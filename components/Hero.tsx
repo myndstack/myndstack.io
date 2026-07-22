@@ -1,0 +1,77 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import { useReducedMotion } from "@/lib/hooks";
+import HeroNetwork, { PULSE_EVENT } from "./HeroNetwork";
+import Magnetic from "./Magnetic";
+
+const WORDS = ["Intelligence", "that", "runs", "on infrastructure."];
+const CYCLE_MS = 1400;
+// Non-breaking space keeps the lime last line from wrapping mid-phrase.
+const LAST = WORDS.length - 1;
+
+export default function Hero() {
+  const reduced = useReducedMotion();
+  const [index, setIndex] = useState(0);
+
+  useEffect(() => {
+    if (reduced) return;
+    const id = window.setInterval(
+      () => setIndex((i) => (i + 1) % WORDS.length),
+      CYCLE_MS,
+    );
+    return () => window.clearInterval(id);
+  }, [reduced]);
+
+  // Hovering a CTA sends a burst of signals through the network behind it.
+  const burst = () => window.dispatchEvent(new Event(PULSE_EVENT));
+
+  // At rest the design lights the final line; the cycle walks the accent instead.
+  const lit = reduced ? LAST : index;
+
+  return (
+    <header
+      id="work"
+      className="relative flex min-h-screen flex-col overflow-hidden border-b border-line"
+    >
+      <HeroNetwork />
+
+      <div className="relative z-2 flex flex-1 flex-col items-center justify-center px-5 pt-[calc(60px+var(--nav-height))] pb-[60px] text-center sm:px-16">
+        <div className="animate-rise-in mb-[26px] font-mono text-xs font-bold tracking-[0.16em] text-lime uppercase">
+          Enterprise AI · Cognitive infrastructure
+        </div>
+
+        <h1 className="animate-rise-in m-0 max-w-[1000px] font-display text-[clamp(30px,7.2vw,92px)] leading-none font-normal tracking-[-0.03em] text-balance [animation-duration:0.7s]">
+          {WORDS.map((word, i) => (
+            <span key={word}>
+              <span className={`hero-word${i === lit ? " is-lit" : ""}`}>{word}</span>
+              {i === 2 ? <br /> : i < LAST ? " " : null}
+            </span>
+          ))}
+        </h1>
+
+        <p className="animate-rise-in mx-0 mt-8 mb-[38px] max-w-[580px] text-[21px] leading-[1.5] text-t3 [animation-duration:0.8s]">
+          One stack that connects your data, compute, and models — engineered so your
+          teams ship mission-critical AI, not plumbing.
+        </p>
+
+        <div className="animate-rise-in flex flex-wrap justify-center gap-3.5 [animation-duration:0.9s]">
+          <Magnetic>
+            <a href="#contact" className="btn btn-lime" onMouseEnter={burst}>
+              Start a project →
+            </a>
+          </Magnetic>
+          <Magnetic>
+            <a href="#work-cases" className="btn btn-outline" onMouseEnter={burst}>
+              See our work ▸
+            </a>
+          </Magnetic>
+        </div>
+      </div>
+
+      <div className="animate-rise-in relative z-2 flex justify-center pb-[30px] font-mono text-[11px] tracking-[0.14em] text-t7 [animation-duration:1s]">
+        SCROLL ↓
+      </div>
+    </header>
+  );
+}

@@ -1,0 +1,745 @@
+@import "tailwindcss";
+
+/* ============================================================
+   DESIGN TOKENS
+   ============================================================ */
+@theme {
+  /* Reset the default breakpoint scale to the design's own stops */
+  --breakpoint-*: initial;
+  --breakpoint-xs: 35rem; /* 560px */
+  --breakpoint-sm: 47.5rem; /* 760px */
+  --breakpoint-md: 62.5rem; /* 1000px */
+  --breakpoint-lg: 68.75rem; /* 1100px */
+  --breakpoint-xl: 80rem; /* 1280px */
+
+  /* Ink / surfaces */
+  --color-ink: #0a0a0b;
+  --color-true-black: #000000;
+  --color-surface: #101012;
+  --color-surface-2: #111113;
+  --color-surface-3: #151517;
+
+  /* Hairlines */
+  --color-line: #1f1f23;
+  --color-line-2: #26262b;
+  --color-line-3: #2e2e34;
+
+  /* Text ramp (t1 brightest → t8 dimmest).
+     t5 is the darkest grey still used for real content, so it is pinned above
+     4.5:1 on both #0A0A0B and #151517. The reference's #6B6B73 measured 3.75:1
+     and has been demoted to t6, which is now decorative only (marquee lockups).
+     t7/t8 stay below AA by design — they only carry ornament ("SCROLL ↓",
+     "FOLLOW") and the manifesto's pre-brighten state. */
+  --color-t1: #f4f4f6;
+  --color-t2: #e2e2e6;
+  --color-t3: #c7c7ce;
+  --color-t4: #9a9aa2;
+  --color-t5: #83838c;
+  --color-t6: #6b6b73;
+  --color-t7: #45454d;
+  --color-t8: #3a3a40;
+
+  /* Accent */
+  --color-lime: #c9f24d;
+  --color-lime-hover: #b4e22f;
+  --color-lime-ink: #18230a; /* ink on lime */
+  --color-lime-ink-2: #3d5010; /* muted on lime */
+  --color-lime-ink-3: #2e3d08; /* body on lime */
+  --color-lime-aa: #6e8e12; /* AA-safe lime for text on light */
+
+  /* Hover edge: lime at 45% so an interactive card reads as "you're on it"
+     without borrowing the solid-lime border the design reserves for locked and
+     selected states (stack layers, the With-Myndstack panel, the Scale tier). */
+  --color-lime-edge: rgba(201, 242, 77, 0.45);
+
+  /* Not in the original palette — the design has no error state. Picked to sit
+     beside the lime without fighting it, at ~7:1 on the ink background. */
+  --color-danger: #ff7a6b;
+
+  /* Type */
+  --font-display: var(--font-space-grotesk), system-ui, sans-serif;
+  --font-body: var(--font-hanken-grotesk), system-ui, sans-serif;
+  --font-mono: var(--font-space-mono), ui-monospace, monospace;
+
+  /* Motion — one easing curve for the whole site */
+  --ease-brand: cubic-bezier(0.2, 0, 0, 1);
+
+  /* Keyframes */
+  --animate-marq: marq 26s linear infinite;
+  --animate-marq-slow: marq 30s linear infinite;
+  --animate-sweep: sweep 3.6s ease-in-out infinite;
+  --animate-rise-in: riseIn 0.6s var(--ease-brand) both;
+  --animate-load-mark: loadmark 0.9s var(--ease-brand) both;
+  --animate-load-line: loadline 1.3s var(--ease-brand) both;
+  --animate-load-fade: loadfade 1.6s ease-in-out infinite;
+}
+
+@keyframes marq {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+@keyframes sweep {
+  0% { transform: translateX(-120%); }
+  100% { transform: translateX(320%); }
+}
+@keyframes riseIn {
+  from { opacity: 0; transform: translateY(16px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes loadline {
+  0% { width: 0; opacity: 0.4; }
+  100% { width: 240px; opacity: 1; }
+}
+@keyframes loadmark {
+  0% { opacity: 0; transform: translateY(14px) scale(0.96); filter: blur(6px); }
+  100% { opacity: 1; transform: none; filter: none; }
+}
+@keyframes loadfade {
+  0% { opacity: 0.35; }
+  50% { opacity: 1; }
+  100% { opacity: 0.35; }
+}
+
+/* ============================================================
+   BASE
+   ============================================================ */
+@layer base {
+  :root {
+    /* The nav overlays the page, so every non-hero route pads past it. */
+    --nav-height: 80px;
+  }
+
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
+  }
+
+  html {
+    scroll-behavior: smooth;
+    scroll-padding-top: 90px;
+  }
+
+  body {
+    margin: 0;
+    background: var(--color-ink);
+    color: #fff;
+    font-family: var(--font-body);
+    font-size: 16px;
+    line-height: 1.6;
+    text-wrap: pretty;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  a {
+    color: var(--color-lime);
+    text-decoration: none;
+  }
+  a:hover {
+    color: var(--color-lime-hover);
+  }
+
+  ::selection {
+    background: var(--color-lime);
+    color: var(--color-lime-ink);
+  }
+
+  /* Sharp corners are the brand — the back-to-top circle opts back in. */
+  :focus-visible {
+    outline: 2px solid var(--color-lime);
+    outline-offset: 2px;
+  }
+}
+
+/* ============================================================
+   COMPONENT PRIMITIVES
+   ============================================================ */
+@layer components {
+  /* --- Type primitives --- */
+  .eyebrow {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    color: var(--color-lime);
+    line-height: 1.2;
+  }
+
+  .h2-section {
+    font-family: var(--font-display);
+    /* The reference dropped section headings to 29px under 760px; a clamp does
+       the same job without a breakpoint jump. */
+    font-size: clamp(29px, 5vw, 44px);
+    font-weight: 700;
+    letter-spacing: -0.025em;
+    line-height: 1.04;
+    margin: 0;
+    text-wrap: balance;
+  }
+
+  .label-mono {
+    font-family: var(--font-mono);
+    font-size: 10.5px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--color-t5);
+  }
+
+  /* --- Surfaces --- */
+  .card {
+    background: var(--color-surface-3);
+    border: 1px solid var(--color-line);
+    transition:
+      border-color 0.16s var(--ease-brand),
+      box-shadow 0.16s var(--ease-brand),
+      transform 0.16s var(--ease-brand);
+  }
+  .card-lift:hover {
+    border-color: var(--color-lime-edge);
+    transform: translateY(-4px);
+    box-shadow:
+      0 0 0 1px rgba(201, 242, 77, 0.08),
+      0 14px 34px rgba(0, 0, 0, 0.45);
+  }
+
+  .chip {
+    font-family: var(--font-mono);
+    font-size: 10.5px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--color-lime);
+    border: 1px solid var(--color-line-3);
+    padding: 4px 11px;
+  }
+
+  /* --- Buttons --- */
+  .btn {
+    display: inline-block;
+    font-family: var(--font-body);
+    font-weight: 600;
+    font-size: 15px;
+    padding: 15px 26px;
+    transition:
+      background 0.16s var(--ease-brand),
+      border-color 0.16s var(--ease-brand),
+      color 0.16s var(--ease-brand);
+  }
+  .btn-lime {
+    background: var(--color-lime);
+    color: var(--color-lime-ink);
+  }
+  .btn-lime:hover {
+    background: var(--color-lime-hover);
+    color: var(--color-lime-ink);
+  }
+  /* Secondary action: opaque ink so nothing shows through it, lime border to
+     pair with the filled lime primary. `.btn-icon` is the square variant used
+     for the burger and drawer close — same skin, different shape. */
+  .btn-outline,
+  .btn-icon {
+    background: var(--color-ink);
+    color: #fff;
+    border: 1px solid var(--color-lime);
+  }
+  .btn-outline:hover,
+  .btn-icon:hover {
+    background: var(--color-surface-3);
+    border-color: var(--color-lime-hover);
+    color: var(--color-lime);
+  }
+  .btn-icon {
+    cursor: pointer;
+    transition:
+      background 0.16s var(--ease-brand),
+      border-color 0.16s var(--ease-brand),
+      color 0.16s var(--ease-brand);
+  }
+  .btn:disabled,
+  .btn[aria-disabled="true"] {
+    opacity: 0.6;
+    cursor: progress;
+  }
+
+  /* --- Form fields --- */
+  .ms-field {
+    background: var(--color-surface-3);
+    border: 1px solid var(--color-line);
+    color: #fff;
+    font-family: var(--font-body);
+    font-size: 15px;
+    padding: 13px 15px;
+    width: 100%;
+    transition:
+      border-color 0.16s var(--ease-brand),
+      box-shadow 0.16s var(--ease-brand);
+  }
+  .ms-field:focus {
+    outline: none;
+    border-color: var(--color-lime);
+    box-shadow: 0 0 0 1px var(--color-lime);
+  }
+  .ms-field::placeholder {
+    color: var(--color-t5);
+  }
+  .ms-field.is-invalid {
+    border-color: var(--color-danger);
+  }
+  .ms-field.is-invalid:focus {
+    border-color: var(--color-danger);
+    box-shadow: 0 0 0 1px var(--color-danger);
+  }
+  .ms-field:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+  }
+  select.ms-field {
+    appearance: none;
+    -webkit-appearance: none;
+    cursor: pointer;
+  }
+
+  /* --- Reveal-on-scroll --- */
+  .reveal {
+    opacity: 0;
+    transform: translateY(24px);
+    transition:
+      opacity 0.7s var(--ease-brand),
+      transform 0.7s var(--ease-brand);
+  }
+  .reveal.is-in {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  /* --- Nav: scrim at top, floating lime capsule once scrolled ---
+     Fixed rather than sticky so it sits *over* the hero: a sticky nav takes up
+     flow, which pushed the particle canvas down and left an isolated black bar
+     across the top. Overlaying it lets the network run behind the nav. */
+  .nav {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 60;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+    /* An explicit width at both states so the morph interpolates. Left as
+       `auto` it snapped, because auto → <length> is not animatable. */
+    width: 100%;
+    margin: 0 auto;
+    padding: 18px 20px;
+    transform: translate3d(0, 0, 0);
+    will-change: transform;
+    /* Vertical scrim, not a flat fill — keeps the links legible over the
+       network without drawing a hard edge across it. */
+    background-image: linear-gradient(
+      180deg,
+      rgba(10, 10, 11, 0.92) 0%,
+      rgba(10, 10, 11, 0.74) 55%,
+      rgba(10, 10, 11, 0.34) 100%
+    );
+    border-radius: 0;
+    /* `top` and `margin` are deliberately absent: the vertical offset rides on
+       transform (compositor-friendly) and margin snaps, which is invisible. */
+    transition:
+      width 0.3s var(--ease-brand),
+      padding 0.3s var(--ease-brand),
+      background 0.3s var(--ease-brand),
+      border-color 0.3s var(--ease-brand),
+      box-shadow 0.3s var(--ease-brand),
+      transform 0.3s var(--ease-brand);
+  }
+  @media (width >= 47.5rem) {
+    .nav {
+      padding: 18px 56px;
+    }
+  }
+
+  /* Continues the scrim past the nav's own box so the fade never terminates
+     on an edge. Hidden once the capsule detaches from the top. */
+  .nav::after {
+    content: "";
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    height: 72px;
+    pointer-events: none;
+    background: linear-gradient(180deg, rgba(10, 10, 11, 0.34), rgba(10, 10, 11, 0));
+    transition: opacity 0.26s var(--ease-brand);
+  }
+  .nav.is-cap::after {
+    opacity: 0;
+  }
+
+  .nav.is-cap {
+    width: min(1120px, calc(100% - 40px));
+    padding: 10px 10px 10px 22px;
+    border: 1px solid var(--color-lime-hover);
+    /* Matching stop structure keeps this interpolatable with the top scrim. */
+    background-image: linear-gradient(
+      180deg,
+      rgba(201, 242, 77, 0.95) 0%,
+      rgba(201, 242, 77, 0.95) 55%,
+      rgba(201, 242, 77, 0.95) 100%
+    );
+    box-shadow: 0 14px 40px rgba(0, 0, 0, 0.42);
+    transform: translate3d(0, 22px, 0);
+  }
+
+  /* A sustained downward scroll slides the capsule away; scrolling back up
+     brings it in. See the accumulator in Nav.tsx. */
+  .nav.is-cap.is-tucked {
+    transform: translate3d(0, -160%, 0);
+  }
+
+  .nav .wm-black {
+    display: none;
+  }
+  .nav.is-cap .wm-white {
+    display: none;
+  }
+  .nav.is-cap .wm-black {
+    display: block;
+  }
+
+  .navlink {
+    color: var(--color-t3);
+    font-size: 14px;
+    font-weight: 500;
+    transition:
+      color 0.16s var(--ease-brand),
+      background 0.16s var(--ease-brand);
+  }
+  .navlink:hover {
+    color: #fff;
+  }
+  .nav.is-cap .navlink {
+    color: var(--color-lime-ink);
+    /* Six links × horizontal padding is the capsule's whole width budget, so it
+       stays tight until there is room to spare. */
+    padding: 8px 9px;
+    white-space: nowrap;
+  }
+  @media (width >= 68.75rem) {
+    .nav.is-cap .navlink {
+      padding: 8px 15px;
+    }
+  }
+
+  /* The link row also closes up in capsule state; the pills supply the rhythm. */
+  .nav.is-cap ul {
+    gap: 2px;
+  }
+  .nav.is-cap .navlink:hover {
+    color: var(--color-lime-ink);
+    background: rgba(24, 35, 10, 0.14);
+  }
+  .nav.is-cap .navlink.is-active {
+    color: var(--color-lime);
+    background: var(--color-ink);
+  }
+
+  .nav-cta {
+    font-family: var(--font-body);
+    font-weight: 600;
+    font-size: 14px;
+    padding: 11px 20px;
+    /* Never let the CTA wrap to two lines inside the capsule. */
+    white-space: nowrap;
+    background: var(--color-lime);
+    color: var(--color-lime-ink);
+    transition:
+      background 0.16s var(--ease-brand),
+      color 0.16s var(--ease-brand);
+  }
+  .nav-cta:hover {
+    background: var(--color-lime-hover);
+    color: var(--color-lime-ink);
+  }
+  .nav.is-cap .nav-cta {
+    background: var(--color-ink);
+    color: var(--color-lime);
+  }
+  .nav.is-cap .nav-cta:hover {
+    background: var(--color-lime-ink);
+    color: var(--color-lime);
+  }
+
+  /* --- Mobile drawer --- */
+  .drawer-link {
+    color: var(--color-t2);
+    font-family: var(--font-display);
+    font-size: 22px;
+    font-weight: 600;
+    padding: 13px 0;
+    border-bottom: 1px solid var(--color-line);
+    transition: color 0.16s var(--ease-brand);
+  }
+  .drawer-link:hover {
+    color: var(--color-lime);
+  }
+
+  /* --- Progress spine --- */
+  .spine-social {
+    color: var(--color-t6);
+    display: flex;
+    transition: color 0.16s var(--ease-brand);
+  }
+  .spine-social:hover {
+    color: var(--color-lime);
+  }
+
+  /* --- Hero headline words --- */
+  .hero-word {
+    transition:
+      color 0.18s var(--ease-brand),
+      text-shadow 0.18s var(--ease-brand);
+    cursor: default;
+  }
+  .hero-word:hover,
+  .hero-word.is-lit {
+    color: var(--color-lime);
+    text-shadow: 0 0 26px rgba(201, 242, 77, 0.55);
+  }
+
+  /* --- Pinned stack story --- */
+  .story-layer {
+    transition:
+      border-color 0.25s var(--ease-brand),
+      box-shadow 0.25s var(--ease-brand);
+    will-change: transform, opacity;
+  }
+  .story-layer.is-locked {
+    border-color: var(--color-lime);
+    box-shadow:
+      0 0 0 1px var(--color-lime),
+      0 16px 44px rgba(0, 0, 0, 0.5);
+  }
+
+  /* --- Pricing billing toggle --- */
+  .bill-btn {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--color-t4);
+    background: transparent;
+    border: none;
+    padding: 10px 20px;
+    cursor: pointer;
+    transition:
+      color 0.16s var(--ease-brand),
+      background 0.16s var(--ease-brand);
+  }
+  .bill-btn.is-on {
+    color: var(--color-lime-ink);
+    background: var(--color-lime);
+  }
+
+  /* --- Manifesto word-by-word brighten --- */
+  .manifesto-word {
+    color: var(--color-t8);
+    transition: color 0.55s var(--ease-brand);
+  }
+  .manifesto-word.is-lit {
+    color: var(--color-t1);
+  }
+
+  /* --- Back to top --- */
+  .totop {
+    opacity: 0;
+    transform: translateY(12px);
+    pointer-events: none;
+    transition:
+      opacity 0.3s var(--ease-brand),
+      transform 0.3s var(--ease-brand);
+  }
+  .totop.is-visible {
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: auto;
+  }
+  .totop.is-visible:hover {
+    transform: translateY(0) scale(1.06);
+  }
+
+  /* --- Long-form legal copy --- */
+  .legal-prose > section + section {
+    margin-top: 44px;
+  }
+  .legal-prose h2 {
+    font-family: var(--font-display);
+    font-size: 24px;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    line-height: 1.2;
+    color: #fff;
+    margin: 0 0 14px;
+    /* Clear the sticky nav when jumped to from the section index. */
+    scroll-margin-top: 110px;
+  }
+  .legal-prose p {
+    margin: 0 0 14px;
+    font-size: 16px;
+    line-height: 1.7;
+    color: var(--color-t3);
+  }
+  .legal-prose p:last-child {
+    margin-bottom: 0;
+  }
+  .legal-note {
+    margin-top: 48px;
+    padding-top: 24px;
+    border-top: 1px solid var(--color-line);
+    font-size: 15px;
+    color: var(--color-t4);
+  }
+
+  /* --- Skip link --- */
+  .skip {
+    position: fixed;
+    top: -64px;
+    left: 12px;
+    z-index: 300;
+    background: var(--color-lime);
+    color: var(--color-lime-ink);
+    font-family: var(--font-mono);
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    padding: 11px 16px;
+    transition: top 0.2s var(--ease-brand);
+  }
+  .skip:focus {
+    top: 12px;
+    outline: none;
+    color: var(--color-lime-ink);
+  }
+}
+
+/* ============================================================
+   UTILITIES
+   ============================================================ */
+/*
+ * The signature 45° corner cut. `--cut` is registered below so it can be
+ * transitioned — a card slices its own corner open as it reveals.
+ */
+@property --cut {
+  syntax: "<length>";
+  inherits: false;
+  initial-value: 0px;
+}
+
+@utility clip-angular-* {
+  --cut-final: calc(--value(integer) * 1px);
+  --cut: var(--cut-final);
+  clip-path: polygon(0 0, calc(100% - var(--cut)) 0, 100% var(--cut), 100% 100%, 0 100%);
+  transition: --cut 0.55s var(--ease-brand) 0.12s;
+}
+
+@keyframes scan {
+  0% { transform: scaleX(0); opacity: 0; }
+  14% { opacity: 1; }
+  70% { transform: scaleX(1); opacity: 1; }
+  100% { transform: scaleX(1); opacity: 0; }
+}
+
+@utility mask-edges {
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 20%, #000 80%, transparent);
+  mask-image: linear-gradient(90deg, transparent, #000 20%, #000 80%, transparent);
+}
+
+/* ============================================================
+   REVEAL-DRIVEN CLIP CORNER
+   Unlayered on purpose — a rule inside @layer components would lose to the
+   clip-angular-* utility regardless of specificity, because layer order wins.
+   ============================================================ */
+.reveal:not(.is-in)[class*="clip-angular"],
+.reveal:not(.is-in) [class*="clip-angular"] {
+  --cut: 0px;
+}
+
+/* ============================================================
+   SECTION SCANLINE
+   A lime hairline sweeps the section's top edge on first entry, then fades.
+   Extends the language of the Process step bars.
+   ============================================================ */
+.scanline {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  transform: scaleX(0);
+  transform-origin: left;
+  opacity: 0;
+  pointer-events: none;
+  background: linear-gradient(90deg, transparent, var(--color-lime), transparent);
+  box-shadow: 0 0 12px rgba(201, 242, 77, 0.45);
+}
+.scanline.is-on {
+  animation: scan 1.15s var(--ease-brand) forwards;
+}
+
+/* ============================================================
+   CROSS-DOCUMENT VIEW TRANSITIONS
+   Smooths navigation between / , /careers and the legal pages in browsers
+   that support it; everywhere else the navigation is simply instant.
+   ============================================================ */
+@view-transition {
+  navigation: auto;
+}
+
+::view-transition-old(root) {
+  animation: vt-out 0.18s var(--ease-brand) both;
+}
+::view-transition-new(root) {
+  animation: vt-in 0.28s var(--ease-brand) both;
+}
+
+@keyframes vt-out {
+  to { opacity: 0; }
+}
+@keyframes vt-in {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: none; }
+}
+
+/* ============================================================
+   REDUCED MOTION
+   ============================================================ */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+  html {
+    scroll-behavior: auto;
+  }
+  /* Hidden in CSS rather than JS so there is no flash before hydration. */
+  .loader {
+    display: none !important;
+  }
+  .reveal {
+    opacity: 1;
+    transform: none;
+  }
+  .hero-word:hover {
+    text-shadow: none;
+  }
+  ::view-transition-old(root),
+  ::view-transition-new(root) {
+    animation: none;
+  }
+}
