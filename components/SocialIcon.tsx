@@ -23,10 +23,20 @@ const PATHS: Record<string, React.ReactNode> = {
     />
   ),
   Instagram: (
-    <g fill="none" stroke="currentColor" strokeWidth="1.9">
-      <rect x="2.6" y="2.6" width="18.8" height="18.8" rx="0" />
-      <circle cx="12" cy="12" r="4.3" />
-      <circle cx="17.4" cy="6.6" r="1.15" fill="currentColor" stroke="none" />
+    // Rounded-square camera body, centre lens, and top-right flash dot — the
+    // three marks that make Instagram read as Instagram. This glyph keeps its
+    // rounded corners on purpose: the site's sharp-corner rule governs Myndstack's
+    // own UI, not the faithful shape of a third-party logo.
+    <g
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <rect x="2" y="2" width="20" height="20" rx="5.5" />
+      <circle cx="12" cy="12" r="4.1" />
+      <circle cx="17.6" cy="6.4" r="1.15" fill="currentColor" stroke="none" />
     </g>
   ),
 };
