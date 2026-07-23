@@ -47,10 +47,10 @@ export const SPY_IDS = NAV_LINKS.flatMap((l) => (l.section ? [l.section] : []));
 export type Social = { label: string; href: string | null };
 
 export const SOCIALS: readonly Social[] = [
-  { label: "X", href: null },
-  { label: "LinkedIn", href: null },
-  { label: "GitHub", href: null },
-  { label: "Instagram", href: null },
+  { label: "X", href: "https://x.com/myndstack" },
+  { label: "LinkedIn", href: "https://linkedin.com/company/myndstack" },
+  { label: "GitHub", href: "https://github.com/myndstack" },
+  { label: "Instagram", href: "https://instagram.com/myndstack" },
 ];
 
 export const STACK_LAYERS = [
