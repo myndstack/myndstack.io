@@ -61,14 +61,19 @@ server warns about it at boot, but it will not stop you.
 
 ## 3. Custom domain + mail DNS
 
-1. **Settings → Domains** → add `myndstack.io` (and `www` → redirect to apex).
-   Vercel issues the DNS records; add them at your registrar.
-2. In the same DNS zone, the Resend records that make mail deliverable:
-   **DKIM** and **SPF** (Resend → Domains issues these), plus a **DMARC** record
-   at `_dmarc.myndstack.io`. Start at `p=none`, then move to `p=quarantine`.
-   `myndstack.io` is already verified in Resend (region `eu-west-1`).
-3. DMARC at `p=quarantine`/`p=reject` is also the prerequisite for the BIMI logo
-   this app serves from `public/bimi/` — see [next.config.ts](next.config.ts).
+1. **Settings → Domains** → add `myndstack.io`. Use the **DNS Records (A record)**
+   method, *not* "Vercel DNS": add `A @ → 216.198.79.1` at your registrar and leave
+   DNS hosted where it is. Do **not** switch nameservers to Vercel — this zone also
+   holds your mail records (below), and moving it would orphan them. Set
+   `myndstack.io` as the primary domain and `www` as a `308` redirect to it, so the
+   canonical host matches `NEXT_PUBLIC_SITE_URL`.
+2. Leave the mail records in this zone untouched — **MX**, **SPF**, Resend **DKIM**
+   (`resend._domainkey`), **DMARC** (`_dmarc`), and **BIMI**. They are already live,
+   and `myndstack.io` is verified in Resend (region `eu-west-1`). DMARC is already at
+   `p=reject`, the strictest setting — nothing needs raising.
+3. That `p=reject` also satisfies the BIMI logo this app serves from `public/bimi/`
+   (BIMI requires DMARC at `p=quarantine` or stricter) — see [next.config.ts](next.config.ts).
+   Gmail additionally wants a paid VMC before it will render the mark.
 
 ## 4. Region (optional)
 
