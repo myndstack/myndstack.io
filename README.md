@@ -22,7 +22,9 @@ npm run test:e2e             # Playwright smoke, against a production build
 
 `npm run build` writes to `.next-build`, not `.next`, so you can build while the
 dev server is running. (They shared a directory originally, and building would
-corrupt the dev server's chunks until you restarted it.)
+corrupt the dev server's chunks until you restarted it.) On Vercel that trick is
+unnecessary, so it builds to the standard `.next` — see [DEPLOYMENT.md](DEPLOYMENT.md)
+for the full hosting runbook (env matrix, the Preview mail-transport trap, DNS).
 
 ## Routes
 
