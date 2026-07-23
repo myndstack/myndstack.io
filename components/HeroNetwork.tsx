@@ -49,8 +49,9 @@ type Pulse = { from: number; to: number; t: number; speed: number };
  * node count, per-node depth parallax, and lime signals that route themselves
  * hop by hop through the network.
  *
- * Falls back to the 2D canvas where WebGL is unavailable, and renders nothing
- * at all below 760px or under reduced motion.
+ * Falls back to the 2D canvas where WebGL is unavailable, or below 760px (dimmed
+ * there — the GPU network is too heavy for a phone). Renders nothing under
+ * reduced motion.
  */
 export default function HeroNetwork() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -478,7 +479,11 @@ export default function HeroNetwork() {
     };
   }, [reduced, isDesktop]);
 
-  if (reduced || !isDesktop) return null;
+  if (reduced) return null;
+  // Below 760px the GPU network is too heavy for the battery, so the hero gets the
+  // lighter 2D field instead — dimmed, so it reads as texture rather than a bare
+  // black panel. Naturally sparse at phone dimensions (area-scaled node count).
+  if (!isDesktop) return <ParticleField dim />;
   if (unsupported) return <ParticleField />;
 
   return (

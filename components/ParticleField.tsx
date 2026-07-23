@@ -22,8 +22,13 @@ const HOVER_RADIUS = 90;
 
 type Particle = { x: number; y: number; vx: number; vy: number };
 
-/** Drifting constellation behind the hero. Pauses entirely when scrolled away. */
-export default function ParticleField() {
+/**
+ * Drifting constellation behind the hero. Pauses entirely when scrolled away.
+ *
+ * `dim` fades the whole field back — used on mobile, where this stands in for the
+ * desktop WebGL network and should read as a faint texture, not a focal point.
+ */
+export default function ParticleField({ dim = false }: { dim?: boolean }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const reduced = useReducedMotion();
 
@@ -184,7 +189,7 @@ export default function ParticleField() {
     <canvas
       ref={canvasRef}
       aria-hidden="true"
-      className="absolute inset-0 z-0 h-full w-full"
+      className={`absolute inset-0 z-0 h-full w-full${dim ? " opacity-[0.55]" : ""}`}
     />
   );
 }
