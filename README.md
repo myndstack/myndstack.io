@@ -1,7 +1,6 @@
 # Myndstack
 
 Marketing site for Myndstack — enterprise AI & cognitive infrastructure.
-Ported from the `Myndstack.dc.html` design reference into Next.js.
 
 ## Stack
 
