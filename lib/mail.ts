@@ -2,15 +2,25 @@ import "server-only";
 import { Resend } from "resend";
 
 import { singleLine } from "./format";
+import { resolveMailStatus, type MailStatus } from "./mail-config";
 
-const apiKey = process.env.RESEND_API_KEY;
+/**
+ * How mail leaves the process, resolved once at module load.
+ *
+ * Exported so `/api/health` can report what this module will actually do, rather
+ * than taking its own reading of the environment and risking a second opinion.
+ * The rules — and why an explicitly-chosen console transport is valid even in a
+ * production build — live in `mail-config.ts`.
+ */
+export const MAIL_STATUS: MailStatus = resolveMailStatus();
 
-/** Where enquiries land. */
-const TO = process.env.CONTACT_TO_EMAIL ?? "hello@myndstack.io";
-/** Must be a domain you've verified in Resend. */
-const FROM = process.env.CONTACT_FROM_EMAIL ?? "Myndstack <onboarding@resend.dev>";
+let client: Resend | null = null;
 
-const resend = apiKey ? new Resend(apiKey) : null;
+/** Built on first send rather than at import, so `broken` never allocates one. */
+function resendClient(apiKey: string): Resend {
+  client ??= new Resend(apiKey);
+  return client;
+}
 
 export type Mail = {
   subject: string;
@@ -52,25 +62,30 @@ function render({ subject, fields }: Mail) {
 }
 
 /**
- * Sends a form submission. Without RESEND_API_KEY it logs instead and reports
- * success in development, so the forms are testable before the key exists —
- * but fails loudly in production rather than silently dropping a lead.
+ * Sends a form submission, or logs it under the console transport.
+ *
+ * A misconfigured deployment fails here rather than silently dropping a lead —
+ * but by this point a visitor is already waiting on the response, so the same
+ * check runs at boot in `instrumentation.ts` and is readable at `/api/health`.
  */
 export async function sendFormMail(mail: Mail): Promise<{ ok: boolean; error?: string }> {
   const { text, html } = render(mail);
 
-  if (!resend) {
-    if (process.env.NODE_ENV === "production") {
-      console.error("RESEND_API_KEY is not set — refusing to drop a submission.");
-      return { ok: false, error: "Email is not configured on this deployment." };
-    }
-    console.info(`\n[dev] Would send to ${TO}:\n${text}\n`);
+  if (MAIL_STATUS.state === "broken") {
+    console.error(
+      `Refusing to drop a submission — ${MAIL_STATUS.problems.join(" ")}`,
+    );
+    return { ok: false, error: "Email is not configured on this deployment." };
+  }
+
+  if (MAIL_STATUS.state === "logging") {
+    console.info(`\n[mail:console] Would send to ${MAIL_STATUS.to}:\n${text}\n`);
     return { ok: true };
   }
 
-  const { error } = await resend.emails.send({
-    from: FROM,
-    to: TO,
+  const { error } = await resendClient(MAIL_STATUS.apiKey).emails.send({
+    from: MAIL_STATUS.from,
+    to: MAIL_STATUS.to,
     // Both carry user input, and both land in line-delimited headers.
     subject: singleLine(mail.subject, 180),
     replyTo: mail.replyTo ? singleLine(mail.replyTo, 200) : undefined,

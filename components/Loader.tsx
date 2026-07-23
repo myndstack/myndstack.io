@@ -21,11 +21,6 @@ export default function Loader() {
       return;
     }
 
-    // The overlay is opaque, so tabbing behind it would move focus to things
-    // nobody can see. `aria-hidden` on the overlay does not prevent that.
-    const site = document.getElementById("site");
-    if (site) site.inert = true;
-
     const fadeTimer = window.setTimeout(() => setFading(true), FADE_AT_MS);
     const removeTimer = window.setTimeout(
       () => setGone(true),
@@ -35,9 +30,27 @@ export default function Loader() {
     return () => {
       window.clearTimeout(fadeTimer);
       window.clearTimeout(removeTimer);
-      if (site) site.inert = false;
     };
   }, []);
+
+  /**
+   * Hold the page inert while the overlay covers it: it is opaque, so tabbing
+   * behind it would move focus to things nobody can see, and `aria-hidden` on
+   * the overlay does not prevent that.
+   *
+   * Keyed on `gone` rather than released in an unmount cleanup — this component
+   * finishes by rendering null, it does not unmount, so a cleanup-based release
+   * never runs and the whole page stays uninteractive.
+   */
+  useEffect(() => {
+    const site = document.getElementById("site");
+    if (!site) return;
+
+    site.inert = !gone;
+    return () => {
+      site.inert = false;
+    };
+  }, [gone]);
 
   useEffect(() => {
     if (gone) return;

@@ -2,6 +2,7 @@
 
 import { SITE } from "@/lib/content";
 import { useFormPost } from "@/lib/useFormPost";
+import BookingEmbed from "./BookingEmbed";
 import Field, { Honeypot } from "./Field";
 import Reveal from "./Reveal";
 
@@ -49,6 +50,8 @@ export default function ContactForm() {
               <div className="font-display text-[17px] text-t2">{SITE.location}</div>
             </div>
           </div>
+
+          <BookingEmbed />
         </Reveal>
 
         <Reveal delay={0.08} className="relative">

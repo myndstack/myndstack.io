@@ -19,7 +19,9 @@ export default function Testimonials() {
 
   const goTo = useCallback((n: number) => {
     setIndex(n);
-    setAnnouncement(`Testimonial ${n + 1} of ${TESTIMONIALS.length}: ${TESTIMONIALS[n].name}`);
+    setAnnouncement(
+      `Testimonial ${n + 1} of ${TESTIMONIALS.length}: ${TESTIMONIALS[n].role}`,
+    );
   }, []);
 
   useEffect(() => {
@@ -59,7 +61,7 @@ export default function Testimonials() {
             >
               {TESTIMONIALS.map((t, i) => (
                 <div
-                  key={t.name}
+                  key={t.index}
                   role="group"
                   aria-roledescription="slide"
                   aria-label={`${i + 1} of ${TESTIMONIALS.length}`}
@@ -77,11 +79,11 @@ export default function Testimonials() {
                         aria-hidden="true"
                         className="flex size-[46px] items-center justify-center border border-line-3 bg-ink font-display text-base font-bold text-lime"
                       >
-                        {t.initials}
+                        {t.index}
                       </div>
                       <div>
-                        <div className="text-[15px] font-semibold">{t.name}</div>
-                        <div className="text-[13px] text-t5">{t.role}</div>
+                        <div className="text-[15px] font-semibold">{t.role}</div>
+                        <div className="text-[13px] text-t5">{t.org}</div>
                       </div>
                     </figcaption>
                   </figure>
@@ -93,10 +95,10 @@ export default function Testimonials() {
           <div className="mt-[26px] flex justify-center gap-[9px]">
             {TESTIMONIALS.map((t, i) => (
               <button
-                key={t.name}
+                key={t.index}
                 type="button"
                 onClick={() => goTo(i)}
-                aria-label={`Show testimonial ${i + 1}: ${t.name}`}
+                aria-label={`Show testimonial ${i + 1}: ${t.role}`}
                 aria-current={i === index}
                 className="ease-brand h-1 cursor-pointer border-none p-0 transition-[width,background-color] duration-200"
                 style={{

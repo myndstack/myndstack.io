@@ -1,3 +1,4 @@
+import { subscribe } from "@/lib/audience";
 import { handleFormSubmission } from "@/lib/form-route";
 import { newsletterSchema } from "@/lib/schemas";
 
@@ -8,5 +9,5 @@ export async function POST(request: Request) {
     subject: `Newsletter signup — ${data.email}`,
     replyTo: data.email,
     fields: [["Email", data.email]],
-  }));
+  }), [(data) => subscribe(data.email)]);
 }

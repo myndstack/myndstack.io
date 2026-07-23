@@ -45,8 +45,8 @@ export default function ProgressSpine() {
       />
 
       <div className="pointer-events-auto absolute inset-x-0 bottom-[34px] flex flex-col items-center gap-5">
-        {SOCIALS.map((s) => (
-          <a key={s.label} className="spine-social" href={s.href} aria-label={s.label}>
+        {SOCIALS.filter((s) => s.href).map((s) => (
+          <a key={s.label} className="spine-social" href={s.href!} aria-label={s.label}>
             <SocialIcon name={s.label} />
           </a>
         ))}

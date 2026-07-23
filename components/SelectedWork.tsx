@@ -1,7 +1,12 @@
-import { FEATURED_CASE, WORK } from "@/lib/content";
+import Link from "next/link";
+
+import { FEATURED_CASE, SUPPORTING_CASES } from "@/lib/cases";
 import Reveal from "./Reveal";
 import Section from "./Section";
 import SectionHeader from "./SectionHeader";
+
+/** Cards show the headline pair; the detail page shows the full set. */
+const CARD_METRICS = 2;
 
 export default function SelectedWork() {
   return (
@@ -17,7 +22,10 @@ export default function SelectedWork() {
       <div className="flex flex-col gap-[18px]">
         {/* Featured case */}
         <Reveal>
-          <div className="card clip-angular-32 grid grid-cols-1 items-center gap-11 px-10 py-[38px] hover:border-lime-edge md:grid-cols-[1.25fr_1fr]">
+          <Link
+            href={`/work/${FEATURED_CASE.slug}`}
+            className="card clip-angular-32 grid grid-cols-1 items-center gap-11 px-10 py-[38px] text-white hover:border-lime-edge hover:text-white md:grid-cols-[1.25fr_1fr]"
+          >
             <div>
               <div className="mb-5 flex flex-wrap gap-2">
                 {FEATURED_CASE.tags.map((tag) => (
@@ -30,8 +38,11 @@ export default function SelectedWork() {
                 {FEATURED_CASE.client}
               </div>
               <p className="m-0 max-w-[440px] text-base leading-[1.55] text-t4">
-                {FEATURED_CASE.desc}
+                {FEATURED_CASE.summary}
               </p>
+              <span className="mt-5 inline-block font-mono text-[11px] tracking-[0.14em] text-lime uppercase">
+                Read the case ▸
+              </span>
             </div>
 
             {/* 1px grid gaps act as the hairlines between metrics */}
@@ -49,44 +60,53 @@ export default function SelectedWork() {
                 </div>
               ))}
             </div>
-          </div>
+          </Link>
         </Reveal>
 
         {/* Supporting cases */}
         <div className="grid grid-cols-1 gap-[18px] sm:grid-cols-3">
-          {WORK.map((w) => (
-            <Reveal key={w.client}>
-              <div className="card card-lift flex h-full min-h-[248px] flex-col justify-between p-7">
-                <div>
-                  <div className="mb-[18px] flex gap-2">
-                    <span className="chip">{w.tag}</span>
-                  </div>
-                  <div className="mb-[9px] font-display text-[21px] font-semibold">
-                    {w.client}
-                  </div>
-                  <p className="m-0 text-[13.5px] leading-[1.55] text-t4">{w.desc}</p>
-                </div>
-
-                <div className="mt-6 flex gap-[26px] border-t border-line pt-4">
-                  {[
-                    { v: w.m1, l: w.l1 },
-                    { v: w.m2, l: w.l2 },
-                  ].map((m) => (
-                    <div key={m.l}>
-                      <div className="font-display text-[22px] font-bold tracking-[-0.02em]">
-                        {m.v}
-                      </div>
-                      <div className="mt-[3px] font-mono text-[10px] tracking-[0.08em] text-t5 uppercase">
-                        {m.l}
-                      </div>
+          {SUPPORTING_CASES.map((c) => (
+            <Reveal key={c.slug}>
+              {/* The card is inside the link so the hover lift and the reveal
+                  transform don't both try to own `transform`. */}
+              <Link href={`/work/${c.slug}`} className="block h-full text-white">
+                <div className="card card-lift flex h-full min-h-[248px] flex-col justify-between p-7">
+                  <div>
+                    <div className="mb-[18px] flex gap-2">
+                      {c.tags.map((tag) => (
+                        <span key={tag} className="chip">
+                          {tag}
+                        </span>
+                      ))}
                     </div>
-                  ))}
+                    <div className="mb-[9px] font-display text-[21px] font-semibold">
+                      {c.client}
+                    </div>
+                    <p className="m-0 text-[13.5px] leading-[1.55] text-t4">{c.summary}</p>
+                  </div>
+
+                  <div className="mt-6 flex gap-[26px] border-t border-line pt-4">
+                    {c.metrics.slice(0, CARD_METRICS).map((m) => (
+                      <div key={m.l}>
+                        <div className="font-display text-[22px] font-bold tracking-[-0.02em]">
+                          {m.v}
+                        </div>
+                        <div className="mt-[3px] font-mono text-[10px] tracking-[0.08em] text-t5 uppercase">
+                          {m.l}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
                 </div>
-              </div>
+              </Link>
             </Reveal>
           ))}
         </div>
       </div>
+
+      <p className="mt-9 mb-0 text-[15px] text-t4">
+        <Link href="/work">See all work →</Link>
+      </p>
     </Section>
   );
 }

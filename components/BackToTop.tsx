@@ -2,27 +2,30 @@
 
 import { useRef } from "react";
 import { useScrollFrame } from "@/lib/hooks";
+import { INITIAL_SCROLL_INTENT, nextScrollIntent } from "@/lib/scroll-intent";
 
-const SHOW_AFTER_PX = 600;
-/** Circumference of the r=22 ring. */
-const RING = 138.2;
-
-/** Circular button with a lime progress ring showing how far down the page you are. */
+/**
+ * Back-to-top button: a solid lime square that appears when you start heading
+ * back up the page.
+ *
+ * No progress indicator — the fixed left spine already shows scroll position,
+ * and a second readout competed with it. Square rather than circular because
+ * this design has no rounded corners anywhere else.
+ */
 export default function BackToTop() {
   const buttonRef = useRef<HTMLButtonElement>(null);
-  const ringRef = useRef<SVGCircleElement>(null);
+  const intentRef = useRef(INITIAL_SCROLL_INTENT);
 
-  useScrollFrame(({ y, progress }) => {
+  useScrollFrame(({ y }) => {
     const button = buttonRef.current;
-    if (button) {
-      const visible = y > SHOW_AFTER_PX;
-      button.classList.toggle("is-visible", visible);
-      // `opacity: 0` alone still leaves the button in the tab order.
-      button.inert = !visible;
-    }
-    if (ringRef.current) {
-      ringRef.current.style.strokeDashoffset = (RING * (1 - progress)).toFixed(1);
-    }
+    if (!button) return;
+
+    const intent = nextScrollIntent(intentRef.current, y);
+    intentRef.current = intent;
+
+    button.classList.toggle("is-visible", intent.visible);
+    // `opacity: 0` alone still leaves the button in the tab order.
+    button.inert = !intent.visible;
   });
 
   return (
@@ -31,39 +34,9 @@ export default function BackToTop() {
       type="button"
       aria-label="Back to top"
       onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
-      className="totop group fixed right-[26px] bottom-[26px] z-59 size-[54px] cursor-pointer border-none bg-none p-0"
+      className="totop fixed right-[26px] bottom-[26px] z-59 flex size-11 cursor-pointer items-center justify-center border-none bg-lime text-lime-ink hover:bg-lime-hover"
     >
-      <svg
-        width="54"
-        height="54"
-        viewBox="0 0 54 54"
-        className="absolute inset-0 -rotate-90"
-        aria-hidden="true"
-      >
-        <circle
-          cx="27"
-          cy="27"
-          r="22"
-          fill="#0A0A0B"
-          stroke="var(--color-lime-edge)"
-          strokeWidth="2"
-          className="ease-brand transition-[stroke] duration-160 group-hover:stroke-lime"
-        />
-        <circle
-          ref={ringRef}
-          cx="27"
-          cy="27"
-          r="22"
-          fill="none"
-          stroke="#C9F24D"
-          strokeWidth="2"
-          strokeLinecap="round"
-          strokeDasharray={RING}
-          strokeDashoffset={RING}
-          className="transition-[stroke-dashoffset] duration-100 ease-linear [filter:drop-shadow(0_0_4px_rgba(201,242,77,.6))]"
-        />
-      </svg>
-      <span className="ease-brand absolute inset-0 flex items-center justify-center font-mono text-[17px] leading-none text-white transition-colors duration-160 group-hover:text-lime">
+      <span aria-hidden="true" className="font-mono text-[15px] leading-none">
         ↑
       </span>
     </button>

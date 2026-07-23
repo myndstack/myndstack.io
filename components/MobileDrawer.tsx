@@ -102,17 +102,29 @@ export default function MobileDrawer({ open, onClose }: Props) {
         </div>
 
         <nav className="flex flex-col">
-          {NAV_LINKS.map((link) => (
-            <a key={link.href} className="drawer-link" href={link.href} onClick={onClose}>
-              {link.label}
-            </a>
-          ))}
-          <a className="drawer-link" href="/#faq" onClick={onClose}>
-            FAQ
-          </a>
-          <Link className="drawer-link" href="/careers" onClick={onClose}>
-            Open roles
-          </Link>
+          {/* Exactly the desktop set — the wider surface should never offer less
+              navigation than the narrower one. FAQ lives in the footer. */}
+          {NAV_LINKS.map((link) =>
+            link.section ? (
+              <a
+                key={link.href}
+                className="drawer-link"
+                href={link.href}
+                onClick={onClose}
+              >
+                {link.label}
+              </a>
+            ) : (
+              <Link
+                key={link.href}
+                className="drawer-link"
+                href={link.href}
+                onClick={onClose}
+              >
+                {link.label}
+              </Link>
+            ),
+          )}
         </nav>
 
         <a

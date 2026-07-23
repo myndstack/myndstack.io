@@ -1,3 +1,5 @@
+import { advanceTravel, type Travel } from "./scroll-travel";
+
 /**
  * The nav's bar → capsule → hidden state machine, as a pure reducer.
  *
@@ -23,13 +25,9 @@ export const TUCK_AFTER_PX = 220;
 export const TUCK_DISTANCE_PX = 90;
 export const UNTUCK_DISTANCE_PX = 40;
 
-export type NavState = {
+export type NavState = Travel & {
   capsule: boolean;
   tucked: boolean;
-  /** Previous scroll offset, for deriving this frame's delta. */
-  lastY: number;
-  /** Signed distance travelled since the last direction change. */
-  travel: number;
 };
 
 export const INITIAL_NAV_STATE: NavState = {
@@ -45,13 +43,7 @@ export function nextNavState(prev: NavState, y: number): NavState {
   if (!capsule && y > CAPSULE_ON_PX) capsule = true;
   else if (capsule && y < CAPSULE_OFF_PX) capsule = false;
 
-  const delta = y - prev.lastY;
-  let travel = prev.travel;
-  if (delta !== 0) {
-    // Direction reversed? Start counting again from here.
-    if (delta > 0 !== travel > 0) travel = 0;
-    travel += delta;
-  }
+  const { lastY, travel } = advanceTravel(prev, y);
 
   let tucked = prev.tucked;
   if (!tucked) {
@@ -60,5 +52,5 @@ export function nextNavState(prev: NavState, y: number): NavState {
     tucked = false;
   }
 
-  return { capsule, tucked, lastY: y, travel };
+  return { capsule, tucked, lastY, travel };
 }

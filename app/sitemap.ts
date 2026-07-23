@@ -1,4 +1,5 @@
 import type { MetadataRoute } from "next";
+import { CASES } from "@/lib/cases";
 import { SITE_URL } from "@/lib/content";
 import { LEGAL_SLUGS } from "@/lib/legal";
 import { ROLES } from "@/lib/roles";
@@ -8,6 +9,13 @@ export default function sitemap(): MetadataRoute.Sitemap {
 
   return [
     { url: SITE_URL, lastModified, changeFrequency: "monthly", priority: 1 },
+    { url: `${SITE_URL}/work`, lastModified, changeFrequency: "monthly", priority: 0.9 },
+    ...CASES.map((c) => ({
+      url: `${SITE_URL}/work/${c.slug}`,
+      lastModified,
+      changeFrequency: "monthly" as const,
+      priority: 0.7,
+    })),
     {
       url: `${SITE_URL}/careers`,
       lastModified,

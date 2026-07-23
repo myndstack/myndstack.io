@@ -1,6 +1,9 @@
 node_modules/
 .next/
 .next-build/
+test-results/
+playwright-report/
+playwright/.cache/
 out/
 build/
 .DS_Store

@@ -16,27 +16,42 @@ export const SITE = {
 } as const;
 
 /**
- * Root-relative so the nav works from /careers and the legal pages too — from
- * the homepage these stay same-document hash jumps.
+ * Top-level navigation.
+ *
+ * `section` is the homepage element the scroll-spy watches. Links without one
+ * are real routes, so they are neither spied on nor scrolled to — Careers goes
+ * straight to the listing rather than the homepage teaser, which would need a
+ * second click to reach the actual openings.
+ *
+ * Hash hrefs are root-relative so they still work from /careers and the legal
+ * pages.
  */
-export const NAV_LINKS = [
-  { label: "Work", href: "/#work-cases" },
-  { label: "Services", href: "/#work-grid" },
-  { label: "Process", href: "/#process" },
-  { label: "Pricing", href: "/#pricing" },
-  { label: "Studio", href: "/#team" },
-  { label: "Careers", href: "/#careers" },
-] as const;
+export type NavLink = { label: string; href: string; section?: string };
 
-/** Section ids the nav scroll-spy tracks. */
-export const SPY_IDS = NAV_LINKS.map((l) => l.href.split("#")[1]);
+export const NAV_LINKS: readonly NavLink[] = [
+  { label: "Work", href: "/work" },
+  { label: "Services", href: "/#work-grid", section: "work-grid" },
+  { label: "Process", href: "/#process", section: "process" },
+  { label: "Pricing", href: "/#pricing", section: "pricing" },
+  { label: "Studio", href: "/#team", section: "team" },
+  { label: "Careers", href: "/careers" },
+];
 
-export const SOCIALS = [
-  { label: "X", href: "#contact" },
-  { label: "LinkedIn", href: "#contact" },
-  { label: "GitHub", href: "#contact" },
-  { label: "Instagram", href: "#contact" },
-] as const;
+/** Homepage section ids the scroll-spy tracks. */
+export const SPY_IDS = NAV_LINKS.flatMap((l) => (l.section ? [l.section] : []));
+
+/**
+ * Profile URLs. `null` means not set up yet — the spine renders nothing for
+ * those rather than a link that goes somewhere it doesn't claim to.
+ */
+export type Social = { label: string; href: string | null };
+
+export const SOCIALS: readonly Social[] = [
+  { label: "X", href: null },
+  { label: "LinkedIn", href: null },
+  { label: "GitHub", href: null },
+  { label: "Instagram", href: null },
+];
 
 export const STACK_LAYERS = [
   { n: "01", title: "Interface", meta: "SDK · API · agents" },
@@ -73,48 +88,6 @@ export const CAPABILITIES = [
     points: ["Product design", "Full-stack build", "Design systems"],
     metric: "weeks",
     metricLabel: "to launch",
-  },
-] as const;
-
-export const FEATURED_CASE = {
-  tags: ["Logistics", "Model serving"],
-  client: "Northwind Logistics",
-  desc: "Real-time routing intelligence unified across three regions — one inference API replacing a brittle six-vendor pipeline.",
-  metrics: [
-    { v: "62%", l: "lower cost", lime: false },
-    { v: "12ms", l: "p50 latency", lime: false },
-    { v: "3", l: "regions live", lime: true },
-    { v: "99.99%", l: "uptime", lime: false },
-  ],
-} as const;
-
-export const WORK = [
-  {
-    tag: "Healthcare",
-    client: "Aperture Health",
-    desc: "Clinical decision support served on governed, region-pinned patient data.",
-    m1: "99.99%",
-    l1: "uptime",
-    m2: "<50ms",
-    l2: "response",
-  },
-  {
-    tag: "FinTech",
-    client: "Meridian Bank",
-    desc: "Legacy core banking modernized into cloud-native services, with zero downtime.",
-    m1: "40+",
-    l1: "services",
-    m2: "0",
-    l2: "downtime",
-  },
-  {
-    tag: "Energy",
-    client: "Helios Energy",
-    desc: "Grid-scale demand-forecasting agents deployed across the national network.",
-    m1: "8%",
-    l1: "efficiency",
-    m2: "3",
-    l2: "regions",
   },
 ] as const;
 
@@ -172,23 +145,23 @@ export const TESTIMONIALS = [
   {
     quote:
       "“Myndstack replaced six months of infra work with one API. We shipped our model to production in a week.”",
-    initials: "DR",
-    name: "Dana Rhodes",
-    role: "VP Engineering · Northwind",
+    index: "01",
+    role: "VP Engineering",
+    org: "Logistics platform",
   },
   {
     quote:
       "“The most engineered team we’ve worked with. Calm, precise, and fast — exactly the stack you want under something critical.”",
-    initials: "MK",
-    name: "Marcus Kade",
-    role: "CTO · Aperture",
+    index: "02",
+    role: "Chief Technology Officer",
+    org: "Clinical software",
   },
   {
     quote:
       "“Our digital transformation moved from roadmap to reality. 99.99% uptime and no glue code left to maintain.”",
-    initials: "SL",
-    name: "Sofia Lund",
-    role: "Founder · Helios.ai",
+    index: "03",
+    role: "Founder",
+    org: "Energy analytics",
   },
 ] as const;
 
