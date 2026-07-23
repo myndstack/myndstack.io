@@ -1,7 +1,8 @@
 import Link from "next/link";
 
-import { FOOTER_COLUMNS, LEGAL_LINKS, SITE } from "@/lib/content";
+import { FOOTER_COLUMNS, LEGAL_LINKS, SITE, SOCIALS } from "@/lib/content";
 import Newsletter from "./Newsletter";
+import SocialIcon from "./SocialIcon";
 import Wordmark from "./Wordmark";
 
 export default function Footer() {
@@ -57,6 +58,25 @@ export default function Footer() {
               <span className="text-[14.5px] text-t5">{SITE.location}</span>
             </li>
           </ul>
+
+          {/* Icons here (not just the desktop spine) so mobile/tablet visitors,
+              where the spine is hidden below 1100px, can still reach the profiles. */}
+          {SOCIALS.some((s) => s.href) ? (
+            <div className="mt-5 flex items-center gap-4">
+              {SOCIALS.filter((s) => s.href).map((s) => (
+                <a
+                  key={s.label}
+                  href={s.href!}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label={s.label}
+                  className="ease-brand text-t4 transition-colors duration-160 hover:text-lime"
+                >
+                  <SocialIcon name={s.label} />
+                </a>
+              ))}
+            </div>
+          ) : null}
         </div>
       </div>
 
