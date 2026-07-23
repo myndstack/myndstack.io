@@ -34,6 +34,23 @@ export default function Hero() {
       id="work"
       className="relative flex min-h-screen flex-col overflow-hidden border-b border-line"
     >
+      {/* Mobile-only blueprint texture: a faint dot lattice behind everything,
+          fading at the edges so it's densest under the headline. Hidden at ≥760px,
+          where the WebGL network carries the depth. Static — no motion, no cost. */}
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-0 z-0 sm:hidden"
+        style={{
+          backgroundImage:
+            "radial-gradient(circle, rgba(255,255,255,0.09) 1px, transparent 1.6px)",
+          backgroundSize: "20px 20px",
+          maskImage:
+            "radial-gradient(ellipse 80% 62% at 50% 42%, #000 38%, transparent 86%)",
+          WebkitMaskImage:
+            "radial-gradient(ellipse 80% 62% at 50% 42%, #000 38%, transparent 86%)",
+        }}
+      />
+
       <HeroNetwork />
 
       <div className="relative z-2 flex flex-1 flex-col items-center justify-center px-5 pt-[calc(60px+var(--nav-height))] pb-[60px] text-center sm:px-16">
