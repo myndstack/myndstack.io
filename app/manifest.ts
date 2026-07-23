@@ -3,9 +3,9 @@ import type { MetadataRoute } from "next";
 /**
  * Installability metadata.
  *
- * Icons are the existing square SVG only. Android's install prompt wants
- * maskable 192px and 512px PNGs, which would mean fabricating a logo asset — the
- * README lists generating them from the real mark as a launch task.
+ * The SVG serves the "any"-purpose icon at every size; the two PNGs are maskable,
+ * with the mark padded into Android's centre-80% safe zone. Both are generated
+ * from the same square mark at build time — see app/icons/[icon]/route.ts.
  */
 export default function manifest(): MetadataRoute.Manifest {
   return {
@@ -23,6 +23,18 @@ export default function manifest(): MetadataRoute.Manifest {
         sizes: "any",
         type: "image/svg+xml",
         purpose: "any",
+      },
+      {
+        src: "/icons/maskable-192.png",
+        sizes: "192x192",
+        type: "image/png",
+        purpose: "maskable",
+      },
+      {
+        src: "/icons/maskable-512.png",
+        sizes: "512x512",
+        type: "image/png",
+        purpose: "maskable",
       },
     ],
   };

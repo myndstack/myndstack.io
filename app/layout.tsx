@@ -45,7 +45,13 @@ export const metadata: Metadata = {
   title,
   description,
   alternates: { canonical: "/" },
-  icons: { icon: "/myndstack-logo-square.svg" },
+  // SVG favicon (retina-crisp in modern browsers) + the generated Apple touch
+  // icon from app/apple-icon.tsx. Both are set here explicitly because a config
+  // `icons` object suppresses Next's file-convention auto-linking.
+  icons: {
+    icon: "/myndstack-logo-square.svg",
+    apple: "/apple-icon",
+  },
   openGraph: { type: "website", url: SITE_URL, siteName: SITE.name, title, description: social },
   twitter: { card: "summary_large_image", title, description: social },
 };

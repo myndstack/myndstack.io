@@ -301,9 +301,11 @@ Three of these are bug fixes; the fourth is a visible design change.
   only state that actually sends mail to a person.
 - **`NEXT_PUBLIC_SITE_URL`** feeds `metadataBase`, canonicals, `robots.txt` and
   `sitemap.xml`. Set it per environment.
-- **Maskable PWA icons are missing.** `app/manifest.ts` ships the existing square
-  SVG only; Android's install prompt wants 192px and 512px maskable PNGs. Generate
-  them from the real mark rather than fabricating one.
+- **Launcher icons are generated from the mark.** `app/apple-icon.tsx` (iOS touch
+  icon) and `app/icons/[icon]/route.ts` (maskable 192/512 PNGs, padded into
+  Android's safe zone) are rendered from `public/myndstack-logo-square.svg` via
+  `next/og` — no fabricated art, no new dependency. On-screen content was already
+  retina-ready (canvases scale by `devicePixelRatio`; all imagery is SVG).
 - **Analytics are off** unless `NEXT_PUBLIC_PLAUSIBLE_DOMAIN` is set, so there is
   no consent banner to manage.
 
