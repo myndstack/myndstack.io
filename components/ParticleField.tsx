@@ -189,7 +189,7 @@ export default function ParticleField({ dim = false }: { dim?: boolean }) {
     <canvas
       ref={canvasRef}
       aria-hidden="true"
-      className={`absolute inset-0 z-0 h-full w-full${dim ? " opacity-[0.55]" : ""}`}
+      className={`absolute inset-0 z-0 h-full w-full${dim ? " opacity-[0.72]" : ""}`}
     />
   );
 }
