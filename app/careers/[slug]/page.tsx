@@ -6,18 +6,13 @@ import ApplicationForm from "@/components/ApplicationForm";
 import PageHeader from "@/components/PageHeader";
 import { SITE_URL } from "@/lib/content";
 import { jsonLd, numberWord } from "@/lib/format";
-import { getRole, getRoles, getSiteSettings } from "@/lib/sanity/queries";
+import { getRole, getRoles, getRoleSlugs, getSiteSettings } from "@/lib/sanity/queries";
 
 type Params = { slug: string };
 
-/**
- * Rendered per request (not prerendered) so a role edited in Sanity shows on the
- * next load — the same reason the rest of the content pages are dynamic. See
- * lib/sanity/client.ts. Any slug is resolved on demand; an unknown one 404s via
- * notFound() below. (generateStaticParams is intentionally omitted; the sitemap
- * enumerates slugs directly through getRoleSlugs.)
- */
-export const dynamic = "force-dynamic";
+export async function generateStaticParams() {
+  return (await getRoleSlugs()).map((slug) => ({ slug }));
+}
 
 export async function generateMetadata({
   params,
