@@ -1,13 +1,13 @@
 "use client";
 
 import { useId, useState } from "react";
-import { FAQS } from "@/lib/content";
+import type { Faq as FaqItem } from "@/lib/sanity/queries";
 import Reveal from "./Reveal";
 import Scanline from "./Scanline";
 import SectionHeader from "./SectionHeader";
 
 /** Accordion with one panel open at a time. */
-export default function Faq() {
+export default function Faq({ faqs }: { faqs: FaqItem[] }) {
   const baseId = useId();
   const [openIndex, setOpenIndex] = useState<number | null>(null);
 
@@ -25,7 +25,7 @@ export default function Faq() {
       />
 
       <Reveal className="flex flex-col gap-3">
-        {FAQS.map((faq, i) => {
+        {faqs.map((faq, i) => {
           const open = openIndex === i;
           const panelId = `${baseId}-panel-${i}`;
           const buttonId = `${baseId}-button-${i}`;

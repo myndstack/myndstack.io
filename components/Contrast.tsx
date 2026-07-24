@@ -1,9 +1,11 @@
-import { CONTRAST_WITH, CONTRAST_WITHOUT } from "@/lib/content";
+import { getHomepage } from "@/lib/sanity/queries";
 import Reveal from "./Reveal";
 import Section from "./Section";
 import SectionHeader from "./SectionHeader";
 
-export default function Contrast() {
+export default async function Contrast() {
+  const { contrastWith, contrastWithout } = await getHomepage();
+
   return (
     <Section>
       <SectionHeader
@@ -19,7 +21,7 @@ export default function Contrast() {
             Without a unified stack
           </div>
           <ul className="m-0 flex list-none flex-col gap-[15px] p-0">
-            {CONTRAST_WITHOUT.map((item) => (
+            {contrastWithout.map((item) => (
               <li
                 key={item}
                 className="flex gap-3.5 text-[15.5px] leading-[1.4] text-t4"
@@ -39,7 +41,7 @@ export default function Contrast() {
             With Myndstack
           </div>
           <ul className="m-0 flex list-none flex-col gap-[15px] p-0">
-            {CONTRAST_WITH.map((item) => (
+            {contrastWith.map((item) => (
               <li
                 key={item}
                 className="flex gap-3.5 text-[15.5px] leading-[1.4] text-t2"

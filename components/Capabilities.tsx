@@ -1,4 +1,4 @@
-import { CAPABILITIES } from "@/lib/content";
+import { getHomepage } from "@/lib/sanity/queries";
 import Reveal from "./Reveal";
 import Section from "./Section";
 import SectionHeader from "./SectionHeader";
@@ -6,7 +6,9 @@ import SectionHeader from "./SectionHeader";
 /** The lime card gets the angular clip and inverted ink — the odd one out by design. */
 const HIGHLIGHT_INDEX = 1;
 
-export default function Capabilities() {
+export default async function Capabilities() {
+  const { capabilities } = await getHomepage();
+
   return (
     <Section id="work-grid">
       <SectionHeader
@@ -17,7 +19,7 @@ export default function Capabilities() {
       />
 
       <div className="grid grid-cols-1 gap-4 xs:grid-cols-2 md:grid-cols-4">
-        {CAPABILITIES.map((cap, i) => {
+        {capabilities.map((cap, i) => {
           const highlight = i === HIGHLIGHT_INDEX;
 
           return (
@@ -72,7 +74,7 @@ export default function Capabilities() {
                 </div>
 
                 {/* A slow lime sweep marks the last card as the "in motion" one. */}
-                {i === CAPABILITIES.length - 1 ? (
+                {i === capabilities.length - 1 ? (
                   <div
                     aria-hidden="true"
                     className="animate-sweep pointer-events-none absolute top-0 left-0 h-full w-2/5 bg-[linear-gradient(90deg,transparent,rgba(201,242,77,.14),transparent)]"

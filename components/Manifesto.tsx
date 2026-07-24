@@ -1,19 +1,18 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { MANIFESTO_KEEP, MANIFESTO_LEAD } from "@/lib/content";
+import { useEffect, useMemo, useState } from "react";
 import { useInView, useReducedMotion } from "@/lib/hooks";
 
 /** Delay between each word lighting up. */
 const STEP_MS = 55;
 
-const WORDS = MANIFESTO_LEAD.trim().split(/\s+/);
-
 /** Oversized statement whose words brighten one at a time on entry. */
-export default function Manifesto() {
+export default function Manifesto({ lead, keep }: { lead: string; keep: string }) {
   const reduced = useReducedMotion();
   const [ref, inView] = useInView<HTMLParagraphElement>(0.55);
   const [litCount, setLitCount] = useState(0);
+
+  const WORDS = useMemo(() => lead.trim().split(/\s+/), [lead]);
 
   useEffect(() => {
     if (!inView) return;
@@ -26,7 +25,7 @@ export default function Manifesto() {
       window.setTimeout(() => setLitCount(i + 1), i * STEP_MS),
     );
     return () => timers.forEach(window.clearTimeout);
-  }, [inView, reduced]);
+  }, [inView, reduced, WORDS]);
 
   return (
     <section className="mx-auto max-w-[1120px] px-5 py-28 sm:px-14">
@@ -43,7 +42,7 @@ export default function Manifesto() {
             {word}{" "}
           </span>
         ))}
-        <span className="text-lime">{MANIFESTO_KEEP}</span>
+        <span className="text-lime">{keep}</span>
       </p>
     </section>
   );

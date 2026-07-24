@@ -1,17 +1,17 @@
 import type { MetadataRoute } from "next";
-import { CASES } from "@/lib/cases";
 import { SITE_URL } from "@/lib/content";
 import { LEGAL_SLUGS } from "@/lib/legal";
-import { ROLES } from "@/lib/roles";
+import { getCaseSlugs, getRoleSlugs } from "@/lib/sanity/queries";
 
-export default function sitemap(): MetadataRoute.Sitemap {
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const lastModified = new Date();
+  const [caseSlugs, roleSlugs] = await Promise.all([getCaseSlugs(), getRoleSlugs()]);
 
   return [
     { url: SITE_URL, lastModified, changeFrequency: "monthly", priority: 1 },
     { url: `${SITE_URL}/work`, lastModified, changeFrequency: "monthly", priority: 0.9 },
-    ...CASES.map((c) => ({
-      url: `${SITE_URL}/work/${c.slug}`,
+    ...caseSlugs.map((slug) => ({
+      url: `${SITE_URL}/work/${slug}`,
       lastModified,
       changeFrequency: "monthly" as const,
       priority: 0.7,
@@ -22,8 +22,8 @@ export default function sitemap(): MetadataRoute.Sitemap {
       changeFrequency: "weekly",
       priority: 0.8,
     },
-    ...ROLES.map((role) => ({
-      url: `${SITE_URL}/careers/${role.slug}`,
+    ...roleSlugs.map((slug) => ({
+      url: `${SITE_URL}/careers/${slug}`,
       lastModified,
       changeFrequency: "weekly" as const,
       priority: 0.6,

@@ -8,6 +8,8 @@ Marketing site for Myndstack — enterprise AI & cognitive infrastructure.
 - **Tailwind CSS v4** — design tokens live in `@theme` in [globals.css](app/globals.css)
 - **next/font/google** — Space Grotesk (display), Hanken Grotesk (body), Space Mono (labels)
 - **Resend** + **zod** for the three forms
+- **Sanity** for editable content (roles, case studies, homepage copy) — see
+  [Content](#content)
 
 ```bash
 npm install
@@ -36,6 +38,7 @@ for the full hosting runbook (env matrix, the Preview mail-transport trap, DNS).
 | `/careers/[slug]` | SSG | One page per role, with an application form and `JobPosting` JSON-LD |
 | `/privacy`, `/terms`, `/security` | Static | Long-form legal, with a sticky section index |
 | `/api/contact`, `/api/newsletter`, `/api/apply` | Dynamic | Form handlers |
+| `/api/revalidate` | Dynamic | Sanity publish webhook — signature-checked, `revalidateTag` |
 | `/api/health` | Dynamic | Mail readiness — 200 `{ok,deliverable}`, 503 when misconfigured |
 | `/robots.txt`, `/sitemap.xml`, `/manifest.webmanifest` | Static | Generated |
 | `/opengraph-image`, `/work/[slug]/opengraph-image`, `/careers/[slug]/opengraph-image` | Static | Social cards, all from `components/OgCard.tsx` |
@@ -50,18 +53,24 @@ app/
   layout.tsx           fonts, metadata, JSON-LD, chrome (loader, spine, nav, spotlight, back-to-top, footer)
   page.tsx             the 17 sections, in scroll order
   globals.css          design tokens (@theme) + component primitives
-  api/                 contact · newsletter · apply
+  api/                 contact · newsletter · apply · revalidate (Sanity webhook)
 components/            one file per section, plus shared Reveal / Section / SectionHeader / Field
 lib/
-  content.ts           homepage copy and data
+  content.ts           homepage copy and data (seeds Sanity; see Content)
   cases.ts roles.ts legal.ts   content for the sub-pages
+  sanity/              read client, GROQ queries (zod-validated), cache tags
   hubspot.ts audience.ts       optional integration sinks
   scroll.ts            the single rAF-throttled scroll loop
+  scroll-spy.ts        which section is current, as pure arithmetic
+  loader-seen.ts       the once-per-session intro contract, shared server/client
   hooks.ts             useReducedMotion, useScrollFrame, useReveal, useInView
   schemas.ts           zod schemas, shared by client and route handlers
   form-shared.ts       the zod-free half of the form contract (see below)
   mail-config.ts       how mail leaves the process, as a pure function of env
   form-route.ts mail.ts rate-limit.ts
+sanity/                Studio schemas, desk structure, env (standalone Studio)
+sanity.config.ts sanity.cli.ts   Studio + CLI config (run separately, not in Next)
+scripts/seed-sanity.ts   one-time import of the lib/ constants into Sanity
 ```
 
 ### Scroll handling
@@ -70,6 +79,30 @@ The spine fill, nav morph, scroll-spy, back-to-top ring and the pinned stack sto
 all subscribe to **one** listener in [lib/scroll.ts](lib/scroll.ts). Subscribers mutate
 styles and classes directly inside the frame — they never call `setState`, so scrolling
 does not re-render the tree. The stat count-ups follow the same rule.
+
+One listener is not by itself enough — what it *does* per frame matters as much:
+
+- **The frame does no layout reads.** It reads `window.scrollY` and nothing else.
+  Document height lives in a cache refreshed by a `ResizeObserver`, the nav's
+  section offsets are cached `offsetTop` values, and the stack story caches its
+  own `offsetTop`/`offsetHeight`. Measuring in the frame is what made a phone
+  stutter: `scrollHeight` once, then a `getBoundingClientRect()` per spied
+  section, each of them landing *after* the nav had written a class — about six
+  forced synchronous layouts per frame.
+- **Reads and writes are separate phases.** A subscriber can register
+  `{ read, write }` instead of a bare function; every read runs before any
+  write. Nothing needs it today, which is the point — it means a subscriber that
+  has to measure can be added without quietly reintroducing the interleaving.
+- **Writes stay off layout properties.** The spine drives `scaleY`/`translateY`
+  rather than `height`/`top`, so its 120ms transition is a compositor job rather
+  than a layout and a paint on every frame.
+
+Cache invalidation is one `ResizeObserver` on `document.body` per consumer, plus
+`document.fonts.ready` — a font swap moves every section on the page.
+
+`content-visibility: auto` on the below-fold sections was tried and removed; the
+comment above `mask-edges` in [globals.css](app/globals.css) records the
+measurements and why it lost.
 
 ### Forms
 
@@ -82,6 +115,86 @@ Each route runs rate limit → parse → validate → honeypot → send. The rat
 an in-process sliding window (5/min per IP): per-instance and reset by cold starts,
 which is the right trade here — swap the `Map` in `lib/rate-limit.ts` for Upstash if
 you ever need it exact.
+
+### Content
+
+> **Full operator + developer guide: [SANITY.md](SANITY.md)** — access, tokens,
+> running/deploying the Studio, editing each content type, data backup/import,
+> adding fields, and troubleshooting. The summary below is the architecture.
+
+Editorial content — the careers **roles**, the **case studies**, and most of the
+homepage (testimonials, team, FAQ, pricing, capabilities, process, stats,
+contrast, manifesto, client lockups, hero eyebrow/subhead/CTA, site settings) —
+lives in **Sanity** so it can change without a deploy. Pages fetch it in
+`lib/sanity/queries.ts`, which validates every response with zod at the boundary
+(server-only, so it costs the first-load bundle nothing) and returns the *same*
+`Role` / `CaseStudy` / `PricingTier` shapes the components already used — the
+migration is a change of source, not of contract.
+
+**What deliberately stays in code, because it is structure rather than copy:**
+
+| In code | Why |
+| --- | --- |
+| `NAV_LINKS` / `SPY_IDS` | Their `section` values must equal element ids the components render — a CMS typo would silently kill the scroll-spy. |
+| `STACK_LAYERS` | The pinned stack animation's geometry is written against exactly four layers. |
+| Hero **headline** words | The word-cycle animation and its hard line break are written against that exact array. Its eyebrow/subhead/CTA copy *did* move. |
+| `lib/legal.ts` | Long-form legal that goes through counsel, not a marketing edit. |
+| `FOOTER_COLUMNS`, `LEGAL_LINKS` | Route wiring, not copy. |
+
+**How edits reach the live site.** Two layers, so it works with or without a
+webhook:
+
+- **Time floor (always on).** Fetches carry `revalidate: 60`
+  (`REVALIDATE_SECONDS` in [lib/sanity/client.ts](lib/sanity/client.ts)), so a
+  published edit appears within ~a minute automatically. Without this, a fetch
+  with no `revalidate` is cached permanently and edits would not show until the
+  next deploy — a real trap, and the reason this floor exists.
+- **Webhook (optional, makes it instant).** Fetches are also tagged
+  ([lib/sanity/tags.ts](lib/sanity/tags.ts)); on publish Sanity can POST
+  [`/api/revalidate`](app/api/revalidate/route.ts), which verifies the signature
+  and `revalidateTag`s just the affected type, so the edit is live in seconds
+  rather than up to a minute. The signature check is the whole security model; an
+  unsigned request is rejected. Setup is in [DEPLOYMENT.md](DEPLOYMENT.md).
+
+So `SANITY_REVALIDATE_SECRET` and the webhook are an *upgrade to instant*, not a
+prerequisite for updates.
+
+**The Studio is standalone**, not embedded at `/studio`. Sanity v5's Studio UI
+imports React's `useEffectEvent`, which Next 15.5's compiled-react shim predates,
+so an embedded route won't compile — and forcing webpack to the real React breaks
+Next's server renderer. Running Studio via the Sanity CLI sidesteps all of it and
+keeps the Studio UI out of the marketing bundle. Editors use its
+`*.sanity.studio` URL:
+
+```bash
+npm run studio:dev           # local Studio at http://localhost:3333
+npm run studio:deploy        # publish to <studioHost>.sanity.studio
+```
+
+Two Studio notes, both from real breakage:
+
+- **Node.** The repo pins Node `22.x` (`engines`). Sanity's CLI bundles a
+  Rolldown-based Vite whose dev HMR crashes on Node ≥26 (`Missing field
+  moduleType`). [sanity.cli.ts](sanity.cli.ts) disables HMR so `studio:dev` runs
+  anyway — the only cost is that a change to a *schema file* needs a manual
+  browser refresh (content edits are live-updated by the Studio itself). The
+  production `studio:build`/`deploy` path is unaffected. On Node 22 none of this
+  applies.
+- **PostCSS.** [sanity.cli.ts](sanity.cli.ts) also hands Vite an empty inline
+  PostCSS config, or it would try to load the Next app's root
+  `postcss.config.mjs` (Tailwind v4, in a form Vite can't parse) and crash.
+
+**First-time setup / re-seeding.** The initial content is imported from the
+`lib/` constants — nothing is retyped, and an identical render afterwards is the
+proof the schema is faithful:
+
+```bash
+# 1. create a Viewer + an Editor token at sanity.io/manage (project e3tbagdk)
+# 2. fill SANITY_API_WRITE_TOKEN in .env.local
+npm run seed                 # idempotent — createOrReplace, safe to re-run
+```
+
+Revoke the write token afterwards; nothing reads it at runtime.
 
 ### Mail configuration
 
@@ -170,6 +283,8 @@ Two things worth knowing:
 
 - `nav-state` — the bar/capsule/hidden reducer, including the hysteresis dead band
   and momentum-wobble immunity that regressed twice while this was a component-local ref.
+- `scroll-spy` — which section is current, including the document-order rule
+  (see *Scroll-spy order* below) and the empty-offsets case every sub-page hits.
 - `format` — the metric parser (must round-trip the authored string exactly),
   JSON-LD escaping, and the mail-header sanitiser.
 - `rate-limit` — the sliding window and the X-Forwarded-For hop selection.
@@ -193,6 +308,9 @@ both unit tests and screenshots:
 | Nav capsule fits across 760–900px | CTA wrapping out of the pill |
 | Work/role cards reach detail pages | Cards that went nowhere |
 | Back-to-top only on scroll-up | Scroll-intent latch |
+| Scroll-spy tracks sections in order | Cached offsets going stale — invisible to the unit tests, which only cover the arithmetic |
+| Intro plays once per session | The overlay, and the `inert` it implies, on a repeat visit |
+| Marquees pause off screen | An observer that silently stops firing; the only symptom is a warm phone |
 | `/api/health` reports `ok` | Mail config resolved at boot, not at first submission |
 
 Two constraints that make them trustworthy: the suite must run with **motion
@@ -272,21 +390,24 @@ Three of these are bug fixes; the fourth is a visible design change.
 
 ## Before going live
 
-**Placeholder content — all of this is invented and must be replaced:**
+**Placeholder content — all of this is invented and must be replaced.** Once the
+site has been seeded (see [Content](#content)), the first four are a **Studio
+task, not a code edit** — replace them at the `*.sanity.studio` URL:
 
-- **Case studies** (`lib/cases.ts`) — clients, metrics and narratives are fabricated.
-  They read as real; that is the risk.
-- **Testimonials** (`lib/content.ts`) — quotes are invented. Attributions have been
-  anonymised to roles rather than names, but the quotes themselves are not real.
-- **Team** (`lib/content.ts`) — names and roles are placeholders.
+- **Case studies** — clients, metrics and narratives are fabricated. They read as
+  real; that is the risk.
+- **Testimonials** — quotes are invented. Attributions are anonymised to roles
+  rather than names, but the quotes themselves are not real.
+- **Team** — names and roles are placeholders.
 - **Client lockups** in the logo marquee.
-- **Legal copy** (`lib/legal.ts`) — a reasonable draft for a services company that
-  has **not** been through counsel. Review it and update `LAST_UPDATED`.
+- **Legal copy** (`lib/legal.ts`) — stays in code (it goes through counsel, not a
+  marketing edit). A reasonable draft that has **not** been reviewed; do so and
+  update `LAST_UPDATED`.
 
 **Configuration:**
 
-- **Social profile URLs** are `null` in `lib/content.ts`, so the spine renders no
-  icons. Set them to real URLs to bring the icons back.
+- **Social profile URLs** — set them under *Site settings* in Studio (leave one
+  blank to hide that icon rather than link nowhere).
 - **Verify a sending domain in Resend** and set `CONTACT_FROM_EMAIL` to an address
   on it — the default `onboarding@resend.dev` is for testing only, and a production
   deployment now refuses to start in a state that would use it. Add DKIM, SPF and a
@@ -311,7 +432,12 @@ Three of these are bug fixes; the fourth is a visible design change.
 
 **Performance:**
 
-- **The loader costs you LCP.** It covers the viewport for ~1.65s by design, so lab
-  tools report LCP after it clears. Measured CLS is ~0.000. If Core Web Vitals
-  matter more than the entrance, shorten `FADE_AT_MS` in
+- **The loader costs you LCP, but only once per session.** It covers the viewport
+  for ~1.65s by design, so lab tools report LCP after it clears — and lab tools
+  always measure a cold session, so that is the number you will see. Real repeat
+  visits, and every click through to `/work` or `/careers` and back, skip it:
+  a blocking script at the top of `<body>` reads the sessionStorage key in
+  [lib/loader-seen.ts](lib/loader-seen.ts) and stamps `data-seen` on `<html>`
+  before first paint, so CSS hides the overlay with no flash to hide. Measured
+  CLS is ~0.000. To go further, shorten `FADE_AT_MS` in
   [Loader.tsx](components/Loader.tsx) or drop the component from the layout.

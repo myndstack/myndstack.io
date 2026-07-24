@@ -1,13 +1,16 @@
 /**
- * Case studies.
+ * Case studies — SEED SOURCE + TYPE ONLY.
  *
- * PLACEHOLDER CONTENT. The clients, figures and narratives here are invented to
- * exercise the layout — they came from the design handoff and were fleshed out to
- * full length so the pages read correctly in review. Replace every entry before
- * launch; see the pre-launch list in the README.
+ * The live site reads case studies from Sanity via lib/sanity/queries.ts
+ * (`getCases`/`getCase`); it does NOT read `CASES`. This file survives for the
+ * `CaseStudy`/`CaseMetric` types (imported by the query layer) and as the source
+ * the one-time seed (scripts/seed-sanity.ts) imports. Editing the array here has
+ * NO effect on the running site — edit content in the Studio, or replace the
+ * placeholder cases there. To change the shape, update these types AND
+ * sanity/schemas/caseStudy.ts together.
  *
- * Shape mirrors lib/roles.ts, and the routes mirror /careers — same PageHeader,
- * same metric grid, same prose treatment.
+ * PLACEHOLDER CONTENT (the original seed): the clients, figures and narratives
+ * are invented. Replace every entry in the Studio before launch.
  */
 
 export type CaseMetric = {
@@ -168,9 +171,3 @@ export const CASES: readonly CaseStudy[] = [
     regions: "3 regions",
   },
 ];
-
-export const getCase = (slug: string) => CASES.find((c) => c.slug === slug);
-
-export const FEATURED_CASE = CASES.find((c) => c.featured) ?? CASES[0];
-/** The non-featured cases, in the order the homepage grid shows them. */
-export const SUPPORTING_CASES = CASES.filter((c) => !c.featured);

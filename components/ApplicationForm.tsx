@@ -1,10 +1,15 @@
 "use client";
 
-import { SITE } from "@/lib/content";
 import { useFormPost } from "@/lib/useFormPost";
 import Field, { Honeypot } from "./Field";
 
-export default function ApplicationForm({ role }: { role: string }) {
+export default function ApplicationForm({
+  role,
+  contactEmail,
+}: {
+  role: string;
+  contactEmail: string;
+}) {
   const { submit, pending, done, error, fieldErrors } = useFormPost(
     "/api/apply",
     "application",
@@ -25,7 +30,7 @@ export default function ApplicationForm({ role }: { role: string }) {
         <p className="m-0 text-[14.5px] text-t4">
           You&rsquo;ll hear from a person, not an autoresponder, within five business
           days. Questions in the meantime:{" "}
-          <a href={`mailto:${SITE.email}`}>{SITE.email}</a>.
+          <a href={`mailto:${contactEmail}`}>{contactEmail}</a>.
         </p>
       </div>
     );

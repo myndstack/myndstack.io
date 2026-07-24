@@ -1,6 +1,5 @@
 "use client";
 
-import { SITE } from "@/lib/content";
 import { useFormPost } from "@/lib/useFormPost";
 import BookingEmbed from "./BookingEmbed";
 import Field, { Honeypot } from "./Field";
@@ -9,7 +8,11 @@ import Reveal from "./Reveal";
 const BUDGETS = ["Under $10k", "$10k – $50k", "$50k – $150k", "$150k+"];
 const SOURCES = ["Search", "Referral", "Social", "Event", "Other"];
 
-export default function ContactForm() {
+/** Contact details from site settings — kept to primitives so this client
+ *  component needn't import the server-only query types. */
+type Props = { email: string; phone: string; phoneHref: string; location: string };
+
+export default function ContactForm({ email, phone, phoneHref, location }: Props) {
   const { submit, pending, done, error, fieldErrors } = useFormPost(
     "/api/contact",
     "contact",
@@ -30,24 +33,24 @@ export default function ContactForm() {
             <div>
               <div className="label-mono mb-[5px]">Email</div>
               <a
-                href={`mailto:${SITE.email}`}
+                href={`mailto:${email}`}
                 className="font-display text-[17px] text-white hover:text-lime"
               >
-                {SITE.email}
+                {email}
               </a>
             </div>
             <div>
               <div className="label-mono mb-[5px]">Phone</div>
               <a
-                href={SITE.phoneHref}
+                href={phoneHref}
                 className="font-display text-[17px] text-white hover:text-lime"
               >
-                {SITE.phone}
+                {phone}
               </a>
             </div>
             <div>
               <div className="label-mono mb-[5px]">Studio</div>
-              <div className="font-display text-[17px] text-t2">{SITE.location}</div>
+              <div className="font-display text-[17px] text-t2">{location}</div>
             </div>
           </div>
 
@@ -68,7 +71,7 @@ export default function ContactForm() {
               </div>
               <p className="m-0 text-[14.5px] text-t4">
                 In the meantime, reach us directly at{" "}
-                <a href={`mailto:${SITE.email}`}>{SITE.email}</a>.
+                <a href={`mailto:${email}`}>{email}</a>.
               </p>
             </div>
           ) : (

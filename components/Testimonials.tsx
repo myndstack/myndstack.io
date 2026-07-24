@@ -1,15 +1,15 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { TESTIMONIALS } from "@/lib/content";
 import { useReducedMotion } from "@/lib/hooks";
+import type { Testimonial } from "@/lib/sanity/queries";
 import Reveal from "./Reveal";
 import Section from "./Section";
 import SectionHeader from "./SectionHeader";
 
 const INTERVAL_MS = 5000;
 
-export default function Testimonials() {
+export default function Testimonials({ items }: { items: Testimonial[] }) {
   const reduced = useReducedMotion();
   const [index, setIndex] = useState(0);
   const [paused, setPaused] = useState(false);
@@ -17,22 +17,23 @@ export default function Testimonials() {
   const [announcement, setAnnouncement] = useState("");
   const timerRef = useRef<number | undefined>(undefined);
 
-  const goTo = useCallback((n: number) => {
-    setIndex(n);
-    setAnnouncement(
-      `Testimonial ${n + 1} of ${TESTIMONIALS.length}: ${TESTIMONIALS[n].role}`,
-    );
-  }, []);
+  const goTo = useCallback(
+    (n: number) => {
+      setIndex(n);
+      setAnnouncement(`Testimonial ${n + 1} of ${items.length}: ${items[n].role}`);
+    },
+    [items],
+  );
 
   useEffect(() => {
     if (reduced || paused) return;
 
     timerRef.current = window.setInterval(
-      () => setIndex((i) => (i + 1) % TESTIMONIALS.length),
+      () => setIndex((i) => (i + 1) % items.length),
       INTERVAL_MS,
     );
     return () => window.clearInterval(timerRef.current);
-  }, [reduced, paused, index]);
+  }, [reduced, paused, index, items.length]);
 
   return (
     <Section>
@@ -59,12 +60,12 @@ export default function Testimonials() {
               className="ease-brand flex transition-transform duration-500"
               style={{ transform: `translateX(${-index * 100}%)` }}
             >
-              {TESTIMONIALS.map((t, i) => (
+              {items.map((t, i) => (
                 <div
                   key={t.index}
                   role="group"
                   aria-roledescription="slide"
-                  aria-label={`${i + 1} of ${TESTIMONIALS.length}`}
+                  aria-label={`${i + 1} of ${items.length}`}
                   // Off-screen slides stay out of the a11y tree and tab order.
                   inert={i !== index}
                   className="flex min-w-full justify-center px-px"
@@ -93,7 +94,7 @@ export default function Testimonials() {
           </div>
 
           <div className="mt-[26px] flex justify-center gap-[9px]">
-            {TESTIMONIALS.map((t, i) => (
+            {items.map((t, i) => (
               <button
                 key={t.index}
                 type="button"

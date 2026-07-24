@@ -57,6 +57,23 @@ export function jsonLd(data: unknown): string {
     .replace(/&/g, "\\u0026");
 }
 
+const NUMBER_WORDS = [
+  "zero", "one", "two", "three", "four", "five", "six",
+  "seven", "eight", "nine", "ten", "eleven", "twelve",
+];
+
+/**
+ * Spells a small count as a word ("Four ways in.") so headings read naturally,
+ * falling back to digits past twelve. Exists because the careers copy used to
+ * hardcode "Four" and "three" against a fixed role list — the whole reason that
+ * content moved to a CMS was so the count could change, and the copy has to
+ * follow it. `capitalize` for sentence-initial use.
+ */
+export function numberWord(n: number, capitalize = false): string {
+  const word = NUMBER_WORDS[n] ?? String(n);
+  return capitalize ? word.charAt(0).toUpperCase() + word.slice(1) : word;
+}
+
 /**
  * Collapses a value to a single line. Email headers are line-delimited, so
  * anything interpolated into a subject or Reply-To gets stripped of control

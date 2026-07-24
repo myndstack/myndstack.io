@@ -6,6 +6,9 @@ playwright-report/
 playwright/.cache/
 out/
 build/
+# Sanity Studio build output (`sanity build` / `studio:deploy`) and CLI cache.
+dist/
+.sanity/
 .DS_Store
 *.pem
 .env*

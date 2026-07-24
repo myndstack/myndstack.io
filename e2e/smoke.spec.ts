@@ -172,4 +172,94 @@ test.describe("scroll chrome", () => {
     await scrollBySteps(page, -400, 4);
     await expect(button).toHaveClass(/is-visible/);
   });
+
+  /**
+   * The spy reads cached `offsetTop` values rather than measuring rects every
+   * frame. Everything that can go wrong with a cache goes wrong here — a stale
+   * entry, a measurement taken before fonts swapped — and none of it is visible
+   * to the unit tests, which only exercise the arithmetic.
+   */
+  test("scroll-spy follows the page down through its sections", async ({ page }) => {
+    await landOnHome(page);
+
+    const current = () =>
+      page.evaluate(
+        () =>
+          document
+            .querySelector(".navlink[data-section].is-active")
+            ?.getAttribute("data-section") ?? null,
+      );
+
+    expect(await current()).toBe("work-grid");
+
+    // Land just past each section's top, in order, without ever jumping back.
+    for (const section of ["process", "pricing", "team"]) {
+      const target = await page.evaluate(
+        (id) => document.getElementById(id)!.offsetTop + 40,
+        section,
+      );
+      await scrollBySteps(page, target - (await page.evaluate(() => window.scrollY)));
+      expect(await current()).toBe(section);
+    }
+  });
+
+  /**
+   * Nothing about a paused marquee is visible, which is exactly why it needs a
+   * test: the observer could stop firing and the only symptom would be a phone
+   * getting warm.
+   */
+  test("marquees stop animating once they are off screen", async ({ page }) => {
+    await landOnHome(page);
+
+    const playState = () =>
+      page.evaluate(
+        () =>
+          getComputedStyle(document.querySelector(".animate-marq")!).animationPlayState,
+      );
+
+    // It sits below the full-height hero, so it starts off screen and paused.
+    expect(await playState()).toBe("paused");
+
+    const band = await page.evaluate(
+      () => document.querySelector(".animate-marq")!.getBoundingClientRect().top,
+    );
+    await scrollBySteps(page, Math.round(band - 200));
+    expect(await playState()).toBe("running");
+
+    await scrollBySteps(page, 3000);
+    expect(await playState()).toBe("paused");
+  });
+});
+
+test.describe("the intro plays once per session", () => {
+  test("first load shows it, a reload in the same session does not", async ({
+    page,
+  }) => {
+    await page.goto("/");
+    await expect(page.locator(".loader")).toBeVisible();
+
+    await page.waitForTimeout(LOADER_MS);
+    await expect(page.locator(".loader")).toHaveCount(0);
+
+    // Same tab, same session: the entrance is spent.
+    await page.reload();
+    await expect(page.locator(".loader")).toHaveCount(0);
+
+    // The overlay is what `inert` exists to cover. No overlay, no inert — this
+    // is the same regression as "nothing is left inert", reached the other way.
+    await expect(page.locator("#site")).not.toHaveAttribute("inert", /.*/);
+    await expect(page.locator(".nav-cta").first()).toBeVisible();
+    await page.locator(".nav-cta").first().click();
+    await expect(page).toHaveURL(/#contact$/);
+  });
+
+  test("a fresh session gets the entrance again", async ({ browser }) => {
+    const context = await browser.newContext();
+    const page = await context.newPage();
+
+    await page.goto("/");
+    await expect(page.locator(".loader")).toBeVisible();
+
+    await context.close();
+  });
 });

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { subscribeToScroll, type ScrollState } from "./scroll";
+import { subscribeToScroll, type ScrollSubscriber } from "./scroll";
 
 const REDUCED_MOTION_QUERY = "(prefers-reduced-motion: reduce)";
 
@@ -47,12 +47,31 @@ export function useMediaQuery(query: string): boolean {
  * Subscribes to the shared scroll loop. The callback runs inside the rAF frame
  * and should mutate styles directly rather than call setState — these fire on
  * every frame of every scroll.
+ *
+ * A bare function is a write-only subscriber, which is what almost everything
+ * wants. Pass `{ read, write }` only if you genuinely have to measure the DOM:
+ * every read runs before every write, so measuring never forces a synchronous
+ * layout on top of another subscriber's mutation.
  */
-export function useScrollFrame(callback: (state: ScrollState) => void) {
-  const ref = useRef(callback);
-  ref.current = callback;
+export function useScrollFrame(subscriber: ScrollSubscriber) {
+  const ref = useRef(subscriber);
+  ref.current = subscriber;
 
-  useEffect(() => subscribeToScroll((state) => ref.current(state)), []);
+  useEffect(
+    () =>
+      subscribeToScroll({
+        read: (state) => {
+          const current = ref.current;
+          if (typeof current !== "function") current.read?.(state);
+        },
+        write: (state) => {
+          const current = ref.current;
+          if (typeof current === "function") current(state);
+          else current.write?.(state);
+        },
+      }),
+    [],
+  );
 }
 
 /** Set once if IntersectionObserver turns out not to deliver — see the watchdog. */

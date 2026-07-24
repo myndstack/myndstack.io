@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { LOADER_SEEN_KEY } from "@/lib/loader-seen";
 import Wordmark from "./Wordmark";
 
 const FADE_AT_MS = 1650;
@@ -8,17 +9,44 @@ const FADE_DURATION_MS = 850;
 const SPARK_COUNT = 90;
 const SPARK_FRAMES = 80;
 
+/** sessionStorage throws outright in some privacy modes; a throw means unseen. */
+function alreadySeen() {
+  try {
+    return window.sessionStorage.getItem(LOADER_SEEN_KEY) !== null;
+  } catch {
+    return false;
+  }
+}
+
 /** Full-screen cinematic intro with a one-shot particle "ignite" burst. */
 export default function Loader() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [fading, setFading] = useState(false);
   const [gone, setGone] = useState(false);
 
+  /**
+   * Set during the first effect, read by the two below it. Effects run in
+   * declaration order within a commit, so this is resolved before anything
+   * else looks at it — and it means a repeat visit never so much as touches
+   * `inert` or the canvas, rather than setting them and undoing it a render
+   * later.
+   */
+  const skipRef = useRef(false);
+
   useEffect(() => {
     const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    if (reduced) {
+    if (reduced || alreadySeen()) {
+      skipRef.current = true;
       setGone(true);
       return;
+    }
+
+    // Claimed now rather than when the entrance finishes: navigating away
+    // mid-entrance must not replay it on the next full page load.
+    try {
+      window.sessionStorage.setItem(LOADER_SEEN_KEY, "1");
+    } catch {
+      // Nothing to do — the entrance simply plays again next time.
     }
 
     const fadeTimer = window.setTimeout(() => setFading(true), FADE_AT_MS);
@@ -38,22 +66,29 @@ export default function Loader() {
    * behind it would move focus to things nobody can see, and `aria-hidden` on
    * the overlay does not prevent that.
    *
+   * Only ever set while the overlay is actually being shown. Setting it
+   * unconditionally and releasing it on `gone` is what left the whole page
+   * uninteractive once before, and on a repeat visit there is no overlay to
+   * hold anything back from.
+   *
    * Keyed on `gone` rather than released in an unmount cleanup — this component
    * finishes by rendering null, it does not unmount, so a cleanup-based release
-   * never runs and the whole page stays uninteractive.
+   * never runs.
    */
   useEffect(() => {
+    if (gone || skipRef.current) return;
+
     const site = document.getElementById("site");
     if (!site) return;
 
-    site.inert = !gone;
+    site.inert = true;
     return () => {
       site.inert = false;
     };
   }, [gone]);
 
   useEffect(() => {
-    if (gone) return;
+    if (gone || skipRef.current) return;
 
     const canvas = canvasRef.current;
     if (!canvas) return;

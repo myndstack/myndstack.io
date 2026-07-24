@@ -691,6 +691,25 @@
   mask-image: linear-gradient(90deg, transparent, #000 20%, #000 80%, transparent);
 }
 
+/*
+ * `content-visibility: auto` on the below-fold sections was tried here and
+ * removed. It is the textbook fix for a long page, but not for this one:
+ *
+ * - Every section that is actually expensive to render is disqualified. A
+ *   deferred section's height is an estimate until it has been rendered once,
+ *   and scrolling to a fragment through an estimate lands in the wrong place —
+ *   which rules out #work-grid, #process, #pricing, #team, #faq, #contact,
+ *   #cta and #careers. The pinned stack story reads its own height to drive its
+ *   animation, so it is out too. What remains is the cheap sections.
+ * - The estimates were measurably wrong for those: real heights of 162, 137,
+ *   298, 589, 554 and 615px against a single authored value, inflating the
+ *   document from 11,872 to 13,863px. A scrollbar 17% too long, and content
+ *   settling underneath you as each section resolves.
+ *
+ * The wins that replaced it are elsewhere: no layout reads in the scroll frame
+ * (lib/scroll.ts) and marquees that stop when off screen (MarqueeTrack.tsx).
+ */
+
 /* ============================================================
    REVEAL-DRIVEN CLIP CORNER
    Unlayered on purpose — a rule inside @layer components would lose to the
@@ -721,6 +740,17 @@
 }
 .scanline.is-on {
   animation: scan 1.15s var(--ease-brand) forwards;
+}
+
+/* ============================================================
+   INTRO, ONCE PER SESSION
+   Set by the blocking script at the top of <body>, so the decision is made
+   before the overlay would have painted rather than a frame after hydration.
+   Unlayered and !important for the same reason the reduced-motion rule below
+   is: it has to beat the utilities on the element itself.
+   ============================================================ */
+html[data-seen] .loader {
+  display: none !important;
 }
 
 /* ============================================================

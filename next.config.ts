@@ -13,6 +13,10 @@ import type { NextConfig } from "next";
  * `includeSubDomains` on HSTS commits every *.myndstack.io host to HTTPS for the
  * max-age — fine as long as api.myndstack.io and friends are TLS, which they are.
  * `preload` is intentionally omitted: it is a hard-to-reverse browser-list entry.
+ *
+ * The Sanity Studio is NOT embedded in this app (see README / sanity.cli.ts), so
+ * these headers apply cleanly to the whole site with nothing to carve out — the
+ * editor lives at its own Sanity-hosted URL, not on this origin.
  */
 const SECURITY_HEADERS = [
   { key: "Strict-Transport-Security", value: "max-age=63072000; includeSubDomains" },

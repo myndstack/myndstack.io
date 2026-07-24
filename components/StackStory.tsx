@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef } from "react";
+import { useEffect, useRef } from "react";
 import { STACK_LAYERS } from "@/lib/content";
 import { useScrollFrame } from "@/lib/hooks";
 
@@ -23,17 +23,49 @@ export default function StackStory() {
   const counterRef = useRef<HTMLSpanElement>(null);
   const layerRefs = useRef<(HTMLDivElement | null)[]>([]);
 
-  useScrollFrame(() => {
-    const section = sectionRef.current;
-    if (!section) return;
+  /**
+   * The pinned section's geometry. Measured on layout changes rather than per
+   * frame — `offsetHeight` and `getBoundingClientRect()` in the scroll frame
+   * forced a synchronous layout on top of whatever the nav had just written.
+   * `top` is absolute, so scrolling never invalidates it.
+   */
+  const geometryRef = useRef({ top: 0, total: 0 });
 
-    const total = section.offsetHeight - window.innerHeight;
+  useEffect(() => {
+    let pending = 0;
+
+    const measure = () => {
+      pending = 0;
+      const section = sectionRef.current;
+      if (!section) return;
+      geometryRef.current = {
+        top: section.offsetTop,
+        total: section.offsetHeight - window.innerHeight,
+      };
+    };
+
+    const schedule = () => {
+      if (pending) return;
+      pending = requestAnimationFrame(measure);
+    };
+
+    measure();
+    document.fonts?.ready.then(schedule);
+
+    const observer = new ResizeObserver(schedule);
+    observer.observe(document.body);
+
+    return () => {
+      observer.disconnect();
+      if (pending) cancelAnimationFrame(pending);
+    };
+  }, []);
+
+  useScrollFrame(({ y }) => {
+    const { top, total } = geometryRef.current;
     if (total <= 0) return;
 
-    const progress = Math.min(
-      1,
-      Math.max(0, -section.getBoundingClientRect().top / total),
-    );
+    const progress = Math.min(1, Math.max(0, (y - top) / total));
 
     let active = 0;
 

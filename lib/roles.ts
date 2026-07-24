@@ -1,3 +1,11 @@
+/**
+ * NOTE: the live site no longer reads `ROLES` — roles come from Sanity via
+ * lib/sanity/queries.ts (`getRoles`/`getRole`). This file survives for two
+ * reasons only: the `Role` type (imported by the query layer) and as the source
+ * the one-time seed (scripts/seed-sanity.ts) imports. Editing the array here has
+ * NO effect on the running site; edit content in the Studio. To change a role's
+ * shape, update this type AND the schema in sanity/schemas/role.ts together.
+ */
 export type Role = {
   slug: string;
   title: string;
@@ -136,5 +144,3 @@ export const ROLES: readonly Role[] = [
     ],
   },
 ];
-
-export const getRole = (slug: string) => ROLES.find((r) => r.slug === slug);
