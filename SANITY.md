@@ -89,7 +89,6 @@ site to run** — the dataset is public and pages read it anonymously.
 | --- | --- | --- | --- |
 | **Write** (`SANITY_API_WRITE_TOKEN`) | ONLY `npm run seed` (initial import). Never read at runtime | `.env.local` only | Create, seed once, **revoke** |
 | **Read** (`SANITY_API_READ_TOKEN`) | Optional. Not needed to read the public dataset; set a **Viewer** token only if you later want drafts or higher rate limits | Host env + `.env.local` | Long-lived |
-| **Revalidate secret** (`SANITY_REVALIDATE_SECRET`) | Was for the publish webhook, which is now inert (content renders dynamically — see §5). Not needed | — | — |
 
 **Create tokens** at **sanity.io/manage → project `e3tbagdk` → API → Tokens**.
 The only one you need is an **Editor** token to run the seed once.
@@ -214,13 +213,12 @@ The content pages render **dynamically**: each request reads Sanity fresh
 content routes are dynamic). There is no cache to wait on and nothing to
 configure — just **Publish** in the Studio and reload.
 
-> **You do not need a webhook or `SANITY_REVALIDATE_SECRET`.** An ISR + webhook
+> **There is no webhook and no `SANITY_REVALIDATE_SECRET`.** An ISR + webhook
 > setup was built first (cache tags, `revalidateTag`, a 60s floor) but Vercel
 > never regenerated the prerendered pages on this deployment — edits never
-> surfaced. Dynamic rendering sidesteps that entirely. The
-> [`/api/revalidate`](app/api/revalidate/route.ts) route and the secret still
-> exist and work, but are **inert** now; you can delete the Sanity webhook and
-> the secret if you set them up. See the README for the full story.
+> surfaced. Dynamic rendering sidesteps that entirely, so the `/api/revalidate`
+> route, its cache tags and the secret were **removed**. If you created a webhook
+> in Sanity pointing at that URL, delete it. See the README for the full story.
 
 ---
 
@@ -318,9 +316,7 @@ sanity.cli.ts         CLI config (studioHost, Vite/PostCSS/HMR workarounds)
 lib/sanity/
   client.ts           `sanityFetch` — native, uncached reads (dynamic pages)
   queries.ts          GROQ + zod validation; returns the app's existing types
-  tags.ts             cache-tag names, shared with the revalidate route
 scripts/seed-sanity.ts    one-time import of lib/ constants
-app/api/revalidate/route.ts   signed webhook → revalidateTag
 ```
 
 ### The query-layer contract
@@ -357,10 +353,9 @@ Then `npm run studio:deploy` (schema changed) and re-run the site build.
 1. New `sanity/schemas/<type>.ts` (mirror an existing one; include an `order`
    field — see `shared.ts`).
 2. Register it in `sanity/schemas/index.ts`.
-3. Add a tag to `lib/sanity/tags.ts` (its key **must** equal the schema `_type`).
-4. Add query function(s) + zod schema in `lib/sanity/queries.ts`.
-5. Seed it in `scripts/seed-sanity.ts`.
-6. Consume it in a component (server components fetch directly; client components
+3. Add query function(s) + zod schema in `lib/sanity/queries.ts`.
+4. Seed it in `scripts/seed-sanity.ts`.
+5. Consume it in a component (server components fetch directly; client components
    receive the data as props from a server parent).
 
 ### Validation helpers
@@ -426,9 +421,6 @@ unpublished or empty. Check it's **Published** in the Studio.
 Studio (drafts aren't shown), and hard-reload to bypass the browser cache. There
 is no CMS-side cache or webhook to wait on.
 
-**Webhook returns 401** — the signature didn't verify: the **Secret** in the
-Sanity webhook doesn't match `SANITY_REVALIDATE_SECRET` in the host. **500** —
-the secret env var isn't set at all.
 
 **Editing `lib/content.ts` did nothing** — that content is served from Sanity now;
 those constants are seed-source only. Edit in the Studio.
@@ -442,7 +434,6 @@ those constants are seed-source only. Edit in the Studio.
 | `NEXT_PUBLIC_SANITY_PROJECT_ID` | site (public) | yes | `e3tbagdk` |
 | `NEXT_PUBLIC_SANITY_DATASET` | site (public) | yes | `production` |
 | `SANITY_API_READ_TOKEN` | site (server) | optional | Only needed for drafts / higher rate limits; the public dataset reads without it |
-| `SANITY_REVALIDATE_SECRET` | site (server) | not needed | Only the (now inert) revalidate webhook used it — see §5 |
 | `SANITY_API_WRITE_TOKEN` | local only | seed only | For `npm run seed`; revoke after. **Never** set in the host |
 
 Public IDs also have safe hardcoded fallbacks in `sanity/env.ts`, so the Studio
@@ -460,9 +451,6 @@ prefix. Full deployment matrix: [DEPLOYMENT.md](DEPLOYMENT.md).
   runtime.
 - **The read token is server-only.** `lib/sanity/` imports `server-only`, so the
   token and GROQ never reach the browser bundle.
-- **The webhook is signature-verified.** `/api/revalidate` rejects any request
-  whose signature doesn't match the shared secret — the payload is treated as
-  data (only its `_type` is used), never as instructions.
 - **`/studio` is not on this domain** (standalone), and the marketing site's
   `/api` and any editor surfaces are disallowed in `robots.txt`.
 
