@@ -31,17 +31,22 @@ for the full hosting runbook (env matrix, the Preview mail-transport trap, DNS).
 
 | Route | Rendering | Notes |
 | --- | --- | --- |
-| `/` | Static | The 17-section scrolling page |
-| `/work` | Static | Case study index |
-| `/work/[slug]` | SSG | One page per case study, with `Article` JSON-LD |
-| `/careers` | Static | Role listing |
-| `/careers/[slug]` | SSG | One page per role, with an application form and `JobPosting` JSON-LD |
-| `/privacy`, `/terms`, `/security` | Static | Long-form legal, with a sticky section index |
+| `/` | Dynamic | The 17-section scrolling page |
+| `/work` | Dynamic | Case study index |
+| `/work/[slug]` | Dynamic | One page per case study, with `Article` JSON-LD |
+| `/careers` | Dynamic | Role listing |
+| `/careers/[slug]` | Dynamic | One page per role, with an application form and `JobPosting` JSON-LD |
+| `/privacy`, `/terms`, `/security` | Dynamic | Long-form legal, with a sticky section index |
 | `/api/contact`, `/api/newsletter`, `/api/apply` | Dynamic | Form handlers |
-| `/api/revalidate` | Dynamic | Sanity publish webhook — signature-checked, `revalidateTag` |
 | `/api/health` | Dynamic | Mail readiness — 200 `{ok,deliverable}`, 503 when misconfigured |
-| `/robots.txt`, `/sitemap.xml`, `/manifest.webmanifest` | Static | Generated |
-| `/opengraph-image`, `/work/[slug]/opengraph-image`, `/careers/[slug]/opengraph-image` | Static | Social cards, all from `components/OgCard.tsx` |
+| `/sitemap.xml` | Dynamic | Generated; slugs come from Sanity |
+| `/robots.txt`, `/manifest.webmanifest` | Static | Generated |
+| `/opengraph-image`, `/work/[slug]/opengraph-image`, `/careers/[slug]/opengraph-image` | Static / SSG | Social cards, all from `components/OgCard.tsx` |
+
+Pages render **per request** because the content comes from Sanity uncached (see
+[Content](#content)) — the root layout reads site settings, so every page that
+uses it is dynamic, the legal pages included. Only the generated assets that
+touch no CMS data stay static.
 
 Legal pages are three real segments rather than `/[slug]`, which would otherwise
 swallow every unknown path and stop `/careers` resolving cleanly.
@@ -53,12 +58,12 @@ app/
   layout.tsx           fonts, metadata, JSON-LD, chrome (loader, spine, nav, spotlight, back-to-top, footer)
   page.tsx             the 17 sections, in scroll order
   globals.css          design tokens (@theme) + component primitives
-  api/                 contact · newsletter · apply · revalidate (Sanity webhook)
+  api/                 contact · newsletter · apply · health
 components/            one file per section, plus shared Reveal / Section / SectionHeader / Field
 lib/
   content.ts           homepage copy and data (seeds Sanity; see Content)
   cases.ts roles.ts legal.ts   content for the sub-pages
-  sanity/              read client, GROQ queries (zod-validated), cache tags
+  sanity/              read client + GROQ queries (zod-validated)
   hubspot.ts audience.ts       optional integration sinks
   scroll.ts            the single rAF-throttled scroll loop
   scroll-spy.ts        which section is current, as pure arithmetic
@@ -157,11 +162,9 @@ repeated reads within a single render, so a page is a handful of Sanity calls,
 not one per component. The traffic here is well within Sanity's limits; if it
 ever isn't, reintroduce a short cache.
 
-[`/api/revalidate`](app/api/revalidate/route.ts) and `SANITY_REVALIDATE_SECRET`
-remain in the tree (signature-verified, working) but are **inert** with dynamic
-rendering — kept only so the caching path can be restored if Vercel ISR is later
-confirmed working. You can delete the Sanity webhook and the secret; nothing
-depends on them.
+The `/api/revalidate` webhook route, its cache tags and `SANITY_REVALIDATE_SECRET`
+have been **removed** — dynamic rendering makes them dead weight. If you set up a
+webhook in Sanity pointing at that URL, delete it; nothing serves it now.
 
 **The Studio is standalone**, not embedded at `/studio`. Sanity v5's Studio UI
 imports React's `useEffectEvent`, which Next 15.5's compiled-react shim predates,
