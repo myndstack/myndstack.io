@@ -525,6 +525,13 @@
   .wm-stack {
     display: grid;
     align-items: center;
+    /* The mark is never the thing that gives. Tailwind's preflight puts
+       `max-width: 100%` on every img, which drops this wrapper's min-content
+       contribution to zero — so as a flex item it was free to shrink, and in
+       the capsule between 760 and 786px, where six links plus the CTA claim the
+       whole row, the wordmark was squeezed to an 8px sliver. The links taper
+       instead; see `.nav.is-cap .navlink`. */
+    flex: none;
   }
   .wm-stack > * {
     grid-area: 1 / 1;
@@ -554,8 +561,17 @@
   .nav.is-cap .navlink {
     color: var(--color-lime-ink);
     /* Six links × horizontal padding is the capsule's whole width budget, so it
-       stays tight until there is room to spare. */
-    padding: 8px 9px;
+       stays tight until there is room to spare — and in the tight band it is
+       the padding that gives, not the wordmark.
+
+       The ramp is 9px (the design value) from ~900px up, tapering to ~6px at
+       760px where the row is 26px over budget. Twelve padding edges make that
+       up several times over. Deliberately continuous rather than a media query:
+       a step would put a visible jump in link spacing right where the capsule
+       is already tightest, and `vw` counts the scrollbar while the row's budget
+       does not, so a breakpoint would land in a slightly different place than
+       the overflow it is meant to prevent. */
+    padding: 8px clamp(5px, 2.5vw - 13.5px, 9px);
     white-space: nowrap;
   }
   @media (width >= 68.75rem) {

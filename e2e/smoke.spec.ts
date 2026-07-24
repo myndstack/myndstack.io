@@ -134,21 +134,48 @@ test.describe("layout holds at every width", () => {
     });
   }
 
-  test("nav capsule does not overflow in the tight band", async ({ page }) => {
+  test("nav capsule fits in the tight band without squeezing the mark", async ({
+    page,
+  }) => {
     // 760-850px is where six links plus the CTA barely fit inside the pill.
-    for (const width of [775, 800, 850, 900]) {
+    //
+    // Overflow alone is not enough to assert. This test passed for a long time
+    // while the wordmark was being crushed to an 8px sliver: the mark was a
+    // shrinkable flex item, so the row absorbed the deficit by squashing the
+    // logo instead of overflowing, and the measurement saw nothing wrong. The
+    // mark's width is now checked against its natural size in the same breath.
+    for (const width of [775, 785, 800, 850, 900]) {
       await page.setViewportSize({ width, height: 900 });
       await landOnHome(page);
       await scrollBySteps(page, 600);
 
-      const overflowing = await page.evaluate(() => {
+      const result = await page.evaluate(() => {
         const nav = document.querySelector(".nav");
         const inner = document.querySelector(".nav-inner");
-        if (!nav || !inner) return false;
+        const mark = document.querySelector(".wm-stack");
+        if (!nav || !inner || !mark) return null;
+
+        nav.classList.remove("is-cap");
+        void (nav as HTMLElement).offsetWidth;
+        const natural = mark.getBoundingClientRect().width;
+
         nav.classList.add("is-cap");
-        return inner.scrollWidth > inner.clientWidth || nav.scrollWidth > nav.clientWidth;
+        void (nav as HTMLElement).offsetWidth;
+        return {
+          natural,
+          capsule: mark.getBoundingClientRect().width,
+          overflowing:
+            inner.scrollWidth > inner.clientWidth || nav.scrollWidth > nav.clientWidth,
+        };
       });
-      expect(overflowing, `capsule overflows at ${width}px`).toBe(false);
+
+      expect(result, "nav did not render").not.toBeNull();
+      expect(result!.overflowing, `capsule overflows at ${width}px`).toBe(false);
+      // Same width in both states — the mark is not what gives.
+      expect(result!.capsule, `wordmark squeezed at ${width}px`).toBeCloseTo(
+        result!.natural,
+        1,
+      );
     }
   });
 });
