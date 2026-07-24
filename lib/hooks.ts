@@ -1,46 +1,49 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
 import { subscribeToScroll, type ScrollSubscriber } from "./scroll";
 
 const REDUCED_MOTION_QUERY = "(prefers-reduced-motion: reduce)";
 
 /**
- * Tracks `prefers-reduced-motion`. Returns `false` during SSR and the first
- * client render so markup matches; the real value lands in the first effect.
+ * The SSR and hydration value. Returning `false` keeps the server markup and the
+ * first client render identical — the real value arrives immediately after,
+ * without a hydration mismatch.
  */
-export function useReducedMotion(): boolean {
-  const [reduced, setReduced] = useState(false);
+const getServerSnapshot = () => false;
 
-  useEffect(() => {
-    const mq = window.matchMedia(REDUCED_MOTION_QUERY);
-    setReduced(mq.matches);
+/**
+ * Matches a media query.
+ *
+ * `useSyncExternalStore` rather than `useState` + `useEffect`: a media query is
+ * an external store, and this is the primitive built for reading one. It also
+ * avoids the set-state-inside-an-effect cascade (render → effect → set → render)
+ * that the previous version caused, which React's lint rules now flag as an
+ * error.
+ */
+export function useMediaQuery(query: string): boolean {
+  const [subscribe, getSnapshot] = useMemo(
+    () =>
+      [
+        (onStoreChange: () => void) => {
+          const mq = window.matchMedia(query);
+          mq.addEventListener("change", onStoreChange);
+          return () => mq.removeEventListener("change", onStoreChange);
+        },
+        () => window.matchMedia(query).matches,
+      ] as const,
+    [query],
+  );
 
-    const onChange = (e: MediaQueryListEvent) => setReduced(e.matches);
-    mq.addEventListener("change", onChange);
-    return () => mq.removeEventListener("change", onChange);
-  }, []);
-
-  return reduced;
+  return useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
 }
 
 /**
- * Matches a media query. Returns `false` during SSR and the first client render
- * so markup matches; the real value lands in the first effect.
+ * Tracks `prefers-reduced-motion`. `false` during SSR and hydration so markup
+ * matches; the real value lands immediately after.
  */
-export function useMediaQuery(query: string): boolean {
-  const [matches, setMatches] = useState(false);
-
-  useEffect(() => {
-    const mq = window.matchMedia(query);
-    setMatches(mq.matches);
-
-    const onChange = (e: MediaQueryListEvent) => setMatches(e.matches);
-    mq.addEventListener("change", onChange);
-    return () => mq.removeEventListener("change", onChange);
-  }, [query]);
-
-  return matches;
+export function useReducedMotion(): boolean {
+  return useMediaQuery(REDUCED_MOTION_QUERY);
 }
 
 /**
@@ -55,7 +58,15 @@ export function useMediaQuery(query: string): boolean {
  */
 export function useScrollFrame(subscriber: ScrollSubscriber) {
   const ref = useRef(subscriber);
-  ref.current = subscriber;
+
+  // Kept fresh in an effect, not during render. Writing to a ref while
+  // rendering is unsafe under concurrent rendering (a render can be thrown away
+  // or replayed), and React's lint rules now reject it. The subscription below
+  // only ever reads `ref.current` inside a rAF frame — long after this has run —
+  // so it always sees the latest subscriber.
+  useEffect(() => {
+    ref.current = subscriber;
+  });
 
   useEffect(
     () =>

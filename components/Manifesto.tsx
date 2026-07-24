@@ -10,19 +10,22 @@ const STEP_MS = 55;
 export default function Manifesto({ lead, keep }: { lead: string; keep: string }) {
   const reduced = useReducedMotion();
   const [ref, inView] = useInView<HTMLParagraphElement>(0.55);
-  const [litCount, setLitCount] = useState(0);
+  const [animatedCount, setAnimatedCount] = useState(0);
 
   const WORDS = useMemo(() => lead.trim().split(/\s+/), [lead]);
 
+  /**
+   * Under reduced motion every word is simply lit — derived here rather than
+   * pushed through `setState` inside the effect. Same result, one render
+   * instead of two, and no set-state-in-an-effect cascade.
+   */
+  const litCount = reduced ? WORDS.length : animatedCount;
+
   useEffect(() => {
-    if (!inView) return;
-    if (reduced) {
-      setLitCount(WORDS.length);
-      return;
-    }
+    if (!inView || reduced) return;
 
     const timers = WORDS.map((_, i) =>
-      window.setTimeout(() => setLitCount(i + 1), i * STEP_MS),
+      window.setTimeout(() => setAnimatedCount(i + 1), i * STEP_MS),
     );
     return () => timers.forEach(window.clearTimeout);
   }, [inView, reduced, WORDS]);

@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useSyncExternalStore } from "react";
+import { useReducedMotion } from "@/lib/hooks";
 import { LOADER_SEEN_KEY } from "@/lib/loader-seen";
 import Wordmark from "./Wordmark";
 
@@ -18,28 +19,39 @@ function alreadySeen() {
   }
 }
 
+/**
+ * "Has the intro already played this session?" is a client-only fact that must
+ * not change the hydrated markup, so it is read as an external store: `false` on
+ * the server and during hydration, the real value immediately after. It never
+ * changes again within a page load, hence the no-op subscribe.
+ *
+ * Deliberately not `useState` + `useEffect` — that set-state-inside-an-effect is
+ * the cascade React's lint rules now reject, and it also meant `inert` was set
+ * and then released a render later on repeat visits.
+ */
+const subscribeNever = () => () => {};
+const neverSeenOnServer = () => false;
+
 /** Full-screen cinematic intro with a one-shot particle "ignite" burst. */
 export default function Loader() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [fading, setFading] = useState(false);
-  const [gone, setGone] = useState(false);
+  const [finished, setFinished] = useState(false);
+
+  const reduced = useReducedMotion();
+  const seen = useSyncExternalStore(subscribeNever, alreadySeen, neverSeenOnServer);
 
   /**
-   * Set during the first effect, read by the two below it. Effects run in
-   * declaration order within a commit, so this is resolved before anything
-   * else looks at it — and it means a repeat visit never so much as touches
-   * `inert` or the canvas, rather than setting them and undoing it a render
-   * later.
+   * Skip the entrance entirely under reduced motion, or if it already played
+   * this session. Both are derived rather than pushed into state, so a repeat
+   * visit is `gone` on its very first client render — it never touches `inert`
+   * or starts the canvas and then undoes it a render later.
    */
-  const skipRef = useRef(false);
+  const skip = reduced || seen;
+  const gone = skip || finished;
 
   useEffect(() => {
-    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    if (reduced || alreadySeen()) {
-      skipRef.current = true;
-      setGone(true);
-      return;
-    }
+    if (skip) return;
 
     // Claimed now rather than when the entrance finishes: navigating away
     // mid-entrance must not replay it on the next full page load.
@@ -51,7 +63,7 @@ export default function Loader() {
 
     const fadeTimer = window.setTimeout(() => setFading(true), FADE_AT_MS);
     const removeTimer = window.setTimeout(
-      () => setGone(true),
+      () => setFinished(true),
       FADE_AT_MS + FADE_DURATION_MS,
     );
 
@@ -59,7 +71,7 @@ export default function Loader() {
       window.clearTimeout(fadeTimer);
       window.clearTimeout(removeTimer);
     };
-  }, []);
+  }, [skip]);
 
   /**
    * Hold the page inert while the overlay covers it: it is opaque, so tabbing
@@ -76,7 +88,7 @@ export default function Loader() {
    * never runs.
    */
   useEffect(() => {
-    if (gone || skipRef.current) return;
+    if (gone) return;
 
     const site = document.getElementById("site");
     if (!site) return;
@@ -88,7 +100,7 @@ export default function Loader() {
   }, [gone]);
 
   useEffect(() => {
-    if (gone || skipRef.current) return;
+    if (gone) return;
 
     const canvas = canvasRef.current;
     if (!canvas) return;

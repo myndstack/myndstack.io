@@ -72,6 +72,9 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ revalidated: false, ignored: type ?? null });
   }
 
-  revalidateTag(type);
+  // Next 16 requires a cache-life profile alongside the tag. "max" expires the
+  // tagged entries as aggressively as the profile set allows, which is what a
+  // publish should do — the editor expects the change to be live, not to linger.
+  revalidateTag(type, "max");
   return NextResponse.json({ revalidated: true, tag: type });
 }
