@@ -7,11 +7,15 @@ import { apiVersion, dataset, projectId } from "@/sanity/env";
 /**
  * The read client, server-only.
  *
- * `useCdn` and the token move together on purpose. With a read token we talk to
- * the live API (`useCdn: false`) so a `revalidateTag` re-fetch returns the just-
- * published content immediately — that is the whole point of the webhook in
- * app/api/revalidate. With no token we fall back to the published CDN, which
- * needs no auth and still works, but can trail a publish by up to a minute.
+ * `useCdn: false` is REQUIRED, not a preference. Next.js tag-based revalidation
+ * only works when the fetch goes through Next's data cache, and the Sanity CDN
+ * (`useCdn: true`) doesn't participate in it — with `useCdn: true` a
+ * `revalidateTag` (from the webhook AND the timed floor) has nothing to purge,
+ * so a published edit never reaches the live, statically generated site until a
+ * redeploy. This cost real debugging: it looked fine in dev (dev doesn't cache)
+ * and shipped a site whose content couldn't update. The dataset is public, so
+ * `useCdn: false` reads work anonymously; a token is optional (drafts, higher
+ * rate limits) and used automatically if present.
  *
  * `stega: false` — this site never renders visual-editing overlays, and stega
  * markers would otherwise leak zero-width characters into the copy.
@@ -22,7 +26,7 @@ export const sanityClient = createClient({
   projectId,
   dataset,
   apiVersion,
-  useCdn: !token,
+  useCdn: false,
   token,
   perspective: "published",
   stega: false,
