@@ -24,6 +24,38 @@ already pins them:
 `instrumentation.ts` runs at each function cold start and logs mail readiness to
 the Vercel **runtime logs** — a misconfigured deployment announces itself there.
 
+## 1b. Branches
+
+Two long-lived branches, and only two:
+
+| Branch | Vercel environment | Role |
+| --- | --- | --- |
+| `dev` | Preview | Where all work lands. Every push builds a preview URL. |
+| `main` | Production | `myndstack.io`. Only ever fast-forwarded from `dev`. |
+
+**Never commit straight to `main`.** Work on `dev`, let the preview build, open
+it in a browser, and merge only then. This is not ceremony: the one outage this
+site has had was fully invisible to `curl`, to the local production build, and to
+a green CI run — the server returned 200 with a complete body on every route, and
+only a real browser showed that the page was dead. A preview you actually looked
+at is the check that would have caught it.
+
+Do not open a branch per fix; they pile up and the preview URL stops meaning
+anything. One `dev`, merged forward.
+
+```bash
+git checkout dev && git pull            # start here, always
+# ...work, commit...
+git push origin dev                     # → preview URL, open it
+
+# only once the preview looks right:
+git checkout main && git merge --ff-only dev && git push origin main
+git checkout dev                        # go straight back
+```
+
+`--ff-only` is deliberate: if it refuses, `main` has commits `dev` does not, and
+that needs looking at rather than papering over with a merge commit.
+
 ## 2. Environment variables
 
 Set these under **Settings → Environment Variables**. `.env.local` is never
@@ -45,7 +77,7 @@ defaults are wrong for production (see [lib/mail-config.ts](lib/mail-config.ts))
 | `NEXT_PUBLIC_SANITY_PROJECT_ID` | **required** | **required** | `e3tbagdk`. Public. The site fetches content from it; without it the content queries throw at build. |
 | `NEXT_PUBLIC_SANITY_DATASET` | **required** | **required** | `production`. Public. |
 | `SANITY_API_READ_TOKEN` | optional | optional | The public dataset reads without a token. Set a Viewer token only if you later need drafts or higher rate limits. |
-| `SANITY_REVALIDATE_SECRET` | not needed | not needed | Only the `/api/revalidate` webhook used it, and content pages now render dynamically (always fresh), so the webhook is inert. Safe to omit; safe to delete the Sanity webhook too. |
+| `SANITY_REVALIDATE_SECRET` | recommended | optional | Used by the `/api/revalidate` webhook, which turns a publish from "live within 60s" into "live in seconds". Content still updates on the timer without it — it is an optimisation, not a dependency. Must match the secret on the Sanity webhook. |
 | `SANITY_API_WRITE_TOKEN` | **do not set** | — | Local-only, for `npm run seed`. Never set in the host — nothing reads it at runtime. |
 
 ### Content (Sanity)
@@ -56,13 +88,20 @@ see the README on why it isn't embedded). Two one-time steps, then it runs itsel
 1. **Seed** the dataset once from the repo's `lib/` constants — locally, with an
    Editor token in `.env.local`: `npm run seed`. Revoke the token after.
 2. **Deploy the Studio** with `npm run studio:deploy` so editors have a hosted
-   URL. No webhook is needed — the content pages render dynamically, so a publish
-   shows on the next page load automatically.
+   URL.
 
-The content routes read Sanity fresh per request (`cache: "no-store"`), so edits
-are always live with nothing to configure. (An ISR + webhook path was built first
-but Vercel wasn't regenerating the prerendered pages on this deployment; see the
-README. The `/api/revalidate` route remains but is inert.)
+The content pages are statically prerendered and revalidate on a 60s timer, so a
+publish surfaces within about a minute with nothing configured. To make it
+near-instant, set `SANITY_REVALIDATE_SECRET` and point a Sanity webhook at
+`/api/revalidate` — it is live and signature-verified, and drops only the
+affected content type's cache tag.
+
+> **Do not "fix" stale content by making the pages dynamic.** That was tried and
+> it took the whole site down: metadata resolves per request once a page is
+> dynamic, it failed there, and every route served a complete body with no
+> `<title>` and no meta tags at all — then the error boundary on hydration.
+> `curl` looked fine throughout. The real cause of the staleness was Next 15.5,
+> and the Next 16 upgrade fixed it; see the README's Content section.
 
 ### The Preview-environment trap
 

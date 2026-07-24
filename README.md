@@ -96,6 +96,13 @@ One listener is not by itself enough — what it *does* per frame matters as muc
 - **Writes stay off layout properties.** The spine drives `scaleY`/`translateY`
   rather than `height`/`top`, so its 120ms transition is a compositor job rather
   than a layout and a paint on every frame.
+- **Writes only happen when the value changed.** Cheap-looking DOM calls are not
+  free at 60fps, and `setAttribute` queues a mutation record even when the value
+  is identical. The nav caches its link elements and diffs against what it last
+  applied, so a steady scroll performs *zero* DOM writes; before that it was
+  re-running `querySelectorAll` and rewriting a class and an `aria-current` on
+  six links every frame. A browser test holds this in place with a
+  `MutationObserver`.
 
 Cache invalidation is one `ResizeObserver` on `document.body` per consumer, plus
 `document.fonts.ready` — a font swap moves every section on the page.
@@ -141,34 +148,45 @@ migration is a change of source, not of contract.
 | `lib/legal.ts` | Long-form legal that goes through counsel, not a marketing edit. |
 | `FOOTER_COLUMNS`, `LEGAL_LINKS` | Route wiring, not copy. |
 
-**How edits reach the live site.** The content pages render **dynamically** —
-each request reads Sanity fresh ([lib/sanity/client.ts](lib/sanity/client.ts)
-uses `cache: "no-store"`, and `/`, `/careers`, `/work` and the `[slug]` pages are
-dynamic). A published edit therefore shows on the **next page load**, always. No
-webhook, no revalidate secret, nothing to configure.
+**How edits reach the live site.** The content pages are **statically
+prerendered and revalidate on a timer** (ISR): [lib/sanity/client.ts](lib/sanity/client.ts)
+reads with `next: { tags, revalidate: 60 }`, so a published edit surfaces within
+about a minute with nothing to configure. Wiring the Sanity webhook to
+[`/api/revalidate`](app/api/revalidate/route.ts) (with `SANITY_REVALIDATE_SECRET`
+set) makes it near-instant by dropping just that content type's tag; the webhook
+is live and signature-verified, not decorative. React `cache()` in
+[queries.ts](lib/sanity/queries.ts) dedupes repeated reads within a single
+render, so a page is a handful of Sanity calls rather than one per component.
 
-This is deliberately *not* ISR (statically prerendered pages that regenerate on a
-timer/tag). That was built first — cache tags + a `revalidateTag` webhook + a 60s
-floor — and it worked in the build but **not on this Vercel deployment**: the
-prerendered pages never regenerated (the `age` header climbed forever; edits
-never surfaced via tag or time). Rather than fight the platform, the pages read
-uncached. React `cache()` in [queries.ts](lib/sanity/queries.ts) still dedupes
-repeated reads within a single render, so a page is a handful of Sanity calls,
-not one per component. The traffic here is well within Sanity's limits; if it
-ever isn't, reintroduce a short cache.
+> **This is the one thing in the repo most worth not undoing.** On Next **15.5**
+> this exact setup appeared broken on Vercel — prerendered pages never
+> regenerated, the `age` header climbed forever, and edits surfaced via neither
+> tag nor time. The response was to make everything render per request
+> (`cache: "no-store"` + `force-dynamic`), and **that took the whole site down**:
+> metadata resolves at build time for a prerendered page but per request for a
+> dynamic one, and per request it failed. Every route served 200 with a complete
+> body and *zero* meta tags, `document.title === ""`, and React then swapped in
+> the error boundary on hydration. `curl` looked perfectly healthy; only a real
+> browser showed it.
+>
+> The actual cause was the framework version. On **Next 16** ISR works — `age`
+> resets, and a Sanity edit was live in **22s** with plain `revalidate: 60` and
+> ordinary static rendering. If content ever looks stale again, check the Next
+> version and the `age` header before reaching for dynamic rendering; going
+> dynamic is what breaks metadata, and it is not the fix.
 
-[`/api/revalidate`](app/api/revalidate/route.ts) and `SANITY_REVALIDATE_SECRET`
-remain in the tree (signature-verified, working) but are **inert** with dynamic
-rendering — kept only so the caching path can be restored if Vercel ISR is later
-confirmed working. You can delete the Sanity webhook and the secret; nothing
-depends on them.
+The lasting guard is in the browser suite: `every route renders with metadata`
+asserts a non-empty `<title>`, a canonical link, and the absence of the error
+copy on all six route shapes. The rest of the suite passed straight through that
+outage, because the error boundary still renders the nav and footer.
 
 **The Studio is standalone**, not embedded at `/studio`. Sanity v5's Studio UI
-imports React's `useEffectEvent`, which Next 15.5's compiled-react shim predates,
-so an embedded route won't compile — and forcing webpack to the real React breaks
-Next's server renderer. Running Studio via the Sanity CLI sidesteps all of it and
-keeps the Studio UI out of the marketing bundle. Editors use its
-`*.sanity.studio` URL:
+imports React's `useEffectEvent`, which Next 15.5's compiled-react shim predated,
+so an embedded route wouldn't compile — and forcing webpack to the real React
+broke Next's server renderer. Running Studio via the Sanity CLI sidesteps all of
+it and keeps the Studio UI out of the marketing bundle, which is reason enough to
+keep it that way even though the Next 16 upgrade probably removes the original
+blocker. Editors use its `*.sanity.studio` URL:
 
 ```bash
 npm run studio:dev           # local Studio at http://localhost:3333
@@ -330,9 +348,12 @@ both unit tests and screenshots:
 
 | Test | Regression |
 | --- | --- |
+| Every route has a title and isn't the error page | The whole site serving the error boundary with no metadata, while every other test passed |
 | `#site` not inert after load | The whole page left uninteractive |
 | No horizontal overflow at 5 widths | Hero H1 clipped at 320px |
-| Nav capsule fits across 760–900px | CTA wrapping out of the pill |
+| Capsule fits 760–900px *without squeezing the mark* | CTA wrapping out of the pill — and later the wordmark crushed to an 8px sliver, which the overflow check alone could not see |
+| Nav morph animates no layout property | `width`/`padding` transitions reflowing the whole nav on every frame of the morph |
+| No per-frame DOM writes while scrolling | The scroll callback rewriting a class and `aria-current` on six links 60×/s — 62 mutations over one scroll |
 | Work/role cards reach detail pages | Cards that went nowhere |
 | Back-to-top only on scroll-up | Scroll-intent latch |
 | Scroll-spy tracks sections in order | Cached offsets going stale — invisible to the unit tests, which only cover the arithmetic |
@@ -448,7 +469,12 @@ task, not a code edit** — replace them at the `*.sanity.studio` URL:
   `.env.local`** — that file is never deployed. Both have defaults that will hurt
   you in production: a `resend.dev` sender, and canonicals pointing at localhost.
 - **After deploying, `curl /api/health`.** `{"ok":true,"deliverable":true}` is the
-  only state that actually sends mail to a person.
+  only state that actually sends mail to a person. Then open the site in a real
+  **browser** — the one outage this site has had returned a healthy 200 with a
+  complete body on every route, and only a browser showed it was dead.
+- **Optionally wire the Sanity publish webhook** (`SANITY_REVALIDATE_SECRET` +
+  a webhook at `/api/revalidate`). Without it a publish is live within 60s; with
+  it, seconds. See [SANITY.md](SANITY.md) §5.
 - **`NEXT_PUBLIC_SITE_URL`** feeds `metadataBase`, canonicals, `robots.txt` and
   `sitemap.xml`. Set it per environment.
 - **Launcher icons are generated from the mark.** `app/apple-icon.tsx` (iOS touch

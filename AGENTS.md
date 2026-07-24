@@ -9,6 +9,14 @@ and broke something. The nav morph's hysteresis, the single rAF scroll loop, the
 premultiplied-alpha WebGL output, the reveal watchdog, and the reasons the e2e
 suite must run with motion *enabled* are all things you will otherwise undo.
 
+**Work on `dev`, never on `main`.** One long-lived branch, not one per fix. Push
+to `dev`, let the Vercel preview build, look at it in a browser, and only then
+fast-forward `main` (`git merge --ff-only dev`). The site's one outage returned
+200 with a complete body on every route and was invisible to `curl`, to a local
+production build and to green CI — a preview someone actually opened is the check
+that catches that class of failure. [DEPLOYMENT.md](DEPLOYMENT.md) has the exact
+commands.
+
 A few rules that are easy to violate by accident:
 
 - **Scroll work goes through `lib/scroll.ts`.** One listener for the whole site.
@@ -18,7 +26,21 @@ A few rules that are easy to violate by accident:
   `ResizeObserver`, the way `Nav` and `StackStory` do. If you genuinely must
   measure, subscribe with `{ read, write }` so your read runs before anyone's
   write. Prefer transforms over `height`/`top`/`width` for anything written per
-  frame.
+  frame — and **write only when the value actually changed**: `setAttribute`
+  queues a mutation record even when the value is identical, so an unconditional
+  "cheap" write is 60 of them a second.
+- **The nav's two states are cross-fading layers, not animated properties.**
+  `.nav` keeps constant geometry and transitions only `transform`; `.nav-scrim`
+  and `.nav-pill` do the rest. Do not move `width`/`padding` back onto `.nav`,
+  and do not upgrade its `contain: layout` to `paint` (or `strict`/`content`) —
+  paint containment clips the pill's shadow and the `::after` scrim continuation,
+  both of which are drawn outside the box deliberately. The capsule's geometry
+  numbers are derived from the pre-layer version, not taste; the README explains
+  where each comes from.
+- **Content pages are prerendered with ISR** (`revalidate: 60` + cache tags).
+  If content looks stale, check the Next version and the `age` header — do **not**
+  make the pages dynamic. That was tried, and per-request metadata resolution
+  failed on Vercel and took every route down while still serving 200s.
 - **Design tokens live in `@theme` in `app/globals.css`.** Reach for an existing
   primitive (`.btn`, `.ms-field`, `.eyebrow`, `.card`) before writing new CSS.
 - **Forms validate with the same zod schemas on both sides**, but the client

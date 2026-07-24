@@ -89,7 +89,7 @@ site to run** — the dataset is public and pages read it anonymously.
 | --- | --- | --- | --- |
 | **Write** (`SANITY_API_WRITE_TOKEN`) | ONLY `npm run seed` (initial import). Never read at runtime | `.env.local` only | Create, seed once, **revoke** |
 | **Read** (`SANITY_API_READ_TOKEN`) | Optional. Not needed to read the public dataset; set a **Viewer** token only if you later want drafts or higher rate limits | Host env + `.env.local` | Long-lived |
-| **Revalidate secret** (`SANITY_REVALIDATE_SECRET`) | Was for the publish webhook, which is now inert (content renders dynamically — see §5). Not needed | — | — |
+| **Revalidate secret** (`SANITY_REVALIDATE_SECRET`) | The publish webhook, which turns "live within 60s" into "live in seconds" (see §5). Optional — content still updates on the timer without it | Host env + the Sanity webhook | Long-lived |
 
 **Create tokens** at **sanity.io/manage → project `e3tbagdk` → API → Tokens**.
 The only one you need is an **Editor** token to run the seed once.
@@ -207,20 +207,33 @@ blank to hide that icon rather than link nowhere).
 
 ## 5. How edits reach the live site
 
-**A published edit shows on the next page load — everywhere, always.** No setup.
+**A published edit is live within about a minute — everywhere, with no setup.**
 
-The content pages render **dynamically**: each request reads Sanity fresh
-([`lib/sanity/client.ts`](lib/sanity/client.ts) uses `cache: "no-store"`, and the
-content routes are dynamic). There is no cache to wait on and nothing to
-configure — just **Publish** in the Studio and reload.
+The content pages are statically prerendered and revalidate on a timer:
+[`lib/sanity/client.ts`](lib/sanity/client.ts) reads with
+`next: { tags, revalidate: 60 }`. Hit **Publish** in the Studio and the change
+surfaces on the next request after the window closes.
 
-> **You do not need a webhook or `SANITY_REVALIDATE_SECRET`.** An ISR + webhook
-> setup was built first (cache tags, `revalidateTag`, a 60s floor) but Vercel
-> never regenerated the prerendered pages on this deployment — edits never
-> surfaced. Dynamic rendering sidesteps that entirely. The
-> [`/api/revalidate`](app/api/revalidate/route.ts) route and the secret still
-> exist and work, but are **inert** now; you can delete the Sanity webhook and
-> the secret if you set them up. See the README for the full story.
+**To make it near-instant**, wire the webhook — it takes a minute and is worth it
+if editors are publishing interactively:
+
+1. Set `SANITY_REVALIDATE_SECRET` in the host (any long random string).
+2. In [sanity.io/manage](https://sanity.io/manage) → **API → Webhooks**, add one
+   pointing at `https://myndstack.io/api/revalidate`, method **POST**, with that
+   same string as the secret.
+
+[`/api/revalidate`](app/api/revalidate/route.ts) verifies the signature, reads
+only the payload's `_type`, and drops that one cache tag — so a publish rebuilds
+the pages that use that content type and nothing else. Measured end to end at
+**22s** without the webhook; seconds with it.
+
+> **If content ever looks stale, do not make the pages dynamic.** On Next 15.5
+> this setup genuinely did not regenerate on Vercel (the `age` header climbed and
+> never reset), and the response — rendering everything per request — took the
+> entire site down: metadata resolves per request for a dynamic page, it failed
+> there, and every route served a full body with no `<title>` and no meta tags.
+> The cause was the framework version; Next 16 fixed it. Check the Next version
+> and the `age` header first.
 
 ---
 
@@ -421,10 +434,13 @@ doing its job — it prevents a blank section from shipping.
 **A homepage section is blank** — the corresponding document/singleton is
 unpublished or empty. Check it's **Published** in the Studio.
 
-**Edits aren't showing on the live site** — an edit shows on the next page load
-(pages render dynamically). If it doesn't: confirm you clicked **Publish** in the
-Studio (drafts aren't shown), and hard-reload to bypass the browser cache. There
-is no CMS-side cache or webhook to wait on.
+**Edits aren't showing on the live site** — first, give it a minute: pages
+revalidate on a 60s timer unless the webhook is wired. Then confirm you clicked
+**Publish** in the Studio (drafts are never shown), and hard-reload to bypass the
+browser cache. If it is still stale after several minutes, check the `age`
+response header — if it climbs past 60 and never resets, revalidation itself is
+stuck, which on this site has only ever been a Next-version problem. Do not
+reach for `force-dynamic`; see the box in §5.
 
 **Webhook returns 401** — the signature didn't verify: the **Secret** in the
 Sanity webhook doesn't match `SANITY_REVALIDATE_SECRET` in the host. **500** —
@@ -442,7 +458,7 @@ those constants are seed-source only. Edit in the Studio.
 | `NEXT_PUBLIC_SANITY_PROJECT_ID` | site (public) | yes | `e3tbagdk` |
 | `NEXT_PUBLIC_SANITY_DATASET` | site (public) | yes | `production` |
 | `SANITY_API_READ_TOKEN` | site (server) | optional | Only needed for drafts / higher rate limits; the public dataset reads without it |
-| `SANITY_REVALIDATE_SECRET` | site (server) | not needed | Only the (now inert) revalidate webhook used it — see §5 |
+| `SANITY_REVALIDATE_SECRET` | site (server) | optional | The revalidate webhook — makes a publish near-instant instead of ≤60s. Must match the secret on the Sanity webhook. See §5 |
 | `SANITY_API_WRITE_TOKEN` | local only | seed only | For `npm run seed`; revoke after. **Never** set in the host |
 
 Public IDs also have safe hardcoded fallbacks in `sanity/env.ts`, so the Studio
