@@ -1,6 +1,6 @@
 # Deploying to Vercel
 
-This app is a standard Next.js 15 App Router project. The only non-obvious pieces
+This app is a standard Next.js 16 App Router project. The only non-obvious pieces
 are the custom build directory, the per-environment mail transport, and the DNS
 that mail deliverability depends on. All three are handled below.
 

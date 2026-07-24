@@ -1,6 +1,6 @@
 # Working in this repo
 
-Next.js 15 (App Router) + React 19 + Tailwind v4, stock — `next@15.5.21`, no fork
+Next.js 16 (App Router) + React 19 + Tailwind v4, stock — `next@16`, no fork
 and no patches. Standard App Router conventions apply.
 
 **Read [README.md](README.md) first.** It is not a courtesy file: it documents the

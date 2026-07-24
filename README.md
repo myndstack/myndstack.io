@@ -4,7 +4,7 @@ Marketing site for Myndstack — enterprise AI & cognitive infrastructure.
 
 ## Stack
 
-- **Next.js 15** (App Router) + **React 19** + **TypeScript**
+- **Next.js 16** (App Router) + **React 19** + **TypeScript**
 - **Tailwind CSS v4** — design tokens live in `@theme` in [globals.css](app/globals.css)
 - **next/font/google** — Space Grotesk (display), Hanken Grotesk (body), Space Mono (labels)
 - **Resend** + **zod** for the three forms
