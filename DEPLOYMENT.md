@@ -44,8 +44,8 @@ defaults are wrong for production (see [lib/mail-config.ts](lib/mail-config.ts))
 | `TRUSTED_PROXY_HOPS` | optional | optional | Defaults to `1`, which is correct for Vercel's single edge hop. Leave unset. |
 | `NEXT_PUBLIC_SANITY_PROJECT_ID` | **required** | **required** | `e3tbagdk`. Public. The site fetches content from it; without it the content queries throw at build. |
 | `NEXT_PUBLIC_SANITY_DATASET` | **required** | **required** | `production`. Public. |
-| `SANITY_API_READ_TOKEN` | recommended | recommended | Viewer token. Without it, published content still reads (via CDN, ~60s stale on publish). **With** it, the revalidate webhook re-fetches live, so an edit is genuinely instant. |
-| `SANITY_REVALIDATE_SECRET` | optional | optional | Shared secret the `/api/revalidate` webhook verifies. Must match the secret set on the Sanity webhook. **Optional now**: edits already appear within ~60s on their own (the `revalidate` floor in `lib/sanity/client.ts`). Set it only to make publishes *instant*. Unset ⇒ the webhook route returns 500 if called, but the timed refresh still propagates edits. |
+| `SANITY_API_READ_TOKEN` | optional | optional | The public dataset reads without a token. Set a Viewer token only if you later need drafts or higher rate limits. |
+| `SANITY_REVALIDATE_SECRET` | not needed | not needed | Only the `/api/revalidate` webhook used it, and content pages now render dynamically (always fresh), so the webhook is inert. Safe to omit; safe to delete the Sanity webhook too. |
 | `SANITY_API_WRITE_TOKEN` | **do not set** | — | Local-only, for `npm run seed`. Never set in the host — nothing reads it at runtime. |
 
 ### Content (Sanity)
@@ -55,16 +55,14 @@ see the README on why it isn't embedded). Two one-time steps, then it runs itsel
 
 1. **Seed** the dataset once from the repo's `lib/` constants — locally, with an
    Editor token in `.env.local`: `npm run seed`. Revoke the token after.
-2. **(Optional) Wire the publish webhook** to make edits *instant* instead of
-   within ~60s. In Sanity → **API → Webhooks**, add one pointing at
-   `https://myndstack.io/api/revalidate`, method POST, trigger on
-   create/update/delete, and set its **Secret** to the same value as
-   `SANITY_REVALIDATE_SECRET` in the host. Deploy the Studio with
-   `npm run studio:deploy`.
+2. **Deploy the Studio** with `npm run studio:deploy` so editors have a hosted
+   URL. No webhook is needed — the content pages render dynamically, so a publish
+   shows on the next page load automatically.
 
-Edits propagate on their own within ~60s (the `revalidate` floor); the webhook
-just tells Vercel which cache tag to drop immediately on publish. Either way the
-pages stay statically generated and rebuild on their next request — no redeploy.
+The content routes read Sanity fresh per request (`cache: "no-store"`), so edits
+are always live with nothing to configure. (An ISR + webhook path was built first
+but Vercel wasn't regenerating the prerendered pages on this deployment; see the
+README. The `/api/revalidate` route remains but is inert.)
 
 ### The Preview-environment trap
 

@@ -141,23 +141,27 @@ migration is a change of source, not of contract.
 | `lib/legal.ts` | Long-form legal that goes through counsel, not a marketing edit. |
 | `FOOTER_COLUMNS`, `LEGAL_LINKS` | Route wiring, not copy. |
 
-**How edits reach the live site.** Two layers, so it works with or without a
-webhook:
+**How edits reach the live site.** The content pages render **dynamically** —
+each request reads Sanity fresh ([lib/sanity/client.ts](lib/sanity/client.ts)
+uses `cache: "no-store"`, and `/`, `/careers`, `/work` and the `[slug]` pages are
+dynamic). A published edit therefore shows on the **next page load**, always. No
+webhook, no revalidate secret, nothing to configure.
 
-- **Time floor (always on).** Fetches carry `revalidate: 60`
-  (`REVALIDATE_SECONDS` in [lib/sanity/client.ts](lib/sanity/client.ts)), so a
-  published edit appears within ~a minute automatically. Without this, a fetch
-  with no `revalidate` is cached permanently and edits would not show until the
-  next deploy — a real trap, and the reason this floor exists.
-- **Webhook (optional, makes it instant).** Fetches are also tagged
-  ([lib/sanity/tags.ts](lib/sanity/tags.ts)); on publish Sanity can POST
-  [`/api/revalidate`](app/api/revalidate/route.ts), which verifies the signature
-  and `revalidateTag`s just the affected type, so the edit is live in seconds
-  rather than up to a minute. The signature check is the whole security model; an
-  unsigned request is rejected. Setup is in [DEPLOYMENT.md](DEPLOYMENT.md).
+This is deliberately *not* ISR (statically prerendered pages that regenerate on a
+timer/tag). That was built first — cache tags + a `revalidateTag` webhook + a 60s
+floor — and it worked in the build but **not on this Vercel deployment**: the
+prerendered pages never regenerated (the `age` header climbed forever; edits
+never surfaced via tag or time). Rather than fight the platform, the pages read
+uncached. React `cache()` in [queries.ts](lib/sanity/queries.ts) still dedupes
+repeated reads within a single render, so a page is a handful of Sanity calls,
+not one per component. The traffic here is well within Sanity's limits; if it
+ever isn't, reintroduce a short cache.
 
-So `SANITY_REVALIDATE_SECRET` and the webhook are an *upgrade to instant*, not a
-prerequisite for updates.
+[`/api/revalidate`](app/api/revalidate/route.ts) and `SANITY_REVALIDATE_SECRET`
+remain in the tree (signature-verified, working) but are **inert** with dynamic
+rendering — kept only so the caching path can be restored if Vercel ISR is later
+confirmed working. You can delete the Sanity webhook and the secret; nothing
+depends on them.
 
 **The Studio is standalone**, not embedded at `/studio`. Sanity v5's Studio UI
 imports React's `useEffectEvent`, which Next 15.5's compiled-react shim predates,
