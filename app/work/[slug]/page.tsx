@@ -5,13 +5,16 @@ import { notFound } from "next/navigation";
 import PageHeader from "@/components/PageHeader";
 import { SITE_URL } from "@/lib/content";
 import { jsonLd } from "@/lib/format";
-import { getCase, getCaseSlugs } from "@/lib/sanity/queries";
+import { getCase } from "@/lib/sanity/queries";
 
 type Params = { slug: string };
 
-export async function generateStaticParams() {
-  return (await getCaseSlugs()).map((slug) => ({ slug }));
-}
+/**
+ * Rendered per request so a case study edited in Sanity shows on the next load
+ * (see lib/sanity/client.ts). Unknown slugs 404 via notFound(); the sitemap
+ * enumerates slugs directly through getCaseSlugs.
+ */
+export const dynamic = "force-dynamic";
 
 export async function generateMetadata({
   params,

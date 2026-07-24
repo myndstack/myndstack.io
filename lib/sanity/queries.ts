@@ -7,7 +7,6 @@ import type { CaseStudy } from "@/lib/cases";
 import type { PricingTier, Social } from "@/lib/content";
 import type { Role } from "@/lib/roles";
 import { sanityFetch } from "./client";
-import { TAGS } from "./tags";
 
 /**
  * The read boundary.
@@ -243,7 +242,6 @@ export const getRoles = cache(async (): Promise<Role[]> => {
   const data = await sanityFetch<unknown[]>(
     `*[_type == "role"] | order(order asc){${ROLE_FIELDS}}`,
     {},
-    [TAGS.role],
   );
   return z.array(roleSchema).parse(data);
 });
@@ -252,7 +250,6 @@ export const getRole = cache(async (slug: string): Promise<Role | null> => {
   const data = await sanityFetch<unknown>(
     `*[_type == "role" && slug.current == $slug][0]{${ROLE_FIELDS}}`,
     { slug },
-    [TAGS.role],
   );
   return data ? parse(roleSchema, data, `role "${slug}"`) : null;
 });
@@ -261,7 +258,6 @@ export const getRoleSlugs = cache(async (): Promise<string[]> => {
   return sanityFetch<string[]>(
     `*[_type == "role" && defined(slug.current)].slug.current`,
     {},
-    [TAGS.role],
   );
 });
 
@@ -269,7 +265,6 @@ export const getCases = cache(async (): Promise<CaseStudy[]> => {
   const data = await sanityFetch<unknown[]>(
     `*[_type == "caseStudy"] | order(order asc){${CASE_FIELDS}}`,
     {},
-    [TAGS.caseStudy],
   );
   return z.array(caseSchema).parse(data);
 });
@@ -278,7 +273,6 @@ export const getCase = cache(async (slug: string): Promise<CaseStudy | null> => 
   const data = await sanityFetch<unknown>(
     `*[_type == "caseStudy" && slug.current == $slug][0]{${CASE_FIELDS}}`,
     { slug },
-    [TAGS.caseStudy],
   );
   return data ? parse(caseSchema, data, `case "${slug}"`) : null;
 });
@@ -287,7 +281,6 @@ export const getCaseSlugs = cache(async (): Promise<string[]> => {
   return sanityFetch<string[]>(
     `*[_type == "caseStudy" && defined(slug.current)].slug.current`,
     {},
-    [TAGS.caseStudy],
   );
 });
 
@@ -295,7 +288,6 @@ export const getTestimonials = cache(async (): Promise<Testimonial[]> => {
   const data = await sanityFetch<unknown[]>(
     `*[_type == "testimonial"] | order(order asc){ quote, index, role, org }`,
     {},
-    [TAGS.testimonial],
   );
   return z.array(testimonialSchema).parse(data);
 });
@@ -304,7 +296,6 @@ export const getTeam = cache(async (): Promise<TeamMember[]> => {
   const data = await sanityFetch<unknown[]>(
     `*[_type == "teamMember"] | order(order asc){ i, n, r }`,
     {},
-    [TAGS.teamMember],
   );
   return z.array(teamSchema).parse(data);
 });
@@ -313,7 +304,6 @@ export const getFaqs = cache(async (): Promise<Faq[]> => {
   const data = await sanityFetch<unknown[]>(
     `*[_type == "faq"] | order(order asc){ q, a }`,
     {},
-    [TAGS.faq],
   );
   return z.array(faqSchema).parse(data);
 });
@@ -325,7 +315,6 @@ export const getPricingTiers = cache(async (): Promise<PricingTier[]> => {
       highlighted, features
     }`,
     {},
-    [TAGS.pricingTier],
   );
   return z.array(pricingSchema).parse(data);
 });
@@ -348,7 +337,6 @@ export const getHomepage = cache(async (): Promise<Homepage> => {
       clientLockups[]{ name, className, dotted }
     }`,
     {},
-    [TAGS.homepage],
   );
   return parse(homepageSchema, data, "homepage");
 });
@@ -360,7 +348,6 @@ export const getSiteSettings = cache(async (): Promise<SiteSettings> => {
       socials[]{ label, href }
     }`,
     {},
-    [TAGS.siteSettings],
   );
   return parse(siteSettingsSchema, data, "siteSettings");
 });
