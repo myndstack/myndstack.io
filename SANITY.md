@@ -82,25 +82,17 @@ Members → Invite**. Roles: **Editor** (create/edit/publish content) or **Viewe
 
 ### The three tokens
 
-Sanity uses different credentials for different jobs. Only the read token is ever
-needed at runtime; the others are one-off/optional.
+Sanity uses different credentials for different jobs. **None is required for the
+site to run** — the dataset is public and pages read it anonymously.
 
 | Token | Purpose | Where it goes | Lifetime |
 | --- | --- | --- | --- |
-| **Read** (`SANITY_API_READ_TOKEN`) | Server-side reads; lets on-publish revalidation fetch live instead of via the ~60s CDN | Host env + `.env.local` | Long-lived; **Viewer** role |
 | **Write** (`SANITY_API_WRITE_TOKEN`) | ONLY `npm run seed` (initial import). Never read at runtime | `.env.local` only | Create, seed once, **revoke** |
-| **Revalidate secret** (`SANITY_REVALIDATE_SECRET`) | A password *you invent* (not issued by Sanity) shared between the site and the publish webhook | Host env + Sanity webhook "Secret" field | Optional (see §5) |
+| **Read** (`SANITY_API_READ_TOKEN`) | Optional. Not needed to read the public dataset; set a **Viewer** token only if you later want drafts or higher rate limits | Host env + `.env.local` | Long-lived |
+| **Revalidate secret** (`SANITY_REVALIDATE_SECRET`) | Was for the publish webhook, which is now inert (content renders dynamically — see §5). Not needed | — | — |
 
 **Create tokens** at **sanity.io/manage → project `e3tbagdk` → API → Tokens**.
-Pick **Viewer** for read, **Editor** for the seed write token.
-
-**Generate a revalidate secret** — it's just a random string, invent it yourself:
-
-```bash
-openssl rand -hex 32
-```
-
-Put that same value in the host env var *and* the Sanity webhook's Secret field.
+The only one you need is an **Editor** token to run the seed once.
 
 > **Security:** the read/write tokens are secrets — never commit them (`.env*` is
 > gitignored). `.env.local` is never deployed. Revoke the write token after
@@ -215,29 +207,20 @@ blank to hide that icon rather than link nowhere).
 
 ## 5. How edits reach the live site
 
-Two layers — it works **with or without** a webhook:
+**A published edit shows on the next page load — everywhere, always.** No setup.
 
-1. **Time floor (always on).** Every fetch carries `revalidate: 60`
-   (`REVALIDATE_SECONDS` in [`lib/sanity/client.ts`](lib/sanity/client.ts)), so a
-   published edit appears on the live site within ~a minute automatically. Without
-   this a fetch would be cached permanently and edits wouldn't show until the next
-   deploy.
-2. **Webhook (optional — makes it instant).** Fetches are also cache-tagged
-   ([`lib/sanity/tags.ts`](lib/sanity/tags.ts)). If you configure a Sanity webhook
-   to `POST /api/revalidate`, a publish drops just that content type's cache tag
-   and the edit is live in seconds.
+The content pages render **dynamically**: each request reads Sanity fresh
+([`lib/sanity/client.ts`](lib/sanity/client.ts) uses `cache: "no-store"`, and the
+content routes are dynamic). There is no cache to wait on and nothing to
+configure — just **Publish** in the Studio and reload.
 
-So `SANITY_REVALIDATE_SECRET` + the webhook are an **upgrade to instant**, not a
-requirement for updates.
-
-**Webhook setup (optional):** Sanity → **API → Webhooks → Create webhook**
-→ URL `https://<your-domain>/api/revalidate`, method `POST`, trigger on
-create/update/delete, and set **Secret** to the same value as
-`SANITY_REVALIDATE_SECRET` in your host. The route verifies the signature and
-rejects anything unsigned.
-
-> **Local dev** (`npm run dev`) always shows edits immediately — the freeze only
-> applies to the deployed, statically generated site.
+> **You do not need a webhook or `SANITY_REVALIDATE_SECRET`.** An ISR + webhook
+> setup was built first (cache tags, `revalidateTag`, a 60s floor) but Vercel
+> never regenerated the prerendered pages on this deployment — edits never
+> surfaced. Dynamic rendering sidesteps that entirely. The
+> [`/api/revalidate`](app/api/revalidate/route.ts) route and the secret still
+> exist and work, but are **inert** now; you can delete the Sanity webhook and
+> the secret if you set them up. See the README for the full story.
 
 ---
 
@@ -333,7 +316,7 @@ sanity/
 sanity.config.ts      Studio config (schemas + plugins)
 sanity.cli.ts         CLI config (studioHost, Vite/PostCSS/HMR workarounds)
 lib/sanity/
-  client.ts           the read client + `sanityFetch` (tags + revalidate floor)
+  client.ts           `sanityFetch` — native, uncached reads (dynamic pages)
   queries.ts          GROQ + zod validation; returns the app's existing types
   tags.ts             cache-tag names, shared with the revalidate route
 scripts/seed-sanity.ts    one-time import of lib/ constants
@@ -438,10 +421,10 @@ doing its job — it prevents a blank section from shipping.
 **A homepage section is blank** — the corresponding document/singleton is
 unpublished or empty. Check it's **Published** in the Studio.
 
-**Edits aren't showing on the live site** — wait ~60s (the revalidate floor). If
-still stale: the read token may be missing (reads then come from the ~60s CDN);
-or, if you rely on the webhook for instant updates, check the Vercel function log
-for the `/api/revalidate` hit and that the secret matches on both sides.
+**Edits aren't showing on the live site** — an edit shows on the next page load
+(pages render dynamically). If it doesn't: confirm you clicked **Publish** in the
+Studio (drafts aren't shown), and hard-reload to bypass the browser cache. There
+is no CMS-side cache or webhook to wait on.
 
 **Webhook returns 401** — the signature didn't verify: the **Secret** in the
 Sanity webhook doesn't match `SANITY_REVALIDATE_SECRET` in the host. **500** —
@@ -458,8 +441,8 @@ those constants are seed-source only. Edit in the Studio.
 | --- | --- | --- | --- |
 | `NEXT_PUBLIC_SANITY_PROJECT_ID` | site (public) | yes | `e3tbagdk` |
 | `NEXT_PUBLIC_SANITY_DATASET` | site (public) | yes | `production` |
-| `SANITY_API_READ_TOKEN` | site (server) | recommended | Viewer token; enables instant, non-stale reads on revalidation |
-| `SANITY_REVALIDATE_SECRET` | site (server) | optional | Only for the instant-publish webhook (see §5) |
+| `SANITY_API_READ_TOKEN` | site (server) | optional | Only needed for drafts / higher rate limits; the public dataset reads without it |
+| `SANITY_REVALIDATE_SECRET` | site (server) | not needed | Only the (now inert) revalidate webhook used it — see §5 |
 | `SANITY_API_WRITE_TOKEN` | local only | seed only | For `npm run seed`; revoke after. **Never** set in the host |
 
 Public IDs also have safe hardcoded fallbacks in `sanity/env.ts`, so the Studio
