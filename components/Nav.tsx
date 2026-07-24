@@ -37,6 +37,20 @@ export default function Nav({ contactEmail }: { contactEmail: string }) {
    */
   const offsetsRef = useRef<SectionOffset[]>([]);
 
+  /**
+   * The section links, and the last state actually written to them.
+   *
+   * The frame callback used to re-run `querySelectorAll` and then set a class
+   * and an `aria-current` on all six links on *every* scroll frame, whether or
+   * not anything had changed — a fresh NodeList plus ~18 DOM operations, 60
+   * times a second, right through the morph. (`setAttribute` queues a mutation
+   * even when the value is identical, so this was not free.) Caching the
+   * elements and diffing against what was last applied means a steady scroll
+   * writes nothing at all.
+   */
+  const linksRef = useRef<HTMLAnchorElement[]>([]);
+  const appliedRef = useRef({ capsule: false, tucked: false, active: null as string | null });
+
   useEffect(() => {
     let pending = 0;
 
@@ -78,12 +92,18 @@ export default function Nav({ contactEmail }: { contactEmail: string }) {
    * highlighted on /careers.
    */
   useEffect(() => {
-    listRef.current
-      ?.querySelectorAll<HTMLAnchorElement>(".navlink[data-section]")
-      .forEach((link) => {
-        link.classList.remove("is-active");
-        link.removeAttribute("aria-current");
-      });
+    // Also where the cache above is refilled — the link set is whatever this
+    // route just rendered, and re-reading it here means the frame callback
+    // never has to touch the DOM to find them.
+    linksRef.current = Array.from(
+      listRef.current?.querySelectorAll<HTMLAnchorElement>(".navlink[data-section]") ?? [],
+    );
+
+    for (const link of linksRef.current) {
+      link.classList.remove("is-active");
+      link.removeAttribute("aria-current");
+    }
+    appliedRef.current.active = null;
   }, [pathname]);
 
   const closeDrawer = useCallback(() => {
@@ -93,36 +113,53 @@ export default function Nav({ contactEmail }: { contactEmail: string }) {
 
   // Styles are toggled through classes rather than state: this runs every
   // scroll frame and must not re-render the tree. Write-only — every value it
-  // needs is either cached above or arrives in the frame state.
+  // needs is either cached above or arrives in the frame state — and every
+  // write is gated on having actually changed, so scrolling through unchanged
+  // state costs three comparisons and nothing else.
   useScrollFrame(({ y }) => {
     const nav = navRef.current;
     if (!nav) return;
 
     const morph = nextNavState(morphRef.current, y);
     morphRef.current = morph;
-    const { capsule, tucked } = morph;
 
-    nav.classList.toggle("is-cap", capsule);
-    nav.classList.toggle("is-tucked", capsule && tucked);
+    const applied = appliedRef.current;
+    const { capsule } = morph;
+    const tucked = capsule && morph.tucked;
+
+    if (capsule !== applied.capsule) {
+      applied.capsule = capsule;
+      nav.classList.toggle("is-cap", capsule);
+    }
+    if (tucked !== applied.tucked) {
+      applied.tucked = tucked;
+      nav.classList.toggle("is-tucked", tucked);
+    }
 
     const active = activeSection(offsetsRef.current, y, SPY_LINE_PX);
+    if (active === applied.active) return;
+    applied.active = active;
 
-    const links = listRef.current?.querySelectorAll<HTMLAnchorElement>(".navlink");
-    links?.forEach((link) => {
-      // Route links carry no section — their active state comes from the URL.
-      if (!link.dataset.section) return;
-      const isActive = active !== null && link.dataset.section === active;
+    // Route links carry no section — their active state comes from the URL, and
+    // they are not in this list.
+    for (const link of linksRef.current) {
+      const isActive = link.dataset.section === active;
       link.classList.toggle("is-active", isActive);
       if (isActive) link.setAttribute("aria-current", "true");
       else link.removeAttribute("aria-current");
-    });
+    }
   });
 
   return (
     <>
       <nav ref={navRef} className="nav" aria-label="Primary">
+        {/* The two morph states, as layers that cross-fade rather than as
+            properties of the nav that have to be animated through layout. */}
+        <span className="nav-scrim" aria-hidden="true" />
+        <span className="nav-pill" aria-hidden="true" />
+
         <div className="nav-inner">
-          <span className="flex items-center">
+          <span className="wm-stack">
             <Wordmark variant="white" className="wm-white" />
             <Wordmark variant="black" className="wm-black" />
           </span>

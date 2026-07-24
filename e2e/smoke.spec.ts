@@ -153,6 +153,71 @@ test.describe("layout holds at every width", () => {
   });
 });
 
+/**
+ * The bar → capsule morph, guarded by properties rather than by eye.
+ *
+ * It shipped stuttering twice for two different reasons, and neither is visible
+ * to a screenshot: the morph animated `width`/`padding` (so every frame reflowed
+ * the wordmark, six links and the CTA), and the scroll callback rewrote a class
+ * and an `aria-current` on all six links on every frame whether or not anything
+ * had changed. Both are cheap to assert and impossible to spot in review.
+ */
+test.describe("the nav morph stays cheap", () => {
+  test("the morph animates no layout properties", async ({ page }) => {
+    await landOnHome(page);
+
+    const transitions = await page.evaluate(() => {
+      const read = (selector: string) => {
+        const el = document.querySelector(selector);
+        return el ? getComputedStyle(el).transitionProperty : "";
+      };
+      return { nav: read(".nav"), scrim: read(".nav-scrim") };
+    });
+
+    // The nav box itself must only ever move. Anything that resizes it is back
+    // to reflowing its contents 60 times a second.
+    expect(transitions.nav).toBe("transform");
+    expect(transitions.scrim).toBe("opacity");
+  });
+
+  test("a steady scroll does not rewrite the nav every frame", async ({ page }) => {
+    await landOnHome(page);
+
+    const mutations = await page.evaluate(async () => {
+      const nav = document.querySelector(".nav");
+      if (!nav) return -1;
+
+      let count = 0;
+      const observer = new MutationObserver((records) => {
+        count += records.length;
+      });
+      observer.observe(nav, {
+        attributes: true,
+        subtree: true,
+        attributeFilter: ["class", "aria-current"],
+      });
+
+      // 60 discrete positions through the capsule threshold and well past it,
+      // each given a frame to be dispatched and written.
+      for (let y = 0; y <= 1200; y += 20) {
+        window.scrollTo({ top: y, behavior: "instant" });
+        await new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+      }
+
+      observer.disconnect();
+      return count;
+    });
+
+    // Legitimate writes are the capsule toggling, the tuck toggling, and two
+    // per change of active section — a handful over the whole scroll. Per-frame
+    // churn lands in the dozens: `setAttribute` queues a mutation even when the
+    // value is unchanged, so the old code wrote one record per frame per active
+    // link. Generous enough not to be flaky, tight enough to fail that.
+    expect(mutations).toBeGreaterThanOrEqual(0);
+    expect(mutations).toBeLessThan(20);
+  });
+});
+
 test.describe("navigation reaches everything", () => {
   test("work cards open their case study", async ({ page }) => {
     await landOnHome(page);

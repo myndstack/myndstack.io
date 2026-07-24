@@ -107,6 +107,20 @@
   :root {
     /* The nav overlays the page, so every non-hero route pads past it. */
     --nav-height: 80px;
+    /* One duration for every part of the bar → capsule morph, so the scrim,
+       the capsule, the content column and the wordmark stay in lockstep.
+       Slower than the 300ms it replaced: the morph now runs on the compositor,
+       so there is room to let it read as deliberate rather than snap. */
+    --nav-morph: 450ms;
+    /* The cross-fade is deliberately shorter than the morph and staggered.
+       Run flat against each other, both layers sit near 50% in the middle and
+       the page shows straight through the nav for a moment — the old single
+       animated background was opaque the whole way and never did that. Fading
+       the incoming layer in *before* the outgoing one leaves keeps the two
+       together at full coverage. The lag is applied to whichever layer is
+       leaving, so it holds in both directions. */
+    --nav-fade: 300ms;
+    --nav-fade-lag: 150ms;
   }
 
   *,
@@ -318,39 +332,114 @@
      Fixed rather than sticky so it sits *over* the hero: a sticky nav takes up
      flow, which pushed the particle canvas down and left an isolated black bar
      across the top. Overlaying it lets the network run behind the nav. */
+  /* The element itself is a transparent, CONSTANT-SIZE frame. It never changes
+     width or padding, and `transform` is the only thing it transitions.
+
+     It used to animate `width` and `padding` (and repaint a full-bleed gradient
+     and a 40px-blur shadow at a new size) for the whole morph, which reflowed
+     the wordmark, six links and the CTA on every frame — while the user was
+     scrolling. That was the stutter. The two visual states now live on the
+     absolutely-positioned .nav-scrim / .nav-pill layers below and simply
+     cross-fade, which the compositor can do without touching layout. */
   .nav {
     position: fixed;
     top: 0;
     left: 0;
     right: 0;
     z-index: 60;
-    /* An explicit width at both states so the morph interpolates. Left as
-       `auto` it snapped, because auto → <length> is not animatable. */
     width: 100%;
     margin: 0 auto;
-    /* Horizontal padding lives on .nav-inner so the background stays
-       full-bleed while the contents align to the page grid. */
+    /* Horizontal padding lives on .nav-inner so the layers stay full-bleed
+       while the contents align to the page grid. */
     padding: 18px 0;
+    background: none;
     transform: translate3d(0, 0, 0);
+    /* Now honest: the element genuinely only moves, so promoting it is a win.
+       While it was still resizing, this layer had to be re-rastered every
+       frame and the hint actively cost time. */
     will-change: transform;
-    /* Vertical scrim, not a flat fill — keeps the links legible over the
-       network without drawing a hard edge across it. */
+    /* Keeps the one remaining reflow — .nav-inner's column closing up — from
+       propagating into the page behind the nav.
+
+       `layout` ONLY. Never add `paint` (nor the `strict`/`content` shorthands):
+       paint containment clips to the padding box, which would cut off both the
+       capsule's 40px-blur shadow and the ::after scrim continuation below. Both
+       are drawn outside this box on purpose. */
+    contain: layout;
+    /* `top` and `margin` are deliberately absent: the vertical offset rides on
+       transform (compositor-friendly) and margin snaps, which is invisible. */
+    transition: transform var(--nav-morph) var(--ease-brand);
+  }
+
+  /* Both morph layers occupy the nav box exactly and are painted behind the
+     content (which is lifted by .nav-inner's z-index). Empty by design: the
+     capsule's width animation is then a self-layout of one childless box
+     instead of a reflow of everything in the nav. */
+  .nav-scrim,
+  .nav-pill {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    width: 100%;
+    margin: 0 auto;
+    pointer-events: none;
+  }
+
+  /* Vertical scrim, not a flat fill — keeps the links legible over the
+     network without drawing a hard edge across it. */
+  .nav-scrim {
     background-image: linear-gradient(
       180deg,
       rgba(10, 10, 11, 0.92) 0%,
       rgba(10, 10, 11, 0.74) 55%,
       rgba(10, 10, 11, 0.34) 100%
     );
-    border-radius: 0;
-    /* `top` and `margin` are deliberately absent: the vertical offset rides on
-       transform (compositor-friendly) and margin snaps, which is invisible. */
+    /* Leaving the capsule the scrim is the one arriving, so it goes first. */
+    transition: opacity var(--nav-fade) var(--ease-brand);
+  }
+  .nav.is-cap .nav-scrim {
+    opacity: 0;
+    /* Entering, it is the one leaving — held back until the pill is solid. */
+    transition-delay: var(--nav-fade-lag);
+  }
+
+  /* Fully opaque: the nav overlays the page, so page content scrolls directly
+     beneath the capsule. The reference's 0.95 was invisible only because its
+     nav sat in flow with nothing passing under it.
+
+     The border is a constant 1px and simply fades in with the layer. As a
+     property of .nav it went 0 → 1px on the first frame — only `border-color`
+     was ever transitioned, never the width — so the outline popped in. */
+  .nav-pill {
+    opacity: 0;
+    background-color: var(--color-lime);
+    border: 1px solid var(--color-lime-hover);
+    box-shadow: 0 14px 40px rgba(0, 0, 0, 0.42);
+    /* The geometry runs the full morph in both directions so the contraction
+       reads as one continuous move; only the fade is staggered. Leaving the
+       capsule the pill is the one departing, so it is the one held back. */
     transition:
-      width 0.3s var(--ease-brand),
-      padding 0.3s var(--ease-brand),
-      background 0.3s var(--ease-brand),
-      border-color 0.3s var(--ease-brand),
-      box-shadow 0.3s var(--ease-brand),
-      transform 0.3s var(--ease-brand);
+      opacity var(--nav-fade) var(--ease-brand) var(--nav-fade-lag),
+      width var(--nav-morph) var(--ease-brand),
+      top var(--nav-morph) var(--ease-brand),
+      bottom var(--nav-morph) var(--ease-brand);
+  }
+  /* Same width expression the bar used to animate itself, so the contracting
+     motion is unchanged.
+
+     7px, measured not guessed: the old capsule sat 11px away from its content
+     on every side (a 1px border *outside* its 10px padding — the border box
+     grew, it did not eat the padding). This box starts 18px away, so it has to
+     come in by 18 - 11. */
+  .nav.is-cap .nav-pill {
+    opacity: 1;
+    top: 7px;
+    bottom: 7px;
+    width: min(1120px, calc(100% - 40px));
+    /* Entering, the pill is the one arriving — no lag, it leads. */
+    transition-delay: 0ms;
   }
   /* Mirrors Section's geometry exactly — same 1200px column, same 56px gutter —
      so the wordmark lines up with section headings instead of hugging the
@@ -364,7 +453,13 @@
     max-width: 1200px;
     margin: 0 auto;
     padding: 0 20px;
-    transition: padding 0.3s var(--ease-brand);
+    /* Lifts the content above the two absolutely-positioned morph layers, which
+       would otherwise paint over it (positioned boxes beat in-flow ones). */
+    position: relative;
+    z-index: 1;
+    transition:
+      max-width var(--nav-morph) var(--ease-brand),
+      padding var(--nav-morph) var(--ease-brand);
   }
   @media (width >= 47.5rem) {
     .nav-inner {
@@ -372,17 +467,21 @@
     }
   }
 
-  /* Capsule keeps the same max-width: it is never the binding constraint there
-     (the pill is only 1120px wide), and `max-width` is not animatable — going
-     to `none` snapped the column to full width on the first frame of the morph
-     while the pill was still contracting, which read as a lurch.
+  /* The content column used to be sized by the bar shrinking around it. Now
+     that .nav stays full width, this reproduces the capsule's content box on
+     its own — and both numbers are derived, not eyeballed.
 
-     6px is derived, not eyeballed: it puts the content's left and right edges
-     in exactly the same place as the bar state, so above 1240px the content
-     doesn't move at all and only the pill contracts around it.
-       (vw - 1200)/2 + 56  ==  (vw - 1120)/2 + 10 + P   →   P = 6 */
+     The old capsule laid out as: pill W, minus its 1px border each side, minus
+     its 10px padding each side, then .nav-inner's own 6px each side. So the
+     content spanned W - 34, centred. Matching that with max-width M and padding
+     P:  M - 2P = W - 34  with  M = W - 2  →  P = 16.
+
+     Both are animatable lengths, and `max-width` never goes to `none` — that
+     snapped the column to full width on the first frame of the morph while the
+     pill was still contracting, which read as a lurch. */
   .nav.is-cap .nav-inner {
-    padding: 0 6px;
+    max-width: min(1118px, calc(100% - 42px));
+    padding: 0 16px;
   }
 
   /* Continues the scrim past the nav's own box so the fade never terminates
@@ -396,30 +495,21 @@
     height: 72px;
     pointer-events: none;
     background: linear-gradient(180deg, rgba(10, 10, 11, 0.34), rgba(10, 10, 11, 0));
-    transition: opacity 0.26s var(--ease-brand);
+    /* Part of the scrim, so it fades on the scrim's timing, not the morph's. */
+    transition: opacity var(--nav-fade) var(--ease-brand);
   }
   .nav.is-cap::after {
     opacity: 0;
+    transition-delay: var(--nav-fade-lag);
   }
 
+  /* All that is left on the element itself is the drop. 15px, not the old 22px,
+     because the nav box no longer shrinks along with it. Both edges still land
+     where they used to: 15 + this box's 18px padding puts the content on the
+     same line as the old 22 + 1px border + 10px padding, and 15 + the pill's
+     7px inset puts the pill's top edge on the old 22. */
   .nav.is-cap {
-    width: min(1120px, calc(100% - 40px));
-    padding: 10px;
-    border: 1px solid var(--color-lime-hover);
-    /* Fully opaque: the nav overlays the page now, so page content scrolls
-       directly beneath the capsule. The reference's 0.95 was invisible only
-       because its nav sat in flow with nothing passing under it.
-       Kept as a gradient with the same stop structure as the top scrim so the
-       morph still interpolates instead of cutting. */
-    background-color: var(--color-lime);
-    background-image: linear-gradient(
-      180deg,
-      var(--color-lime) 0%,
-      var(--color-lime) 55%,
-      var(--color-lime) 100%
-    );
-    box-shadow: 0 14px 40px rgba(0, 0, 0, 0.42);
-    transform: translate3d(0, 22px, 0);
+    transform: translate3d(0, 15px, 0);
   }
 
   /* A sustained downward scroll slides the capsule away; scrolling back up
@@ -428,14 +518,26 @@
     transform: translate3d(0, -160%, 0);
   }
 
+  /* The two marks are stacked in one grid cell and cross-fade. Swapping them
+     with `display: none` popped the colour on a single frame and, being a
+     `display` change, forced layout in the middle of the morph. Both are the
+     same SVG at the same size, so they overlay exactly. */
+  .wm-stack {
+    display: grid;
+    align-items: center;
+  }
+  .wm-stack > * {
+    grid-area: 1 / 1;
+    transition: opacity var(--nav-morph) var(--ease-brand);
+  }
   .nav .wm-black {
-    display: none;
+    opacity: 0;
   }
   .nav.is-cap .wm-white {
-    display: none;
+    opacity: 0;
   }
   .nav.is-cap .wm-black {
-    display: block;
+    opacity: 1;
   }
 
   .navlink {
@@ -787,6 +889,11 @@ html[data-seen] .loader {
     animation-duration: 0.001ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.001ms !important;
+    /* Zeroing only the duration leaves any staggered delay intact, so a
+       "collapsed" transition still waits before snapping — the nav morph's
+       cross-fade lag would hold the old state visible for 150ms. */
+    transition-delay: 0ms !important;
+    animation-delay: 0ms !important;
   }
   html {
     scroll-behavior: auto;
