@@ -81,6 +81,16 @@ const slugify = (s: string) =>
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/^-|-$/g, "");
 
+/**
+ * Document IDs are hyphenated (`role-<slug>`), never dotted (`role.<slug>`).
+ * This matters: on a *public* dataset, Sanity's anonymous read grant does NOT
+ * expose documents whose `_id` contains a `.`, so dotted IDs are invisible to
+ * any tokenless reader — which is every CI run and every Vercel build that
+ * doesn't carry a read token. Dotted IDs made the live `/work` and `/careers`
+ * render empty while local (tokened) reads looked fine. Keep them dotless.
+ * (The queries key off `slug.current`, not `_id`, so the ID format is free to
+ * change without touching lib/sanity/queries.ts.)
+ */
 type SeedDoc = { _id: string; _type: string; [key: string]: unknown };
 
 function buildDocs() {
@@ -88,7 +98,7 @@ function buildDocs() {
 
   ROLES.forEach((r, i) =>
     docs.push({
-      _id: `role.${r.slug}`,
+      _id: `role-${r.slug}`,
       _type: "role",
       order: i,
       slug: { _type: "slug", current: r.slug },
@@ -108,7 +118,7 @@ function buildDocs() {
 
   CASES.forEach((c, i) =>
     docs.push({
-      _id: `case.${c.slug}`,
+      _id: `case-${c.slug}`,
       _type: "caseStudy",
       order: i,
       slug: { _type: "slug", current: c.slug },
@@ -130,7 +140,7 @@ function buildDocs() {
 
   TESTIMONIALS.forEach((t, i) =>
     docs.push({
-      _id: `testimonial.${t.index}`,
+      _id: `testimonial-${t.index}`,
       _type: "testimonial",
       order: i,
       quote: t.quote,
@@ -141,16 +151,16 @@ function buildDocs() {
   );
 
   TEAM.forEach((m, i) =>
-    docs.push({ _id: `team.${slugify(m.n)}`, _type: "teamMember", order: i, i: m.i, n: m.n, r: m.r }),
+    docs.push({ _id: `team-${slugify(m.n)}`, _type: "teamMember", order: i, i: m.i, n: m.n, r: m.r }),
   );
 
   FAQS.forEach((f, i) =>
-    docs.push({ _id: `faq.${i}`, _type: "faq", order: i, q: f.q, a: f.a }),
+    docs.push({ _id: `faq-${i}`, _type: "faq", order: i, q: f.q, a: f.a }),
   );
 
   PRICING_TIERS.forEach((p, i) =>
     docs.push({
-      _id: `pricing.${slugify(p.name)}`,
+      _id: `pricing-${slugify(p.name)}`,
       _type: "pricingTier",
       order: i,
       name: p.name,
