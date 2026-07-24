@@ -14,8 +14,37 @@
  *   scripts/seed-sanity.ts can import them. Edit this content in the Studio.
  */
 
-/** Canonical origin. Override per-environment with NEXT_PUBLIC_SITE_URL. */
-export const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://myndstack.io";
+const FALLBACK_SITE_URL = "https://myndstack.io";
+
+/**
+ * Canonical origin. Override per-environment with NEXT_PUBLIC_SITE_URL.
+ *
+ * Deliberately defensive, because this value feeds `metadataBase: new URL(...)`
+ * in app/layout.tsx — and a `new URL()` throw there takes the *whole site's*
+ * metadata down (no title, no canonical, no OG tags, on every route). A plain
+ * `?? fallback` is not enough: `??` only catches `undefined`/`null`, so an env
+ * var set to an empty string, to whitespace, or to a host with no scheme
+ * ("myndstack.io") would sail through and then throw. Normalise and validate
+ * here instead, so a misconfigured deployment degrades to the canonical domain
+ * rather than shipping a site with no metadata.
+ */
+function resolveSiteUrl(): string {
+  const raw = process.env.NEXT_PUBLIC_SITE_URL?.trim();
+  if (!raw) return FALLBACK_SITE_URL;
+
+  // A bare host is the common mistake; give it the scheme it meant.
+  const candidate = /^https?:\/\//i.test(raw) ? raw : `https://${raw}`;
+
+  try {
+    // Throws on anything URL() can't parse; strip any trailing slash so
+    // `${SITE_URL}/path` never produces a double slash.
+    return new URL(candidate).toString().replace(/\/$/, "");
+  } catch {
+    return FALLBACK_SITE_URL;
+  }
+}
+
+export const SITE_URL = resolveSiteUrl();
 
 export const SITE = {
   name: "Myndstack",
