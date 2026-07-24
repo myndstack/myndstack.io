@@ -45,6 +45,7 @@ defaults are wrong for production (see [lib/mail-config.ts](lib/mail-config.ts))
 | `NEXT_PUBLIC_SANITY_PROJECT_ID` | **required** | **required** | `e3tbagdk`. Public. The site fetches content from it; without it the content queries throw at build. |
 | `NEXT_PUBLIC_SANITY_DATASET` | **required** | **required** | `production`. Public. |
 | `SANITY_API_READ_TOKEN` | optional | optional | The public dataset reads without a token. Set a Viewer token only if you later need drafts or higher rate limits. |
+| `SANITY_REVALIDATE_SECRET` | not needed | not needed | Only the `/api/revalidate` webhook used it, and content pages now render dynamically (always fresh), so the webhook is inert. Safe to omit; safe to delete the Sanity webhook too. |
 | `SANITY_API_WRITE_TOKEN` | **do not set** | — | Local-only, for `npm run seed`. Never set in the host — nothing reads it at runtime. |
 
 ### Content (Sanity)
@@ -61,7 +62,7 @@ see the README on why it isn't embedded). Two one-time steps, then it runs itsel
 The content routes read Sanity fresh per request (`cache: "no-store"`), so edits
 are always live with nothing to configure. (An ISR + webhook path was built first
 but Vercel wasn't regenerating the prerendered pages on this deployment; see the
-README. The `/api/revalidate` route and its secret were removed.)
+README. The `/api/revalidate` route remains but is inert.)
 
 ### The Preview-environment trap
 
