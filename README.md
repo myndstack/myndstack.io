@@ -240,10 +240,33 @@ not bare threshold comparisons:
   so trackpad momentum can't flip it back and forth. It takes 90px of sustained
   downward scroll to hide and 40px upward to bring it back.
 
-On the CSS side the vertical offset rides on `transform` rather than `top`, `width` is
-explicit in both states (`auto → <length>` is not animatable, so it used to snap), and
-both backgrounds are gradients with matching stop structure so the colour interpolates
-instead of cutting.
+On the CSS side the two states are **layers that cross-fade**, not properties of the
+nav that get animated. `.nav` keeps constant width and padding and transitions only
+`transform`; `.nav-scrim` (the gradient) and `.nav-pill` (the capsule) are absolutely
+positioned, and only the pill's own width animates. That matters because the earlier
+version transitioned `width` and `padding` on the fixed nav — so all 450ms of it
+reflowed the wordmark, six links and the CTA, on every frame, while the user was
+scrolling. The pill is childless, so its contraction is a self-layout of one empty
+box, and `contain: layout` keeps the one remaining reflow (the content column closing
+up) off the page behind it.
+
+Three things are easy to undo by accident:
+
+- **`contain: layout` only — never `paint`.** Paint containment clips to the padding
+  box, which would cut off the pill's 40px-blur shadow *and* the `.nav::after` scrim
+  continuation. Both are drawn outside that box deliberately.
+- **The cross-fade is staggered** (`--nav-fade-lag`), applied to whichever layer is
+  leaving so it holds in both directions. Run flat against each other, both layers sit
+  near 50% in the middle and the page ghosts straight through the nav.
+- **The capsule's content box is reproduced by `.nav-inner`**, not by the nav
+  shrinking around it. The `max-width`/`padding` pair there is derived from the old
+  geometry, and the pill's 7px inset and 15px drop are too — the old capsule's 1px
+  border sat *outside* its 10px padding, which is where the odd numbers come from.
+
+The scroll callback is also write-gated: it caches the section links and compares
+against what it last applied, because rewriting a class and an `aria-current` on six
+links every frame cost 62 mutation records over a single scroll. Both of these are
+held in place by tests — see `the nav morph stays cheap` in [e2e/smoke.spec.ts](e2e/smoke.spec.ts).
 
 ### Integrations
 
@@ -357,8 +380,10 @@ if nothing arrives within 1.5s it abandons scroll reveals and shows everything.
 
 `prefers-reduced-motion: reduce` drops the loader, particle field, cursor spotlight,
 headline cycle, magnetic CTAs, stat count-ups, testimonial autoplay, view transitions
-and the word-by-word manifesto, and collapses transition durations. Reveal animations
-are also forced open under `<noscript>`.
+and the word-by-word manifesto, and collapses transition durations *and delays* —
+zeroing only the duration leaves a staggered transition still waiting before it snaps,
+which is exactly what the nav morph's cross-fade lag would do. Reveal animations are
+also forced open under `<noscript>`.
 
 ## Changes made on top of the reference
 
