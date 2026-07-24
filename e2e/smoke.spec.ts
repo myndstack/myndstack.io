@@ -32,6 +32,47 @@ async function scrollBySteps(page: Page, total: number, steps = 6) {
   await page.waitForTimeout(250);
 }
 
+/**
+ * Every route renders, with metadata, and is NOT the error boundary.
+ *
+ * This exists because a deploy once served the error page ("Something in the
+ * stack gave way") on every route while the whole suite stayed green: the error
+ * boundary still renders the nav and footer, so the navigation and layout tests
+ * passed straight through it. The tell was that `<title>` and every meta tag had
+ * vanished — metadata resolved at build time for a static page, and broke when
+ * the pages were switched to render per request.
+ *
+ * So: assert the title exists and the error copy doesn't. Cheap, and it catches
+ * a whole class of "the site is down but CI is green".
+ */
+test.describe("every route renders with metadata", () => {
+  const ROUTES = [
+    "/",
+    "/careers",
+    "/work",
+    "/privacy",
+    "/careers/staff-platform-engineer",
+    "/work/aperture-health",
+  ];
+
+  for (const route of ROUTES) {
+    test(`${route} has a title and is not the error page`, async ({ page }) => {
+      const response = await page.goto(route);
+      expect(response?.status()).toBe(200);
+
+      // Metadata resolved. An empty title is the signature of the outage above.
+      await expect(page).toHaveTitle(/\S/);
+      await expect(page).toHaveTitle(/Myndstack/);
+
+      // The error boundary must not be what the visitor got.
+      await expect(page.locator("body")).not.toContainText("gave way");
+
+      // Canonical proves the metadata pipeline ran, not just that a title exists.
+      await expect(page.locator('link[rel="canonical"]')).toHaveCount(1);
+    });
+  }
+});
+
 test.describe("page is actually usable", () => {
   test("nothing is left inert once the loader clears", async ({ page }) => {
     await landOnHome(page);
