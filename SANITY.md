@@ -143,10 +143,14 @@ non-issue. The production `studio:build`/`deploy` path is unaffected either way.
 
 It is deliberately **not** embedded at `/studio` inside the Next app. Sanity v5's
 Studio UI imports React's `useEffectEvent`, which Next 15.5's compiled-React shim
-predates, so an embedded route won't compile — and forcing webpack to the real
-React breaks Next's server renderer. Standalone sidesteps all of it and keeps the
-Studio's weight out of the marketing bundle. If Next is ever upgraded to 16, an
-embedded Studio becomes viable again.
+predated, so an embedded route wouldn't compile — and forcing webpack to the real
+React broke Next's server renderer.
+
+The app is on **Next 16** now, so that original blocker is probably gone. It has
+stayed standalone anyway, on the second reason: it keeps the Studio's weight
+entirely out of the marketing bundle, and the Studio is an internal tool that
+does not need to ship from the marketing domain. Embedding it is a real option,
+not a fix for anything currently broken.
 
 ---
 
