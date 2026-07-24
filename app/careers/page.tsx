@@ -3,7 +3,8 @@ import Link from "next/link";
 
 import PageHeader from "@/components/PageHeader";
 import Reveal from "@/components/Reveal";
-import { ROLES } from "@/lib/roles";
+import { numberWord } from "@/lib/format";
+import { getRoles } from "@/lib/sanity/queries";
 
 const title = "Careers — Myndstack";
 const description =
@@ -34,14 +35,16 @@ const PRINCIPLES = [
   },
 ];
 
-export default function CareersPage() {
+export default async function CareersPage() {
+  const roles = await getRoles();
+
   return (
     <>
       <PageHeader
         eyebrow="Join the studio"
         title="Build the stack behind everything."
         lede="We hire engineers and designers who care about the layer beneath the product. Small team, real ownership, mission-critical work."
-        meta={`${ROLES.length} open roles · Remote`}
+        meta={`${roles.length} open role${roles.length === 1 ? "" : "s"} · Remote`}
         breadcrumbs={[{ label: "Home", href: "/" }]}
       />
 
@@ -63,10 +66,12 @@ export default function CareersPage() {
         className="mx-auto max-w-[1200px] scroll-mt-28 px-5 pt-12 pb-[88px] sm:px-14"
       >
         <div className="eyebrow mb-3.5">Open roles</div>
-        <h2 className="h2-section mb-9">Four ways in.</h2>
+        <h2 className="h2-section mb-9">
+          {numberWord(roles.length, true)} way{roles.length === 1 ? "" : "s"} in.
+        </h2>
 
         <ul className="m-0 flex list-none flex-col gap-2.5 p-0">
-          {ROLES.map((role, i) => (
+          {roles.map((role, i) => (
             <li key={role.slug}>
               <Reveal delay={i * 0.05}>
                 <Link

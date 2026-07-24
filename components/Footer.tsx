@@ -1,11 +1,14 @@
 import Link from "next/link";
 
-import { FOOTER_COLUMNS, LEGAL_LINKS, SITE, SOCIALS } from "@/lib/content";
+import { FOOTER_COLUMNS, LEGAL_LINKS } from "@/lib/content";
+import type { SiteSettings } from "@/lib/sanity/queries";
 import Newsletter from "./Newsletter";
 import SocialIcon from "./SocialIcon";
 import Wordmark from "./Wordmark";
 
-export default function Footer() {
+export default function Footer({ site }: { site: SiteSettings }) {
+  const { socials } = site;
+
   return (
     <footer className="mt-[88px] border-t border-line px-5 pt-14 pb-10 sm:px-14">
       <div className="mx-auto grid max-w-[1200px] grid-cols-1 gap-8 xs:grid-cols-2 md:grid-cols-[2fr_1fr_1fr_1fr]">
@@ -43,27 +46,27 @@ export default function Footer() {
           <ul className="m-0 flex list-none flex-col gap-[11px] p-0">
             <li>
               <a
-                href={`mailto:${SITE.email}`}
+                href={`mailto:${site.email}`}
                 className="text-[14.5px] text-t3 hover:text-lime"
               >
-                {SITE.email}
+                {site.email}
               </a>
             </li>
             <li>
-              <a href={SITE.phoneHref} className="text-[14.5px] text-t3 hover:text-lime">
-                {SITE.phone}
+              <a href={site.phoneHref} className="text-[14.5px] text-t3 hover:text-lime">
+                {site.phone}
               </a>
             </li>
             <li>
-              <span className="text-[14.5px] text-t5">{SITE.location}</span>
+              <span className="text-[14.5px] text-t5">{site.location}</span>
             </li>
           </ul>
 
           {/* Icons here (not just the desktop spine) so mobile/tablet visitors,
               where the spine is hidden below 1100px, can still reach the profiles. */}
-          {SOCIALS.some((s) => s.href) ? (
+          {socials.some((s) => s.href) ? (
             <div className="mt-5 flex items-center gap-4">
-              {SOCIALS.filter((s) => s.href).map((s) => (
+              {socials.filter((s) => s.href).map((s) => (
                 <a
                   key={s.label}
                   href={s.href!}
@@ -93,7 +96,7 @@ export default function Footer() {
             </Link>
           ))}
         </div>
-        <span className="font-mono">{SITE.version}</span>
+        <span className="font-mono">{site.version}</span>
       </div>
     </footer>
   );

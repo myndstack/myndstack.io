@@ -3,14 +3,14 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import PageHeader from "@/components/PageHeader";
-import { CASES, getCase } from "@/lib/cases";
 import { SITE_URL } from "@/lib/content";
 import { jsonLd } from "@/lib/format";
+import { getCase, getCaseSlugs } from "@/lib/sanity/queries";
 
 type Params = { slug: string };
 
-export function generateStaticParams() {
-  return CASES.map((c) => ({ slug: c.slug }));
+export async function generateStaticParams() {
+  return (await getCaseSlugs()).map((slug) => ({ slug }));
 }
 
 export async function generateMetadata({
@@ -18,7 +18,7 @@ export async function generateMetadata({
 }: {
   params: Promise<Params>;
 }): Promise<Metadata> {
-  const study = getCase((await params).slug);
+  const study = await getCase((await params).slug);
   if (!study) return {};
 
   const title = `${study.client} — Myndstack`;
@@ -31,7 +31,7 @@ export async function generateMetadata({
 }
 
 export default async function CasePage({ params }: { params: Promise<Params> }) {
-  const study = getCase((await params).slug);
+  const study = await getCase((await params).slug);
   if (!study) notFound();
 
   const facts = [

@@ -15,11 +15,35 @@ import StackStory from "@/components/StackStory";
 import StatsStrip from "@/components/StatsStrip";
 import Team from "@/components/Team";
 import Testimonials from "@/components/Testimonials";
+import {
+  getFaqs,
+  getHomepage,
+  getPricingTiers,
+  getSiteSettings,
+  getTestimonials,
+} from "@/lib/sanity/queries";
 
-export default function Home() {
+export default async function Home() {
+  // The client sections (Hero, Manifesto, Faq, Pricing, Testimonials, ContactForm)
+  // can't fetch, so this server component fetches once and passes their data down.
+  // getHomepage/getSiteSettings are cached, so the server sections that self-fetch
+  // them below share this same request. The awaits run in parallel.
+  const [home, faqs, tiers, testimonials, site] = await Promise.all([
+    getHomepage(),
+    getFaqs(),
+    getPricingTiers(),
+    getTestimonials(),
+    getSiteSettings(),
+  ]);
+
   return (
     <>
-      <Hero />
+      <Hero
+        eyebrow={home.hero.eyebrow}
+        subhead={home.hero.subhead}
+        ctaPrimary={home.hero.ctaPrimary}
+        ctaSecondary={home.hero.ctaSecondary}
+      />
       <MarqueeBand />
       <StackStory />
       <Capabilities />
@@ -28,14 +52,19 @@ export default function Home() {
       <LogoMarquee />
       <StatsStrip />
       <Contrast />
-      <Manifesto />
-      <Testimonials />
-      <Pricing />
+      <Manifesto lead={home.manifestoLead} keep={home.manifestoKeep} />
+      <Testimonials items={testimonials} />
+      <Pricing tiers={tiers} />
       <Team />
       <Careers />
-      <Faq />
+      <Faq faqs={faqs} />
       <CtaBand />
-      <ContactForm />
+      <ContactForm
+        email={site.email}
+        phone={site.phone}
+        phoneHref={site.phoneHref}
+        location={site.location}
+      />
     </>
   );
 }

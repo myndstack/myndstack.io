@@ -5,13 +5,13 @@ import { notFound } from "next/navigation";
 import ApplicationForm from "@/components/ApplicationForm";
 import PageHeader from "@/components/PageHeader";
 import { SITE_URL } from "@/lib/content";
-import { jsonLd } from "@/lib/format";
-import { getRole, ROLES } from "@/lib/roles";
+import { jsonLd, numberWord } from "@/lib/format";
+import { getRole, getRoles, getRoleSlugs, getSiteSettings } from "@/lib/sanity/queries";
 
 type Params = { slug: string };
 
-export function generateStaticParams() {
-  return ROLES.map((role) => ({ slug: role.slug }));
+export async function generateStaticParams() {
+  return (await getRoleSlugs()).map((slug) => ({ slug }));
 }
 
 export async function generateMetadata({
@@ -19,7 +19,7 @@ export async function generateMetadata({
 }: {
   params: Promise<Params>;
 }): Promise<Metadata> {
-  const role = getRole((await params).slug);
+  const role = await getRole((await params).slug);
   if (!role) return {};
 
   const title = `${role.title} — Careers at Myndstack`;
@@ -32,8 +32,13 @@ export async function generateMetadata({
 }
 
 export default async function RolePage({ params }: { params: Promise<Params> }) {
-  const role = getRole((await params).slug);
+  const role = await getRole((await params).slug);
   if (!role) notFound();
+
+  // How many *other* roles are open, for the closing line. Derived rather than
+  // hardcoded — the count changes in the CMS and the copy has to follow.
+  const [{ length: roleCount }, site] = await Promise.all([getRoles(), getSiteSettings()]);
+  const otherCount = roleCount - 1;
 
   const facts = [
     { label: "Team", value: role.team },
@@ -127,10 +132,16 @@ export default async function RolePage({ params }: { params: Promise<Params> }) 
               </section>
             ))}
 
-            <p className="legal-note">
-              Not quite your role?{" "}
-              <Link href="/careers">See the other three openings</Link>.
-            </p>
+            {otherCount > 0 ? (
+              <p className="legal-note">
+                Not quite your role?{" "}
+                <Link href="/careers">
+                  See the other {numberWord(otherCount)} opening
+                  {otherCount === 1 ? "" : "s"}
+                </Link>
+                .
+              </p>
+            ) : null}
           </article>
 
           <aside className="md:sticky md:top-28 md:self-start">
@@ -142,7 +153,7 @@ export default async function RolePage({ params }: { params: Promise<Params> }) 
               <p className="mt-0 mb-6 text-sm leading-[1.55] text-t4">
                 No cover letter needed. Links and a few honest lines beat a formatted CV.
               </p>
-              <ApplicationForm role={role.title} />
+              <ApplicationForm role={role.title} contactEmail={site.email} />
             </div>
           </aside>
         </div>

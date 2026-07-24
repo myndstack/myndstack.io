@@ -1,14 +1,14 @@
 "use client";
 
 import { useState } from "react";
-import { PRICING_TIERS } from "@/lib/content";
+import type { PricingTier } from "@/lib/content";
 import Reveal from "./Reveal";
 import Section from "./Section";
 import SectionHeader from "./SectionHeader";
 
 type Billing = "monthly" | "annual";
 
-export default function Pricing() {
+export default function Pricing({ tiers }: { tiers: PricingTier[] }) {
   const [billing, setBilling] = useState<Billing>("monthly");
   const annual = billing === "annual";
 
@@ -48,7 +48,7 @@ export default function Pricing() {
       </Reveal>
 
       <div className="grid grid-cols-1 items-start gap-[18px] sm:grid-cols-3">
-        {PRICING_TIERS.map((tier, i) => {
+        {tiers.map((tier, i) => {
           const price = annual && tier.annualPrice ? tier.annualPrice : tier.price;
 
           return (

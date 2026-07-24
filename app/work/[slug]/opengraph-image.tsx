@@ -1,13 +1,13 @@
 import { ImageResponse } from "next/og";
 import { OG_CONTENT_TYPE, OG_SIZE, OgCard } from "@/components/OgCard";
-import { CASES, getCase } from "@/lib/cases";
+import { getCase, getCaseSlugs } from "@/lib/sanity/queries";
 
 export const alt = "Myndstack case study";
 export const size = OG_SIZE;
 export const contentType = OG_CONTENT_TYPE;
 
-export function generateStaticParams() {
-  return CASES.map((c) => ({ slug: c.slug }));
+export async function generateStaticParams() {
+  return (await getCaseSlugs()).map((slug) => ({ slug }));
 }
 
 export default async function CaseOgImage({
@@ -15,7 +15,7 @@ export default async function CaseOgImage({
 }: {
   params: Promise<{ slug: string }>;
 }) {
-  const study = getCase((await params).slug);
+  const study = await getCase((await params).slug);
 
   return new ImageResponse(
     OgCard({

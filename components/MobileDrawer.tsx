@@ -7,7 +7,7 @@
 
 import Link from "next/link";
 import { useEffect, useRef } from "react";
-import { NAV_LINKS, SITE } from "@/lib/content";
+import { NAV_LINKS } from "@/lib/content";
 import Wordmark from "./Wordmark";
 
 const FOCUSABLE = "a[href], button:not([disabled])";
@@ -15,10 +15,12 @@ const FOCUSABLE = "a[href], button:not([disabled])";
 type Props = {
   open: boolean;
   onClose: () => void;
+  /** Contact email, from site settings — the only content bit the drawer shows. */
+  contactEmail: string;
 };
 
 /** Right slide-in menu for ≤760px. Traps focus while open and closes on Esc. */
-export default function MobileDrawer({ open, onClose }: Props) {
+export default function MobileDrawer({ open, onClose, contactEmail }: Props) {
   const drawerRef = useRef<HTMLElement>(null);
   const closeButtonRef = useRef<HTMLButtonElement>(null);
 
@@ -135,10 +137,10 @@ export default function MobileDrawer({ open, onClose }: Props) {
           Start a project →
         </a>
         <a
-          href={`mailto:${SITE.email}`}
+          href={`mailto:${contactEmail}`}
           className="mt-[18px] font-mono text-xs tracking-[0.04em] text-t5"
         >
-          {SITE.email}
+          {contactEmail}
         </a>
       </aside>
     </>

@@ -1,9 +1,11 @@
-import { STEPS } from "@/lib/content";
+import { getHomepage } from "@/lib/sanity/queries";
 import Reveal from "./Reveal";
 import Section from "./Section";
 import SectionHeader from "./SectionHeader";
 
-export default function Process() {
+export default async function Process() {
+  const { steps } = await getHomepage();
+
   return (
     <Section id="process">
       <SectionHeader
@@ -15,7 +17,7 @@ export default function Process() {
       {/* Gap-as-divider, so stacked steps get separators too and the last cell
           has no stray trailing rule. */}
       <div className="grid grid-cols-1 gap-px border-t border-line bg-line xs:grid-cols-2 md:grid-cols-4">
-        {STEPS.map((step) => (
+        {steps.map((step) => (
           <Reveal
             key={step.n}
             className="relative bg-ink px-[22px] pt-7 pb-[30px] transition-colors hover:bg-surface"

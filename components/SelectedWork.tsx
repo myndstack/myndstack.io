@@ -1,6 +1,6 @@
 import Link from "next/link";
 
-import { FEATURED_CASE, SUPPORTING_CASES } from "@/lib/cases";
+import { getCases } from "@/lib/sanity/queries";
 import Reveal from "./Reveal";
 import Section from "./Section";
 import SectionHeader from "./SectionHeader";
@@ -8,7 +8,17 @@ import SectionHeader from "./SectionHeader";
 /** Cards show the headline pair; the detail page shows the full set. */
 const CARD_METRICS = 2;
 
-export default function SelectedWork() {
+export default async function SelectedWork() {
+  const cases = await getCases();
+  // Nothing to show if every case study is unpublished — render nothing rather
+  // than read `.slug` off an undefined featured case and 500 the homepage.
+  if (cases.length === 0) return null;
+
+  // Same derivation the old cases.ts helpers used: one featured card, the rest
+  // as supporting cards. Ordering already comes from the query.
+  const featured = cases.find((c) => c.featured) ?? cases[0];
+  const supporting = cases.filter((c) => c !== featured);
+
   return (
     <Section id="work-cases">
       <SectionHeader
@@ -23,22 +33,22 @@ export default function SelectedWork() {
         {/* Featured case */}
         <Reveal>
           <Link
-            href={`/work/${FEATURED_CASE.slug}`}
+            href={`/work/${featured.slug}`}
             className="card clip-angular-32 grid grid-cols-1 items-center gap-11 px-10 py-[38px] text-white hover:border-lime-edge hover:text-white md:grid-cols-[1.25fr_1fr]"
           >
             <div>
               <div className="mb-5 flex flex-wrap gap-2">
-                {FEATURED_CASE.tags.map((tag) => (
+                {featured.tags.map((tag) => (
                   <span key={tag} className="chip">
                     {tag}
                   </span>
                 ))}
               </div>
               <div className="mb-3 font-display text-[clamp(24px,4vw,31px)] font-bold tracking-[-0.02em]">
-                {FEATURED_CASE.client}
+                {featured.client}
               </div>
               <p className="m-0 max-w-[440px] text-base leading-[1.55] text-t4">
-                {FEATURED_CASE.summary}
+                {featured.summary}
               </p>
               <span className="mt-5 inline-block font-mono text-[11px] tracking-[0.14em] text-lime uppercase">
                 Read the case ▸
@@ -47,7 +57,7 @@ export default function SelectedWork() {
 
             {/* 1px grid gaps act as the hairlines between metrics */}
             <div className="grid grid-cols-2 gap-px overflow-hidden border border-line bg-line">
-              {FEATURED_CASE.metrics.map((m) => (
+              {featured.metrics.map((m) => (
                 <div key={m.l} className="bg-surface-3 px-[22px] py-5">
                   <div
                     className={`font-display text-[26px] font-bold tracking-[-0.02em] ${m.lime ? "text-lime" : ""}`}
@@ -65,7 +75,7 @@ export default function SelectedWork() {
 
         {/* Supporting cases */}
         <div className="grid grid-cols-1 gap-[18px] sm:grid-cols-3">
-          {SUPPORTING_CASES.map((c) => (
+          {supporting.map((c) => (
             <Reveal key={c.slug}>
               {/* The card is inside the link so the hover lift and the reveal
                   transform don't both try to own `transform`. */}

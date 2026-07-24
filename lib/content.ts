@@ -1,6 +1,17 @@
 /**
- * All copy and data for the single marketing page.
- * Kept here so sections stay presentational and content is editable in one place.
+ * Marketing-page data and types.
+ *
+ * MIND THE SPLIT — not everything here is live any more:
+ *
+ * - **Still live (edit here, ships on next deploy):** `SITE_URL`, `NAV_LINKS` /
+ *   `SPY_IDS`, `FOOTER_COLUMNS`, `LEGAL_LINKS`, `STACK_LAYERS`, and the exported
+ *   types (`Social`, `PricingTier`, `NavLink`). These are structure/routing the
+ *   code is written against, deliberately kept out of the CMS.
+ * - **Seed source only (editing has NO live effect):** `SITE`, `SOCIALS`,
+ *   `CAPABILITIES`, `STEPS`, `STATS`, `CONTRAST_*`, `MANIFESTO_*`, `TESTIMONIALS`,
+ *   `PRICING_TIERS`, `TEAM`, `FAQS`, `CLIENT_LOCKUPS`. The live site reads these
+ *   from Sanity via lib/sanity/queries.ts; these consts remain only so
+ *   scripts/seed-sanity.ts can import them. Edit this content in the Studio.
  */
 
 /** Canonical origin. Override per-environment with NEXT_PUBLIC_SITE_URL. */

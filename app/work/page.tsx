@@ -3,7 +3,7 @@ import Link from "next/link";
 
 import PageHeader from "@/components/PageHeader";
 import Reveal from "@/components/Reveal";
-import { CASES } from "@/lib/cases";
+import { getCases } from "@/lib/sanity/queries";
 
 const title = "Selected work — Myndstack";
 const description =
@@ -16,14 +16,16 @@ export const metadata: Metadata = {
   openGraph: { title, description },
 };
 
-export default function WorkPage() {
+export default async function WorkPage() {
+  const cases = await getCases();
+
   return (
     <>
       <PageHeader
         eyebrow="Selected work"
         title="Stacks we built, running in production."
         lede="Each of these replaced something that already worked, badly. The interesting part is rarely the model — it's the seams around it."
-        meta={`${CASES.length} case studies`}
+        meta={`${cases.length} case stud${cases.length === 1 ? "y" : "ies"}`}
         breadcrumbs={[{ label: "Home", href: "/" }]}
       />
 
@@ -31,7 +33,7 @@ export default function WorkPage() {
         <h2 className="sr-only">Case studies</h2>
 
         <div className="grid grid-cols-1 gap-[18px] sm:grid-cols-2">
-          {CASES.map((c, i) => (
+          {cases.map((c, i) => (
             <Reveal key={c.slug} delay={i * 0.06}>
               <Link href={`/work/${c.slug}`} className="block h-full text-white">
                 <div className="card card-lift flex h-full flex-col justify-between p-7">

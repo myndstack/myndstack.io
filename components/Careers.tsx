@@ -1,9 +1,11 @@
 import Link from "next/link";
 
-import { ROLES } from "@/lib/roles";
+import { getRoles } from "@/lib/sanity/queries";
 import Reveal from "./Reveal";
 
-export default function Careers() {
+export default async function Careers() {
+  const roles = await getRoles();
+
   return (
     <section id="careers" className="mx-auto mt-[60px] max-w-[1200px] px-5 sm:px-14">
       <Reveal className="clip-angular-34 relative overflow-hidden border border-line bg-surface px-6 py-16 sm:px-14">
@@ -36,7 +38,7 @@ export default function Careers() {
           </div>
 
           <ul className="m-0 flex list-none flex-col gap-2.5 p-0">
-            {ROLES.map((role) => (
+            {roles.map((role) => (
               <li key={role.slug}>
                 <Link
                   href={`/careers/${role.slug}`}
