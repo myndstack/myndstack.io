@@ -391,32 +391,44 @@ compositor wash the whole link mesh out.
 It falls back to the 2D [ParticleField](components/ParticleField.tsx) where WebGL is
 unavailable, and renders nothing below 760px or under reduced motion.
 
-### After-hero field
+### Section fields
 
-[SectionField](components/SectionField.tsx) is the animated backdrop behind the
-band below the hero (the `#work-grid`/Capabilities section). Three layers: a faint
-blueprint line grid and a few drifting lime glows — both pure CSS, so they cost
+[SectionField](components/SectionField.tsx) is the animated blueprint backdrop —
+a faint line grid and a few drifting lime glows (both pure CSS, so they cost
 almost nothing and freeze into a static field under reduced motion via the global
-duration override — plus, on desktop with motion allowed, a canvas of lime
+duration override), plus, on desktop with motion allowed, a canvas of lime
 *signals* that travel the grid lines with a fading tail, echoing the hero
 network's hopping pulses.
 
-Two things keep it cheap and safe, and both are held by tests (`the after-hero
-field stays in its lane` in [e2e/smoke.spec.ts](e2e/smoke.spec.ts)):
+It rides the five **open** sections down the page — the ones whose content sits
+on ink rather than an opaque panel: Capabilities, SelectedWork, Manifesto,
+Testimonials, Faq. Each is wrapped by [FieldBand](components/FieldBand.tsx) in
+[app/page.tsx](app/page.tsx); the paneled sections between them (Process,
+StatsStrip, Contrast, Pricing, Team, Careers) stay clean, which is what gives the
+alternating rhythm — a field on a section built from opaque panels would just be
+hidden behind them. `variant` (1–3) shifts the glows so repeats don't look
+identical, and **`signals` runs the canvas on only two focal bands**
+(Capabilities and Testimonials) so at most one is ever in view; the rest are
+pure-CSS grid + glow.
+
+Two things keep it cheap and safe, both held by tests (`the section fields stay
+in their lane` in [e2e/smoke.spec.ts](e2e/smoke.spec.ts)):
 
 - It is **not** a `lib/scroll.ts` subscriber — it runs on its own clock, not the
-  scroll position — and the canvas RAF is paused by an `IntersectionObserver`
-  whenever the band is off screen, the same pattern as `ParticleField`.
-- The band is wrapped in an `overflow-hidden` container in
-  [app/page.tsx](app/page.tsx). That clip is load-bearing: the glows are
-  positioned to extend past the band (for depth), and the clip is what stops them
-  bleeding up into StackStory and down into SelectedWork. (Document-level
-  horizontal overflow has its own backstop — the `#site` `overflow-x-clip` in
-  [app/layout.tsx](app/layout.tsx) — so this clip is about the neighbours, not
-  the page width.)
+  scroll position — and each signal canvas's RAF is paused by an
+  `IntersectionObserver` whenever its band is off screen, the same pattern as
+  `ParticleField`.
+- Each band is wrapped in an `overflow-hidden` container (`FieldBand`). That clip
+  is load-bearing: the glows are positioned to extend past the band (for depth),
+  and the clip is what stops them bleeding into the neighbouring sections.
+  (Document-level horizontal overflow has its own backstop — the `#site`
+  `overflow-x-clip` in [app/layout.tsx](app/layout.tsx) — so this clip is about
+  the neighbours, not the page width.)
 
 The signal canvas is desktop-and-motion only; mobile and reduced motion get the
-static grid + glow.
+static grid + glow. Because a faint field now sits under more headings and muted
+copy, the standing axe guard (below) is what confirms the added glow never pushes
+text below contrast — it stayed at zero serious violations.
 
 ### Reveal watchdog
 

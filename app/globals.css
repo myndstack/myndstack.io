@@ -880,6 +880,34 @@
     animation: fieldDriftC 33s var(--ease-brand) infinite;
   }
 
+  /* Variants only move the glows around — same sizes, same drift — so bands
+     down the page don't read as copies of each other. Variant 1 is the default
+     positions above (the after-hero showcase). */
+  .field[data-variant="2"] .field-glow-a {
+    left: auto;
+    right: 4%;
+  }
+  .field[data-variant="2"] .field-glow-b {
+    right: auto;
+    left: -2%;
+  }
+  .field[data-variant="2"] .field-glow-c {
+    left: auto;
+    right: 30%;
+  }
+  .field[data-variant="3"] .field-glow-a {
+    left: 28%;
+    top: -34%;
+  }
+  .field[data-variant="3"] .field-glow-b {
+    right: 8%;
+    top: 6%;
+  }
+  .field[data-variant="3"] .field-glow-c {
+    left: 6%;
+    bottom: -30%;
+  }
+
   .field-canvas {
     position: absolute;
     inset: 0;

@@ -47,14 +47,24 @@ const rand = (a: number, b: number) => a + Math.random() * (b - a);
  * Renders the static grid + glow under reduced motion; drops the canvas entirely
  * on mobile and under reduced motion.
  */
-export default function SectionField() {
+export default function SectionField({
+  signals = false,
+  variant = 1,
+}: {
+  /** Run the travelling-signal canvas. Off by default — static bands are pure CSS. */
+  signals?: boolean;
+  /** Shifts the glow layout so repeated bands don't look identical. */
+  variant?: 1 | 2 | 3;
+} = {}) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const reduced = useReducedMotion();
   const isDesktop = useMediaQuery("(min-width: 47.5rem)");
-  const animate = isDesktop && !reduced;
+  // The canvas only mounts for a signals band on desktop with motion allowed;
+  // everything else is the CSS grid + glow, which costs nothing to animate.
+  const runSignals = signals && isDesktop && !reduced;
 
   useEffect(() => {
-    if (!animate) return;
+    if (!runSignals) return;
 
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -163,12 +173,12 @@ export default function SectionField() {
       window.clearTimeout(resizeTimer);
       window.removeEventListener("resize", onResize);
     };
-  }, [animate]);
+  }, [runSignals]);
 
   return (
-    <div className="field" aria-hidden="true">
+    <div className="field" data-variant={variant} aria-hidden="true">
       <div className="field-grid" />
-      {animate ? <canvas ref={canvasRef} className="field-canvas" /> : null}
+      {runSignals ? <canvas ref={canvasRef} className="field-canvas" /> : null}
       <div className="field-glows">
         <span className="field-glow field-glow-a" />
         <span className="field-glow field-glow-b" />

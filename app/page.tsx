@@ -4,13 +4,13 @@ import ContactForm from "@/components/ContactForm";
 import Contrast from "@/components/Contrast";
 import CtaBand from "@/components/CtaBand";
 import Faq from "@/components/Faq";
+import FieldBand from "@/components/FieldBand";
 import Hero from "@/components/Hero";
 import LogoMarquee from "@/components/LogoMarquee";
 import Manifesto from "@/components/Manifesto";
 import MarqueeBand from "@/components/MarqueeBand";
 import Pricing from "@/components/Pricing";
 import Process from "@/components/Process";
-import SectionField from "@/components/SectionField";
 import SelectedWork from "@/components/SelectedWork";
 import StackStory from "@/components/StackStory";
 import StatsStrip from "@/components/StatsStrip";
@@ -47,25 +47,35 @@ export default async function Home() {
       />
       <MarqueeBand />
       <StackStory />
-      {/* The band directly below the hero gets the animated blueprint field.
-          The wrapper is full-bleed and `overflow-hidden` so the drifting glows
-          can never widen the document; `isolate` + DOM order keep the field
-          (z-0) behind the section's content. */}
-      <div className="relative isolate overflow-hidden">
-        <SectionField />
+      {/* The animated blueprint field rides the "open" sections — the ones whose
+          content sits on ink rather than an opaque panel. Signals (the canvas)
+          run only on the two focal bands and are spaced apart, so at most one is
+          ever in view; the rest are static CSS grid + glow. `variant` shifts the
+          glows so repeats don't look identical. The paneled sections between them
+          (Process, StatsStrip, Contrast, Pricing, Team, Careers) stay clean,
+          which is what gives the alternating rhythm. */}
+      <FieldBand signals variant={1}>
         <Capabilities />
-      </div>
-      <SelectedWork />
+      </FieldBand>
+      <FieldBand variant={2}>
+        <SelectedWork />
+      </FieldBand>
       <Process />
       <LogoMarquee />
       <StatsStrip />
       <Contrast />
-      <Manifesto lead={home.manifestoLead} keep={home.manifestoKeep} />
-      <Testimonials items={testimonials} />
+      <FieldBand variant={3}>
+        <Manifesto lead={home.manifestoLead} keep={home.manifestoKeep} />
+      </FieldBand>
+      <FieldBand signals variant={2}>
+        <Testimonials items={testimonials} />
+      </FieldBand>
       <Pricing tiers={tiers} />
       <Team />
       <Careers />
-      <Faq faqs={faqs} />
+      <FieldBand variant={1}>
+        <Faq faqs={faqs} />
+      </FieldBand>
       <CtaBand />
       <ContactForm
         email={site.email}

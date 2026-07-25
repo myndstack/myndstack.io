@@ -247,50 +247,55 @@ test.describe("the nav morph stays cheap", () => {
 });
 
 /**
- * The animated field behind the after-hero band (SectionField).
+ * The animated section fields (SectionField, via FieldBand).
  *
- * Two things about it are easy to regress and invisible to a screenshot: the
- * band must stay clipped, and its canvas must not run under reduced motion or on
- * mobile, where only the static grid + glow should show.
+ * Five bands ride the open sections; two of them (the `signals` bands) run a
+ * canvas. Two things are easy to regress and invisible to a screenshot: every
+ * band must stay clipped, and the signal canvases must not run under reduced
+ * motion or on mobile, where only the static grid + glow should show.
  */
-test.describe("the after-hero field stays in its lane", () => {
-  test("keeps the band clipped so the glows can't bleed into neighbours", async ({
+const FIELD_COUNT = 5;
+const SIGNAL_BANDS = 2; // Capabilities + Testimonials
+
+test.describe("the section fields stay in their lane", () => {
+  test("every band is clipped so the glows can't bleed into neighbours", async ({
     page,
   }) => {
-    // The glows are positioned to extend past the band (top: -25%, right: -2%,
-    // etc.) so they read as depth rather than a framed box. The wrapper's
-    // `overflow: hidden` is what stops them painting up into StackStory and down
-    // into SelectedWork. (Document-level horizontal overflow is separately caught
-    // by `#site`'s overflow-x-clip, so a doc-width assertion here would pass even
-    // with the clip gone — this asserts the clip itself, which actually bites.)
+    // The glows are positioned to extend past each band (top: -25%, right: -2%,
+    // etc.) so they read as depth rather than a framed box. Each wrapper's
+    // `overflow: hidden` is what stops them painting into the sections above and
+    // below. (Document-level horizontal overflow is separately caught by `#site`'s
+    // overflow-x-clip, so a doc-width assertion here would pass even with the clip
+    // gone — this asserts the clip itself, which actually bites.)
     await page.setViewportSize({ width: 1440, height: 900 });
     await landOnHome(page);
-    const overflow = await page
-      .locator(".field")
-      .locator("xpath=..")
-      .evaluate((el) => getComputedStyle(el).overflow);
-    expect(overflow).toBe("hidden");
+    const fields = page.locator(".field");
+    await expect(fields).toHaveCount(FIELD_COUNT);
+    const overflows = await fields.evaluateAll((els) =>
+      els.map((el) => getComputedStyle(el.parentElement as Element).overflow),
+    );
+    expect(overflows.every((o) => o === "hidden")).toBe(true);
   });
 
-  test("runs the signal canvas on desktop but not on mobile", async ({ page }) => {
+  test("runs the signal canvases on desktop but not on mobile", async ({ page }) => {
     await page.setViewportSize({ width: 1440, height: 900 });
     await landOnHome(page);
-    await expect(page.locator(".field canvas")).toHaveCount(1);
+    await expect(page.locator(".field canvas")).toHaveCount(SIGNAL_BANDS);
 
     await page.setViewportSize({ width: 400, height: 900 });
-    // Give the media-query store a beat to settle and drop the canvas.
+    // Give the media-query store a beat to settle and drop the canvases.
     await page.waitForTimeout(200);
     await expect(page.locator(".field canvas")).toHaveCount(0);
-    // The static field itself is always present.
-    await expect(page.locator(".field .field-grid")).toHaveCount(1);
+    // The static fields themselves are always present.
+    await expect(page.locator(".field .field-grid")).toHaveCount(FIELD_COUNT);
   });
 
-  test("drops the canvas under reduced motion", async ({ page }) => {
+  test("drops the canvases under reduced motion", async ({ page }) => {
     await page.emulateMedia({ reducedMotion: "reduce" });
     await page.setViewportSize({ width: 1440, height: 900 });
     await landOnHome(page);
     await expect(page.locator(".field canvas")).toHaveCount(0);
-    await expect(page.locator(".field .field-grid")).toHaveCount(1);
+    await expect(page.locator(".field .field-grid")).toHaveCount(FIELD_COUNT);
   });
 });
 
