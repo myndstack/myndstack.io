@@ -3,7 +3,6 @@
 import { useEffect, useRef } from "react";
 import { STACK_LAYERS } from "@/lib/content";
 import { useScrollFrame } from "@/lib/hooks";
-import SectionField from "./SectionField";
 
 /** Vertical pitch between locked tiles, and where the stack starts. */
 const GAP = 106;
@@ -85,7 +84,11 @@ export default function StackStory() {
         `translate(${(scatterX * (1 - eased)).toFixed(1)}px, ` +
         `${(restY + scatterY * (1 - eased)).toFixed(1)}px) ` +
         `scale(${scale.toFixed(3)})`;
-      el.style.opacity = (0.1 + 0.9 * eased).toFixed(2);
+      // Start fully transparent, not at a 0.1 floor: the old floor left every
+      // un-assembled tile as faint ghost text scattered across the panel before
+      // its turn came — which the brighter field behind only made louder. Each
+      // tile now fades up from nothing as it assembles.
+      el.style.opacity = eased.toFixed(2);
 
       const locked = raw > LOCK_AT;
       el.classList.toggle("is-locked", locked);
@@ -102,15 +105,11 @@ export default function StackStory() {
       ref={sectionRef}
       className="relative min-h-[70vh] border-b border-line sm:h-[340vh]"
     >
-      {/* `isolate` contains the field's z-0 layer; the `overflow-hidden` here is
-          on the sticky element itself (not an ancestor), so it clips the field's
-          glows without breaking the pin. The field replaces the section's old
-          static grid — same blueprint look, now with the drifting glow and
-          signals the rest of the page uses. */}
-      <div className="relative isolate flex min-h-[70vh] items-center overflow-hidden py-16 sm:sticky sm:top-0 sm:h-screen sm:py-0">
-        <SectionField signals variant={3} />
-
-        <div className="relative z-1 mx-auto grid w-full max-w-[1200px] grid-cols-1 items-center gap-16 px-5 sm:px-14 md:grid-cols-[1.05fr_1fr]">
+      {/* No backdrop of its own — the page's continuous aurora (see page.tsx)
+          flows behind this section. `overflow-hidden` here is on the sticky
+          element itself, which is fine for the pin. */}
+      <div className="relative flex min-h-[70vh] items-center overflow-hidden py-16 sm:sticky sm:top-0 sm:h-screen sm:py-0">
+        <div className="relative mx-auto grid w-full max-w-[1200px] grid-cols-1 items-center gap-16 px-5 sm:px-14 md:grid-cols-[1.05fr_1fr]">
           <div>
             <div className="eyebrow mb-5 tracking-[0.16em]">
               The stack · <span ref={counterRef}>01 / 04</span>

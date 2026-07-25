@@ -391,52 +391,34 @@ compositor wash the whole link mesh out.
 It falls back to the 2D [ParticleField](components/ParticleField.tsx) where WebGL is
 unavailable, and renders nothing below 760px or under reduced motion.
 
-### Section fields
+### Aurora
 
-[SectionField](components/SectionField.tsx) is the animated blueprint backdrop —
-a faint line grid and a few drifting lime glows (both pure CSS, so they cost
-almost nothing and freeze into a static field under reduced motion via the global
-duration override), plus, on desktop with motion allowed, a canvas of lime
-*signals* that travel the grid lines with a fading tail, echoing the hero
-network's hopping pulses.
+[Aurora](components/Aurora.tsx) is the soft flowing backdrop for the page's middle
+run — a handful of large, slowly drifting lime glows over the ink, no grid and no
+dots. It spans one continuous range, **StackStory → Studio (the Team section,
+which the nav labels "Studio")**; everything above (hero, marquee) and below
+(Careers, FAQ, CTA, contact) stays on plain ink. It's wrapped once around that run
+in [app/page.tsx](app/page.tsx).
 
-It rides the five **open** sections down the page — the ones whose content sits
-on ink rather than an opaque panel: StackStory, Capabilities, SelectedWork,
-Manifesto, Testimonials. Most are wrapped by [FieldBand](components/FieldBand.tsx)
-in [app/page.tsx](app/page.tsx); the paneled sections between them (Process,
-StatsStrip, Contrast, Pricing, Team, Careers, Faq) stay clean, which is what gives
-the alternating rhythm — a field on a section built from opaque panels would just
-be hidden behind them. `variant` (1–3) shifts the glows so repeats don't look
-identical, and **`signals` runs the canvas on the three focal bands** (StackStory,
-Capabilities, Testimonials), which are spaced far enough apart that at most one is
-ever in view; the rest are pure-CSS grid + glow.
+Pure CSS — a plain server component, styles + `auroraDrift*` keyframes in
+`globals.css`, and under reduced motion the global duration override freezes the
+drift into a static gradient. Two decisions matter, both held by `the aurora stays
+in its lane` in [e2e/smoke.spec.ts](e2e/smoke.spec.ts):
 
-**StackStory is the exception to `FieldBand`.** It's the pinned section, and a
-`FieldBand`'s `overflow-hidden` wrapper would sit *between* the sticky element and
-its scroll container — which breaks `position: sticky`. So `SectionField` is
-placed **inside** StackStory's own sticky element (see
-[StackStory.tsx](components/StackStory.tsx)), whose `overflow-hidden` is on the
-sticky box itself (fine — it clips the glows without breaking the pin). It
-replaced the section's old hand-rolled static grid.
+- **It is viewport-pinned, not stretched over the run.** A zero-height `sticky`
+  anchor keeps a `100vh` layer at the top of the screen while you scroll the run,
+  so the glow is uniform everywhere. Stretching one tall `absolute` layer over the
+  whole run instead pools all the light behind the 340vh pinned StackStory and
+  leaves the shorter sections below it starved — that was the first attempt.
+- **The run wrapper must stay clip-free.** StackStory pins with `position: sticky`,
+  and an `overflow`-clip ancestor between it and its scroll container would break
+  the pin. So the wrapper is `relative isolate` (no clip); the aurora sits at a
+  negative z-index behind every section and clips its *own* blobs. The test asserts
+  the aurora clips while its ancestors don't.
 
-Two things keep it cheap and safe, both held by tests (`the section fields stay
-in their lane` in [e2e/smoke.spec.ts](e2e/smoke.spec.ts)):
-
-- It is **not** a `lib/scroll.ts` subscriber — it runs on its own clock, not the
-  scroll position — and each signal canvas's RAF is paused by an
-  `IntersectionObserver` whenever its band is off screen, the same pattern as
-  `ParticleField`.
-- Each band is wrapped in an `overflow-hidden` container (`FieldBand`). That clip
-  is load-bearing: the glows are positioned to extend past the band (for depth),
-  and the clip is what stops them bleeding into the neighbouring sections.
-  (Document-level horizontal overflow has its own backstop — the `#site`
-  `overflow-x-clip` in [app/layout.tsx](app/layout.tsx) — so this clip is about
-  the neighbours, not the page width.)
-
-The signal canvas is desktop-and-motion only; mobile and reduced motion get the
-static grid + glow. Because a faint field now sits under more headings and muted
-copy, the standing axe guard (below) is what confirms the added glow never pushes
-text below contrast — it stayed at zero serious violations.
+Because the glow now sits under a lot of headings and muted copy, the standing axe
+guard (below) is what confirms it never pushes text below contrast — it stayed at
+zero serious violations.
 
 ### Reveal watchdog
 

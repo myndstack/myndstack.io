@@ -103,20 +103,20 @@
   50% { opacity: 1; }
   100% { opacity: 0.35; }
 }
-/* The drifting glows behind the after-hero field. Transform-only so each is a
-   compositor job, not a paint. Three different periods and paths so they never
-   line up into an obvious pulse. See `.field-glow` and SectionField.tsx. */
-@keyframes fieldDriftA {
-  0%, 100% { transform: translate3d(0, 0, 0); }
-  50% { transform: translate3d(7%, 5%, 0); }
+/* The slowly-drifting blobs of the aurora backdrop. Transform-only (translate +
+   a little scale) so each is a compositor job, not a paint. Different periods and
+   paths so they never line up into an obvious pulse. See `.aurora` / Aurora.tsx. */
+@keyframes auroraDriftA {
+  0%, 100% { transform: translate3d(0, 0, 0) scale(1); }
+  50% { transform: translate3d(4%, 3%, 0) scale(1.08); }
 }
-@keyframes fieldDriftB {
-  0%, 100% { transform: translate3d(0, 0, 0); }
-  50% { transform: translate3d(-6%, 6%, 0); }
+@keyframes auroraDriftB {
+  0%, 100% { transform: translate3d(0, 0, 0) scale(1.06); }
+  50% { transform: translate3d(-5%, -3%, 0) scale(1); }
 }
-@keyframes fieldDriftC {
-  0%, 100% { transform: translate3d(0, 0, 0); }
-  50% { transform: translate3d(5%, -7%, 0); }
+@keyframes auroraDriftC {
+  0%, 100% { transform: translate3d(0, 0, 0) scale(1); }
+  50% { transform: translate3d(3%, -4%, 0) scale(1.1); }
 }
 
 /* ============================================================
@@ -808,115 +808,80 @@
     color: var(--color-lime-ink);
   }
 
-  /* --- After-hero field ---------------------------------------------------
-     A payload-style backdrop for the band below the hero: a faint blueprint
-     grid, a few drifting lime glows for depth, and (on desktop, via
-     SectionField's canvas) signals that travel the grid lines. The grid and
-     glows are pure CSS and cost almost nothing; the wrapper is
-     `overflow-hidden`, which is what keeps the glows from ever widening the
-     document. See SectionField.tsx. */
-  .field {
-    position: absolute;
-    inset: 0;
-    z-index: 0;
+  /* --- Aurora ---------------------------------------------------------------
+     A single soft flowing backdrop for the whole StackStory → Studio(Team) run
+     — a few large, slowly drifting lime glows over the ink, no grid and no dots.
+
+     It is viewport-PINNED, not stretched over the (very tall) run: a zero-height
+     `sticky` anchor keeps a viewport-sized layer at the top of the screen while
+     you scroll the run, so coverage is uniform everywhere instead of pooling
+     behind the tall pinned StackStory. Pure CSS — the sticky un-pins on its own
+     when the run ends. The anchor takes no flow space and sits at a negative
+     z-index behind every section; the run wrapper stays clip-free so StackStory
+     keeps its own `position: sticky`. See Aurora.tsx. */
+  .aurora-anchor {
+    position: sticky;
+    top: 0;
+    height: 0;
+    z-index: -10;
     pointer-events: none;
-    /* Fade the whole field into the ink at the top and bottom edges so the band
-       blends into the plain sections above and below instead of ending on a
-       visible seam. */
-    -webkit-mask-image: linear-gradient(180deg, transparent, #000 16%, #000 84%, transparent);
-    mask-image: linear-gradient(180deg, transparent, #000 16%, #000 84%, transparent);
+  }
+  .aurora {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 100vh;
+    overflow: hidden;
   }
 
-  /* Thin line grid. Same masked-blueprint idea as the mobile hero dot lattice
-     (Hero.tsx), but lines rather than dots and centred on the band. The radial
-     mask keeps it densest in the middle and gone at the sides. */
-  .field-grid {
-    position: absolute;
-    inset: 0;
-    background-image:
-      linear-gradient(rgba(255, 255, 255, 0.045) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(255, 255, 255, 0.045) 1px, transparent 1px);
-    background-size: 46px 46px;
-    -webkit-mask-image: radial-gradient(130% 108% at 50% 46%, #000 46%, transparent 92%);
-    mask-image: radial-gradient(130% 108% at 50% 46%, #000 46%, transparent 92%);
-  }
-
-  /* The drifting glows. `screen` lifts them off the ink without a hard edge;
-     soft gradient stops carry the blur so there is no `filter` pass. */
-  .field-glows {
-    position: absolute;
-    inset: 0;
-  }
-  .field-glow {
+  /* Large soft radial blobs spread across the viewport and drifting. Low opacity
+     over near-black, so plain blending reads the same as `screen` without the
+     extra composited layer. */
+  .aurora-blob {
     position: absolute;
     border-radius: 50%;
-    mix-blend-mode: screen;
-    will-change: transform;
   }
-  .field-glow-a {
-    width: 44%;
-    height: 150%;
-    left: 4%;
-    top: -25%;
-    background: radial-gradient(circle at 50% 50%, rgba(201, 242, 77, 0.2), transparent 66%);
-    animation: fieldDriftA 19s var(--ease-brand) infinite;
+  .aurora-1 {
+    top: -12%;
+    left: 3%;
+    width: 55vw;
+    height: 72vh;
+    background: radial-gradient(circle at 50% 50%, rgba(201, 242, 77, 0.1), transparent 62%);
+    animation: auroraDriftA 24s var(--ease-brand) infinite;
   }
-  .field-glow-b {
-    width: 52%;
-    height: 165%;
-    right: -2%;
-    top: -32%;
-    background: radial-gradient(circle at 50% 50%, rgba(201, 242, 77, 0.14), transparent 68%);
-    animation: fieldDriftB 26s var(--ease-brand) infinite;
-  }
-  /* One cool-tinted glow for depth — the same trick the reference uses to stop
-     a single-hue field reading flat. Kept faint so it never fights the lime. */
-  .field-glow-c {
-    width: 40%;
-    height: 130%;
-    left: 32%;
-    bottom: -40%;
-    background: radial-gradient(circle at 50% 50%, rgba(120, 190, 255, 0.09), transparent 70%);
-    animation: fieldDriftC 33s var(--ease-brand) infinite;
-  }
-
-  /* Variants only move the glows around — same sizes, same drift — so bands
-     down the page don't read as copies of each other. Variant 1 is the default
-     positions above (the after-hero showcase). */
-  .field[data-variant="2"] .field-glow-a {
-    left: auto;
-    right: 4%;
-  }
-  .field[data-variant="2"] .field-glow-b {
-    right: auto;
-    left: -2%;
-  }
-  .field[data-variant="2"] .field-glow-c {
-    left: auto;
-    right: 30%;
-  }
-  .field[data-variant="3"] .field-glow-a {
-    left: 28%;
-    top: -34%;
-  }
-  .field[data-variant="3"] .field-glow-b {
-    right: 8%;
+  .aurora-2 {
     top: 6%;
+    right: -4%;
+    width: 52vw;
+    height: 66vh;
+    background: radial-gradient(circle at 50% 50%, rgba(201, 242, 77, 0.075), transparent 64%);
+    animation: auroraDriftB 30s var(--ease-brand) infinite;
   }
-  .field[data-variant="3"] .field-glow-c {
-    left: 6%;
-    bottom: -30%;
+  /* One cool-tinted blob for depth, so the run doesn't read as one flat hue. */
+  .aurora-3 {
+    top: 32%;
+    left: 22%;
+    width: 62vw;
+    height: 72vh;
+    background: radial-gradient(circle at 50% 50%, rgba(150, 200, 255, 0.045), transparent 66%);
+    animation: auroraDriftC 34s var(--ease-brand) infinite;
   }
-
-  .field-canvas {
-    position: absolute;
-    inset: 0;
-    width: 100%;
-    height: 100%;
-    /* Same radial fade as the grid, so a signal dims as it runs toward the
-       edges rather than winking out at a hard boundary. */
-    -webkit-mask-image: radial-gradient(130% 108% at 50% 46%, #000 46%, transparent 92%);
-    mask-image: radial-gradient(130% 108% at 50% 46%, #000 46%, transparent 92%);
+  .aurora-4 {
+    bottom: -10%;
+    right: 4%;
+    width: 54vw;
+    height: 68vh;
+    background: radial-gradient(circle at 50% 50%, rgba(201, 242, 77, 0.085), transparent 63%);
+    animation: auroraDriftA 27s var(--ease-brand) infinite reverse;
+  }
+  .aurora-5 {
+    bottom: 2%;
+    left: -2%;
+    width: 50vw;
+    height: 62vh;
+    background: radial-gradient(circle at 50% 50%, rgba(201, 242, 77, 0.06), transparent 64%);
+    animation: auroraDriftB 32s var(--ease-brand) infinite;
   }
 }
 

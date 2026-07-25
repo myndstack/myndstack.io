@@ -247,55 +247,40 @@ test.describe("the nav morph stays cheap", () => {
 });
 
 /**
- * The animated section fields (SectionField, via FieldBand).
+ * The continuous aurora backdrop (Aurora) behind the StackStory → Studio(Team) run.
  *
- * Five bands ride the open sections; two of them (the `signals` bands) run a
- * canvas. Two things are easy to regress and invisible to a screenshot: every
- * band must stay clipped, and the signal canvases must not run under reduced
- * motion or on mobile, where only the static grid + glow should show.
+ * The one thing that's easy to regress and invisible to a screenshot: the aurora
+ * must clip its own blobs, while its wrapper must stay clip-free — an
+ * `overflow-hidden` on the wrapper would sit between StackStory's sticky element
+ * and its scroll container and break the pin. So this asserts the clip is on the
+ * `.aurora` itself, not its parent.
  */
-const FIELD_COUNT = 5; // StackStory, Capabilities, SelectedWork, Manifesto, Testimonials
-const SIGNAL_BANDS = 3; // StackStory + Capabilities + Testimonials
-
-test.describe("the section fields stay in their lane", () => {
-  test("every band is clipped so the glows can't bleed into neighbours", async ({
+test.describe("the aurora stays in its lane", () => {
+  test("clips its own blobs but not via an ancestor (which would break the pin)", async ({
     page,
   }) => {
-    // The glows are positioned to extend past each band (top: -25%, right: -2%,
-    // etc.) so they read as depth rather than a framed box. Each wrapper's
-    // `overflow: hidden` is what stops them painting into the sections above and
-    // below. (Document-level horizontal overflow is separately caught by `#site`'s
-    // overflow-x-clip, so a doc-width assertion here would pass even with the clip
-    // gone — this asserts the clip itself, which actually bites.)
     await page.setViewportSize({ width: 1440, height: 900 });
     await landOnHome(page);
-    const fields = page.locator(".field");
-    await expect(fields).toHaveCount(FIELD_COUNT);
-    const overflows = await fields.evaluateAll((els) =>
-      els.map((el) => getComputedStyle(el.parentElement as Element).overflow),
-    );
-    expect(overflows.every((o) => o === "hidden")).toBe(true);
+    const aurora = page.locator(".aurora");
+    await expect(aurora).toHaveCount(1);
+    const { self, anchor, region } = await aurora.evaluate((el) => ({
+      self: getComputedStyle(el).overflow,
+      anchor: getComputedStyle(el.parentElement as Element).overflow,
+      // The run wrapper that also holds StackStory.
+      region: getComputedStyle(el.parentElement!.parentElement as Element).overflow,
+    }));
+    // The aurora clips its own blobs; nothing above it does — StackStory pins
+    // with position:sticky, and an overflow-clip ancestor would break it.
+    expect(self).toBe("hidden");
+    expect(anchor).toBe("visible");
+    expect(region).toBe("visible");
   });
 
-  test("runs the signal canvases on desktop but not on mobile", async ({ page }) => {
+  test("adds no canvas and no per-frame work — it's pure CSS", async ({ page }) => {
     await page.setViewportSize({ width: 1440, height: 900 });
     await landOnHome(page);
-    await expect(page.locator(".field canvas")).toHaveCount(SIGNAL_BANDS);
-
-    await page.setViewportSize({ width: 400, height: 900 });
-    // Give the media-query store a beat to settle and drop the canvases.
-    await page.waitForTimeout(200);
-    await expect(page.locator(".field canvas")).toHaveCount(0);
-    // The static fields themselves are always present.
-    await expect(page.locator(".field .field-grid")).toHaveCount(FIELD_COUNT);
-  });
-
-  test("drops the canvases under reduced motion", async ({ page }) => {
-    await page.emulateMedia({ reducedMotion: "reduce" });
-    await page.setViewportSize({ width: 1440, height: 900 });
-    await landOnHome(page);
-    await expect(page.locator(".field canvas")).toHaveCount(0);
-    await expect(page.locator(".field .field-grid")).toHaveCount(FIELD_COUNT);
+    await expect(page.locator(".aurora canvas")).toHaveCount(0);
+    await expect(page.locator(".aurora-blob")).toHaveCount(5);
   });
 });
 

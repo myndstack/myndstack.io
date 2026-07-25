@@ -1,10 +1,10 @@
+import Aurora from "@/components/Aurora";
 import Capabilities from "@/components/Capabilities";
 import Careers from "@/components/Careers";
 import ContactForm from "@/components/ContactForm";
 import Contrast from "@/components/Contrast";
 import CtaBand from "@/components/CtaBand";
 import Faq from "@/components/Faq";
-import FieldBand from "@/components/FieldBand";
 import Hero from "@/components/Hero";
 import LogoMarquee from "@/components/LogoMarquee";
 import Manifesto from "@/components/Manifesto";
@@ -46,34 +46,27 @@ export default async function Home() {
         ctaSecondary={home.hero.ctaSecondary}
       />
       <MarqueeBand />
-      {/* StackStory carries the field inside its own sticky wrapper (a FieldBand's
-          overflow-hidden would break the pin), see StackStory.tsx. */}
-      <StackStory />
-      {/* The animated blueprint field rides the "open" sections — the ones whose
-          content sits on ink rather than an opaque panel. Signals (the canvas)
-          run only on the focal bands and are spaced apart, so at most one is ever
-          in view; the rest are static CSS grid + glow. `variant` shifts the glows
-          so repeats don't look identical. The paneled sections between them
-          (Process, StatsStrip, Contrast, Pricing, Team, Careers) stay clean,
-          which is what gives the alternating rhythm. */}
-      <FieldBand signals variant={1}>
+      {/* One continuous soft aurora runs behind everything from the stack down to
+          the Studio (Team) section — a single flowing gradient, no grid, no dots.
+          The wrapper is `relative isolate` but deliberately NOT `overflow-hidden`:
+          StackStory pins with `position: sticky`, which an overflow-clip ancestor
+          would break. The aurora sits at a negative z-index behind all the
+          sections' content and clips its own blobs. Everything after Team
+          (Careers, FAQ, CTA, contact) stays on plain ink. */}
+      <div className="relative isolate">
+        <Aurora />
+        <StackStory />
         <Capabilities />
-      </FieldBand>
-      <FieldBand variant={2}>
         <SelectedWork />
-      </FieldBand>
-      <Process />
-      <LogoMarquee />
-      <StatsStrip />
-      <Contrast />
-      <FieldBand variant={3}>
+        <Process />
+        <LogoMarquee />
+        <StatsStrip />
+        <Contrast />
         <Manifesto lead={home.manifestoLead} keep={home.manifestoKeep} />
-      </FieldBand>
-      <FieldBand signals variant={2}>
         <Testimonials items={testimonials} />
-      </FieldBand>
-      <Pricing tiers={tiers} />
-      <Team />
+        <Pricing tiers={tiers} />
+        <Team />
+      </div>
       <Careers />
       <Faq faqs={faqs} />
       <CtaBand />
