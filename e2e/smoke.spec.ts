@@ -285,6 +285,58 @@ test.describe("the aurora stays in its lane", () => {
 });
 
 /**
+ * The Hybrid A+B field (SectionField, via FieldBand) layered over the aurora on
+ * the open sections.
+ *
+ * Five fields ride the open sections; three run a signal canvas. Two things are
+ * easy to regress and invisible to a screenshot: every field must stay clipped,
+ * and the signal canvases must not run under reduced motion or on mobile, where
+ * only the static grid + glow should show.
+ */
+const FIELD_COUNT = 5; // StackStory, Capabilities, SelectedWork, Manifesto, Testimonials
+const SIGNAL_BANDS = 3; // StackStory + Capabilities + Testimonials
+
+test.describe("the section fields stay in their lane", () => {
+  test("every field is clipped so the glows can't bleed into neighbours", async ({
+    page,
+  }) => {
+    // Each field's `overflow: hidden` wrapper stops its glows painting into the
+    // sections above and below. (Document-level horizontal overflow is separately
+    // caught by `#site`'s overflow-x-clip, so a doc-width assertion here would pass
+    // even with the clip gone — this asserts the clip itself, which actually bites.)
+    await page.setViewportSize({ width: 1440, height: 900 });
+    await landOnHome(page);
+    const fields = page.locator(".field");
+    await expect(fields).toHaveCount(FIELD_COUNT);
+    const overflows = await fields.evaluateAll((els) =>
+      els.map((el) => getComputedStyle(el.parentElement as Element).overflow),
+    );
+    expect(overflows.every((o) => o === "hidden")).toBe(true);
+  });
+
+  test("runs the signal canvases on desktop but not on mobile", async ({ page }) => {
+    await page.setViewportSize({ width: 1440, height: 900 });
+    await landOnHome(page);
+    await expect(page.locator(".field canvas")).toHaveCount(SIGNAL_BANDS);
+
+    await page.setViewportSize({ width: 400, height: 900 });
+    // Give the media-query store a beat to settle and drop the canvases.
+    await page.waitForTimeout(200);
+    await expect(page.locator(".field canvas")).toHaveCount(0);
+    // The static fields themselves are always present.
+    await expect(page.locator(".field .field-grid")).toHaveCount(FIELD_COUNT);
+  });
+
+  test("drops the canvases under reduced motion", async ({ page }) => {
+    await page.emulateMedia({ reducedMotion: "reduce" });
+    await page.setViewportSize({ width: 1440, height: 900 });
+    await landOnHome(page);
+    await expect(page.locator(".field canvas")).toHaveCount(0);
+    await expect(page.locator(".field .field-grid")).toHaveCount(FIELD_COUNT);
+  });
+});
+
+/**
  * Standing accessibility guard (axe-core).
  *
  * A Vercel audit surfaced a wall of `color-contrast` and `link-in-text-block`

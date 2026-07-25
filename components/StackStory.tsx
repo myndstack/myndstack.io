@@ -3,6 +3,7 @@
 import { useEffect, useRef } from "react";
 import { STACK_LAYERS } from "@/lib/content";
 import { useScrollFrame } from "@/lib/hooks";
+import SectionField from "./SectionField";
 
 /** Vertical pitch between locked tiles, and where the stack starts. */
 const GAP = 106;
@@ -105,11 +106,15 @@ export default function StackStory() {
       ref={sectionRef}
       className="relative min-h-[70vh] border-b border-line sm:h-[340vh]"
     >
-      {/* No backdrop of its own — the page's continuous aurora (see page.tsx)
-          flows behind this section. `overflow-hidden` here is on the sticky
-          element itself, which is fine for the pin. */}
-      <div className="relative flex min-h-[70vh] items-center overflow-hidden py-16 sm:sticky sm:top-0 sm:h-screen sm:py-0">
-        <div className="relative mx-auto grid w-full max-w-[1200px] grid-cols-1 items-center gap-16 px-5 sm:px-14 md:grid-cols-[1.05fr_1fr]">
+      {/* StackStory is an open section, so it gets the Hybrid A+B field on top of
+          the page aurora — but placed INSIDE its own sticky element (a FieldBand's
+          overflow-hidden wrapper would break the pin). `isolate` contains the
+          field's z-0; the `overflow-hidden` here is on the sticky box itself,
+          which is fine for the pin and clips the field's glows. */}
+      <div className="relative isolate flex min-h-[70vh] items-center overflow-hidden py-16 sm:sticky sm:top-0 sm:h-screen sm:py-0">
+        <SectionField signals variant={3} />
+
+        <div className="relative z-1 mx-auto grid w-full max-w-[1200px] grid-cols-1 items-center gap-16 px-5 sm:px-14 md:grid-cols-[1.05fr_1fr]">
           <div>
             <div className="eyebrow mb-5 tracking-[0.16em]">
               The stack · <span ref={counterRef}>01 / 04</span>

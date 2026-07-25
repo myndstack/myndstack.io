@@ -391,32 +391,44 @@ compositor wash the whole link mesh out.
 It falls back to the 2D [ParticleField](components/ParticleField.tsx) where WebGL is
 unavailable, and renders nothing below 760px or under reduced motion.
 
-### Aurora
+### Background: aurora + section fields
 
-[Aurora](components/Aurora.tsx) is the soft flowing backdrop for the page's middle
-run — a handful of large, slowly drifting lime glows over the ink, no grid and no
-dots. It spans one continuous range, **StackStory → Studio (the Team section,
-which the nav labels "Studio")**; everything above (hero, marquee) and below
-(Careers, FAQ, CTA, contact) stays on plain ink. It's wrapped once around that run
-in [app/page.tsx](app/page.tsx).
+The page's middle run — **StackStory → Studio (the Team section, the nav labels it
+"Studio")** — carries a two-layer backdrop, wrapped once in
+[app/page.tsx](app/page.tsx). Everything above (hero, marquee) and below (Careers,
+FAQ, CTA, contact) stays on plain ink.
 
-Pure CSS — a plain server component, styles + `auroraDrift*` keyframes in
-`globals.css`, and under reduced motion the global duration override freezes the
-drift into a static gradient. Two decisions matter, both held by `the aurora stays
-in its lane` in [e2e/smoke.spec.ts](e2e/smoke.spec.ts):
+**Layer 1 — [Aurora](components/Aurora.tsx):** the continuous base, a handful of
+large, slowly drifting lime glows over the ink, no grid and no dots, behind the
+whole run. Pure CSS (a plain server component; `auroraDrift*` keyframes in
+`globals.css`; reduced motion freezes it). Two decisions, both held by `the aurora
+stays in its lane` in [e2e/smoke.spec.ts](e2e/smoke.spec.ts):
 
-- **It is viewport-pinned, not stretched over the run.** A zero-height `sticky`
-  anchor keeps a `100vh` layer at the top of the screen while you scroll the run,
-  so the glow is uniform everywhere. Stretching one tall `absolute` layer over the
-  whole run instead pools all the light behind the 340vh pinned StackStory and
-  leaves the shorter sections below it starved — that was the first attempt.
+- **Viewport-pinned, not stretched over the run.** A zero-height `sticky` anchor
+  keeps a `100vh` layer at the top of the screen while you scroll, so the glow is
+  uniform. Stretching one tall `absolute` layer instead pools all the light behind
+  the 340vh pinned StackStory and starves the shorter sections below — the first
+  attempt did exactly that.
 - **The run wrapper must stay clip-free.** StackStory pins with `position: sticky`,
-  and an `overflow`-clip ancestor between it and its scroll container would break
-  the pin. So the wrapper is `relative isolate` (no clip); the aurora sits at a
-  negative z-index behind every section and clips its *own* blobs. The test asserts
-  the aurora clips while its ancestors don't.
+  and an `overflow`-clip ancestor would break the pin. So the wrapper is `relative
+  isolate` (no clip); the aurora sits at a negative z-index and clips its *own*
+  blobs.
 
-Because the glow now sits under a lot of headings and muted copy, the standing axe
+**Layer 2 — the Hybrid A+B field** ([SectionField](components/SectionField.tsx) via
+[FieldBand](components/FieldBand.tsx)): a blueprint grid + drifting glow +
+travelling *signals* canvas, layered **on top of the aurora on the open sections**
+(StackStory, Capabilities, SelectedWork, Manifesto, Testimonials). The paneled
+sections between them (Process, StatsStrip, Contrast, Pricing, Team) show the
+aurora alone — that open/paneled split is the on/off rhythm. The field's own glows
+are dialled back from the standalone version so they add grid-and-signal texture
+over the aurora rather than doubling the lime; `signals` runs the canvas on three
+focal fields (StackStory, Capabilities, Testimonials), each paused off-screen by
+its `IntersectionObserver`, and mobile/reduced-motion get grid + glow only.
+StackStory is the exception that carries its field *inside* its own sticky element
+(same pin reason as the aurora wrapper). Held by `the section fields stay in their
+lane`.
+
+Because glow now sits under a lot of headings and muted copy, the standing axe
 guard (below) is what confirms it never pushes text below contrast — it stayed at
 zero serious violations.
 

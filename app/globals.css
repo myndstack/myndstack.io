@@ -118,6 +118,21 @@
   0%, 100% { transform: translate3d(0, 0, 0) scale(1); }
   50% { transform: translate3d(3%, -4%, 0) scale(1.1); }
 }
+/* The drifting glows of the per-section field (grid + glow + signals), which sits
+   ON TOP of the aurora on the open sections. Transform-only, offset periods. See
+   `.field-glow` / SectionField.tsx. */
+@keyframes fieldDriftA {
+  0%, 100% { transform: translate3d(0, 0, 0); }
+  50% { transform: translate3d(7%, 5%, 0); }
+}
+@keyframes fieldDriftB {
+  0%, 100% { transform: translate3d(0, 0, 0); }
+  50% { transform: translate3d(-6%, 6%, 0); }
+}
+@keyframes fieldDriftC {
+  0%, 100% { transform: translate3d(0, 0, 0); }
+  50% { transform: translate3d(5%, -7%, 0); }
+}
 
 /* ============================================================
    BASE
@@ -882,6 +897,92 @@
     height: 62vh;
     background: radial-gradient(circle at 50% 50%, rgba(201, 242, 77, 0.06), transparent 64%);
     animation: auroraDriftB 32s var(--ease-brand) infinite;
+  }
+
+  /* --- Section field (Hybrid A+B) ------------------------------------------
+     The blueprint grid + drifting glow + travelling signals, layered ON TOP of
+     the aurora on the open sections (the paneled ones show only the aurora).
+     Its own glows are dialled back from the standalone version so they add
+     texture over the aurora rather than doubling the lime. Per-section, wrapped
+     by FieldBand; the wrapper's `overflow-hidden` clips the glows. See
+     SectionField.tsx. */
+  .field {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    /* Fade the field into the section's top and bottom edges so it doesn't end
+       on a visible seam over the continuous aurora. */
+    -webkit-mask-image: linear-gradient(180deg, transparent, #000 16%, #000 84%, transparent);
+    mask-image: linear-gradient(180deg, transparent, #000 16%, #000 84%, transparent);
+  }
+
+  /* Thin line grid — the "A" of Hybrid A+B. The radial mask keeps it densest in
+     the middle and gone at the sides. */
+  .field-grid {
+    position: absolute;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(255, 255, 255, 0.045) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255, 255, 255, 0.045) 1px, transparent 1px);
+    background-size: 46px 46px;
+    -webkit-mask-image: radial-gradient(130% 108% at 50% 46%, #000 46%, transparent 92%);
+    mask-image: radial-gradient(130% 108% at 50% 46%, #000 46%, transparent 92%);
+  }
+
+  /* The field's own glows. Lower opacity than the standalone field, since the
+     aurora underneath already carries the ambient light. */
+  .field-glows {
+    position: absolute;
+    inset: 0;
+  }
+  .field-glow {
+    position: absolute;
+    border-radius: 50%;
+    mix-blend-mode: screen;
+    will-change: transform;
+  }
+  .field-glow-a {
+    width: 44%;
+    height: 150%;
+    left: 4%;
+    top: -25%;
+    background: radial-gradient(circle at 50% 50%, rgba(201, 242, 77, 0.12), transparent 66%);
+    animation: fieldDriftA 19s var(--ease-brand) infinite;
+  }
+  .field-glow-b {
+    width: 52%;
+    height: 165%;
+    right: -2%;
+    top: -32%;
+    background: radial-gradient(circle at 50% 50%, rgba(201, 242, 77, 0.09), transparent 68%);
+    animation: fieldDriftB 26s var(--ease-brand) infinite;
+  }
+  .field-glow-c {
+    width: 40%;
+    height: 130%;
+    left: 32%;
+    bottom: -40%;
+    background: radial-gradient(circle at 50% 50%, rgba(120, 190, 255, 0.07), transparent 70%);
+    animation: fieldDriftC 33s var(--ease-brand) infinite;
+  }
+
+  /* Variants move the glows around so repeated field sections don't look alike. */
+  .field[data-variant="2"] .field-glow-a { left: auto; right: 4%; }
+  .field[data-variant="2"] .field-glow-b { right: auto; left: -2%; }
+  .field[data-variant="2"] .field-glow-c { left: auto; right: 30%; }
+  .field[data-variant="3"] .field-glow-a { left: 28%; top: -34%; }
+  .field[data-variant="3"] .field-glow-b { right: 8%; top: 6%; }
+  .field[data-variant="3"] .field-glow-c { left: 6%; bottom: -30%; }
+
+  /* The travelling signals canvas — the "B" of Hybrid A+B. */
+  .field-canvas {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    -webkit-mask-image: radial-gradient(130% 108% at 50% 46%, #000 46%, transparent 92%);
+    mask-image: radial-gradient(130% 108% at 50% 46%, #000 46%, transparent 92%);
   }
 }
 

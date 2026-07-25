@@ -5,6 +5,7 @@ import ContactForm from "@/components/ContactForm";
 import Contrast from "@/components/Contrast";
 import CtaBand from "@/components/CtaBand";
 import Faq from "@/components/Faq";
+import FieldBand from "@/components/FieldBand";
 import Hero from "@/components/Hero";
 import LogoMarquee from "@/components/LogoMarquee";
 import Manifesto from "@/components/Manifesto";
@@ -46,24 +47,37 @@ export default async function Home() {
         ctaSecondary={home.hero.ctaSecondary}
       />
       <MarqueeBand />
-      {/* One continuous soft aurora runs behind everything from the stack down to
-          the Studio (Team) section — a single flowing gradient, no grid, no dots.
-          The wrapper is `relative isolate` but deliberately NOT `overflow-hidden`:
-          StackStory pins with `position: sticky`, which an overflow-clip ancestor
-          would break. The aurora sits at a negative z-index behind all the
-          sections' content and clips its own blobs. Everything after Team
-          (Careers, FAQ, CTA, contact) stays on plain ink. */}
+      {/* Two layers over the stack → Studio(Team) run. The soft aurora is the
+          continuous base behind everything (a single flowing gradient, no grid).
+          On top of it, the Hybrid A+B field (grid + glow + travelling signals)
+          rides the OPEN sections — StackStory, Capabilities, SelectedWork,
+          Manifesto, Testimonials — while the paneled sections between them
+          (Process, StatsStrip, Contrast, Pricing, Team) show the aurora alone,
+          giving the on/off rhythm. The wrapper is `relative isolate` but NOT
+          `overflow-hidden`: StackStory pins with `position: sticky`, which an
+          overflow-clip ancestor would break; the aurora sits behind at a negative
+          z-index. StackStory carries its field inside its own sticky element for
+          the same pin reason (see StackStory.tsx). Everything after Team stays on
+          plain ink. */}
       <div className="relative isolate">
         <Aurora />
         <StackStory />
-        <Capabilities />
-        <SelectedWork />
+        <FieldBand signals variant={1}>
+          <Capabilities />
+        </FieldBand>
+        <FieldBand variant={2}>
+          <SelectedWork />
+        </FieldBand>
         <Process />
         <LogoMarquee />
         <StatsStrip />
         <Contrast />
-        <Manifesto lead={home.manifestoLead} keep={home.manifestoKeep} />
-        <Testimonials items={testimonials} />
+        <FieldBand variant={3}>
+          <Manifesto lead={home.manifestoLead} keep={home.manifestoKeep} />
+        </FieldBand>
+        <FieldBand signals variant={2}>
+          <Testimonials items={testimonials} />
+        </FieldBand>
         <Pricing tiers={tiers} />
         <Team />
       </div>
