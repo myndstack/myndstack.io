@@ -391,6 +391,33 @@ compositor wash the whole link mesh out.
 It falls back to the 2D [ParticleField](components/ParticleField.tsx) where WebGL is
 unavailable, and renders nothing below 760px or under reduced motion.
 
+### After-hero field
+
+[SectionField](components/SectionField.tsx) is the animated backdrop behind the
+band below the hero (the `#work-grid`/Capabilities section). Three layers: a faint
+blueprint line grid and a few drifting lime glows — both pure CSS, so they cost
+almost nothing and freeze into a static field under reduced motion via the global
+duration override — plus, on desktop with motion allowed, a canvas of lime
+*signals* that travel the grid lines with a fading tail, echoing the hero
+network's hopping pulses.
+
+Two things keep it cheap and safe, and both are held by tests (`the after-hero
+field stays in its lane` in [e2e/smoke.spec.ts](e2e/smoke.spec.ts)):
+
+- It is **not** a `lib/scroll.ts` subscriber — it runs on its own clock, not the
+  scroll position — and the canvas RAF is paused by an `IntersectionObserver`
+  whenever the band is off screen, the same pattern as `ParticleField`.
+- The band is wrapped in an `overflow-hidden` container in
+  [app/page.tsx](app/page.tsx). That clip is load-bearing: the glows are
+  positioned to extend past the band (for depth), and the clip is what stops them
+  bleeding up into StackStory and down into SelectedWork. (Document-level
+  horizontal overflow has its own backstop — the `#site` `overflow-x-clip` in
+  [app/layout.tsx](app/layout.tsx) — so this clip is about the neighbours, not
+  the page width.)
+
+The signal canvas is desktop-and-motion only; mobile and reduced motion get the
+static grid + glow.
+
 ### Reveal watchdog
 
 Reveals are what make most of the page visible, so if `IntersectionObserver` never

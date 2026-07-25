@@ -10,6 +10,7 @@ import Manifesto from "@/components/Manifesto";
 import MarqueeBand from "@/components/MarqueeBand";
 import Pricing from "@/components/Pricing";
 import Process from "@/components/Process";
+import SectionField from "@/components/SectionField";
 import SelectedWork from "@/components/SelectedWork";
 import StackStory from "@/components/StackStory";
 import StatsStrip from "@/components/StatsStrip";
@@ -46,7 +47,14 @@ export default async function Home() {
       />
       <MarqueeBand />
       <StackStory />
-      <Capabilities />
+      {/* The band directly below the hero gets the animated blueprint field.
+          The wrapper is full-bleed and `overflow-hidden` so the drifting glows
+          can never widen the document; `isolate` + DOM order keep the field
+          (z-0) behind the section's content. */}
+      <div className="relative isolate overflow-hidden">
+        <SectionField />
+        <Capabilities />
+      </div>
       <SelectedWork />
       <Process />
       <LogoMarquee />
