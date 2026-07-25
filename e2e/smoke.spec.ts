@@ -254,8 +254,8 @@ test.describe("the nav morph stays cheap", () => {
  * band must stay clipped, and the signal canvases must not run under reduced
  * motion or on mobile, where only the static grid + glow should show.
  */
-const FIELD_COUNT = 5;
-const SIGNAL_BANDS = 2; // Capabilities + Testimonials
+const FIELD_COUNT = 5; // StackStory, Capabilities, SelectedWork, Manifesto, Testimonials
+const SIGNAL_BANDS = 3; // StackStory + Capabilities + Testimonials
 
 test.describe("the section fields stay in their lane", () => {
   test("every band is clipped so the glows can't bleed into neighbours", async ({

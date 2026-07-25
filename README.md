@@ -401,15 +401,23 @@ duration override), plus, on desktop with motion allowed, a canvas of lime
 network's hopping pulses.
 
 It rides the five **open** sections down the page — the ones whose content sits
-on ink rather than an opaque panel: Capabilities, SelectedWork, Manifesto,
-Testimonials, Faq. Each is wrapped by [FieldBand](components/FieldBand.tsx) in
-[app/page.tsx](app/page.tsx); the paneled sections between them (Process,
-StatsStrip, Contrast, Pricing, Team, Careers) stay clean, which is what gives the
-alternating rhythm — a field on a section built from opaque panels would just be
-hidden behind them. `variant` (1–3) shifts the glows so repeats don't look
-identical, and **`signals` runs the canvas on only two focal bands**
-(Capabilities and Testimonials) so at most one is ever in view; the rest are
-pure-CSS grid + glow.
+on ink rather than an opaque panel: StackStory, Capabilities, SelectedWork,
+Manifesto, Testimonials. Most are wrapped by [FieldBand](components/FieldBand.tsx)
+in [app/page.tsx](app/page.tsx); the paneled sections between them (Process,
+StatsStrip, Contrast, Pricing, Team, Careers, Faq) stay clean, which is what gives
+the alternating rhythm — a field on a section built from opaque panels would just
+be hidden behind them. `variant` (1–3) shifts the glows so repeats don't look
+identical, and **`signals` runs the canvas on the three focal bands** (StackStory,
+Capabilities, Testimonials), which are spaced far enough apart that at most one is
+ever in view; the rest are pure-CSS grid + glow.
+
+**StackStory is the exception to `FieldBand`.** It's the pinned section, and a
+`FieldBand`'s `overflow-hidden` wrapper would sit *between* the sticky element and
+its scroll container — which breaks `position: sticky`. So `SectionField` is
+placed **inside** StackStory's own sticky element (see
+[StackStory.tsx](components/StackStory.tsx)), whose `overflow-hidden` is on the
+sticky box itself (fine — it clips the glows without breaking the pin). It
+replaced the section's old hand-rolled static grid.
 
 Two things keep it cheap and safe, both held by tests (`the section fields stay
 in their lane` in [e2e/smoke.spec.ts](e2e/smoke.spec.ts)):

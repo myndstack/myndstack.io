@@ -46,12 +46,14 @@ export default async function Home() {
         ctaSecondary={home.hero.ctaSecondary}
       />
       <MarqueeBand />
+      {/* StackStory carries the field inside its own sticky wrapper (a FieldBand's
+          overflow-hidden would break the pin), see StackStory.tsx. */}
       <StackStory />
       {/* The animated blueprint field rides the "open" sections — the ones whose
           content sits on ink rather than an opaque panel. Signals (the canvas)
-          run only on the two focal bands and are spaced apart, so at most one is
-          ever in view; the rest are static CSS grid + glow. `variant` shifts the
-          glows so repeats don't look identical. The paneled sections between them
+          run only on the focal bands and are spaced apart, so at most one is ever
+          in view; the rest are static CSS grid + glow. `variant` shifts the glows
+          so repeats don't look identical. The paneled sections between them
           (Process, StatsStrip, Contrast, Pricing, Team, Careers) stay clean,
           which is what gives the alternating rhythm. */}
       <FieldBand signals variant={1}>
@@ -73,9 +75,7 @@ export default async function Home() {
       <Pricing tiers={tiers} />
       <Team />
       <Careers />
-      <FieldBand variant={1}>
-        <Faq faqs={faqs} />
-      </FieldBand>
+      <Faq faqs={faqs} />
       <CtaBand />
       <ContactForm
         email={site.email}
