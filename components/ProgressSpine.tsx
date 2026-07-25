@@ -51,20 +51,32 @@ export default function ProgressSpine({ socials }: { socials: Social[] }) {
 
   return (
     <div className="pointer-events-none fixed inset-y-0 left-0 z-58 hidden w-16 lg:block">
+      {/* The label and the whole progress track are decoration — a scroll-
+          position indicator conveys nothing to a screen reader, and the "Follow"
+          label is dim ornament beside the labelled social icons below. Hidden
+          from the a11y tree so the contrast rules don't apply and the rail's only
+          real content is the social nav. */}
+      {/* aria-hidden because it's decoration beside the labelled social links —
+          but aria-hidden does NOT exempt an element from a contrast audit (the
+          text is still on screen), so the colour has to clear AA on its own: t5,
+          not the old t7. */}
       <div
-        className="absolute top-[100px] left-1/2 -translate-x-1/2 font-mono text-[10px] font-bold tracking-[0.22em] text-t7 uppercase"
+        aria-hidden="true"
+        className="absolute top-[100px] left-1/2 -translate-x-1/2 font-mono text-[10px] font-bold tracking-[0.22em] text-t5 uppercase"
         style={{ writingMode: "vertical-rl" }}
       >
         Follow
       </div>
 
       <div
+        aria-hidden="true"
         className="absolute left-1/2 w-px -translate-x-1/2 bg-line"
         style={{ top: TRACK_TOP, bottom: TRACK_BOTTOM_GAP }}
       />
       {/* Full-length, scaled down to `progress` from its top edge. */}
       <div
         ref={fillRef}
+        aria-hidden="true"
         className="absolute left-1/2 w-0.5 origin-top bg-lime shadow-[0_0_8px_#C9F24D] transition-transform duration-[120ms] ease-linear"
         style={{
           top: TRACK_TOP,
@@ -74,6 +86,7 @@ export default function ProgressSpine({ socials }: { socials: Social[] }) {
       />
       <div
         ref={dotRef}
+        aria-hidden="true"
         className="absolute left-1/2 size-2 bg-lime shadow-[0_0_10px_#C9F24D] transition-transform duration-[120ms] ease-linear"
         style={{
           top: TRACK_TOP,
@@ -81,7 +94,10 @@ export default function ProgressSpine({ socials }: { socials: Social[] }) {
         }}
       />
 
-      <div className="pointer-events-auto absolute inset-x-0 bottom-[34px] flex flex-col items-center gap-5">
+      <nav
+        aria-label="Social"
+        className="pointer-events-auto absolute inset-x-0 bottom-[34px] flex flex-col items-center gap-5"
+      >
         {socials.filter((s) => s.href).map((s) => (
           <a
             key={s.label}
@@ -94,7 +110,7 @@ export default function ProgressSpine({ socials }: { socials: Social[] }) {
             <SocialIcon name={s.label} />
           </a>
         ))}
-      </div>
+      </nav>
     </div>
   );
 }

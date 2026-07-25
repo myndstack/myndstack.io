@@ -116,9 +116,14 @@ export default async function RootLayout({
 
         {/* id is the handle Loader uses to make everything behind it inert. */}
         <div id="site" className="max-w-full overflow-x-clip">
-          <a className="skip" href="#work">
-            Skip to content
-          </a>
+          {/* A landmark so the skip link isn't loose content outside every
+              region (axe `region`). The link stays position:fixed — this wrapper
+              isn't transformed, so its placement is unchanged. */}
+          <nav aria-label="Skip to content">
+            <a className="skip" href="#work">
+              Skip to content
+            </a>
+          </nav>
 
           <Nav contactEmail={site.email} />
           <main>{children}</main>

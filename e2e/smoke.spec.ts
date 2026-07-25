@@ -1,3 +1,4 @@
+import AxeBuilder from "@axe-core/playwright";
 import { expect, test, type Page } from "@playwright/test";
 
 /**
@@ -291,6 +292,79 @@ test.describe("the after-hero field stays in its lane", () => {
     await expect(page.locator(".field canvas")).toHaveCount(0);
     await expect(page.locator(".field .field-grid")).toHaveCount(1);
   });
+});
+
+/**
+ * Standing accessibility guard (axe-core).
+ *
+ * A Vercel audit surfaced a wall of `color-contrast` and `link-in-text-block`
+ * violations — chiefly the manifesto rendering its un-lit words below AA, plus
+ * lime links marked by colour alone. This encodes the fix the way the metadata
+ * and nav regressions are encoded: a test that fails loudly if any of it returns.
+ *
+ * Gated on `serious` + `critical` only. The `region` best-practice rule (the
+ * skip link, the scroll rail) is handled separately and is borderline by nature;
+ * coupling this to it would make it flake the first time a new decorative element
+ * appears. Serious+critical is the meaningful, stable line.
+ */
+const A11Y_ROUTES = ["/", "/careers", "/work", "/privacy"];
+const A11Y_VIEWPORTS = [
+  { name: "desktop", width: 1280, height: 900 },
+  { name: "mobile", width: 390, height: 844 },
+];
+
+/**
+ * Put every scroll-triggered section into its true revealed REST state before
+ * auditing. Most sections are `.reveal` (opacity:0 until in view) and axe skips
+ * zero-opacity elements, so a top-only scan misses most of the page.
+ *
+ * The subtlety that matters: force `opacity:1` alone and you *start* the 0.7s
+ * reveal transition (with per-item stagger) — axe then samples half-faded text
+ * and misreads `.is-in`-dependent card backgrounds, inventing dozens of contrast
+ * failures that don't exist at rest. Instead add the real `.is-in` class (so the
+ * genuine revealed styles apply) and kill transitions/animations so nothing is
+ * caught mid-flight. This is the state a user sees after scrolling.
+ */
+async function revealAll(page: Page) {
+  await page.evaluate(() => {
+    const s = document.createElement("style");
+    s.textContent = "*,*::before,*::after{transition:none!important;animation:none!important}";
+    document.head.appendChild(s);
+    document.querySelectorAll(".reveal").forEach((el) => el.classList.add("is-in"));
+  });
+  await page.waitForTimeout(150);
+}
+
+async function seriousViolations(page: Page): Promise<string[]> {
+  const scan = async () => {
+    const { violations } = await new AxeBuilder({ page })
+      .withTags(["wcag2a", "wcag2aa", "wcag21a", "wcag21aa"])
+      .analyze();
+    return violations
+      .filter((v) => v.impact === "serious" || v.impact === "critical")
+      .flatMap((v) => v.nodes.map((n) => `${v.id} → ${n.target.join(" ")}`));
+  };
+
+  // Scan first as-loaded (catches the manifesto in its un-lit state, which the
+  // reveal would otherwise brighten away), then again once everything is in view.
+  const found = new Set<string>(await scan());
+  await revealAll(page);
+  for (const f of await scan()) found.add(f);
+  return [...found].sort();
+}
+
+test.describe("no serious accessibility violations", () => {
+  for (const vp of A11Y_VIEWPORTS) {
+    for (const route of A11Y_ROUTES) {
+      test(`${route} @ ${vp.name}`, async ({ page }) => {
+        await page.setViewportSize({ width: vp.width, height: vp.height });
+        await page.goto(route);
+        await page.waitForTimeout(LOADER_MS);
+        const found = await seriousViolations(page);
+        expect(found, `serious/critical violations:\n${found.join("\n")}`).toEqual([]);
+      });
+    }
+  }
 });
 
 test.describe("navigation reaches everything", () => {

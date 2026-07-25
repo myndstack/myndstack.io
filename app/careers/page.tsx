@@ -106,8 +106,10 @@ export default async function CareersPage() {
 
         <p className="mt-9 mb-0 text-[15px] text-t4">
           Nothing that fits?{" "}
-          <Link href="/#contact">Tell us what you&rsquo;d want to work on</Link> — we read
-          every one.
+          <Link href="/#contact" className="underline underline-offset-2">
+            Tell us what you&rsquo;d want to work on
+          </Link>{" "}
+          — we read every one.
         </p>
       </section>
     </>

@@ -97,7 +97,10 @@ export default function Hero({ eyebrow, subhead, ctaPrimary, ctaSecondary }: Pro
         </div>
       </div>
 
-      <div className="animate-rise-in relative z-2 flex justify-center pb-[30px] font-mono text-[11px] tracking-[0.14em] text-t7 [animation-duration:1s]">
+      <div
+        aria-hidden="true"
+        className="animate-rise-in relative z-2 flex justify-center pb-[30px] font-mono text-[11px] tracking-[0.14em] text-t7 [animation-duration:1s]"
+      >
         SCROLL ↓
       </div>
     </header>

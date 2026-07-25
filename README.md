@@ -433,6 +433,22 @@ zeroing only the duration leaves a staggered transition still waiting before it 
 which is exactly what the nav morph's cross-fade lag would do. Reveal animations are
 also forced open under `<noscript>`.
 
+### Accessibility guard
+
+A standing axe-core scan (`@axe-core/playwright`) runs in the browser suite over
+`/`, `/careers`, `/work` and `/privacy` at desktop and mobile, asserting **zero
+serious/critical violations** — see `no serious accessibility violations` in
+[e2e/smoke.spec.ts](e2e/smoke.spec.ts). One detail is load-bearing: it puts the
+page into its **revealed rest state** (adds the real `.is-in` class and disables
+transitions) before scanning. Most sections are `.reveal` (opacity:0 until in
+view), so a naive top-only scan audits almost nothing — but forcing `opacity:1`
+instead *starts* the staggered reveal transition, and axe then samples half-faded
+text and misreads card backgrounds, inventing dozens of contrast failures that
+don't exist at rest. The manifesto's un-lit words and the spine's "Follow" label
+were raised to the AA floor (t5); note that `aria-hidden` does **not** exempt an
+on-screen element from contrast (see the ramp comment in
+[globals.css](app/globals.css)).
+
 ## Changes made on top of the reference
 
 Three of these are bug fixes; the fourth is a visible design change.

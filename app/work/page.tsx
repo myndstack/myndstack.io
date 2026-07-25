@@ -75,7 +75,10 @@ export default async function WorkPage() {
 
         <p className="mt-9 mb-0 text-[15px] text-t4">
           Working on something like this?{" "}
-          <Link href="/#contact">Tell us the shape of it</Link>.
+          <Link href="/#contact" className="underline underline-offset-2">
+            Tell us the shape of it
+          </Link>
+          .
         </p>
       </section>
     </>

@@ -25,11 +25,15 @@
   --color-line-3: #2e2e34;
 
   /* Text ramp (t1 brightest → t8 dimmest).
-     t5 is the darkest grey still used for real content, so it is pinned above
-     4.5:1 on both #0A0A0B and #151517. The reference's #6B6B73 measured 3.75:1
-     and has been demoted to t6, which is now decorative only (marquee lockups).
-     t7/t8 stay below AA by design — they only carry ornament ("SCROLL ↓",
-     "FOLLOW") and the manifesto's pre-brighten state. */
+     t5 is the darkest grey used for real content, pinned above 4.5:1 on ink,
+     #101012 and #151517. That now includes the manifesto's un-lit words and the
+     spine's "Follow" label — both used to sit lower (t8 / t7) and failed an
+     accessibility audit, and `aria-hidden` does NOT excuse contrast (the text is
+     still on screen). t6 is decorative: the marquee lockups, which are large
+     enough to clear the 3:1 large-text bar. t7/t8 are hairlines and the hero's
+     aria-hidden "SCROLL ↓", which sits over the network canvas — an animated,
+     indeterminate background a contrast audit has nothing fixed to measure
+     against. No body text uses t6–t8. */
   --color-t1: #f4f4f6;
   --color-t2: #e2e2e6;
   --color-t3: #c7c7ce;
@@ -708,7 +712,12 @@
 
   /* --- Manifesto word-by-word brighten --- */
   .manifesto-word {
-    color: var(--color-t8);
+    /* t5, not the old t8: an un-lit word is still real content a reader (or a
+       screen reader's contrast audit) has to see, so its resting state has to
+       clear AA (~5.3:1 on ink), not just look dim. The reveal to t1 still reads
+       as a brighten — it starts from a legible floor instead of an invisible
+       one. This also means the words are readable if the reveal never fires. */
+    color: var(--color-t5);
     transition: color 0.55s var(--ease-brand);
   }
   .manifesto-word.is-lit {
@@ -767,6 +776,14 @@
     border-top: 1px solid var(--color-line);
     font-size: 15px;
     color: var(--color-t4);
+  }
+  /* Inline links inside body copy carry the lime accent, but colour alone is not
+     enough to mark a link (axe `link-in-text-block`, and it fails colour-blind
+     readers). Underline them — scoped here rather than on the global `a`, which
+     is deliberately undecorated for nav, buttons and cards. */
+  .legal-note a {
+    text-decoration: underline;
+    text-underline-offset: 2px;
   }
 
   /* --- Skip link --- */
