@@ -5,7 +5,6 @@ import ContactForm from "@/components/ContactForm";
 import Contrast from "@/components/Contrast";
 import CtaBand from "@/components/CtaBand";
 import Faq from "@/components/Faq";
-import FieldBand from "@/components/FieldBand";
 import Hero from "@/components/Hero";
 import LogoMarquee from "@/components/LogoMarquee";
 import Manifesto from "@/components/Manifesto";
@@ -65,37 +64,26 @@ export default async function Home() {
         ctaSecondary={home.hero.ctaSecondary}
       />
       <MarqueeBand />
-      {/* Two layers over the stack → Studio(Team) run. The soft aurora is the
-          continuous base behind everything (a single flowing gradient, no grid).
-          On top of it, the Hybrid A+B field (grid + glow + travelling signals)
-          rides the OPEN sections — StackStory, Capabilities, SelectedWork,
-          Manifesto, Testimonials — while the paneled sections between them
-          (Process, StatsStrip, Contrast, Pricing, Team) show the aurora alone,
-          giving the on/off rhythm. The wrapper is `relative isolate` but NOT
-          `overflow-hidden`: StackStory pins with `position: sticky`, which an
-          overflow-clip ancestor would break; the aurora sits behind at a negative
-          z-index. StackStory carries its field inside its own sticky element for
-          the same pin reason (see StackStory.tsx). Everything after Team stays on
-          plain ink. */}
+      {/* One soft aurora is the continuous base behind the whole stack → Studio
+          (Team) run — a single flowing gradient, no grid, no dots. The grid +
+          travelling-signals field is kept for the StackStory moment only (inside
+          its own sticky element, see StackStory.tsx); every other section in the
+          run floats on the aurora alone, so the content leads and the motion
+          stays calm. The wrapper is `relative isolate` but NOT `overflow-hidden`:
+          StackStory pins with `position: sticky`, which an overflow-clip ancestor
+          would break; the aurora sits behind at a negative z-index. Everything
+          after Team stays on plain ink. */}
       <div className="relative isolate">
         <Aurora />
         <StackStory />
-        <FieldBand signals variant={1}>
-          <Capabilities />
-        </FieldBand>
-        <FieldBand variant={2}>
-          <SelectedWork />
-        </FieldBand>
+        <Capabilities />
+        <SelectedWork />
         <Process />
         <LogoMarquee />
         <StatsStrip />
         <Contrast />
-        <FieldBand variant={3}>
-          <Manifesto lead={home.manifestoLead} keep={home.manifestoKeep} />
-        </FieldBand>
-        <FieldBand signals variant={2}>
-          <Testimonials items={testimonials} />
-        </FieldBand>
+        <Manifesto lead={home.manifestoLead} keep={home.manifestoKeep} />
+        <Testimonials items={testimonials} />
         <Pricing tiers={tiers} />
         <Team />
       </div>

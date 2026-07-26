@@ -938,11 +938,11 @@
 
   /* --- Section field (Hybrid A+B) ------------------------------------------
      The blueprint grid + drifting glow + travelling signals, layered ON TOP of
-     the aurora on the open sections (the paneled ones show only the aurora).
-     Its own glows are dialled back from the standalone version so they add
-     texture over the aurora rather than doubling the lime. Per-section, wrapped
-     by FieldBand; the wrapper's `overflow-hidden` clips the glows. See
-     SectionField.tsx. */
+     the aurora for the StackStory moment only (every other section in the run
+     floats on the aurora alone). Its own glows are dialled back from the
+     standalone version so they add texture over the aurora rather than doubling
+     the lime. Lives inside StackStory's sticky element, whose `overflow-hidden`
+     clips the glows. See SectionField.tsx / StackStory.tsx. */
   .field {
     position: absolute;
     inset: 0;

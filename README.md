@@ -414,23 +414,22 @@ stays in its lane` in [e2e/smoke.spec.ts](e2e/smoke.spec.ts):
   isolate` (no clip); the aurora sits at a negative z-index and clips its *own*
   blobs.
 
-**Layer 2 — the Hybrid A+B field** ([SectionField](components/SectionField.tsx) via
-[FieldBand](components/FieldBand.tsx)): a blueprint grid + drifting glow +
-travelling *signals* canvas, layered **on top of the aurora on the open sections**
-(StackStory, Capabilities, SelectedWork, Manifesto, Testimonials). The paneled
-sections between them (Process, StatsStrip, Contrast, Pricing, Team) show the
-aurora alone — that open/paneled split is the on/off rhythm. The field's own glows
-are dialled back from the standalone version so they add grid-and-signal texture
-over the aurora rather than doubling the lime; `signals` runs the canvas on three
-focal fields (StackStory, Capabilities, Testimonials), each paused off-screen by
-its `IntersectionObserver`, and mobile/reduced-motion get grid + glow only.
-StackStory is the exception that carries its field *inside* its own sticky element
-(same pin reason as the aurora wrapper). Held by `the section fields stay in their
-lane`.
+**Layer 2 — the Hybrid A+B field** ([SectionField](components/SectionField.tsx)): a
+blueprint grid + drifting glow + travelling *signals* canvas, kept **for the
+StackStory moment only** — every other section in the run floats on the aurora
+alone. This is deliberate restraint: the earlier version layered the field across
+all five "open" sections, which read as busy on an already animation-rich page, so
+it was pulled back to the one signature moment. The field's own glows are dialled
+back so they add grid-and-signal texture over the aurora rather than doubling the
+lime; its `signals` canvas is paused off-screen by an `IntersectionObserver`, and
+mobile/reduced-motion get grid + glow only. It lives *inside* StackStory's own
+sticky element (an `overflow-clip` wrapper would break the pin, same reason as the
+aurora). Held by `the section fields stay in their lane` in
+[e2e/smoke.spec.ts](e2e/smoke.spec.ts).
 
-Because glow now sits under a lot of headings and muted copy, the standing axe
-guard (below) is what confirms it never pushes text below contrast — it stayed at
-zero serious violations.
+Because glow sits under a lot of headings and muted copy, the standing axe guard
+(below) is what confirms it never pushes text below contrast — it stayed at zero
+serious violations.
 
 ### Reveal watchdog
 

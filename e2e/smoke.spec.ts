@@ -285,16 +285,14 @@ test.describe("the aurora stays in its lane", () => {
 });
 
 /**
- * The Hybrid A+B field (SectionField, via FieldBand) layered over the aurora on
- * the open sections.
- *
- * Five fields ride the open sections; three run a signal canvas. Two things are
- * easy to regress and invisible to a screenshot: every field must stay clipped,
- * and the signal canvases must not run under reduced motion or on mobile, where
- * only the static grid + glow should show.
+ * The Hybrid A+B field (SectionField) — grid + glow + signals — kept for the
+ * StackStory moment only, over the aurora. Everything else in the run is aurora
+ * alone. Two things are easy to regress and invisible to a screenshot: the field
+ * must stay clipped, and its signal canvas must not run under reduced motion or
+ * on mobile, where only the static grid + glow should show.
  */
-const FIELD_COUNT = 5; // StackStory, Capabilities, SelectedWork, Manifesto, Testimonials
-const SIGNAL_BANDS = 3; // StackStory + Capabilities + Testimonials
+const FIELD_COUNT = 1; // StackStory only
+const SIGNAL_BANDS = 1; // StackStory
 
 test.describe("the section fields stay in their lane", () => {
   test("every field is clipped so the glows can't bleed into neighbours", async ({
