@@ -65,7 +65,11 @@ export default function Footer({ site }: { site: SiteSettings }) {
           {/* Icons here (not just the desktop spine) so mobile/tablet visitors,
               where the spine is hidden below 1100px, can still reach the profiles. */}
           {socials.some((s) => s.href) ? (
-            <div className="mt-5 flex items-center gap-4">
+            // Each link is a 44×44 hit area (WCAG 2.5.8) with the icon centred;
+            // -ml-3 pulls the row back so the first icon still lines up with the
+            // text above. This is the only way to reach socials below 1100px,
+            // where the desktop spine is hidden.
+            <div className="mt-1.5 -ml-3 flex items-center">
               {socials.filter((s) => s.href).map((s) => (
                 <a
                   key={s.label}
@@ -73,7 +77,7 @@ export default function Footer({ site }: { site: SiteSettings }) {
                   target="_blank"
                   rel="noopener noreferrer"
                   aria-label={s.label}
-                  className="ease-brand text-t4 transition-colors duration-160 hover:text-lime"
+                  className="ease-brand inline-flex size-11 items-center justify-center text-t4 transition-colors duration-160 hover:text-lime"
                 >
                   <SocialIcon name={s.label} />
                 </a>

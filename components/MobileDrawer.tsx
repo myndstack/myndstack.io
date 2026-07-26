@@ -97,7 +97,7 @@ export default function MobileDrawer({ open, onClose, contactEmail }: Props) {
             type="button"
             onClick={onClose}
             aria-label="Close menu"
-            className="btn-icon size-[38px] font-mono text-base"
+            className="btn-icon size-11 font-mono text-base"
           >
             ✕
           </button>

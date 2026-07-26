@@ -101,12 +101,19 @@ export default function Testimonials({ items }: { items: Testimonial[] }) {
                 onClick={() => goTo(i)}
                 aria-label={`Show testimonial ${i + 1}: ${t.role}`}
                 aria-current={i === index}
-                className="ease-brand h-1 cursor-pointer border-none p-0 transition-[width,background-color] duration-200"
-                style={{
-                  width: i === index ? 34 : 22,
-                  background: i === index ? "#C9F24D" : "#2E2E34",
-                }}
-              />
+                // The visible dot is a 4px bar, but the hit area (and focus ring)
+                // is a full-height 44px button — WCAG 2.5.8 target size.
+                className="flex min-h-[44px] cursor-pointer items-center border-none bg-transparent px-1"
+              >
+                <span
+                  aria-hidden="true"
+                  className="ease-brand block h-1 transition-[width,background-color] duration-200"
+                  style={{
+                    width: i === index ? 34 : 22,
+                    background: i === index ? "#C9F24D" : "#2E2E34",
+                  }}
+                />
+              </button>
             ))}
           </div>
         </div>

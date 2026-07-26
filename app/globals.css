@@ -135,6 +135,25 @@
 }
 
 /* ============================================================
+   Z-INDEX LADDER — the one place the whole stacking order is written down.
+   Values live on their elements (Tailwind `z-*` / these rules); this is the
+   canonical order. Add new layers here first, don't invent ad-hoc numbers.
+
+     -10  aurora backdrop        .aurora-anchor
+       0  section fields         .field   ·  hero mobile texture
+       1  in-flow content lift   .nav-inner · StackStory content
+       2  hero content           Hero.tsx
+      55  cursor spotlight       CursorSpotlight.tsx
+      58  progress spine         ProgressSpine.tsx
+      59  back-to-top            BackToTop.tsx
+      60  nav                    .nav
+     119  mobile drawer scrim    MobileDrawer.tsx
+     120  mobile drawer panel    MobileDrawer.tsx
+     200  loader                 Loader.tsx
+     300  skip link              .skip   (must sit above everything focusable)
+   ============================================================ */
+
+/* ============================================================
    BASE
    ============================================================ */
 @layer base {
@@ -347,6 +366,13 @@
     appearance: none;
     -webkit-appearance: none;
     cursor: pointer;
+    /* Native `appearance:none` drops the OS dropdown arrow, which left the
+       selects looking like plain text inputs. Draw our own lime chevron and
+       reserve room for it so the affordance is unmistakable. */
+    padding-right: 44px;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8' fill='none'%3E%3Cpath d='M1 1.5L6 6.5L11 1.5' stroke='%23C9F24D' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 18px center;
   }
 
   /* --- Reveal-on-scroll --- */
@@ -706,6 +732,11 @@
 
   /* --- Pricing billing toggle --- */
   .bill-btn {
+    /* inline-flex + min-height give a 44px tap target (WCAG 2.5.8) around the
+       small 12px label without inflating the visual chrome. */
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
     font-family: var(--font-mono);
     font-size: 12px;
     font-weight: 700;
@@ -714,7 +745,7 @@
     color: var(--color-t4);
     background: transparent;
     border: none;
-    padding: 10px 20px;
+    padding: 6px 20px;
     cursor: pointer;
     transition:
       color 0.16s var(--ease-brand),

@@ -337,6 +337,71 @@ test.describe("the section fields stay in their lane", () => {
 });
 
 /**
+ * UI/UX audit fixes — each maps to a WCAG success criterion and would silently
+ * regress (they're invisible to the existing tests).
+ */
+test.describe("touch targets and error affordances", () => {
+  test("interactive controls meet the target-size minimum (WCAG 2.5.8)", async ({
+    page,
+  }) => {
+    // Testimonial dots: 4px visual bar, but a ≥44px-tall hit area.
+    await page.setViewportSize({ width: 1280, height: 900 });
+    await landOnHome(page);
+    const dot = page.locator('button[aria-label^="Show testimonial"]').first();
+    await dot.scrollIntoViewIfNeeded();
+    const dotBox = await dot.boundingBox();
+    expect(dotBox!.height, "testimonial dot height").toBeGreaterThanOrEqual(44);
+    expect(dotBox!.width, "testimonial dot width").toBeGreaterThanOrEqual(24);
+
+    // Footer social links are the only path to socials below 1100px → 44×44.
+    const social = page.locator('footer a[rel="noopener noreferrer"]').first();
+    await social.scrollIntoViewIfNeeded();
+    const socialBox = await social.boundingBox();
+    expect(socialBox!.width, "footer social width").toBeGreaterThanOrEqual(44);
+    expect(socialBox!.height, "footer social height").toBeGreaterThanOrEqual(44);
+
+    // Mobile drawer close. Back to the top first — scrolling to the footer above
+    // tucked the nav (and its burger) away.
+    await page.setViewportSize({ width: 390, height: 844 });
+    await page.evaluate(() => window.scrollTo(0, 0));
+    await page.waitForTimeout(400);
+    await page.getByRole("button", { name: /open menu/i }).click();
+    const close = page.getByRole("button", { name: /close menu/i });
+    const closeBox = await close.boundingBox();
+    expect(closeBox!.width, "drawer close width").toBeGreaterThanOrEqual(44);
+    expect(closeBox!.height, "drawer close height").toBeGreaterThanOrEqual(44);
+  });
+
+  test("field validation errors use the danger colour, not white", async ({ page }) => {
+    await landOnHome(page);
+    await page.locator("#contact").scrollIntoViewIfNeeded();
+    const form = page.locator("#contact form");
+    await form.getByRole("button", { name: /send message/i }).click();
+    const err = form.locator("p[id$='-error']").first();
+    await expect(err).toBeVisible();
+    // --color-danger #ff7a6b → rgb(255, 122, 107). The bug rendered it white
+    // (rgb(255,255,255)) because `text-red` isn't a real utility.
+    const color = await err.evaluate((el) => getComputedStyle(el).color);
+    expect(color).toBe("rgb(255, 122, 107)");
+  });
+
+  test("reduced motion assembles the stack with no scroll animation", async ({ page }) => {
+    await page.emulateMedia({ reducedMotion: "reduce" });
+    await page.setViewportSize({ width: 1280, height: 900 });
+    await landOnHome(page);
+    // Without scrolling into the pinned section, the tiles are already assembled
+    // (opacity 1, locked). Under normal motion they'd be at opacity 0 up here.
+    const tiles = page.locator(".story-layer");
+    await expect(tiles).toHaveCount(4);
+    const opacities = await tiles.evaluateAll((els) =>
+      els.map((el) => getComputedStyle(el).opacity),
+    );
+    expect(opacities.every((o) => o === "1"), `opacities: ${opacities}`).toBe(true);
+    await expect(tiles.first()).toHaveClass(/is-locked/);
+  });
+});
+
+/**
  * Standing accessibility guard (axe-core).
  *
  * A Vercel audit surfaced a wall of `color-contrast` and `link-in-text-block`

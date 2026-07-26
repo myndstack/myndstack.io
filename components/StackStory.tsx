@@ -2,7 +2,7 @@
 
 import { useEffect, useRef } from "react";
 import { STACK_LAYERS } from "@/lib/content";
-import { useScrollFrame } from "@/lib/hooks";
+import { useReducedMotion, useScrollFrame } from "@/lib/hooks";
 import SectionField from "./SectionField";
 
 /** Vertical pitch between locked tiles, and where the stack starts. */
@@ -23,6 +23,7 @@ export default function StackStory() {
   const sectionRef = useRef<HTMLElement>(null);
   const counterRef = useRef<HTMLSpanElement>(null);
   const layerRefs = useRef<(HTMLDivElement | null)[]>([]);
+  const reduced = useReducedMotion();
 
   /**
    * The pinned section's geometry. Measured on layout changes rather than per
@@ -62,7 +63,31 @@ export default function StackStory() {
     };
   }, []);
 
+  /**
+   * Reduced motion: the assembly is a scroll-driven animation (WCAG 2.3.3), and
+   * the tiles are positioned with inline transforms that the global CSS
+   * reduce-rule can't reach. So place every tile in its assembled rest state once
+   * and let the scroll frame below bail out — no scatter, no fly-in, just the
+   * finished stack.
+   */
+  useEffect(() => {
+    if (!reduced) return;
+    layerRefs.current.forEach((el, k) => {
+      if (!el) return;
+      el.style.transform = `translate(0px, ${BASE_Y + k * GAP}px) scale(1)`;
+      el.style.opacity = "1";
+      el.classList.add("is-locked");
+    });
+    if (counterRef.current) {
+      counterRef.current.textContent = `0${STACK_LAYERS.length} / 0${STACK_LAYERS.length}`;
+    }
+  }, [reduced]);
+
   useScrollFrame(({ y }) => {
+    // Under reduced motion the tiles are pre-assembled by the effect above; don't
+    // drive the scatter/fly-in per scroll frame.
+    if (reduced) return;
+
     const { top, total } = geometryRef.current;
     if (total <= 0) return;
 
