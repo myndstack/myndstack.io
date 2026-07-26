@@ -29,7 +29,14 @@ export default function StackStory() {
    * The pinned section's geometry. Measured on layout changes rather than per
    * frame — `offsetHeight` and `getBoundingClientRect()` in the scroll frame
    * forced a synchronous layout on top of whatever the nav had just written.
-   * `top` is absolute, so scrolling never invalidates it.
+   * `top` is document-absolute, so scrolling never invalidates it.
+   *
+   * It must be `getBoundingClientRect().top + scrollY`, NOT `offsetTop`:
+   * `offsetTop` is relative to the nearest positioned ancestor, and the section
+   * now lives inside the aurora run's `relative isolate` wrapper (see page.tsx),
+   * which is that ancestor. `offsetTop` there reads ~0, the progress runs far
+   * ahead of the scroll, and the tiles finish assembling before the section
+   * even pins. The rect is unaffected by any offsetParent.
    */
   const geometryRef = useRef({ top: 0, total: 0 });
 
@@ -41,7 +48,7 @@ export default function StackStory() {
       const section = sectionRef.current;
       if (!section) return;
       geometryRef.current = {
-        top: section.offsetTop,
+        top: section.getBoundingClientRect().top + window.scrollY,
         total: section.offsetHeight - window.innerHeight,
       };
     };
