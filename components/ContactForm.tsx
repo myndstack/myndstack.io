@@ -178,7 +178,7 @@ export default function ContactForm({ email, phone, phoneHref, location }: Props
               <button
                 type="submit"
                 disabled={pending}
-                className="btn ease-brand cursor-pointer border-none bg-lime p-[15px] text-center text-[15px] font-semibold text-lime-ink transition-colors duration-160 not-disabled:hover:bg-lime-hover xs:col-span-2"
+                className="btn btn-lime w-full cursor-pointer border-none text-center xs:col-span-2"
               >
                 {pending ? "Sending…" : "Send message →"}
               </button>

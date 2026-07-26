@@ -24,6 +24,7 @@ import {
   getSiteSettings,
   getTestimonials,
 } from "@/lib/sanity/queries";
+import { jsonLd } from "@/lib/format";
 
 export default async function Home() {
   // The client sections (Hero, Manifesto, Faq, Pricing, Testimonials, ContactForm)
@@ -40,6 +41,23 @@ export default async function Home() {
 
   return (
     <>
+      {/* FAQPage markup so the questions can surface as rich results in search. */}
+      {faqs.length ? (
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: jsonLd({
+              "@context": "https://schema.org",
+              "@type": "FAQPage",
+              mainEntity: faqs.map((f) => ({
+                "@type": "Question",
+                name: f.q,
+                acceptedAnswer: { "@type": "Answer", text: f.a },
+              })),
+            }),
+          }}
+        />
+      ) : null}
       <Hero
         eyebrow={home.hero.eyebrow}
         subhead={home.hero.subhead}

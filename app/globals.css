@@ -302,6 +302,12 @@
     background: var(--color-lime-hover);
     color: var(--color-lime-ink);
   }
+  /* Shared disabled state so consolidated buttons (e.g. a form submit mid-send)
+     read as inactive without each one re-inventing it. */
+  .btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
   /* Secondary action: opaque ink so nothing shows through it, lime border to
      pair with the filled lime primary. `.btn-icon` is the square variant used
      for the burger and drawer close — same skin, different shape. */

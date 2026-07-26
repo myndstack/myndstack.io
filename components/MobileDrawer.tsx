@@ -132,7 +132,7 @@ export default function MobileDrawer({ open, onClose, contactEmail }: Props) {
         <a
           href="/#contact"
           onClick={onClose}
-          className="mt-[26px] bg-lime p-[15px] text-center font-body text-[15px] font-semibold text-lime-ink"
+          className="btn btn-lime mt-[26px] w-full text-center"
         >
           Start a project →
         </a>
