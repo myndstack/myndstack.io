@@ -320,6 +320,59 @@
       0 14px 34px rgba(0, 0, 0, 0.45);
   }
 
+  /* --- Tile field ---------------------------------------------------------
+     A STATIC take on the SectionField grammar (blueprint grid + lime glow +
+     signal net), scoped to a single card. No per-tile canvas, so it's cheap to
+     drop on every bento tile — it fills the larger tiles whose CMS-sourced copy
+     doesn't reach the edges, giving them depth instead of empty space. Sits at
+     z-0 behind the tile's own `relative z-1` content. */
+  .tile-field {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    overflow: hidden;
+    pointer-events: none;
+  }
+  .tile-field-grid {
+    position: absolute;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(255, 255, 255, 0.035) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255, 255, 255, 0.035) 1px, transparent 1px);
+    background-size: 46px 46px;
+    /* Densest through the middle, gone at the edges — same radial fade the
+       section field uses, so the two read as one system. */
+    -webkit-mask-image: radial-gradient(120% 112% at 50% 44%, #000 40%, transparent 88%);
+    mask-image: radial-gradient(120% 112% at 50% 44%, #000 40%, transparent 88%);
+  }
+  .tile-field-glow {
+    position: absolute;
+    width: 78%;
+    height: 92%;
+    right: -14%;
+    top: -20%;
+    border-radius: 50%;
+    background: radial-gradient(
+      circle at 50% 50%,
+      rgba(201, 242, 77, 0.1),
+      transparent 66%
+    );
+    mix-blend-mode: screen;
+  }
+  /* The signal net — a sparse static echo of the hero network / field signals.
+     `slice` scales it to cover the tile; the radial mask fades its edges so it
+     dissolves into the grid rather than ending on a hard box. */
+  .tile-field-net {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    color: var(--color-lime);
+    opacity: 0.4;
+    -webkit-mask-image: radial-gradient(115% 100% at 50% 42%, #000 34%, transparent 82%);
+    mask-image: radial-gradient(115% 100% at 50% 42%, #000 34%, transparent 82%);
+  }
+
   .chip {
     font-family: var(--font-mono);
     font-size: 10.5px;

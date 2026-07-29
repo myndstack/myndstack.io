@@ -3,6 +3,7 @@ import Check from "./Check";
 import Reveal from "./Reveal";
 import Section from "./Section";
 import SectionHeader from "./SectionHeader";
+import TileField from "./TileField";
 
 /** The lime tile — the odd one out by design; kept as the single colour accent. */
 const HIGHLIGHT_INDEX = 1;
@@ -53,19 +54,24 @@ export default async function Capabilities() {
             // animation don't both try to own `transform`.
             <Reveal key={cap.n} delay={i * 0.08} className={span}>
               <div
-                className={`flex h-full min-h-64 flex-col justify-between p-[22px] ${
+                className={`relative flex h-full min-h-64 flex-col justify-between overflow-hidden p-[22px] ${
                   highlight
                     ? "clip-angular-26 bg-lime text-lime-ink"
                     : "card card-lift"
                 }`}
               >
+                {/* Abstract field fills the space the copy doesn't reach — the
+                    big tile gets the signal net, the small tiles just grid+glow.
+                    The lime tile is solid, so it skips the field entirely. */}
+                {!highlight ? <TileField net={bento && i === 0} /> : null}
+
                 <div
-                  className={`font-mono text-xs ${highlight ? "text-lime-ink-2" : "text-t5"}`}
+                  className={`relative z-[1] font-mono text-xs ${highlight ? "text-lime-ink-2" : "text-t5"}`}
                 >
                   {cap.n}
                 </div>
 
-                <div className="flex flex-col gap-4">
+                <div className="relative z-[1] flex flex-col gap-4">
                   <div>
                     <div className="h3-card mb-3">{cap.title}</div>
                     <ul className="m-0 flex list-none flex-col gap-2 p-0">
