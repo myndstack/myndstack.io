@@ -49,6 +49,8 @@ export const SITE_URL = resolveSiteUrl();
 export const SITE = {
   name: "Myndstack",
   email: "hello@myndstack.io",
+  supportEmail: "support@myndstack.io",
+  grievanceEmail: "grievance@myndstack.io",
   phone: "+91 99465 60607",
   phoneHref: "tel:+919946560607",
   location: "Kerala, India",
@@ -188,6 +190,8 @@ export const TESTIMONIALS = [
     index: "01",
     role: "VP Engineering",
     org: "Logistics platform",
+    metric: "6→1",
+    metricLabel: "months to first endpoint",
   },
   {
     quote:
@@ -195,6 +199,8 @@ export const TESTIMONIALS = [
     index: "02",
     role: "Chief Technology Officer",
     org: "Clinical software",
+    metric: "0",
+    metricLabel: "P1 incidents in year one",
   },
   {
     quote:
@@ -202,8 +208,33 @@ export const TESTIMONIALS = [
     index: "03",
     role: "Founder",
     org: "Energy analytics",
+    metric: "-42%",
+    metricLabel: "run-rate infra spend",
   },
 ] as const;
+
+/**
+ * Currency + region buckets the site supports. Everything not in this union
+ * falls back to US/USD via lib/region.ts. Add new codes here, in RegionalPrice,
+ * in COUNTRY_TO_REGION, and in the picker — the type will keep them honest.
+ */
+export type RegionCode = "IN" | "US" | "EU" | "UK";
+
+export type RegionalPrice = {
+  region: RegionCode;
+  currency: "INR" | "USD" | "EUR" | "GBP";
+  symbol: "₹" | "$" | "€" | "£";
+  /** Full formatted price string, e.g. "₹1,99,000" — stored as-is so marketing
+   *  can pick psychological prices without a code change. */
+  price: string;
+  annualPrice?: string;
+  period?: string;
+  annualNote?: string;
+  /** Displayed under the price. e.g. "excl. GST 18%". */
+  taxNote?: string;
+  /** One-liner listing local payment methods, e.g. "UPI · cards · netbanking". */
+  paymentNote?: string;
+};
 
 export type PricingTier = {
   name: string;
@@ -217,6 +248,133 @@ export type PricingTier = {
   cta: string;
   highlighted: boolean;
   features: readonly string[];
+  /**
+   * Optional per-region overlay. When present, the field on the matching
+   * region wins; when absent, the tier's flat fields render as today.
+   */
+  regionalPrices?: readonly RegionalPrice[];
+};
+
+/**
+ * Feature-by-tier comparison matrix for the "Compare all plans" table.
+ *
+ * Deliberately separate from each tier's `features` bullets — those are
+ * marketing shorthand and stay short; this matrix is the exhaustive side-by-
+ * side buyers want when evaluating tiers. Keeping them apart means changing
+ * one doesn't churn the other.
+ *
+ * Row values: `true` renders a lime check, `false` renders an em dash, a
+ * string renders literally (short — one or two words). Any tier missing from
+ * a row's `values` object also renders as an em dash.
+ */
+export type CompareValue = true | false | string;
+
+export type CompareRow = {
+  label: string;
+  hint?: string;
+  values: Record<string, CompareValue>;
+};
+
+export type CompareSection = {
+  title: string;
+  rows: CompareRow[];
+};
+
+/** Tier names must match `PricingTier.name` — the table keys off them. */
+export const PRICING_COMPARISON: readonly CompareSection[] = [
+  {
+    title: "Platform",
+    rows: [
+      {
+        label: "Unified data + model API",
+        values: {
+          Platform: true,
+          Scale: true,
+          Projects: "As built",
+          Studio: "As built",
+        },
+      },
+      {
+        label: "Endpoints",
+        values: {
+          Platform: "Up to 10",
+          Scale: "Unlimited",
+          Projects: "Per scope",
+          Studio: "Per scope",
+        },
+      },
+      {
+        label: "Regions",
+        values: {
+          Platform: "1",
+          Scale: "3",
+          Projects: "Per scope",
+          Studio: "Per scope",
+        },
+      },
+      {
+        label: "Vector storage",
+        values: { Platform: true, Scale: true, Projects: true, Studio: true },
+      },
+    ],
+  },
+  {
+    title: "Service level",
+    rows: [
+      {
+        label: "SLA",
+        values: {
+          Platform: "—",
+          Scale: "99.99%",
+          Projects: "Per SOW",
+          Studio: "Per SOW",
+        },
+      },
+      {
+        label: "p50 inference target",
+        values: { Scale: "12ms" },
+      },
+      {
+        label: "Dedicated solutions engineer",
+        values: { Scale: true, Studio: true },
+      },
+    ],
+  },
+  {
+    title: "Delivery",
+    rows: [
+      {
+        label: "Design + engineering",
+        values: { Projects: true, Studio: true },
+      },
+      { label: "Embedded team", values: { Studio: true } },
+      { label: "Architecture consulting", values: { Studio: true } },
+      {
+        label: "Handover + documentation",
+        values: { Projects: true, Studio: true },
+      },
+    ],
+  },
+  {
+    title: "Support",
+    rows: [
+      { label: "Community", values: { Platform: true } },
+      { label: "Business hours", values: { Scale: true, Projects: true } },
+      { label: "24/7 on-call", values: { Studio: true } },
+      { label: "Post-launch retainer", values: { Projects: "Optional", Studio: true } },
+    ],
+  },
+];
+
+/**
+ * Reusable per-region tax + payment copy. Kept as a shared table so a policy
+ * change (e.g. GST rate) needs one edit, not four.
+ */
+const REGION_NOTES: Record<RegionCode, { taxNote: string; paymentNote: string }> = {
+  IN: { taxNote: "excl. GST 18%", paymentNote: "UPI · cards · netbanking · wallets" },
+  US: { taxNote: "billed in USD", paymentNote: "cards" },
+  EU: { taxNote: "excl. VAT (reverse charge for B2B)", paymentNote: "cards · SEPA" },
+  UK: { taxNote: "excl. VAT", paymentNote: "cards" },
 };
 
 export const PRICING_TIERS: readonly PricingTier[] = [
@@ -231,6 +389,14 @@ export const PRICING_TIERS: readonly PricingTier[] = [
       "Unified data + model API",
       "1 region, up to 10 endpoints",
       "Community support",
+    ],
+    // Free tier: currency symbol changes per region so the "0" reads right in
+    // context, but there's no tax and no payment method to name.
+    regionalPrices: [
+      { region: "IN", currency: "INR", symbol: "₹", price: "₹0", period: "/ start free" },
+      { region: "US", currency: "USD", symbol: "$", price: "$0", period: "/ start free" },
+      { region: "EU", currency: "EUR", symbol: "€", price: "€0", period: "/ start free" },
+      { region: "UK", currency: "GBP", symbol: "£", price: "£0", period: "/ start free" },
     ],
   },
   {
@@ -249,6 +415,70 @@ export const PRICING_TIERS: readonly PricingTier[] = [
       "99.99% SLA · 12ms p50",
       "Dedicated solutions engineer",
     ],
+    // Placeholder marketing-set numbers — override in Sanity for real prices.
+    regionalPrices: [
+      {
+        region: "IN",
+        currency: "INR",
+        symbol: "₹",
+        price: "₹1,99,000",
+        annualPrice: "₹1,65,000",
+        period: "/ mo",
+        annualNote: "billed annually · 2 months free",
+        ...REGION_NOTES.IN,
+      },
+      {
+        region: "US",
+        currency: "USD",
+        symbol: "$",
+        price: "$2,400",
+        annualPrice: "$2,000",
+        period: "/ mo",
+        annualNote: "billed annually · 2 months free",
+        ...REGION_NOTES.US,
+      },
+      {
+        region: "EU",
+        currency: "EUR",
+        symbol: "€",
+        price: "€2,200",
+        annualPrice: "€1,830",
+        period: "/ mo",
+        annualNote: "billed annually · 2 months free",
+        ...REGION_NOTES.EU,
+      },
+      {
+        region: "UK",
+        currency: "GBP",
+        symbol: "£",
+        price: "£1,900",
+        annualPrice: "£1,580",
+        period: "/ mo",
+        annualNote: "billed annually · 2 months free",
+        ...REGION_NOTES.UK,
+      },
+    ],
+  },
+  {
+    name: "Projects",
+    blurb: "One-off web, app, and AI builds",
+    price: "Fixed",
+    period: "/ per scope",
+    cta: "Request a quote",
+    highlighted: false,
+    features: [
+      "Website, mobile app, or bespoke AI system",
+      "Fixed scope, milestones, and price",
+      "Design, engineering, and handover included",
+      "Optional post-launch retainer",
+    ],
+    // Number is "Fixed" everywhere; only tax + payment vary.
+    regionalPrices: [
+      { region: "IN", currency: "INR", symbol: "₹", price: "Fixed", period: "/ per scope", ...REGION_NOTES.IN },
+      { region: "US", currency: "USD", symbol: "$", price: "Fixed", period: "/ per scope", ...REGION_NOTES.US },
+      { region: "EU", currency: "EUR", symbol: "€", price: "Fixed", period: "/ per scope", ...REGION_NOTES.EU },
+      { region: "UK", currency: "GBP", symbol: "£", price: "Fixed", period: "/ per scope", ...REGION_NOTES.UK },
+    ],
   },
   {
     name: "Studio",
@@ -261,6 +491,14 @@ export const PRICING_TIERS: readonly PricingTier[] = [
       "Embedded engineering team",
       "Architecture & strategy consulting",
       "Enterprise security & compliance",
+    ],
+    // Priced per engagement, invoiced against the SOW. Payment note omitted —
+    // there is no self-serve checkout for this tier.
+    regionalPrices: [
+      { region: "IN", currency: "INR", symbol: "₹", price: "Custom", taxNote: REGION_NOTES.IN.taxNote },
+      { region: "US", currency: "USD", symbol: "$", price: "Custom", taxNote: REGION_NOTES.US.taxNote },
+      { region: "EU", currency: "EUR", symbol: "€", price: "Custom", taxNote: REGION_NOTES.EU.taxNote },
+      { region: "UK", currency: "GBP", symbol: "£", price: "Custom", taxNote: REGION_NOTES.UK.taxNote },
     ],
   },
 ];
@@ -309,10 +547,50 @@ export const CLIENT_LOCKUPS: readonly ClientLockup[] = [
   { name: "Cobalt", className: "font-semibold tracking-[-0.01em]" },
 ];
 
+/**
+ * The vendor stack we plug into on customer engagements. Text-only so no
+ * third-party marks or trademarks are reproduced from memory — the site
+ * reflects reality, not a guessed SVG library. Buyer-facing purpose: signal
+ * "we work with what you already run" without a wall of logos to police.
+ */
+export type IntegrationGroup = {
+  /** UI heading. */
+  title: string;
+  /** Short line that sits under the heading. */
+  blurb: string;
+  /** Vendor names as plain strings — no branding assets embedded. */
+  items: readonly string[];
+};
+
+export const INTEGRATIONS: readonly IntegrationGroup[] = [
+  {
+    title: "Models",
+    blurb: "Route across providers with a single interface.",
+    items: ["OpenAI", "Anthropic", "Google", "Mistral", "Meta Llama", "Cohere"],
+  },
+  {
+    title: "Cloud",
+    blurb: "Deploy where your data already lives.",
+    items: ["AWS", "Google Cloud", "Azure", "Vercel", "Cloudflare"],
+  },
+  {
+    title: "Data",
+    blurb: "Query in place — no unnecessary copies.",
+    items: ["Postgres", "Snowflake", "BigQuery", "Databricks", "Pinecone"],
+  },
+  {
+    title: "Delivery",
+    blurb: "Fits your existing shipping and observability.",
+    items: ["GitHub", "GitLab", "Datadog", "Grafana", "Sentry"],
+  },
+];
+
 export const LEGAL_LINKS = [
   { label: "Privacy", href: "/privacy" },
   { label: "Terms", href: "/terms" },
   { label: "Security", href: "/security" },
+  { label: "Cookies", href: "/cookies" },
+  { label: "Refunds", href: "/refunds" },
 ] as const;
 
 export const FOOTER_COLUMNS = [
@@ -331,6 +609,17 @@ export const FOOTER_COLUMNS = [
       { label: "Careers", href: "/careers" },
       { label: "FAQ", href: "/#faq" },
       { label: "Contact", href: "/#contact" },
+    ],
+  },
+  {
+    title: "Trust",
+    links: [
+      { label: "Acceptable use", href: "/acceptable-use" },
+      { label: "Responsible AI", href: "/responsible-ai" },
+      { label: "SLA", href: "/sla" },
+      { label: "DPA", href: "/dpa" },
+      { label: "Subprocessors", href: "/subprocessors" },
+      { label: "All policies", href: "/legal" },
     ],
   },
 ] as const;

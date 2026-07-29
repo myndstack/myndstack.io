@@ -26,7 +26,10 @@ export default function PageHeader({
             <ol className="m-0 flex list-none flex-wrap items-center gap-2 p-0 font-mono text-[11px] tracking-[0.1em] text-t5 uppercase">
               {breadcrumbs.map((crumb) => (
                 <li key={crumb.href} className="flex items-center gap-2">
-                  <Link href={crumb.href} className="text-t5 hover:text-lime">
+                  <Link
+                    href={crumb.href}
+                    className="ease-brand text-t5 transition-colors duration-160 hover:text-t2"
+                  >
                     {crumb.label}
                   </Link>
                   <span aria-hidden="true" className="text-line-3">

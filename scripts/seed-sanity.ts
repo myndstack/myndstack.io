@@ -147,6 +147,11 @@ function buildDocs() {
       index: t.index,
       role: t.role,
       org: t.org,
+      // Optional fields on the schema; older seeds without them stay valid.
+      ...("metric" in t && t.metric ? { metric: t.metric } : {}),
+      ...("metricLabel" in t && t.metricLabel
+        ? { metricLabel: t.metricLabel }
+        : {}),
     }),
   );
 
@@ -173,6 +178,24 @@ function buildDocs() {
       cta: p.cta,
       highlighted: p.highlighted,
       features: [...p.features],
+      // Optional overlay; older seeds without regionalPrices stay valid.
+      ...(p.regionalPrices && p.regionalPrices.length > 0
+        ? {
+            regionalPrices: p.regionalPrices.map((r) =>
+              keyed({
+                region: r.region,
+                currency: r.currency,
+                symbol: r.symbol,
+                price: r.price,
+                annualPrice: r.annualPrice,
+                period: r.period,
+                annualNote: r.annualNote,
+                taxNote: r.taxNote,
+                paymentNote: r.paymentNote,
+              }),
+            ),
+          }
+        : {}),
     }),
   );
 

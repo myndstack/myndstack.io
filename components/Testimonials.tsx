@@ -75,17 +75,33 @@ export default function Testimonials({ items }: { items: Testimonial[] }) {
                     <blockquote className="m-0 font-display text-[21px] leading-[1.42] font-medium text-t1 text-pretty sm:text-[27px]">
                       {t.quote}
                     </blockquote>
-                    <figcaption className="flex items-center gap-3.5">
-                      <div
-                        aria-hidden="true"
-                        className="flex size-[46px] items-center justify-center border border-line-3 bg-ink font-display text-base font-bold text-lime"
-                      >
-                        {t.index}
+                    <figcaption className="flex flex-wrap items-center justify-between gap-x-6 gap-y-4">
+                      <div className="flex items-center gap-3.5">
+                        <div
+                          aria-hidden="true"
+                          className="flex size-[46px] items-center justify-center border border-line-3 bg-ink font-display text-base font-bold text-lime"
+                        >
+                          {t.index}
+                        </div>
+                        <div>
+                          <div className="text-[15px] font-semibold">{t.role}</div>
+                          <div className="text-[13px] text-t5">{t.org}</div>
+                        </div>
                       </div>
-                      <div>
-                        <div className="text-[15px] font-semibold">{t.role}</div>
-                        <div className="text-[13px] text-t5">{t.org}</div>
-                      </div>
+                      {/* Metric appears only when the CMS provides one; older
+                          seeds without the field render exactly as before. */}
+                      {t.metric ? (
+                        <div className="text-right">
+                          <div className="font-display text-[24px] leading-none font-bold tracking-[-0.02em] text-lime sm:text-[28px]">
+                            {t.metric}
+                          </div>
+                          {t.metricLabel ? (
+                            <div className="mt-1 font-mono text-[10.5px] tracking-[0.1em] text-t5 uppercase">
+                              {t.metricLabel}
+                            </div>
+                          ) : null}
+                        </div>
+                      ) : null}
                     </figcaption>
                   </figure>
                 </div>

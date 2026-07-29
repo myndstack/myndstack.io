@@ -838,6 +838,83 @@
     text-underline-offset: 2px;
   }
 
+  /* --- Print stylesheet ---
+     B2B buyers, procurement and legal teams routinely print or export policy
+     pages to PDF. The screen design is dark aurora with fixed nav, a scroll
+     spine and a WebGL background — none of which help on paper. Force a plain
+     document: black text on white, drop the chrome, unpin the sticky ToC, and
+     make links self-describing by appending their href after inline anchors so
+     the reader keeps the URL when the click is gone.
+     Print rules live under a media query so they don't affect the on-screen
+     experience. All screen-only elements opt out with `print:hidden` on the
+     JSX or by matching a selector below. */
+  @media print {
+    :root {
+      --color-ink: #ffffff;
+      --color-surface: #ffffff;
+      --color-surface-3: #ffffff;
+      --color-t1: #000000;
+      --color-t2: #000000;
+      --color-t3: #111111;
+      --color-t4: #222222;
+      --color-t5: #333333;
+      --color-line: #cccccc;
+      --color-line-3: #cccccc;
+    }
+    html,
+    body {
+      background: #ffffff !important;
+      color: #000000 !important;
+    }
+    /* Kill the site chrome: nav, footer, back-to-top, progress spine, aurora
+       canvas, hero network, scanline, cursor spotlight, particle field, and
+       the on-page ToC (its anchors are broken once paginated anyway). */
+    nav[aria-label="Primary"],
+    header:has(> a.skip),
+    footer,
+    aside,
+    canvas,
+    [aria-label="Back to top"],
+    [aria-label="On this page"],
+    [aria-label="Between policies"],
+    .print\:hidden {
+      display: none !important;
+    }
+    /* PageHeader still shows but should render as a plain document title. */
+    .eyebrow {
+      color: #333333 !important;
+    }
+    h1,
+    h2,
+    h3 {
+      color: #000000 !important;
+      page-break-after: avoid;
+    }
+    .legal-prose,
+    .legal-prose p,
+    .legal-prose h2 {
+      color: #000000 !important;
+    }
+    .legal-prose p {
+      max-width: none;
+    }
+    .legal-prose section {
+      page-break-inside: avoid;
+    }
+    a[href]::after {
+      content: " (" attr(href) ")";
+      font-size: 0.85em;
+      color: #555555;
+    }
+    /* But not for same-page anchors, mailto:, or tel: — those either don't
+       navigate anywhere useful in print or already show their target. */
+    a[href^="#"]::after,
+    a[href^="mailto:"]::after,
+    a[href^="tel:"]::after {
+      content: "";
+    }
+  }
+
   /* --- Skip link --- */
   .skip {
     position: fixed;

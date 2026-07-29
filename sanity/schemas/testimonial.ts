@@ -36,6 +36,20 @@ export default defineType({
       type: "string",
       validation: (rule) => rule.required(),
     }),
+    defineField({
+      name: "metric",
+      title: "Metric — value",
+      type: "string",
+      description:
+        'Optional. The headline number under the quote, e.g. "-40%" or "6×".',
+    }),
+    defineField({
+      name: "metricLabel",
+      title: "Metric — label",
+      type: "string",
+      description:
+        'Optional. The short label after the value, e.g. "infra spend" or "faster time to endpoint". Only shown when metric is set.',
+    }),
   ],
   orderings: [
     { title: "Display order", name: "order", by: [{ field: "order", direction: "asc" }] },

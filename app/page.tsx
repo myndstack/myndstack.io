@@ -6,6 +6,7 @@ import Contrast from "@/components/Contrast";
 import CtaBand from "@/components/CtaBand";
 import Faq from "@/components/Faq";
 import Hero from "@/components/Hero";
+import Integrations from "@/components/Integrations";
 import LogoMarquee from "@/components/LogoMarquee";
 import Manifesto from "@/components/Manifesto";
 import MarqueeBand from "@/components/MarqueeBand";
@@ -64,6 +65,11 @@ export default async function Home() {
         ctaSecondary={home.hero.ctaSecondary}
       />
       <MarqueeBand />
+      {/* Logos land immediately after the hero band so the first thing after
+          the value prop is external credibility, matching the pattern used by
+          Vercel, Stripe, Anthropic and most B2B infra sites. Sits outside the
+          aurora wrapper so it renders on plain ink, no z-index acrobatics. */}
+      <LogoMarquee />
       {/* One soft aurora is the continuous base behind the whole stack → Studio
           (Team) run — a single flowing gradient, no grid, no dots. The grid +
           travelling-signals field is kept for the StackStory moment only (inside
@@ -77,9 +83,9 @@ export default async function Home() {
         <Aurora />
         <StackStory />
         <Capabilities />
+        <Integrations />
         <SelectedWork />
         <Process />
-        <LogoMarquee />
         <StatsStrip />
         <Contrast />
         <Manifesto lead={home.manifestoLead} keep={home.manifestoKeep} />

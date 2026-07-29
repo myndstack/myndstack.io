@@ -4,7 +4,7 @@ import { cache } from "react";
 import { z } from "zod";
 
 import type { CaseStudy } from "@/lib/cases";
-import type { PricingTier, Social } from "@/lib/content";
+import type { PricingTier, RegionalPrice, Social } from "@/lib/content";
 import type { Role } from "@/lib/roles";
 import { sanityFetch } from "./client";
 import { TAGS } from "./tags";
@@ -40,7 +40,16 @@ export type Stat = { v: string; l: string };
 export type TeamMember = { i: string; n: string; r: string };
 export type Faq = { q: string; a: string };
 export type ClientLockup = { name: string; className: string; dotted?: boolean };
-export type Testimonial = { quote: string; index: string; role: string; org: string };
+export type Testimonial = {
+  quote: string;
+  index: string;
+  role: string;
+  org: string;
+  /** Optional headline number rendered beneath the quote. */
+  metric?: string;
+  /** Only shown alongside `metric`. */
+  metricLabel?: string;
+};
 
 export type HeroCopy = {
   eyebrow: string;
@@ -137,6 +146,8 @@ const testimonialSchema = z.object({
   index: nonEmpty,
   role: nonEmpty,
   org: nonEmpty,
+  metric: optionalString,
+  metricLabel: optionalString,
 }) satisfies z.ZodType<Testimonial>;
 
 const teamSchema = z.object({
@@ -150,6 +161,18 @@ const faqSchema = z.object({
   a: nonEmpty,
 }) satisfies z.ZodType<Faq>;
 
+const regionalPriceSchema = z.object({
+  region: z.enum(["IN", "US", "EU", "UK"]),
+  currency: z.enum(["INR", "USD", "EUR", "GBP"]),
+  symbol: z.enum(["₹", "$", "€", "£"]),
+  price: nonEmpty,
+  annualPrice: optionalString,
+  period: optionalString,
+  annualNote: optionalString,
+  taxNote: optionalString,
+  paymentNote: optionalString,
+}) satisfies z.ZodType<RegionalPrice>;
+
 const pricingSchema = z.object({
   name: nonEmpty,
   blurb: nonEmpty,
@@ -161,6 +184,10 @@ const pricingSchema = z.object({
   cta: nonEmpty,
   highlighted: z.boolean(),
   features: stringList,
+  regionalPrices: z
+    .array(regionalPriceSchema)
+    .nullish()
+    .transform((v) => v ?? undefined),
 }) satisfies z.ZodType<PricingTier>;
 
 const capabilitySchema = z.object({
@@ -293,7 +320,7 @@ export const getCaseSlugs = cache(async (): Promise<string[]> => {
 
 export const getTestimonials = cache(async (): Promise<Testimonial[]> => {
   const data = await sanityFetch<unknown[]>(
-    `*[_type == "testimonial"] | order(order asc){ quote, index, role, org }`,
+    `*[_type == "testimonial"] | order(order asc){ quote, index, role, org, metric, metricLabel }`,
     {},
     [TAGS.testimonial],
   );
@@ -322,7 +349,11 @@ export const getPricingTiers = cache(async (): Promise<PricingTier[]> => {
   const data = await sanityFetch<unknown[]>(
     `*[_type == "pricingTier"] | order(order asc){
       name, blurb, price, annualPrice, period, annualNote, badge, cta,
-      highlighted, features
+      highlighted, features,
+      regionalPrices[]{
+        region, currency, symbol, price, annualPrice, period, annualNote,
+        taxNote, paymentNote
+      }
     }`,
     {},
     [TAGS.pricingTier],

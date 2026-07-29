@@ -28,6 +28,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       changeFrequency: "weekly" as const,
       priority: 0.6,
     })),
+    {
+      url: `${SITE_URL}/legal`,
+      lastModified,
+      changeFrequency: "monthly",
+      priority: 0.4,
+    },
     ...LEGAL_SLUGS.map((slug) => ({
       url: `${SITE_URL}/${slug}`,
       lastModified,
