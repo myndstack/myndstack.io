@@ -78,10 +78,11 @@
   --text-lead: clamp(1.0625rem, 0.92rem + 0.6vw, 1.3125rem); /* 17→21px */
   --text-lead--line-height: 1.5;
 
-  /* Section vertical rhythm — one responsive value for the whole page,
-     replacing the flat 88px (heavy on mobile) and the mt-60/py-28/mt-88
-     scatter in the hand-rolled bands. ~64px phone → ~88px desktop. */
-  --spacing-section: clamp(4rem, 2.2rem + 4.8vw, 5.5rem);
+  /* Section vertical rhythm — the design system's canonical 88px top / 48px
+     bottom (pb-12). A single token so the mt-60/py-28/mt-88 scatter in the
+     hand-rolled bands collapses to one value. Kept flat at the spec's 88px
+     (gutters reduce on mobile, section rhythm does not — per the handoff). */
+  --spacing-section: 5.5rem;
 
   /* Elevation — a real shadow scale (sharp corners + depth = the premium tell
      we're allowed). Replaces scattered inline shadow-[…rgba] one-offs. */
