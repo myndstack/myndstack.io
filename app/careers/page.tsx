@@ -95,7 +95,7 @@ export default async function CareersPage() {
                       aria-hidden="true"
                       className="ease-brand font-mono text-lime transition-transform duration-160 group-hover:translate-x-1"
                     >
-                      →
+                      ▸
                     </span>
                   </span>
                 </Link>

@@ -24,13 +24,15 @@ export default async function Careers() {
 
         <div className="relative grid grid-cols-1 items-center gap-12 md:grid-cols-[1.2fr_1fr]">
           <div>
-            <div className="eyebrow mb-[18px]">Join the studio</div>
-            <h2 className="h2-section mb-4">Build the stack behind everything.</h2>
-            <p className="m-0 mb-7 max-w-[440px] text-body text-t4">
+            <div className="eyebrow mb-[18px] tracking-[0.16em]">Join the studio</div>
+            <h2 className="m-0 mb-4 font-display text-[34px] leading-none font-bold tracking-[-0.03em] text-balance sm:text-[48px]">
+              Build the stack behind everything.
+            </h2>
+            <p className="m-0 mb-7 max-w-[440px] text-[17px] leading-[1.55] text-t4">
               We hire engineers who care about the layer beneath the product. Small team,
               real ownership, mission-critical work.
             </p>
-            <Link href="/careers" className="btn btn-lime">
+            <Link href="/careers" className="btn btn-lime px-6 py-3.5">
               See open roles →
             </Link>
           </div>
@@ -46,7 +48,7 @@ export default async function Careers() {
                     <span className="block font-display text-base font-semibold">
                       {role.title}
                     </span>
-                    <span className="mt-0.5 block text-body-sm text-t4">
+                    <span className="mt-0.5 block text-[12.5px] text-t4">
                       {role.meta}
                     </span>
                   </span>
@@ -54,7 +56,7 @@ export default async function Careers() {
                     aria-hidden="true"
                     className="ease-brand font-mono text-lime transition-transform duration-160 group-hover:translate-x-1"
                   >
-                    →
+                    ▸
                   </span>
                 </Link>
               </li>

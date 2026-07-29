@@ -31,7 +31,7 @@ export default function Footer({ site }: { site: SiteSettings }) {
           </div>
 
           <div className="max-w-[360px]">
-            <h2 className={colHeadClass}>Newsletter</h2>
+            <div className={colHeadClass}>Newsletter</div>
             <Newsletter />
           </div>
 

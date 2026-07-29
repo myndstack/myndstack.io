@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
-import Check from "@/components/Check";
 import PageHeader from "@/components/PageHeader";
 import { SITE_URL } from "@/lib/content";
 import { jsonLd } from "@/lib/format";
@@ -132,9 +131,11 @@ export default async function CasePage({ params }: { params: Promise<Params> }) 
                   {study.stack.map((layer) => (
                     <li
                       key={layer}
-                      className="flex gap-2.5 text-body-sm leading-snug text-t3"
+                      className="flex gap-2.5 text-[14px] leading-snug text-t3"
                     >
-                      <Check size={15} className="mt-0.5 flex-none text-lime" />
+                      <span aria-hidden="true" className="flex-none text-lime">
+                        ▸
+                      </span>
                       {layer}
                     </li>
                   ))}

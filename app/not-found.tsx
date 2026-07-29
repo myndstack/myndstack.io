@@ -24,7 +24,7 @@ export default function NotFound() {
           Back to home →
         </Link>
         <Link href="/#contact" className="btn btn-outline">
-          Get in touch →
+          Get in touch ▸
         </Link>
       </div>
     </section>

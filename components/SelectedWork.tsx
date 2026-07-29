@@ -47,11 +47,11 @@ export default async function SelectedWork() {
               <div className="mb-3 font-display text-[clamp(24px,4vw,31px)] font-bold tracking-[-0.02em]">
                 {featured.client}
               </div>
-              <p className="m-0 max-w-[440px] text-body text-t4">
+              <p className="m-0 max-w-[440px] text-base leading-[1.55] text-t4">
                 {featured.summary}
               </p>
               <span className="mt-5 inline-block font-mono text-[11px] tracking-[0.14em] text-lime uppercase">
-                Read the case →
+                Read the case ▸
               </span>
             </div>
 
@@ -89,8 +89,10 @@ export default async function SelectedWork() {
                         </span>
                       ))}
                     </div>
-                    <div className="h3-card mb-[9px]">{c.client}</div>
-                    <p className="m-0 text-body-sm text-t4">{c.summary}</p>
+                    <div className="mb-[9px] font-display text-[21px] font-semibold">
+                      {c.client}
+                    </div>
+                    <p className="m-0 text-[13.5px] leading-[1.55] text-t4">{c.summary}</p>
                   </div>
 
                   <div className="mt-6 flex gap-[26px] border-t border-line pt-4">
@@ -112,7 +114,7 @@ export default async function SelectedWork() {
         </div>
       </div>
 
-      <p className="mt-9 mb-0 text-body-sm text-t4">
+      <p className="mt-9 mb-0 text-[15px] text-t4">
         <Link href="/work">See all work →</Link>
       </p>
     </Section>

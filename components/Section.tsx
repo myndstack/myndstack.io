@@ -17,7 +17,7 @@ export default function Section({
   return (
     <section
       id={id}
-      className={`relative mx-auto max-w-[1200px] px-5 pt-section pb-12 sm:px-14 ${className}`}
+      className={`relative mx-auto max-w-[1200px] px-5 pt-[88px] pb-12 sm:px-14 ${className}`}
     >
       {scanline ? <Scanline /> : null}
       {children}

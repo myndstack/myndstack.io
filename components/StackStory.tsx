@@ -148,19 +148,15 @@ export default function StackStory() {
 
         <div className="relative z-1 mx-auto grid w-full max-w-[1200px] grid-cols-1 items-center gap-16 px-5 sm:px-14 md:grid-cols-[1.05fr_1fr]">
           <div>
-            <div className="eyebrow mb-5">
+            <div className="eyebrow mb-5 tracking-[0.16em]">
               The stack · <span ref={counterRef}>01 / 04</span>
             </div>
-            {/* The one signature oversized headline on the page besides the hero
-                — the pinned scroll-story centrepiece. Deliberately larger than
-                .h2-section; kept bespoke rather than tokenised so it reads as the
-                moment it is. */}
             <h2 className="m-0 mb-[22px] font-display text-[42px] leading-[0.98] font-bold tracking-[-0.03em] text-balance sm:text-[76px]">
               One stack.
               <br />
               Every layer.
             </h2>
-            <p className="m-0 max-w-[420px] text-lead text-t4">
+            <p className="m-0 max-w-[420px] text-[19px] leading-[1.55] text-t4">
               Scroll to assemble the cognitive stack — data, compute, models, and
               interface, unified behind one API.
             </p>

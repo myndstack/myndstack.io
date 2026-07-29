@@ -16,7 +16,7 @@ export default async function StatsStrip() {
             <div className="font-display text-[clamp(30px,5vw,44px)] font-bold tracking-[-0.02em] tabular-nums">
               <CountUp value={stat.v} />
             </div>
-            <div className="mt-1 text-body-sm text-t4">{stat.l}</div>
+            <div className="mt-1 text-[13.5px] text-t4">{stat.l}</div>
           </div>
         ))}
       </Reveal>

@@ -1,35 +1,13 @@
 import { getHomepage } from "@/lib/sanity/queries";
-import Check from "./Check";
 import Reveal from "./Reveal";
 import Section from "./Section";
 import SectionHeader from "./SectionHeader";
-import TileField from "./TileField";
 
-/** The lime tile — the odd one out by design; kept as the single colour accent. */
+/** The lime card gets the angular clip and inverted ink — the odd one out by design. */
 const HIGHLIGHT_INDEX = 1;
-
-/**
- * Bento spans for the canonical 4-capability set: one large tall tile, one wide,
- * two small — so the section stops reading as another uniform 4-column grid.
- * Only applied when there are exactly 4 items; any other count falls back to a
- * plain responsive grid so a CMS change can't break the layout.
- *
- *   +--------+--------+
- *   |        |   1    |   0 = big (2×2), 1 = wide (top-right),
- *   |   0    +---+----+   2 = small, 3 = small (bottom-right)
- *   |        | 2 | 3  |
- *   +--------+---+----+
- */
-const BENTO_SPANS = [
-  "md:col-span-2 md:row-span-2",
-  "md:col-span-2",
-  "md:col-span-1",
-  "md:col-span-1",
-];
 
 export default async function Capabilities() {
   const { capabilities } = await getHomepage();
-  const bento = capabilities.length === 4;
 
   return (
     <Section id="work-grid">
@@ -40,50 +18,41 @@ export default async function Capabilities() {
         aside="We architect cognitive infrastructure for mission-critical software, then build on it with you."
       />
 
-      <div
-        className={`grid grid-cols-1 gap-4 xs:grid-cols-2 ${
-          bento ? "md:grid-cols-4 md:grid-rows-2" : "md:grid-cols-4"
-        }`}
-      >
+      <div className="grid grid-cols-1 gap-4 xs:grid-cols-2 md:grid-cols-4">
         {capabilities.map((cap, i) => {
           const highlight = i === HIGHLIGHT_INDEX;
-          const span = bento ? `${BENTO_SPANS[i]} h-full` : "";
 
           return (
-            // The tile sits inside Reveal so the hover lift and the entrance
+            // The card sits inside Reveal so the hover lift and the entrance
             // animation don't both try to own `transform`.
-            <Reveal key={cap.n} delay={i * 0.08} className={span}>
+            <Reveal key={cap.n} delay={i * 0.08}>
               <div
-                className={`relative flex h-full min-h-64 flex-col justify-between overflow-hidden p-[22px] ${
+                className={
                   highlight
-                    ? "clip-angular-26 bg-lime text-lime-ink"
-                    : "card card-lift"
-                }`}
+                    ? "clip-angular-26 flex h-full min-h-64 flex-col justify-between bg-lime p-[22px] text-lime-ink"
+                    : "card card-lift relative flex h-full min-h-64 flex-col justify-between overflow-hidden p-[22px]"
+                }
               >
-                {/* Abstract field fills the space the copy doesn't reach — the
-                    big tile gets the signal net, the small tiles just grid+glow.
-                    The lime tile is solid, so it skips the field entirely. */}
-                {!highlight ? <TileField net={bento && i === 0} /> : null}
-
                 <div
-                  className={`relative z-[1] font-mono text-xs ${highlight ? "text-lime-ink-2" : "text-t5"}`}
+                  className={`font-mono text-xs ${highlight ? "text-lime-ink-2" : "text-t5"}`}
                 >
                   {cap.n}
                 </div>
 
-                <div className="relative z-[1] flex flex-col gap-4">
+                <div className="flex flex-col gap-4">
                   <div>
-                    <div className="h3-card mb-3">{cap.title}</div>
+                    <div className="mb-3 font-display text-[22px] font-semibold">
+                      {cap.title}
+                    </div>
                     <ul className="m-0 flex list-none flex-col gap-2 p-0">
                       {cap.points.map((point) => (
                         <li
                           key={point}
-                          className={`flex items-start gap-2 text-body-sm ${highlight ? "text-lime-ink-3" : "text-t4"}`}
+                          className={`flex gap-2 text-[12.5px] ${highlight ? "text-lime-ink-3" : "text-t4"}`}
                         >
-                          <Check
-                            size={14}
-                            className={`mt-1 flex-none ${highlight ? "text-lime-ink-2" : "text-lime"}`}
-                          />
+                          <span className={highlight ? "text-lime-ink-2" : "text-lime"}>
+                            ▸
+                          </span>
                           {point}
                         </li>
                       ))}
@@ -97,12 +66,20 @@ export default async function Capabilities() {
                       {cap.metric}
                     </span>{" "}
                     <span
-                      className={`font-mono text-caption ${highlight ? "text-lime-ink-2" : "text-t5"}`}
+                      className={`font-mono text-[11px] ${highlight ? "text-lime-ink-2" : "text-t5"}`}
                     >
                       {cap.metricLabel}
                     </span>
                   </div>
                 </div>
+
+                {/* A slow lime sweep marks the last card as the "in motion" one. */}
+                {i === capabilities.length - 1 ? (
+                  <div
+                    aria-hidden="true"
+                    className="animate-sweep pointer-events-none absolute top-0 left-0 h-full w-2/5 bg-[linear-gradient(90deg,transparent,rgba(201,242,77,.14),transparent)]"
+                  />
+                ) : null}
               </div>
             </Reveal>
           );

@@ -65,32 +65,6 @@
   --font-body: var(--font-hanken-grotesk), system-ui, sans-serif;
   --font-mono: var(--font-space-mono), ui-monospace, monospace;
 
-  /* Type scale — named steps (Tailwind v4 --text-* → text-<name> utilities)
-     so components stop hand-rolling text-[13.5px]. Real content never drops
-     below --text-body-sm (15px). --text-caption (13px) is for mono labels,
-     meta and notes only, not paragraphs. */
-  --text-caption: 0.8125rem; /* 13px */
-  --text-caption--line-height: 1.5;
-  --text-body-sm: 0.9375rem; /* 15px */
-  --text-body-sm--line-height: 1.55;
-  --text-body: 1rem; /* 16px */
-  --text-body--line-height: 1.6;
-  --text-lead: clamp(1.0625rem, 0.92rem + 0.6vw, 1.3125rem); /* 17→21px */
-  --text-lead--line-height: 1.5;
-
-  /* Section vertical rhythm — the design system's canonical 88px top / 48px
-     bottom (pb-12). A single token so the mt-60/py-28/mt-88 scatter in the
-     hand-rolled bands collapses to one value. Kept flat at the spec's 88px
-     (gutters reduce on mobile, section rhythm does not — per the handoff). */
-  --spacing-section: 5.5rem;
-
-  /* Elevation — a real shadow scale (sharp corners + depth = the premium tell
-     we're allowed). Replaces scattered inline shadow-[…rgba] one-offs. */
-  --shadow-card: 0 1px 2px rgba(0, 0, 0, 0.3), 0 8px 24px rgba(0, 0, 0, 0.28);
-  --shadow-card-hover: 0 0 0 1px rgba(201, 242, 77, 0.08),
-    0 14px 34px rgba(0, 0, 0, 0.45);
-  --shadow-float: 0 24px 60px rgba(0, 0, 0, 0.55);
-
   /* Motion — one easing curve for the whole site */
   --ease-brand: cubic-bezier(0.2, 0, 0, 1);
 
@@ -271,30 +245,6 @@
     text-wrap: balance;
   }
 
-  /* Card / tier / member titles — the step below a section heading. One class
-     so cards stop hand-rolling text-[19px]/text-[17px]. */
-  .h3-card {
-    font-family: var(--font-display);
-    font-size: 1.1875rem; /* 19px */
-    font-weight: 600;
-    letter-spacing: -0.01em;
-    line-height: 1.2;
-    margin: 0;
-  }
-
-  /* The single sanctioned oversized display — the Manifesto statement. One
-     named exception instead of four ad-hoc heading sizes (34/48, 34/52, 42/76,
-     30/50) scattered across bands. */
-  .h1-statement {
-    font-family: var(--font-display);
-    font-size: clamp(30px, 4.6vw, 50px);
-    font-weight: 500;
-    letter-spacing: -0.02em;
-    line-height: 1.16;
-    margin: 0;
-    text-wrap: balance;
-  }
-
   .label-mono {
     font-family: var(--font-mono);
     font-size: 10.5px;
@@ -319,59 +269,6 @@
     box-shadow:
       0 0 0 1px rgba(201, 242, 77, 0.08),
       0 14px 34px rgba(0, 0, 0, 0.45);
-  }
-
-  /* --- Tile field ---------------------------------------------------------
-     A STATIC take on the SectionField grammar (blueprint grid + lime glow +
-     signal net), scoped to a single card. No per-tile canvas, so it's cheap to
-     drop on every bento tile — it fills the larger tiles whose CMS-sourced copy
-     doesn't reach the edges, giving them depth instead of empty space. Sits at
-     z-0 behind the tile's own `relative z-1` content. */
-  .tile-field {
-    position: absolute;
-    inset: 0;
-    z-index: 0;
-    overflow: hidden;
-    pointer-events: none;
-  }
-  .tile-field-grid {
-    position: absolute;
-    inset: 0;
-    background-image:
-      linear-gradient(rgba(255, 255, 255, 0.035) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(255, 255, 255, 0.035) 1px, transparent 1px);
-    background-size: 46px 46px;
-    /* Densest through the middle, gone at the edges — same radial fade the
-       section field uses, so the two read as one system. */
-    -webkit-mask-image: radial-gradient(120% 112% at 50% 44%, #000 40%, transparent 88%);
-    mask-image: radial-gradient(120% 112% at 50% 44%, #000 40%, transparent 88%);
-  }
-  .tile-field-glow {
-    position: absolute;
-    width: 78%;
-    height: 92%;
-    right: -14%;
-    top: -20%;
-    border-radius: 50%;
-    background: radial-gradient(
-      circle at 50% 50%,
-      rgba(201, 242, 77, 0.1),
-      transparent 66%
-    );
-    mix-blend-mode: screen;
-  }
-  /* The signal net — a sparse static echo of the hero network / field signals.
-     `slice` scales it to cover the tile; the radial mask fades its edges so it
-     dissolves into the grid rather than ending on a hard box. */
-  .tile-field-net {
-    position: absolute;
-    inset: 0;
-    width: 100%;
-    height: 100%;
-    color: var(--color-lime);
-    opacity: 0.4;
-    -webkit-mask-image: radial-gradient(115% 100% at 50% 42%, #000 34%, transparent 82%);
-    mask-image: radial-gradient(115% 100% at 50% 42%, #000 34%, transparent 82%);
   }
 
   .chip {

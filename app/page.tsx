@@ -9,6 +9,7 @@ import Hero from "@/components/Hero";
 import Integrations from "@/components/Integrations";
 import LogoMarquee from "@/components/LogoMarquee";
 import Manifesto from "@/components/Manifesto";
+import MarqueeBand from "@/components/MarqueeBand";
 import Pricing from "@/components/Pricing";
 import Process from "@/components/Process";
 import SelectedWork from "@/components/SelectedWork";
@@ -63,11 +64,11 @@ export default async function Home() {
         ctaPrimary={home.hero.ctaPrimary}
         ctaSecondary={home.hero.ctaSecondary}
       />
-      {/* A single trust band right after the hero: client lockups as the first
-          thing after the value prop, matching Vercel/Stripe/Anthropic. Replaces
-          the former two stacked marquees (a giant tagline wordline + this) —
-          the tagline still reads in the footer. Outside the aurora wrapper so it
-          renders on plain ink, no z-index acrobatics. */}
+      <MarqueeBand />
+      {/* Logos land immediately after the hero band so the first thing after
+          the value prop is external credibility, matching the pattern used by
+          Vercel, Stripe, Anthropic and most B2B infra sites. Sits outside the
+          aurora wrapper so it renders on plain ink, no z-index acrobatics. */}
       <LogoMarquee />
       {/* One soft aurora is the continuous base behind the whole stack → Studio
           (Team) run — a single flowing gradient, no grid, no dots. The grid +
