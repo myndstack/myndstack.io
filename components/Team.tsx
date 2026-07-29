@@ -24,8 +24,8 @@ export default async function Team() {
               </span>
               <span className="absolute bottom-3 left-3 size-2 bg-lime shadow-[0_0_10px_#C9F24D]" />
             </div>
-            <div className="font-display text-[17px] font-semibold">{member.n}</div>
-            <div className="mt-0.5 text-[13px] text-t5">{member.r}</div>
+            <div className="h3-card">{member.n}</div>
+            <div className="mt-1 text-body-sm text-t4">{member.r}</div>
           </Reveal>
         ))}
       </div>

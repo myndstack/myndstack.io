@@ -7,6 +7,7 @@ import {
   resolveTiersForRegion,
   type ResolvedTier,
 } from "@/lib/region";
+import Check from "./Check";
 import CurrencyPicker from "./CurrencyPicker";
 import PricingCompare, { tierNamesOf } from "./PricingCompare";
 import Reveal from "./Reveal";
@@ -209,10 +210,10 @@ function PrimaryCard({ tier, annual }: { tier: ResolvedTier; annual: boolean }) 
         </div>
       ) : null}
 
-      <div className="mb-1.5 font-display text-[19px] font-semibold">{tier.name}</div>
+      <div className="h3-card mb-1.5">{tier.name}</div>
       {/* min-h reserves two lines' worth of blurb so a one-line neighbour
           doesn't shrink and misalign the price row across cards. */}
-      <div className="mb-[22px] min-h-[42px] text-[13.5px] text-t4">{tier.blurb}</div>
+      <div className="mb-[22px] min-h-[42px] text-body-sm text-t4">{tier.blurb}</div>
 
       {/* aria-live so a screen reader announces the currency swap when the user
           picks a region. Polite = wait for user idle, avoids reading over
@@ -226,17 +227,17 @@ function PrimaryCard({ tier, annual }: { tier: ResolvedTier; annual: boolean }) 
         </div>
         {/* Reserved height so switching billing doesn't shift the card. */}
         {tier.annualNote ? (
-          <div className="mt-[7px] h-3.5 font-mono text-[11px] tracking-[0.04em] text-lime">
+          <div className="mt-[7px] h-3.5 font-mono text-caption leading-[1.2] tracking-[0.04em] text-lime">
             {annual ? tier.annualNote : ""}
           </div>
         ) : null}
         {tier.taxNote ? (
-          <div className="mt-3 font-mono text-[11.5px] tracking-[0.04em] text-t5">
+          <div className="mt-3 font-mono text-caption tracking-[0.04em] text-t5">
             {tier.taxNote}
           </div>
         ) : null}
         {tier.paymentNote ? (
-          <div className="mt-1 font-mono text-[11.5px] tracking-[0.04em] text-t5">
+          <div className="mt-1 font-mono text-caption tracking-[0.04em] text-t5">
             {tier.paymentNote}
           </div>
         ) : null}
@@ -249,11 +250,11 @@ function PrimaryCard({ tier, annual }: { tier: ResolvedTier; annual: boolean }) 
         {tier.features.map((feature) => (
           <li
             key={feature}
-            className={`flex gap-2.5 text-[14.5px] ${
+            className={`flex items-start gap-2.5 text-body-sm ${
               tier.highlighted ? "text-t2" : "text-t3"
             }`}
           >
-            <span className="text-lime">▸</span>
+            <Check size={15} className="mt-1 flex-none text-lime" />
             {feature}
           </li>
         ))}
@@ -261,11 +262,9 @@ function PrimaryCard({ tier, annual }: { tier: ResolvedTier; annual: boolean }) 
 
       <a
         href="#contact"
-        className={
-          tier.highlighted
-            ? "mt-auto block bg-lime p-3 text-center text-[15px] font-semibold text-lime-ink transition-colors hover:bg-lime-hover hover:text-lime-ink"
-            : "btn-outline mt-auto block p-3 text-center text-[15px] font-semibold"
-        }
+        className={`mt-auto w-full text-center ${
+          tier.highlighted ? "btn btn-lime" : "btn btn-outline"
+        }`}
       >
         {tier.cta}
       </a>
@@ -285,16 +284,13 @@ function BespokeBanner({ tier, annual }: { tier: ResolvedTier; annual: boolean }
   return (
     <div className="card grid grid-cols-1 gap-8 p-[30px] md:grid-cols-[1.4fr_1fr] md:items-center md:gap-12">
       <div>
-        <div className="mb-1.5 font-display text-[19px] font-semibold">{tier.name}</div>
-        <div className="mb-5 text-[13.5px] text-t4">{tier.blurb}</div>
+        <div className="h3-card mb-1.5">{tier.name}</div>
+        <div className="mb-5 text-body-sm text-t4">{tier.blurb}</div>
 
         <ul className="m-0 grid list-none grid-cols-1 gap-x-6 gap-y-3 p-0 sm:grid-cols-2">
           {tier.features.map((feature) => (
-            <li
-              key={feature}
-              className="flex gap-2.5 text-[14.5px] text-t3"
-            >
-              <span className="text-lime">▸</span>
+            <li key={feature} className="flex items-start gap-2.5 text-body-sm text-t3">
+              <Check size={15} className="mt-1 flex-none text-lime" />
               {feature}
             </li>
           ))}
@@ -312,13 +308,13 @@ function BespokeBanner({ tier, annual }: { tier: ResolvedTier; annual: boolean }
           {tier.period ? <span className="text-sm text-t5">{tier.period}</span> : null}
         </div>
         {tier.taxNote ? (
-          <div className="font-mono text-[11.5px] tracking-[0.04em] text-t5">
+          <div className="font-mono text-caption tracking-[0.04em] text-t5">
             {tier.taxNote}
           </div>
         ) : null}
         <a
           href="#contact"
-          className="btn-outline mt-2 block px-6 py-3 text-center text-[15px] font-semibold md:self-end"
+          className="btn btn-outline mt-2 text-center md:self-end"
         >
           {tier.cta}
         </a>

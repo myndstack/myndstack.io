@@ -1,4 +1,5 @@
 import { getHomepage } from "@/lib/sanity/queries";
+import Check from "./Check";
 import Reveal from "./Reveal";
 import Section from "./Section";
 import SectionHeader from "./SectionHeader";
@@ -41,18 +42,17 @@ export default async function Capabilities() {
 
                 <div className="flex flex-col gap-4">
                   <div>
-                    <div className="mb-3 font-display text-[22px] font-semibold">
-                      {cap.title}
-                    </div>
+                    <div className="h3-card mb-3">{cap.title}</div>
                     <ul className="m-0 flex list-none flex-col gap-2 p-0">
                       {cap.points.map((point) => (
                         <li
                           key={point}
-                          className={`flex gap-2 text-[12.5px] ${highlight ? "text-lime-ink-3" : "text-t4"}`}
+                          className={`flex items-start gap-2 text-body-sm ${highlight ? "text-lime-ink-3" : "text-t4"}`}
                         >
-                          <span className={highlight ? "text-lime-ink-2" : "text-lime"}>
-                            ▸
-                          </span>
+                          <Check
+                            size={14}
+                            className={`mt-1 flex-none ${highlight ? "text-lime-ink-2" : "text-lime"}`}
+                          />
                           {point}
                         </li>
                       ))}
@@ -66,7 +66,7 @@ export default async function Capabilities() {
                       {cap.metric}
                     </span>{" "}
                     <span
-                      className={`font-mono text-[11px] ${highlight ? "text-lime-ink-2" : "text-t5"}`}
+                      className={`font-mono text-caption ${highlight ? "text-lime-ink-2" : "text-t5"}`}
                     >
                       {cap.metricLabel}
                     </span>

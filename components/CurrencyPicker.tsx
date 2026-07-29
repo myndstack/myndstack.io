@@ -1,6 +1,5 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import type { RegionCode } from "@/lib/content";
 import {
   COOKIE_MAX_AGE_SECONDS,
@@ -46,11 +45,6 @@ type Props = {
  * "resets to auto".
  */
 export default function CurrencyPicker({ region, onChange }: Props) {
-  // First client render matches SSR (which knows nothing about cookies), so
-  // we only start honouring the cookie post-hydration. Prevents mismatch.
-  const [hydrated, setHydrated] = useState(false);
-  useEffect(() => setHydrated(true), []);
-
   const handleChange = (next: string) => {
     if (!isRegionCode(next)) return;
     writeCookie(COOKIE_REGION, next, COOKIE_MAX_AGE_SECONDS);
@@ -58,42 +52,29 @@ export default function CurrencyPicker({ region, onChange }: Props) {
     onChange(next);
   };
 
-  // Until the first client effect fires, echo the SSR-provided region so the
-  // hydration match holds. After hydration, the effect above has already run
-  // and the parent's `region` prop is authoritative.
-  const value = hydrated ? region : region;
-
+  // `region` comes from the parent, which renders the SSR default on first
+  // paint and updates after /api/pricing resolves — so the select value matches
+  // between server and client and there's no hydration mismatch.
   return (
     <div className="flex items-center gap-2.5 print:hidden">
-      <label
-        htmlFor="currency-picker"
-        className="font-mono text-[11px] tracking-[0.14em] text-t5 uppercase"
-      >
+      <label htmlFor="currency-picker" className="eyebrow text-t5">
         Currency
       </label>
-      <div className="relative">
-        <select
-          id="currency-picker"
-          value={value}
-          onChange={(e) => handleChange(e.target.value)}
-          className="ease-brand cursor-pointer appearance-none border border-line-3 bg-surface py-2 pr-8 pl-3 font-mono text-[12px] tracking-[0.04em] text-t2 uppercase transition-colors duration-160 hover:border-lime-edge focus:border-lime focus:outline-none"
-        >
-          {REGION_CODES.map((code) => (
-            <option key={code} value={code}>
-              {REGION_META[code].symbol} {REGION_META[code].currency}
-            </option>
-          ))}
-        </select>
-        {/* Custom chevron since we suppressed the native one with appearance-none. */}
-        <svg
-          aria-hidden="true"
-          className="pointer-events-none absolute top-1/2 right-2.5 size-3 -translate-y-1/2 text-t5"
-          viewBox="0 0 12 12"
-          fill="none"
-        >
-          <path d="M2.5 4.5 6 8l3.5-3.5" stroke="currentColor" strokeWidth="1.4" />
-        </svg>
-      </div>
+      {/* Reuses the .ms-field select primitive (border/focus/lime chevron) so
+          it matches the contact-form selects; w-auto + compact padding fit it
+          into the section header rather than a full-width form row. */}
+      <select
+        id="currency-picker"
+        value={region}
+        onChange={(e) => handleChange(e.target.value)}
+        className="ms-field w-auto py-2.5 text-caption"
+      >
+        {REGION_CODES.map((code) => (
+          <option key={code} value={code}>
+            {REGION_META[code].symbol} {REGION_META[code].currency}
+          </option>
+        ))}
+      </select>
     </div>
   );
 }

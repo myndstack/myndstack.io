@@ -66,9 +66,7 @@ export default function Hero({ eyebrow, subhead, ctaPrimary, ctaSecondary }: Pro
       <HeroNetwork />
 
       <div className="relative z-2 flex flex-1 flex-col items-center justify-center px-5 pt-[calc(60px+var(--nav-height))] pb-[60px] text-center sm:px-16">
-        <div className="animate-rise-in mb-[26px] font-mono text-xs font-bold tracking-[0.16em] text-lime uppercase">
-          {eyebrow}
-        </div>
+        <div className="animate-rise-in eyebrow mb-[26px]">{eyebrow}</div>
 
         <h1 className="animate-rise-in m-0 max-w-[1000px] font-display text-[clamp(30px,7.2vw,92px)] leading-none font-normal tracking-[-0.03em] text-balance [animation-duration:0.7s]">
           {WORDS.map((word, i) => (

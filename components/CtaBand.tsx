@@ -8,20 +8,23 @@ export default function CtaBand() {
         <div className="mb-[18px] font-mono text-xs font-bold tracking-[0.16em] text-lime-ink-2 uppercase">
           Start building
         </div>
-        <h2 className="m-0 mb-4 font-display text-[34px] leading-none font-bold tracking-[-0.03em] text-lime-ink text-balance sm:text-[52px]">
+        <h2 className="h2-section mx-auto mb-4 text-lime-ink">
           Ship the thing.
           <br />
           We handle the stack.
         </h2>
-        <p className="mx-auto mt-0 mb-8 max-w-[520px] text-lg leading-[1.5] text-lime-ink-3">
+        <p className="mx-auto mt-0 mb-8 max-w-[520px] text-lead text-lime-ink-3">
           Tell us what you&rsquo;re building. We&rsquo;ll show you the fastest path to
           production AI.
         </p>
         <div className="flex flex-wrap justify-center gap-3.5">
           <Magnetic>
+            {/* Inverse of the standard CTA: on a lime band, the primary is dark
+                ink and the secondary is a lime-ink outline. A contextual variant,
+                not a fork — .btn-lime would be lime-on-lime. */}
             <a
               href="#contact"
-              className="btn bg-lime-ink px-7 text-base text-lime hover:bg-ink hover:text-lime"
+              className="btn bg-lime-ink text-lime hover:bg-ink hover:text-lime"
             >
               Start a project →
             </a>
@@ -29,7 +32,7 @@ export default function CtaBand() {
           <Magnetic>
             <a
               href="#pricing"
-              className="btn border border-lime-ink/35 bg-transparent px-7 text-base text-lime-ink hover:bg-lime-ink/8 hover:text-lime-ink"
+              className="btn border border-lime-ink/35 bg-transparent text-lime-ink hover:bg-lime-ink/8 hover:text-lime-ink"
             >
               See pricing
             </a>

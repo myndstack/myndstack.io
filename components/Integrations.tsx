@@ -33,16 +33,14 @@ export default function Integrations() {
           <Reveal key={group.title} delay={i * 0.06}>
             <div className="ease-brand flex h-full flex-col gap-4 bg-ink p-6 transition-colors duration-160 hover:bg-surface-3">
               <div>
-                <div className="label-mono mb-1.5 text-t3">{group.title}</div>
-                <p className="m-0 text-[13px] leading-[1.5] text-t5">
-                  {group.blurb}
-                </p>
+                <h3 className="label-mono mb-1.5 text-t3">{group.title}</h3>
+                <p className="m-0 text-body-sm text-t4">{group.blurb}</p>
               </div>
               <ul className="m-0 flex list-none flex-wrap gap-x-4 gap-y-1.5 p-0 pt-1">
                 {group.items.map((item) => (
                   <li
                     key={item}
-                    className="font-mono text-[12px] tracking-[0.02em] text-t3"
+                    className="font-mono text-caption tracking-[0.02em] text-t3"
                   >
                     {item}
                   </li>

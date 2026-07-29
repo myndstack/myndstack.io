@@ -44,7 +44,7 @@ const HERO = {
   subhead:
     "One stack that connects your data, compute, and models — engineered so your teams ship mission-critical AI, not plumbing.",
   ctaPrimary: "Start a project →",
-  ctaSecondary: "See our work ▸",
+  ctaSecondary: "See our work →",
 };
 const LOGO_MARQUEE_HEADING = "Trusted by 120+ engineering teams building at scale";
 

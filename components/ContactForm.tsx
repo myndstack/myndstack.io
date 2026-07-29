@@ -2,6 +2,7 @@
 
 import { useFormPost } from "@/lib/useFormPost";
 import BookingEmbed from "./BookingEmbed";
+import Check from "./Check";
 import Field, { Honeypot } from "./Field";
 import Reveal from "./Reveal";
 
@@ -22,9 +23,9 @@ export default function ContactForm({ email, phone, phoneHref, location }: Props
     <section id="contact" className="mx-auto mt-[88px] max-w-[1200px] px-5 sm:px-14">
       <div className="grid grid-cols-1 items-start gap-14 md:grid-cols-[1fr_1.1fr]">
         <Reveal>
-          <div className="eyebrow mb-4 tracking-[0.16em]">Get in touch</div>
+          <div className="eyebrow mb-4">Get in touch</div>
           <h2 className="h2-section mb-[18px]">Tell us what you&rsquo;re building.</h2>
-          <p className="m-0 mb-[34px] max-w-[400px] text-base leading-[1.55] text-t4">
+          <p className="m-0 mb-[34px] max-w-[400px] text-body text-t4">
             Send the shape of the problem. We&rsquo;ll reply within one business day with
             the fastest path to production.
           </p>
@@ -63,13 +64,14 @@ export default function ContactForm({ email, phone, phoneHref, location }: Props
               role="status"
               className="flex min-h-[220px] flex-col items-start justify-center gap-3 border border-lime bg-surface px-10 py-11"
             >
-              <div className="font-mono text-xs font-bold tracking-[0.12em] text-lime">
-                ▸ MESSAGE RECEIVED
+              <div className="flex items-center gap-2 font-mono text-xs font-bold tracking-[0.12em] text-lime">
+                <Check size={14} className="text-lime" />
+                MESSAGE RECEIVED
               </div>
               <div className="font-display text-2xl leading-tight font-semibold">
                 Thanks — we&rsquo;ll be in touch within one business day.
               </div>
-              <p className="m-0 text-[14.5px] text-t4">
+              <p className="m-0 text-body-sm text-t4">
                 In the meantime, reach us directly at{" "}
                 <a href={`mailto:${email}`}>{email}</a>.
               </p>
@@ -169,7 +171,7 @@ export default function ContactForm({ email, phone, phoneHref, location }: Props
               {error ? (
                 <p
                   role="alert"
-                  className="m-0 border border-danger/40 bg-danger/8 px-4 py-3 font-mono text-[11.5px] text-danger xs:col-span-2"
+                  className="m-0 border border-danger/40 bg-danger/8 px-4 py-3 font-mono text-caption text-danger xs:col-span-2"
                 >
                   {error}
                 </p>

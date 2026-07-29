@@ -14,12 +14,11 @@ export default function Faq({ faqs }: { faqs: FaqItem[] }) {
   return (
     <section
       id="faq"
-      className="relative mx-auto max-w-[900px] px-5 pt-[88px] pb-12 sm:px-14"
+      className="relative mx-auto max-w-[900px] px-5 pt-section pb-12 sm:px-14"
     >
       <Scanline />
       <SectionHeader
         className="mb-11"
-        align="center"
         eyebrow="Questions"
         title="Frequently asked."
       />
@@ -67,7 +66,7 @@ export default function Faq({ faqs }: { faqs: FaqItem[] }) {
                 style={{ gridTemplateRows: open ? "1fr" : "0fr" }}
               >
                 <div className="overflow-hidden">
-                  <p className="m-0 max-w-[640px] px-6 pb-6 text-[15.5px] leading-[1.6] text-t4">
+                  <p className="m-0 max-w-[640px] px-6 pb-6 text-body text-t4">
                     {faq.a}
                   </p>
                 </div>

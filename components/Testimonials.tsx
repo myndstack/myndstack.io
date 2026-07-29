@@ -84,8 +84,8 @@ export default function Testimonials({ items }: { items: Testimonial[] }) {
                           {t.index}
                         </div>
                         <div>
-                          <div className="text-[15px] font-semibold">{t.role}</div>
-                          <div className="text-[13px] text-t5">{t.org}</div>
+                          <div className="text-body-sm font-semibold">{t.role}</div>
+                          <div className="text-body-sm text-t4">{t.org}</div>
                         </div>
                       </div>
                       {/* Metric appears only when the CMS provides one; older
@@ -116,7 +116,7 @@ export default function Testimonials({ items }: { items: Testimonial[] }) {
                 type="button"
                 onClick={() => goTo(i)}
                 aria-label={`Show testimonial ${i + 1}: ${t.role}`}
-                aria-current={i === index}
+                aria-current={i === index ? "true" : undefined}
                 // The visible dot is a 4px bar, but the hit area (and focus ring)
                 // is a full-height 44px button — WCAG 2.5.8 target size.
                 className="flex min-h-[44px] cursor-pointer items-center border-none bg-transparent px-1"

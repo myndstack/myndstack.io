@@ -1,6 +1,7 @@
 "use client";
 
 import { useFormPost } from "@/lib/useFormPost";
+import Check from "./Check";
 import Field, { Honeypot } from "./Field";
 
 export default function ApplicationForm({
@@ -21,13 +22,14 @@ export default function ApplicationForm({
         role="status"
         className="flex min-h-[220px] flex-col items-start justify-center gap-3 border border-lime bg-surface px-8 py-10"
       >
-        <div className="font-mono text-xs font-bold tracking-[0.12em] text-lime">
-          ▸ APPLICATION RECEIVED
+        <div className="flex items-center gap-2 font-mono text-xs font-bold tracking-[0.12em] text-lime">
+          <Check size={14} className="text-lime" />
+          APPLICATION RECEIVED
         </div>
         <div className="font-display text-2xl leading-tight font-semibold">
           Thanks — we read every application.
         </div>
-        <p className="m-0 text-[14.5px] text-t4">
+        <p className="m-0 text-body-sm text-t4">
           You&rsquo;ll hear from a person, not an autoresponder, within five business
           days. Questions in the meantime:{" "}
           <a href={`mailto:${contactEmail}`}>{contactEmail}</a>.

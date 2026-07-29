@@ -65,6 +65,31 @@
   --font-body: var(--font-hanken-grotesk), system-ui, sans-serif;
   --font-mono: var(--font-space-mono), ui-monospace, monospace;
 
+  /* Type scale — named steps (Tailwind v4 --text-* → text-<name> utilities)
+     so components stop hand-rolling text-[13.5px]. Real content never drops
+     below --text-body-sm (15px). --text-caption (13px) is for mono labels,
+     meta and notes only, not paragraphs. */
+  --text-caption: 0.8125rem; /* 13px */
+  --text-caption--line-height: 1.5;
+  --text-body-sm: 0.9375rem; /* 15px */
+  --text-body-sm--line-height: 1.55;
+  --text-body: 1rem; /* 16px */
+  --text-body--line-height: 1.6;
+  --text-lead: clamp(1.0625rem, 0.92rem + 0.6vw, 1.3125rem); /* 17→21px */
+  --text-lead--line-height: 1.5;
+
+  /* Section vertical rhythm — one responsive value for the whole page,
+     replacing the flat 88px (heavy on mobile) and the mt-60/py-28/mt-88
+     scatter in the hand-rolled bands. ~64px phone → ~88px desktop. */
+  --spacing-section: clamp(4rem, 2.2rem + 4.8vw, 5.5rem);
+
+  /* Elevation — a real shadow scale (sharp corners + depth = the premium tell
+     we're allowed). Replaces scattered inline shadow-[…rgba] one-offs. */
+  --shadow-card: 0 1px 2px rgba(0, 0, 0, 0.3), 0 8px 24px rgba(0, 0, 0, 0.28);
+  --shadow-card-hover: 0 0 0 1px rgba(201, 242, 77, 0.08),
+    0 14px 34px rgba(0, 0, 0, 0.45);
+  --shadow-float: 0 24px 60px rgba(0, 0, 0, 0.55);
+
   /* Motion — one easing curve for the whole site */
   --ease-brand: cubic-bezier(0.2, 0, 0, 1);
 
@@ -241,6 +266,30 @@
     font-weight: 700;
     letter-spacing: -0.025em;
     line-height: 1.04;
+    margin: 0;
+    text-wrap: balance;
+  }
+
+  /* Card / tier / member titles — the step below a section heading. One class
+     so cards stop hand-rolling text-[19px]/text-[17px]. */
+  .h3-card {
+    font-family: var(--font-display);
+    font-size: 1.1875rem; /* 19px */
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    line-height: 1.2;
+    margin: 0;
+  }
+
+  /* The single sanctioned oversized display — the Manifesto statement. One
+     named exception instead of four ad-hoc heading sizes (34/48, 34/52, 42/76,
+     30/50) scattered across bands. */
+  .h1-statement {
+    font-family: var(--font-display);
+    font-size: clamp(30px, 4.6vw, 50px);
+    font-weight: 500;
+    letter-spacing: -0.02em;
+    line-height: 1.16;
     margin: 0;
     text-wrap: balance;
   }

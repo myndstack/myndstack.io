@@ -1,6 +1,7 @@
 "use client";
 
 import { useFormPost } from "@/lib/useFormPost";
+import Check from "./Check";
 import { Honeypot } from "./Field";
 
 export default function Newsletter() {
@@ -13,9 +14,10 @@ export default function Newsletter() {
     return (
       <div
         role="status"
-        className="mt-2.5 font-mono text-[11px] tracking-[0.04em] text-lime"
+        className="mt-2.5 flex items-center gap-1.5 font-mono text-[11px] tracking-[0.04em] text-lime"
       >
-        ▸ Subscribed. Watch your inbox.
+        <Check size={13} className="flex-none text-lime" />
+        Subscribed. Watch your inbox.
       </div>
     );
   }

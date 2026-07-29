@@ -3,6 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import ApplicationForm from "@/components/ApplicationForm";
+import Check from "@/components/Check";
 import PageHeader from "@/components/PageHeader";
 import { SITE_URL } from "@/lib/content";
 import { jsonLd, numberWord } from "@/lib/format";
@@ -48,9 +49,9 @@ export default async function RolePage({ params }: { params: Promise<Params> }) 
   ];
 
   const lists = [
-    { heading: "What you'll do", items: role.responsibilities, marker: "▸" },
-    { heading: "What we're looking for", items: role.requirements, marker: "▸" },
-    { heading: "Nice to have", items: role.bonus, marker: "—" },
+    { heading: "What you'll do", items: role.responsibilities, check: true },
+    { heading: "What we're looking for", items: role.requirements, check: true },
+    { heading: "Nice to have", items: role.bonus, check: false },
   ];
 
   return (
@@ -117,14 +118,15 @@ export default async function RolePage({ params }: { params: Promise<Params> }) 
                   {list.items.map((item) => (
                     <li
                       key={item}
-                      className="flex gap-3.5 text-[15.5px] leading-[1.55] text-t3"
+                      className="flex gap-3.5 text-body leading-[1.55] text-t3"
                     >
-                      <span
-                        aria-hidden="true"
-                        className={`flex-none ${list.marker === "▸" ? "text-lime" : "text-t7"}`}
-                      >
-                        {list.marker}
-                      </span>
+                      {list.check ? (
+                        <Check size={16} className="mt-1 flex-none text-lime" />
+                      ) : (
+                        <span aria-hidden="true" className="mt-px flex-none text-t6">
+                          —
+                        </span>
+                      )}
                       {item}
                     </li>
                   ))}
