@@ -1,6 +1,5 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import type { RegionCode } from "@/lib/content";
 import {
   COOKIE_MAX_AGE_SECONDS,
@@ -46,22 +45,15 @@ type Props = {
  * "resets to auto".
  */
 export default function CurrencyPicker({ region, onChange }: Props) {
-  // First client render matches SSR (which knows nothing about cookies), so
-  // we only start honouring the cookie post-hydration. Prevents mismatch.
-  const [hydrated, setHydrated] = useState(false);
-  useEffect(() => setHydrated(true), []);
-
+  // The select simply reflects the parent's `region`. Hydration is safe with no
+  // local state: the parent seeds `region` with the same default the server
+  // rendered, and only moves it after its own post-mount /api/pricing fetch.
   const handleChange = (next: string) => {
     if (!isRegionCode(next)) return;
     writeCookie(COOKIE_REGION, next, COOKIE_MAX_AGE_SECONDS);
     writeCookie(COOKIE_SOURCE, "user", COOKIE_MAX_AGE_SECONDS);
     onChange(next);
   };
-
-  // Until the first client effect fires, echo the SSR-provided region so the
-  // hydration match holds. After hydration, the effect above has already run
-  // and the parent's `region` prop is authoritative.
-  const value = hydrated ? region : region;
 
   return (
     <div className="flex items-center gap-2.5 print:hidden">
@@ -74,7 +66,7 @@ export default function CurrencyPicker({ region, onChange }: Props) {
       <div className="relative">
         <select
           id="currency-picker"
-          value={value}
+          value={region}
           onChange={(e) => handleChange(e.target.value)}
           className="ease-brand cursor-pointer appearance-none border border-line-3 bg-surface py-2 pr-8 pl-3 font-mono text-[12px] tracking-[0.04em] text-t2 uppercase transition-colors duration-160 hover:border-lime-edge focus:border-lime focus:outline-none"
         >

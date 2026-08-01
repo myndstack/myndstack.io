@@ -1,4 +1,3 @@
-import Aurora from "@/components/Aurora";
 import Capabilities from "@/components/Capabilities";
 import Careers from "@/components/Careers";
 import ContactForm from "@/components/ContactForm";
@@ -65,34 +64,21 @@ export default async function Home() {
         ctaSecondary={home.hero.ctaSecondary}
       />
       <MarqueeBand />
-      {/* Logos land immediately after the hero band so the first thing after
-          the value prop is external credibility, matching the pattern used by
-          Vercel, Stripe, Anthropic and most B2B infra sites. Sits outside the
-          aurora wrapper so it renders on plain ink, no z-index acrobatics. */}
+      <StackStory />
+      <Capabilities />
+      {/* Client-lockup strip sits directly after the "what we do" section so it
+          reads as "here's our work — and here are the brands that trust us with
+          it" rather than a decontextualised logo wall right under the hero. */}
       <LogoMarquee />
-      {/* One soft aurora is the continuous base behind the whole stack → Studio
-          (Team) run — a single flowing gradient, no grid, no dots. The grid +
-          travelling-signals field is kept for the StackStory moment only (inside
-          its own sticky element, see StackStory.tsx); every other section in the
-          run floats on the aurora alone, so the content leads and the motion
-          stays calm. The wrapper is `relative isolate` but NOT `overflow-hidden`:
-          StackStory pins with `position: sticky`, which an overflow-clip ancestor
-          would break; the aurora sits behind at a negative z-index. Everything
-          after Team stays on plain ink. */}
-      <div className="relative isolate">
-        <Aurora />
-        <StackStory />
-        <Capabilities />
-        <Integrations />
-        <SelectedWork />
-        <Process />
-        <StatsStrip />
-        <Contrast />
-        <Manifesto lead={home.manifestoLead} keep={home.manifestoKeep} />
-        <Testimonials items={testimonials} />
-        <Pricing tiers={tiers} />
-        <Team />
-      </div>
+      <Integrations />
+      <SelectedWork />
+      <Process />
+      <StatsStrip />
+      <Contrast />
+      <Manifesto lead={home.manifestoLead} keep={home.manifestoKeep} />
+      <Testimonials items={testimonials} />
+      <Pricing tiers={tiers} />
+      <Team />
       <Careers />
       <Faq faqs={faqs} />
       <CtaBand />

@@ -45,15 +45,20 @@ export function middleware(req: NextRequest) {
     (req as unknown as { geo?: { country?: string } }).geo?.country ?? null;
   const region = regionFromCountry(countryHeader ?? countryFromGeo);
 
+  // `x-region` must go on the *request* headers via `NextResponse.next({
+  // request })` to be readable downstream — setting it on the response (the
+  // obvious call) only sends it back to the browser, and no handler ever sees
+  // it.
+  const requestHeaders = new Headers(req.headers);
+  requestHeaders.set("x-region", region);
+
   // Skip write when the cookie already matches the geo pick (no-op path avoids
   // unnecessary Set-Cookie churn on every homepage hit).
   if (existingRegion === region) {
-    const passthrough = NextResponse.next();
-    passthrough.headers.set("x-region", region);
-    return passthrough;
+    return NextResponse.next({ request: { headers: requestHeaders } });
   }
 
-  const res = NextResponse.next();
+  const res = NextResponse.next({ request: { headers: requestHeaders } });
   res.cookies.set({
     name: COOKIE_REGION,
     value: region,
@@ -63,7 +68,6 @@ export function middleware(req: NextRequest) {
     maxAge: COOKIE_MAX_AGE_SECONDS,
     // Not httpOnly — the client picker needs to read + write this cookie.
   });
-  res.headers.set("x-region", region);
   return res;
 }
 

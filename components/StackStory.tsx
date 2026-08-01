@@ -32,11 +32,12 @@ export default function StackStory() {
    * `top` is document-absolute, so scrolling never invalidates it.
    *
    * It must be `getBoundingClientRect().top + scrollY`, NOT `offsetTop`:
-   * `offsetTop` is relative to the nearest positioned ancestor, and the section
-   * now lives inside the aurora run's `relative isolate` wrapper (see page.tsx),
-   * which is that ancestor. `offsetTop` there reads ~0, the progress runs far
-   * ahead of the scroll, and the tiles finish assembling before the section
-   * even pins. The rect is unaffected by any offsetParent.
+   * `offsetTop` is relative to the nearest positioned ancestor, so any wrapper
+   * with `position: relative` silently rebases it — which happened when the
+   * section briefly lived inside a positioned backdrop wrapper: `offsetTop`
+   * read ~0, the progress ran far ahead of the scroll, and the tiles finished
+   * assembling before the section even pinned. The rect is unaffected by any
+   * offsetParent, so this survives future re-wrapping.
    */
   const geometryRef = useRef({ top: 0, total: 0 });
 
@@ -136,15 +137,18 @@ export default function StackStory() {
   return (
     <section
       ref={sectionRef}
-      className="relative min-h-[70vh] border-b border-line sm:h-[340vh]"
+      // No border-bottom on purpose: the section ends on the field's soft
+      // vertical mask (see `.field` in globals.css), so it dissolves into the
+      // plain ink of the section below rather than terminating on a hard line.
+      className="relative min-h-[70vh] sm:h-[340vh]"
     >
-      {/* StackStory is an open section, so it gets the Hybrid A+B field on top of
-          the page aurora — but placed INSIDE its own sticky element (a FieldBand's
-          overflow-hidden wrapper would break the pin). `isolate` contains the
-          field's z-0; the `overflow-hidden` here is on the sticky box itself,
-          which is fine for the pin and clips the field's glows. */}
+      {/* The Hybrid A+B field (grid + travelling signals + cursor spotlight) is
+          this section's signature backdrop — placed INSIDE the sticky element,
+          because an overflow-hidden *ancestor* of a sticky box breaks the pin.
+          `isolate` contains the field's z-0; the `overflow-hidden` here is on
+          the sticky box itself, which is fine for the pin and clips the field. */}
       <div className="relative isolate flex min-h-[70vh] items-center overflow-hidden py-16 sm:sticky sm:top-0 sm:h-screen sm:py-0">
-        <SectionField signals variant={3} />
+        <SectionField signals />
 
         <div className="relative z-1 mx-auto grid w-full max-w-[1200px] grid-cols-1 items-center gap-16 px-5 sm:px-14 md:grid-cols-[1.05fr_1fr]">
           <div>

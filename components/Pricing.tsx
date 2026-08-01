@@ -48,12 +48,18 @@ export default function Pricing({ tiers }: { tiers: PricingTier[] }) {
   // we can emit `pricing_currency_mismatch` when they diverge.
   const autoRegion = useRef<RegionCode | null>(null);
   const reportedDetected = useRef(false);
+  // /api/pricing is fetched on mount and again on every picker change, and the
+  // responses can land out of order — only the newest request may write state,
+  // or a slow mount fetch would overwrite the user's pick.
+  const requestSeq = useRef(0);
 
   const loadRegion = useCallback(async () => {
+    const seq = ++requestSeq.current;
     try {
       const res = await fetch("/api/pricing", { credentials: "same-origin" });
       if (!res.ok) return;
       const data = (await res.json()) as { region: RegionCode; tiers: ResolvedTier[] };
+      if (seq !== requestSeq.current) return; // superseded — drop this response
       setResolved(data.tiers);
       setRegion(data.region);
       // Record the geo default the first time we see it; subsequent overrides
@@ -71,6 +77,9 @@ export default function Pricing({ tiers }: { tiers: PricingTier[] }) {
   }, []);
 
   useEffect(() => {
+    // Fetch-on-mount, not a synchronous setState: loadRegion only writes state
+    // in its post-await continuation, which the lint rule can't see through.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     void loadRegion();
   }, [loadRegion]);
 
