@@ -247,58 +247,59 @@ test.describe("the nav morph stays cheap", () => {
 });
 
 /**
- * The continuous aurora backdrop (Aurora) behind the StackStory → Studio(Team) run.
- *
- * The one thing that's easy to regress and invisible to a screenshot: the aurora
- * must clip its own blobs, while its wrapper must stay clip-free — an
- * `overflow-hidden` on the wrapper would sit between StackStory's sticky element
- * and its scroll container and break the pin. So this asserts the clip is on the
- * `.aurora` itself, not its parent.
+ * StackStory's viewport pin. The section relies on `position: sticky`, and the
+ * classic way to break it silently is an ancestor that scroll-clips overflow —
+ * added for some unrelated reason, months later, a few components up. Nothing
+ * errors; the section just scrolls straight through instead of pinning. So this
+ * asserts the invariant directly: no ancestor between the sticky element and
+ * <body> may be a vertical scroll container. (`overflow: clip` stays legal —
+ * unlike `hidden` it creates no scroll container, which is why #site's
+ * overflow-x-clip doesn't bite.)
  */
-test.describe("the aurora stays in its lane", () => {
-  test("clips its own blobs but not via an ancestor (which would break the pin)", async ({
+test.describe("the stack story keeps its pin", () => {
+  test("no ancestor of the sticky element scroll-clips vertical overflow", async ({
     page,
   }) => {
     await page.setViewportSize({ width: 1440, height: 900 });
     await landOnHome(page);
-    const aurora = page.locator(".aurora");
-    await expect(aurora).toHaveCount(1);
-    const { self, anchor, region } = await aurora.evaluate((el) => ({
-      self: getComputedStyle(el).overflow,
-      anchor: getComputedStyle(el.parentElement as Element).overflow,
-      // The run wrapper that also holds StackStory.
-      region: getComputedStyle(el.parentElement!.parentElement as Element).overflow,
-    }));
-    // The aurora clips its own blobs; nothing above it does — StackStory pins
-    // with position:sticky, and an overflow-clip ancestor would break it.
-    expect(self).toBe("hidden");
-    expect(anchor).toBe("visible");
-    expect(region).toBe("visible");
-  });
-
-  test("adds no canvas and no per-frame work — it's pure CSS", async ({ page }) => {
-    await page.setViewportSize({ width: 1440, height: 900 });
-    await landOnHome(page);
-    await expect(page.locator(".aurora canvas")).toHaveCount(0);
-    await expect(page.locator(".aurora-blob")).toHaveCount(5);
+    const offenders = await page
+      .locator(".story-layer")
+      .first()
+      .evaluate((tile) => {
+        const section = tile.closest("section");
+        const sticky = Array.from(section?.children ?? []).find(
+          (child) => getComputedStyle(child).position === "sticky",
+        );
+        if (!sticky) return ["no sticky element found in the stack story"];
+        const bad: string[] = [];
+        for (let el = sticky.parentElement; el && el !== document.body; el = el.parentElement) {
+          const overflowY = getComputedStyle(el).overflowY;
+          if (overflowY === "hidden" || overflowY === "scroll" || overflowY === "auto") {
+            bad.push(`${el.tagName.toLowerCase()}#${el.id}: overflow-y ${overflowY}`);
+          }
+        }
+        return bad;
+      });
+    expect(offenders).toEqual([]);
   });
 });
 
 /**
- * The Hybrid A+B field (SectionField) — grid + glow + signals — kept for the
- * StackStory moment only, over the aurora. Everything else in the run is aurora
- * alone. Two things are easy to regress and invisible to a screenshot: the field
- * must stay clipped, and its signal canvas must not run under reduced motion or
- * on mobile, where only the static grid + glow should show.
+ * The Hybrid A+B field (SectionField) — grid + signals + cursor spotlight — is
+ * the StackStory backdrop and the page's one decorated moment; everything else
+ * sits on plain ink. Easy to regress and invisible to a screenshot: the field
+ * must stay clipped, its signal canvas must not run under reduced motion or on
+ * mobile (only the static grid shows there), and the spotlight must engage on
+ * hover only.
  */
 const FIELD_COUNT = 1; // StackStory only
 const SIGNAL_BANDS = 1; // StackStory
 
 test.describe("the section fields stay in their lane", () => {
-  test("every field is clipped so the glows can't bleed into neighbours", async ({
+  test("every field is clipped so it can't bleed into neighbours", async ({
     page,
   }) => {
-    // Each field's `overflow: hidden` wrapper stops its glows painting into the
+    // Each field's `overflow: hidden` wrapper stops it painting into the
     // sections above and below. (Document-level horizontal overflow is separately
     // caught by `#site`'s overflow-x-clip, so a doc-width assertion here would pass
     // even with the clip gone — this asserts the clip itself, which actually bites.)
@@ -332,6 +333,42 @@ test.describe("the section fields stay in their lane", () => {
     await expect(page.locator(".field canvas")).toHaveCount(0);
     await expect(page.locator(".field .field-grid")).toHaveCount(FIELD_COUNT);
   });
+
+  test("the cursor spotlight engages under the pointer, and only there", async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width: 1440, height: 900 });
+    await landOnHome(page);
+    const field = page.locator(".field").first();
+    // Nothing hovered yet — the hot layer must be off.
+    await expect(field).not.toHaveClass(/is-hot/);
+
+    const heading = page.getByRole("heading", { name: /one stack/i });
+    await heading.scrollIntoViewIfNeeded();
+    const box = (await heading.boundingBox())!;
+    await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
+    await expect(field).toHaveClass(/is-hot/);
+    // The pointer position lands as CSS custom properties on the field, in px.
+    const fx = await field.evaluate((el) => el.style.getPropertyValue("--fx"));
+    expect(fx).toMatch(/px$/);
+
+    // Leaving the section (here: onto the fixed nav) releases the spotlight.
+    await page.mouse.move(box.x + box.width / 2, 10);
+    await expect(field).not.toHaveClass(/is-hot/);
+  });
+
+  test("the spotlight never engages under reduced motion", async ({ page }) => {
+    await page.emulateMedia({ reducedMotion: "reduce" });
+    await page.setViewportSize({ width: 1440, height: 900 });
+    await landOnHome(page);
+    const heading = page.getByRole("heading", { name: /one stack/i });
+    await heading.scrollIntoViewIfNeeded();
+    const box = (await heading.boundingBox())!;
+    await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
+    // Give a wrongly-bound handler time to fire before asserting silence.
+    await page.waitForTimeout(150);
+    await expect(page.locator(".field").first()).not.toHaveClass(/is-hot/);
+  });
 });
 
 /**
@@ -352,6 +389,10 @@ test.describe("touch targets and error affordances", () => {
     expect(dotBox!.width, "testimonial dot width").toBeGreaterThanOrEqual(24);
 
     // Footer social links are the only path to socials below 1100px → 44×44.
+    // The row is `lg:hidden` (above 1100px the desktop spine carries the same
+    // profiles), so measure at a sub-lg width where the links actually render —
+    // at 1280px this locator resolves to a display:none element and times out.
+    await page.setViewportSize({ width: 1000, height: 900 });
     const social = page.locator('footer a[rel="noopener noreferrer"]').first();
     await social.scrollIntoViewIfNeeded();
     const socialBox = await social.boundingBox();
