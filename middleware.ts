@@ -3,7 +3,6 @@ import {
   COOKIE_MAX_AGE_SECONDS,
   COOKIE_REGION,
   COOKIE_SOURCE,
-  DEFAULT_REGION,
   isRegionCode,
   regionFromCountry,
 } from "@/lib/region";
@@ -20,17 +19,12 @@ import {
  * says "user", the middleware doesn't touch anything. If the region cookie is
  * missing entirely, the middleware fills it in from geo (or from the default
  * when geo is unavailable, e.g. localhost or a non-Vercel host).
- *
- * An `x-region` request header is also set for the same request so downstream
- * handlers (currently only /api/pricing when called through a rewrite) can
- * read the resolved region without re-parsing.
  */
 export function middleware(req: NextRequest) {
   const existingRegion = req.cookies.get(COOKIE_REGION)?.value;
   const isUserPick = req.cookies.get(COOKIE_SOURCE)?.value === "user";
 
-  // Nothing to do — user has explicitly chosen, or the geo default already
-  // landed on a valid region.
+  // Nothing to do — user has explicitly chosen.
   if (existingRegion && isRegionCode(existingRegion) && isUserPick) {
     return NextResponse.next();
   }
@@ -45,20 +39,13 @@ export function middleware(req: NextRequest) {
     (req as unknown as { geo?: { country?: string } }).geo?.country ?? null;
   const region = regionFromCountry(countryHeader ?? countryFromGeo);
 
-  // `x-region` must go on the *request* headers via `NextResponse.next({
-  // request })` to be readable downstream — setting it on the response (the
-  // obvious call) only sends it back to the browser, and no handler ever sees
-  // it.
-  const requestHeaders = new Headers(req.headers);
-  requestHeaders.set("x-region", region);
-
   // Skip write when the cookie already matches the geo pick (no-op path avoids
   // unnecessary Set-Cookie churn on every homepage hit).
   if (existingRegion === region) {
-    return NextResponse.next({ request: { headers: requestHeaders } });
+    return NextResponse.next();
   }
 
-  const res = NextResponse.next({ request: { headers: requestHeaders } });
+  const res = NextResponse.next();
   res.cookies.set({
     name: COOKIE_REGION,
     value: region,
@@ -77,6 +64,3 @@ export function middleware(req: NextRequest) {
 export const config = {
   matcher: ["/"],
 };
-
-// Re-export so a Node import doesn't fail on tree-shaken build metadata.
-export const _defaultRegion = DEFAULT_REGION;

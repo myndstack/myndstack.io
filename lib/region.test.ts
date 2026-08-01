@@ -70,6 +70,17 @@ describe("isRegionCode", () => {
       expect(isRegionCode(bad)).toBe(false);
     }
   });
+
+  // The CurrencyPicker <select> renders its `value` prop directly with no
+  // local hydration state, so `<Pricing>`'s initial `useState(DEFAULT_REGION)`
+  // has to produce a value that matches an <option> — otherwise the first
+  // client render diverges from SSR and React drops hydration on the subtree.
+  // Freezing that contract here so a future rename of DEFAULT_REGION can't
+  // silently unpin the picker.
+  it("DEFAULT_REGION is a valid RegionCode (SSR ↔ hydration contract)", () => {
+    expect(isRegionCode(DEFAULT_REGION)).toBe(true);
+    expect(REGION_CODES).toContain(DEFAULT_REGION);
+  });
 });
 
 describe("resolveTierForRegion", () => {

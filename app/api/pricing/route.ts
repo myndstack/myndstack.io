@@ -35,6 +35,13 @@ export async function GET(request: Request) {
   const headerStore = await headers();
 
   const cookieRegion = cookieStore.get(COOKIE_REGION)?.value;
+  // Trust boundary: `x-vercel-ip-country` is injected by Vercel's edge, but the
+  // platform docs don't explicitly guarantee it strips a client-supplied
+  // version — a determined caller could send this header themselves. Fine for
+  // this endpoint (worst case: they see the wrong currency on the pricing
+  // section, which the picker lets them override anyway). Do NOT treat this
+  // value as authoritative for anything security-sensitive without adding a
+  // strip-and-reinject step upstream.
   const geoRegion = regionFromCountry(headerStore.get("x-vercel-ip-country"));
 
   const region =

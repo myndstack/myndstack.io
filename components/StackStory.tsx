@@ -146,8 +146,16 @@ export default function StackStory() {
           this section's signature backdrop — placed INSIDE the sticky element,
           because an overflow-hidden *ancestor* of a sticky box breaks the pin.
           `isolate` contains the field's z-0; the `overflow-hidden` here is on
-          the sticky box itself, which is fine for the pin and clips the field. */}
-      <div className="relative isolate flex min-h-[70vh] items-center overflow-hidden py-16 sm:sticky sm:top-0 sm:h-screen sm:py-0">
+          the sticky box itself, which is fine for the pin and clips the field.
+
+          `data-sticky` marks this as the pinned box: SectionField's cursor
+          spotlight uses `.closest('[data-sticky]')` to find the sticky rather
+          than assuming `parentElement`, so an intermediate wrapper doesn't
+          silently misalign the coordinate math. */}
+      <div
+        data-sticky
+        className="relative isolate flex min-h-[70vh] items-center overflow-hidden py-16 sm:sticky sm:top-0 sm:h-screen sm:py-0"
+      >
         <SectionField signals />
 
         <div className="relative z-1 mx-auto grid w-full max-w-[1200px] grid-cols-1 items-center gap-16 px-5 sm:px-14 md:grid-cols-[1.05fr_1fr]">

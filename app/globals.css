@@ -142,6 +142,11 @@
        leaving, so it holds in both directions. */
     --nav-fade: 300ms;
     --nav-fade-lag: 150ms;
+    /* Cell size for the blueprint grid in SectionField. Read from JS via
+       getComputedStyle so the travelling signals ride the same lines the
+       CSS draws; kept as a token here so `.field-grid`, `.field-grid-hot`,
+       and SectionField.tsx can't drift out of sync. */
+    --field-grid: 30px;
   }
 
   *,
@@ -943,7 +948,7 @@
     background-image:
       linear-gradient(rgba(255, 255, 255, 0.075) 1px, transparent 1px),
       linear-gradient(90deg, rgba(255, 255, 255, 0.075) 1px, transparent 1px);
-    background-size: 30px 30px;
+    background-size: var(--field-grid) var(--field-grid);
     -webkit-mask-image: radial-gradient(130% 108% at 50% 46%, #000 46%, transparent 92%);
     mask-image: radial-gradient(130% 108% at 50% 46%, #000 46%, transparent 92%);
   }
@@ -959,7 +964,7 @@
     background-image:
       linear-gradient(rgba(201, 242, 77, 0.55) 1px, transparent 1px),
       linear-gradient(90deg, rgba(201, 242, 77, 0.55) 1px, transparent 1px);
-    background-size: 30px 30px;
+    background-size: var(--field-grid) var(--field-grid);
     -webkit-mask-image: radial-gradient(
       circle 150px at var(--fx, 50%) var(--fy, 50%),
       #000 0%,

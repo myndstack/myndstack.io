@@ -1,13 +1,24 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, type RefObject } from "react";
 import { useMediaQuery, useReducedMotion } from "@/lib/hooks";
 
 /**
- * Must match `background-size` on `.field-grid` in globals.css — signals ride
- * the same lines the grid draws, so the two have to agree on the spacing.
+ * Cell size for the blueprint grid. Read from the `--field-grid` CSS custom
+ * property (defined once in globals.css `:root`) so the travelling signals
+ * ride the same lines the grid draws — one source of truth across CSS + JS.
+ * Falls back to the CSS default (30px) on the server or if the property is
+ * missing.
  */
-const GRID = 30;
+const GRID_FALLBACK = 30;
+function readGridSize(): number {
+  if (typeof window === "undefined") return GRID_FALLBACK;
+  const raw = getComputedStyle(document.documentElement)
+    .getPropertyValue("--field-grid")
+    .trim();
+  const n = parseInt(raw, 10);
+  return Number.isFinite(n) && n > 0 ? n : GRID_FALLBACK;
+}
 
 /** Signals per (width + height) pixel. Sparse on purpose — this is a backdrop. */
 const DENSITY = 1 / 64;
@@ -45,7 +56,9 @@ const rand = (a: number, b: number) => a + Math.random() * (b - a);
  * whenever the band is off screen. Deliberately not a `lib/scroll.ts` subscriber
  * — it runs on its own clock, not the scroll position.
  *
- * Renders the static grid alone under reduced motion and on mobile.
+ * The two independent lifecycles — travelling-signal canvas and cursor
+ * spotlight — live in separate hooks below so each can be reasoned about
+ * (and tested) on its own.
  */
 export default function SectionField({
   signals = false,
@@ -57,18 +70,40 @@ export default function SectionField({
   const fieldRef = useRef<HTMLDivElement>(null);
   const reduced = useReducedMotion();
   const isDesktop = useMediaQuery("(min-width: 47.5rem)");
-  // The canvas only mounts for a signals band on desktop with motion allowed;
-  // everything else is the CSS grid + glow, which costs nothing to animate.
-  const runSignals = signals && isDesktop && !reduced;
+  // Both effects are gated on desktop + motion-allowed. Canvas needs `signals`
+  // additionally; the spotlight always follows the pointer wherever the field
+  // renders (still hover-only, since touch has no hover).
+  useSignalsCanvas(canvasRef, signals && isDesktop && !reduced);
+  useCursorSpotlight(fieldRef, isDesktop && !reduced);
 
+  const runSignals = signals && isDesktop && !reduced;
+  return (
+    <div className="field" aria-hidden="true" ref={fieldRef}>
+      <div className="field-grid" />
+      {/* Bright grid, revealed only inside the cursor spotlight (see globals.css). */}
+      <div className="field-grid-hot" />
+      {runSignals ? <canvas ref={canvasRef} className="field-canvas" /> : null}
+    </div>
+  );
+}
+
+/**
+ * The travelling-signal canvas. A pool of lime pulses ride the grid lines
+ * with a fading tail; when they run past the far edge they respawn from the
+ * leading edge. No layout reads inside the frame — dimensions are cached and
+ * refreshed on a debounced resize. The RAF stops when the canvas leaves the
+ * viewport.
+ */
+function useSignalsCanvas(canvasRef: RefObject<HTMLCanvasElement | null>, enabled: boolean) {
   useEffect(() => {
-    if (!runSignals) return;
+    if (!enabled) return;
 
     const canvas = canvasRef.current;
     if (!canvas) return;
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
+    const grid = readGridSize();
     const dpr = Math.min(window.devicePixelRatio || 1, 2);
     let w = 0;
     let h = 0;
@@ -84,7 +119,7 @@ export default function SectionField({
       return {
         axis,
         // Snap onto an actual grid line so the signal sits on a drawn edge.
-        line: Math.round(rand(0, cross) / GRID) * GRID,
+        line: Math.round(rand(0, cross) / grid) * grid,
         pos: dir > 0 ? -tail : span + tail,
         dir,
         speed: rand(MIN_SPEED, MAX_SPEED),
@@ -171,33 +206,40 @@ export default function SectionField({
       window.clearTimeout(resizeTimer);
       window.removeEventListener("resize", onResize);
     };
-  }, [runSignals]);
+  }, [canvasRef, enabled]);
+}
 
-  // Cursor spotlight: brighten the grid cells under the pointer. Hover-only, so
-  // it's gated to desktop (touch has no hover) and skipped under reduced motion.
-  // Writes two CSS custom properties on the field per move (coalesced to one
-  // rAF); the brightening itself is a masked opacity layer in CSS. Not a
-  // lib/scroll.ts subscriber — it runs off pointer events, on its own clock.
-  //
-  // The geometry is CACHED, refreshed by a ResizeObserver — the same discipline
-  // as Nav and StackStory. The first version called getBoundingClientRect()
-  // inside the per-move rAF, and a trackpad scroll with the cursor over the
-  // pinned section put that read in the same frames as the nav's class writes:
-  // exactly the forced-synchronous-layout interleaving lib/scroll.ts exists to
-  // prevent.
-  //
-  // A plain cached origin isn't enough, though: the field fills the STICKY box,
-  // which moves in document space while pinned. Its viewport top is instead
-  // derived from scroll-invariant section geometry — in flow it sits at the
-  // section top, pins at 0, and leaves with the section bottom — so the
-  // per-move work is arithmetic on `scrollY`, which reads scroll position
-  // without forcing layout.
+/**
+ * The cursor spotlight. Brightens the grid cells under the pointer via two
+ * CSS custom properties (`--fx`/`--fy`) written on the field element; the
+ * brightening itself is a masked opacity layer defined in globals.css.
+ *
+ * Discipline is the same as `Nav` and `StackStory`: geometry is CACHED,
+ * refreshed by a `ResizeObserver` observing only the relevant section (not
+ * `document.body`, which fires on any content resize anywhere). The first
+ * version called `getBoundingClientRect()` inside the per-move rAF, and a
+ * trackpad scroll with the cursor over the pinned section put that read in
+ * the same frames as the nav's class writes — exactly the forced-synchronous-
+ * layout interleaving `lib/scroll.ts` exists to prevent.
+ *
+ * A plain cached origin isn't enough, though: the field fills the STICKY box,
+ * which moves in document space while pinned. Its viewport top is instead
+ * derived from scroll-invariant section geometry — in flow it sits at the
+ * section top, pins at 0, and leaves with the section bottom — so the
+ * per-move work is arithmetic on `scrollY`, which reads scroll position
+ * without forcing layout.
+ */
+function useCursorSpotlight(fieldRef: RefObject<HTMLDivElement | null>, enabled: boolean) {
   useEffect(() => {
-    if (!isDesktop || reduced) return;
+    if (!enabled) return;
     const field = fieldRef.current;
-    const sticky = field?.parentElement;
-    const section = field?.closest("section");
-    if (!field || !sticky || !section) return;
+    if (!field) return;
+    // The field sits inside a `[data-sticky]` box (see StackStory). Looking
+    // it up by attribute rather than assuming `parentElement` means an
+    // intermediate wrapper doesn't silently misalign the coordinate math.
+    const sticky = field.closest<HTMLElement>("[data-sticky]");
+    const section = field.closest<HTMLElement>("section");
+    if (!sticky || !section) return;
 
     let leftDoc = 0;
     let sectionTopDoc = 0;
@@ -218,8 +260,12 @@ export default function SectionField({
     };
     measure();
     document.fonts?.ready.then(scheduleMeasure);
+    // Observe the section only: sticky's height is `sm:h-screen`, which
+    // scales with the viewport — that resize also resizes section, so one
+    // observation catches both. `document.body` would fire on any global
+    // content change (image loads, revealed sections) with no benefit.
     const observer = new ResizeObserver(scheduleMeasure);
-    observer.observe(document.body);
+    observer.observe(section);
 
     let raf = 0;
     let px = 0;
@@ -260,14 +306,5 @@ export default function SectionField({
       if (pendingMeasure) cancelAnimationFrame(pendingMeasure);
       if (raf) cancelAnimationFrame(raf);
     };
-  }, [isDesktop, reduced]);
-
-  return (
-    <div className="field" aria-hidden="true" ref={fieldRef}>
-      <div className="field-grid" />
-      {/* Bright grid, revealed only inside the cursor spotlight (see globals.css). */}
-      <div className="field-grid-hot" />
-      {runSignals ? <canvas ref={canvasRef} className="field-canvas" /> : null}
-    </div>
-  );
+  }, [fieldRef, enabled]);
 }
