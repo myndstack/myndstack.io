@@ -1100,30 +1100,6 @@
 }
 
 /* ============================================================
-   STATUS PULSE
-   Footer live-health dot (StatusPulse.tsx). Square to stay on-brand; the pulse
-   is a box-shadow ring so it never shifts layout. Reduced-motion freezes it via
-   the global block, leaving a static dot.
-   ============================================================ */
-.status-dot {
-  width: 7px;
-  height: 7px;
-  flex: none;
-  background: var(--color-lime);
-  animation: status-pulse 2.4s var(--ease-brand) infinite;
-}
-.status-dot.is-degraded {
-  background: var(--color-danger);
-  box-shadow: 0 0 8px rgba(255, 122, 107, 0.5);
-  animation: none;
-}
-@keyframes status-pulse {
-  0% { box-shadow: 0 0 0 0 rgba(201, 242, 77, 0.45); }
-  70% { box-shadow: 0 0 0 6px rgba(201, 242, 77, 0); }
-  100% { box-shadow: 0 0 0 0 rgba(201, 242, 77, 0); }
-}
-
-/* ============================================================
    PROGRESS SPINE — CSS scroll-timeline (progressive enhancement)
    Where `animation-timeline: scroll()` is supported, the left-rail fill and
    dot are driven entirely on the compositor by document scroll progress — zero

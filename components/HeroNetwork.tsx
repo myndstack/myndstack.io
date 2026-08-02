@@ -70,10 +70,31 @@ export default function HeroNetwork() {
   useEffect(() => {
     if (reduced || !isDesktop) return;
 
-    const canvas = canvasRef.current;
-    if (!canvas) return;
+    // Data-saver clients skip the ~WebGL cost entirely and get the light 2D
+    // field instead (rendered via the `unsupported` branch below).
+    const conn = (
+      navigator as Navigator & { connection?: { saveData?: boolean } }
+    ).connection;
+    if (conn?.saveData) {
+      setUnsupported(true);
+      return;
+    }
 
-    const gl = (canvas.getContext("webgl", {
+    // Defer the whole GL bootstrap — shader compile + node-graph build + first
+    // frame — until the browser is idle, so the hero H1 (the LCP element) paints
+    // first instead of competing with ~4kB of WebGL setup during hydration.
+    // `teardown` is filled in once boot runs; the effect cleanup either cancels
+    // the pending boot or tears down whatever it built.
+    let teardown = () => {};
+    let cancelled = false;
+
+    const boot = () => {
+      if (cancelled) return;
+
+      const canvas = canvasRef.current;
+      if (!canvas) return;
+
+      const gl = (canvas.getContext("webgl", {
       alpha: true,
       antialias: true,
       powerPreference: "low-power",
@@ -504,18 +525,35 @@ export default function HeroNetwork() {
 
     frame();
 
+      teardown = () => {
+        io.disconnect();
+        cancelAnimationFrame(raf);
+        window.clearTimeout(resizeTimer);
+        window.removeEventListener("resize", onResize);
+        canvas.removeEventListener("mousemove", onMove);
+        canvas.removeEventListener("mouseleave", onLeave);
+        canvas.removeEventListener("webglcontextlost", onContextLost);
+        window.removeEventListener(PULSE_EVENT, onBurst);
+        gl.deleteBuffer(buffer);
+        gl.deleteProgram(pointProgram.program);
+        gl.deleteProgram(lineProgram.program);
+      };
+    };
+
+    // Kick the boot off the critical path: run it when the browser is idle
+    // (post-LCP), falling back to a short timeout where requestIdleCallback is
+    // unavailable. The cleanup cancels a still-pending boot, or tears down what
+    // it built.
+    const hasIdle = typeof window.requestIdleCallback === "function";
+    const idleId = hasIdle
+      ? window.requestIdleCallback(boot, { timeout: 1200 })
+      : window.setTimeout(boot, 200);
+
     return () => {
-      io.disconnect();
-      cancelAnimationFrame(raf);
-      window.clearTimeout(resizeTimer);
-      window.removeEventListener("resize", onResize);
-      canvas.removeEventListener("mousemove", onMove);
-      canvas.removeEventListener("mouseleave", onLeave);
-      canvas.removeEventListener("webglcontextlost", onContextLost);
-      window.removeEventListener(PULSE_EVENT, onBurst);
-      gl.deleteBuffer(buffer);
-      gl.deleteProgram(pointProgram.program);
-      gl.deleteProgram(lineProgram.program);
+      cancelled = true;
+      if (hasIdle) window.cancelIdleCallback(idleId as number);
+      else window.clearTimeout(idleId as number);
+      teardown();
     };
   }, [reduced, isDesktop]);
 
