@@ -63,9 +63,8 @@ export default async function Home() {
         ctaPrimary={home.hero.ctaPrimary}
         ctaSecondary={home.hero.ctaSecondary}
       />
-      <MarqueeBand />
-      {/* Client lockups ride high, right under the hero's brand beat: the first
-          thing after the pitch is proof of who already trusts the stack. */}
+      {/* Client lockups ride high, right under the hero: the first thing after
+          the pitch is proof of who already trusts the stack. */}
       <LogoMarquee />
       {/* Problem framing before the solution — name the pain (glue nobody owns)
           before the stack that removes it assembles. */}
@@ -84,6 +83,8 @@ export default async function Home() {
       {/* Brand crescendo just before the close. */}
       <Manifesto lead={home.manifestoLead} keep={home.manifestoKeep} />
       <Faq faqs={faqs} />
+      {/* Brand wordline as a texture beat leading into the final CTA. */}
+      <MarqueeBand />
       <CtaBand />
       <ContactForm
         email={site.email}

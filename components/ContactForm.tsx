@@ -19,7 +19,7 @@ export default function ContactForm({ email, phone, phoneHref, location }: Props
   );
 
   return (
-    <section id="contact" className="mx-auto mt-[88px] max-w-[1200px] px-5 sm:px-14">
+    <section id="contact" className="mx-auto max-w-[1200px] px-5 pt-[88px] sm:px-14">
       <div className="grid grid-cols-1 items-start gap-14 md:grid-cols-[1fr_1.1fr]">
         <Reveal>
           <div className="eyebrow mb-4 tracking-[0.16em]">Get in touch</div>

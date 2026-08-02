@@ -128,10 +128,12 @@
   :root {
     /* The nav overlays the page, so every non-hero route pads past it. */
     --nav-height: 80px;
-    /* One line for both in-page anchoring and the scroll-spy: `scroll-padding-top`
-       lands a clicked section's top here, and Nav.tsx reads this same value as its
-       spy line — so "the section a click would land on" is always "the section
-       highlighted." Nav height (80px) + a little breathing room. */
+    /* The scroll-spy ACTIVATION line: a section becomes "current" once its top is
+       this far below the viewport top (Nav.tsx reads it in measure() as the spy
+       line). Sections land flush (scroll-padding-top: 0) and clear the nav with
+       their own top padding, so this is only the highlight threshold — a clicked
+       section, landing at the very top, is still within this line and so lit.
+       ~ nav height (80px) + a little. */
     --nav-offset: 96px;
     /* One duration for every part of the bar → capsule morph, so the scrim,
        the capsule, the content column and the wordmark stay in lockstep.
@@ -162,7 +164,13 @@
 
   html {
     scroll-behavior: smooth;
-    scroll-padding-top: var(--nav-offset);
+    /* Land anchored sections FLUSH at the very top so the previous section (e.g.
+       the green CTA band above Contact) scrolls fully off instead of bleeding in
+       behind the transparent nav. Each anchor section clears the nav with its own
+       top padding (Section's pt-[88px]; ContactForm's pt-[88px]; StackStory pins),
+       so content still sits below the pill. Legal pages keep their own clearance
+       via `.legal-prose h2 { scroll-margin-top }`. */
+    scroll-padding-top: 0;
   }
 
   body {

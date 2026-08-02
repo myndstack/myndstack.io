@@ -38,9 +38,10 @@ export default function Nav({ contactEmail }: { contactEmail: string }) {
   const offsetsRef = useRef<SectionOffset[]>([]);
 
   /**
-   * The spy line, in px from the top of the viewport — read from the shared
-   * `--nav-offset` token so it matches the CSS `scroll-padding-top` exactly (the
-   * section a click lands on is the section highlighted). Cached in `measure()`,
+   * The spy ACTIVATION line, in px from the top of the viewport — read from the
+   * shared `--nav-offset` token. Sections land flush (scroll-padding-top: 0) and
+   * clear the nav with their own top padding; a clicked section lands at the very
+   * top, still within this line, so it is highlighted. Cached in `measure()`,
    * never read per frame.
    */
   const spyLineRef = useRef(SPY_LINE_FALLBACK);
@@ -64,8 +65,7 @@ export default function Nav({ contactEmail }: { contactEmail: string }) {
 
     const measure = () => {
       pending = 0;
-      // Read --nav-offset once here (not per frame) so the spy line and the CSS
-      // scroll-padding stay one number.
+      // Read --nav-offset (the spy activation line) once here, not per frame.
       const offset = parseFloat(
         getComputedStyle(document.documentElement).getPropertyValue("--nav-offset"),
       );

@@ -617,6 +617,37 @@ test.describe("scroll chrome", () => {
   });
 
   /**
+   * Anchor jumps must land flush: with a transparent nav, a click that leaves the
+   * previous section peeking in behind the bar looks broken — most visibly the
+   * green CTA band bleeding in above the Contact form. scroll-padding-top: 0 plus
+   * each section's own top padding lands the target at the very top with content
+   * below the nav, and the previous section fully off screen.
+   */
+  test("clicking an anchor lands the section flush, no previous section bleeding in", async ({
+    page,
+  }) => {
+    await landOnHome(page);
+    await page.locator(".nav-cta").click();
+    await expect(page).toHaveURL(/#contact$/);
+
+    // Wait for the smooth scroll to settle: Contact's box flush at the top and the
+    // green CTA band that precedes it entirely above the fold.
+    await page.waitForFunction(
+      () => {
+        const contact = document.getElementById("contact");
+        const cta = document.getElementById("cta");
+        if (!contact || !cta) return false;
+        return (
+          contact.getBoundingClientRect().top <= 2 &&
+          cta.getBoundingClientRect().bottom <= 2
+        );
+      },
+      undefined,
+      { timeout: 4000 },
+    );
+  });
+
+  /**
    * Nothing about a paused marquee is visible, which is exactly why it needs a
    * test: the observer could stop firing and the only symptom would be a phone
    * getting warm.
