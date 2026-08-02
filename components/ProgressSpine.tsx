@@ -17,7 +17,18 @@ export default function ProgressSpine({ socials }: { socials: Social[] }) {
   /** Track length in px. Only the viewport height can change it. */
   const spanRef = useRef(0);
 
+  /**
+   * Where the browser can drive the fill + dot off a CSS scroll-timeline
+   * (see `.spine-fill` / `.spine-dot` in globals.css), the JS path below is
+   * pure overhead — and a running CSS animation overrides inline transforms
+   * anyway. Skip the per-frame writes there so modern browsers do zero
+   * per-frame work. Computed on the client (this is a "use client" component).
+   */
+  const nativeTimeline =
+    typeof CSS !== "undefined" && CSS.supports("animation-timeline: scroll(root)");
+
   useEffect(() => {
+    if (nativeTimeline) return;
     const measure = () => {
       spanRef.current = Math.max(
         0,
@@ -28,7 +39,7 @@ export default function ProgressSpine({ socials }: { socials: Social[] }) {
     measure();
     window.addEventListener("resize", measure, { passive: true });
     return () => window.removeEventListener("resize", measure);
-  }, []);
+  }, [nativeTimeline]);
 
   /**
    * Both writes are transforms, not `height` and `top`. The old pair animated
@@ -40,6 +51,8 @@ export default function ProgressSpine({ socials }: { socials: Social[] }) {
    * replaces the utility classes wholesale.
    */
   useScrollFrame(({ progress }) => {
+    // Native scroll-timeline is driving the transforms — don't fight it.
+    if (nativeTimeline) return;
     if (fillRef.current) {
       fillRef.current.style.transform = `translateX(-50%) scaleY(${progress.toFixed(4)})`;
     }
@@ -77,7 +90,7 @@ export default function ProgressSpine({ socials }: { socials: Social[] }) {
       <div
         ref={fillRef}
         aria-hidden="true"
-        className="absolute left-1/2 w-0.5 origin-top bg-lime shadow-[0_0_8px_#C9F24D] transition-transform duration-[120ms] ease-linear"
+        className="spine-fill absolute left-1/2 w-0.5 origin-top bg-lime shadow-[0_0_8px_#C9F24D] transition-transform duration-[120ms] ease-linear"
         style={{
           top: TRACK_TOP,
           bottom: TRACK_BOTTOM_GAP,
@@ -87,7 +100,7 @@ export default function ProgressSpine({ socials }: { socials: Social[] }) {
       <div
         ref={dotRef}
         aria-hidden="true"
-        className="absolute left-1/2 size-2 bg-lime shadow-[0_0_10px_#C9F24D] transition-transform duration-[120ms] ease-linear"
+        className="spine-dot absolute left-1/2 size-2 bg-lime shadow-[0_0_10px_#C9F24D] transition-transform duration-[120ms] ease-linear"
         style={{
           top: TRACK_TOP,
           transform: "translate(-50%, -50%)",

@@ -15,20 +15,30 @@ export default function Manifesto({ lead, keep }: { lead: string; keep: string }
   const WORDS = useMemo(() => lead.trim().split(/\s+/), [lead]);
 
   /**
+   * Where `animation-timeline: view()` is supported, the words brighten (and
+   * dim on scroll-up) as the paragraph scrolls through the viewport, driven on
+   * the compositor — see `.manifesto-word` in globals.css. There the JS timer
+   * path is redundant, so it's skipped and `litCount` stays 0 (the CSS
+   * animation owns the colour). Older browsers keep the timer cascade.
+   */
+  const nativeView =
+    typeof CSS !== "undefined" && CSS.supports("animation-timeline: view()");
+
+  /**
    * Under reduced motion every word is simply lit — derived here rather than
    * pushed through `setState` inside the effect. Same result, one render
    * instead of two, and no set-state-in-an-effect cascade.
    */
-  const litCount = reduced ? WORDS.length : animatedCount;
+  const litCount = reduced ? WORDS.length : nativeView ? 0 : animatedCount;
 
   useEffect(() => {
-    if (!inView || reduced) return;
+    if (!inView || reduced || nativeView) return;
 
     const timers = WORDS.map((_, i) =>
       window.setTimeout(() => setAnimatedCount(i + 1), i * STEP_MS),
     );
     return () => timers.forEach(window.clearTimeout);
-  }, [inView, reduced, WORDS]);
+  }, [inView, reduced, nativeView, WORDS]);
 
   return (
     <section className="mx-auto max-w-[1120px] px-5 py-28 sm:px-14">
@@ -41,6 +51,8 @@ export default function Manifesto({ lead, keep }: { lead: string; keep: string }
           <span
             key={`${word}-${i}`}
             className={`manifesto-word${i < litCount ? " is-lit" : ""}`}
+            // Per-word index staggers the scroll-driven brighten (globals.css).
+            style={{ "--i": i } as React.CSSProperties}
           >
             {word}{" "}
           </span>

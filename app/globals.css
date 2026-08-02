@@ -766,6 +766,21 @@
   .manifesto-word.is-lit {
     color: var(--color-t1);
   }
+  /* Where supported, scrub the brighten with scroll instead of a timer: each
+     word lights t5→t1 as the paragraph crosses the viewport, staggered by its
+     --i, and dims again on scroll-up. `both` holds t5 before the range (a
+     legible floor if the reveal never reaches it) and t1 after. Manifesto skips
+     its JS timer when this is supported, so the two never fight. */
+  @supports (animation-timeline: view()) {
+    @media (prefers-reduced-motion: no-preference) {
+      .manifesto-word {
+        animation: manifesto-lit linear both;
+        animation-timeline: view();
+        animation-range: entry calc(28% + var(--i, 0) * 2.4%)
+          entry calc(52% + var(--i, 0) * 2.4%);
+      }
+    }
+  }
 
   /* --- Back to top ---
      background-color belongs in this list, not on a Tailwind transition-*
@@ -1106,6 +1121,42 @@
   0% { box-shadow: 0 0 0 0 rgba(201, 242, 77, 0.45); }
   70% { box-shadow: 0 0 0 6px rgba(201, 242, 77, 0); }
   100% { box-shadow: 0 0 0 0 rgba(201, 242, 77, 0); }
+}
+
+/* ============================================================
+   PROGRESS SPINE — CSS scroll-timeline (progressive enhancement)
+   Where `animation-timeline: scroll()` is supported, the left-rail fill and
+   dot are driven entirely on the compositor by document scroll progress — zero
+   per-frame JS (ProgressSpine skips its useScrollFrame writes when this is
+   supported). Everywhere else the JS transform path stays. `--spine-span` is
+   the track's rendered length: 100vh minus TRACK_TOP (170) + TRACK_BOTTOM_GAP
+   (188) from ProgressSpine.tsx — keep the two in sync.
+   ============================================================ */
+@supports (animation-timeline: scroll(root)) {
+  @media (prefers-reduced-motion: no-preference) {
+    .spine-fill {
+      animation: spine-fill linear both;
+      animation-timeline: scroll(root block);
+    }
+    .spine-dot {
+      --spine-span: calc(100vh - 358px);
+      animation: spine-dot linear both;
+      animation-timeline: scroll(root block);
+    }
+  }
+}
+@keyframes spine-fill {
+  from { transform: translateX(-50%) scaleY(0); }
+  to { transform: translateX(-50%) scaleY(1); }
+}
+@keyframes spine-dot {
+  from { transform: translate(-50%, -50%); }
+  to { transform: translate(-50%, calc(var(--spine-span) - 50%)); }
+}
+
+@keyframes manifesto-lit {
+  from { color: var(--color-t5); }
+  to { color: var(--color-t1); }
 }
 
 /* ============================================================
