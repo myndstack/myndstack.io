@@ -153,7 +153,11 @@ export default async function RolePage({ params }: { params: Promise<Params> }) 
               <p className="mt-0 mb-6 text-sm leading-[1.55] text-t4">
                 No cover letter needed. Links and a few honest lines beat a formatted CV.
               </p>
-              <ApplicationForm role={role.title} contactEmail={site.email} />
+              <ApplicationForm
+                role={role.title}
+                contactEmail={site.email}
+                turnstileSiteKey={process.env.TURNSTILE_SITE_KEY ?? ""}
+              />
             </div>
           </aside>
         </div>

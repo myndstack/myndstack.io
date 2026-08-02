@@ -1,6 +1,13 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
+import {
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  useSyncExternalStore,
+  type FormEvent,
+} from "react";
 import { subscribeToScroll, type ScrollSubscriber } from "./scroll";
 
 const REDUCED_MOTION_QUERY = "(prefers-reduced-motion: reduce)";
@@ -177,4 +184,86 @@ export function useInView<T extends HTMLElement>(threshold = 0.5) {
   }, [threshold]);
 
   return [ref, inView] as const;
+}
+
+/** Everything a form needs to gate submission on a Cloudflare Turnstile token. */
+export type TurnstileGate = {
+  /** Whether Turnstile is configured (a site key was supplied) for this form. */
+  readonly enabled: boolean;
+  /** The current token, or null while pending / after a reset. */
+  readonly token: string | null;
+  /** The widget failed to load (script blocked / render error). */
+  readonly widgetFailed: boolean;
+  /** A submit was attempted before a token existed — show a nudge. */
+  readonly needsVerify: boolean;
+  /** Bumped to force the widget to issue a fresh (single-use) token. */
+  readonly resetSignal: number;
+  readonly handleToken: (value: string | null) => void;
+  readonly onWidgetError: () => void;
+  /** Wraps a submit handler so it can't run without a token. */
+  readonly guard: (
+    submit: (event: FormEvent<HTMLFormElement>) => void,
+  ) => (event: FormEvent<HTMLFormElement>) => void;
+};
+
+/**
+ * Client-side Turnstile gating, shared by every form behind the widget. Keeps
+ * the single-use / reset-on-failure / block-without-token logic in one place so
+ * the forms stay consistent — the server verification is the real authority.
+ *
+ * @param turnstileSiteKey the public site key (empty ⇒ not configured ⇒ no gate)
+ * @param error            the form's current submit error (drives the reset)
+ */
+export function useTurnstileGate(
+  turnstileSiteKey: string,
+  error: string | null,
+): TurnstileGate {
+  const enabled = turnstileSiteKey.length > 0;
+  const [token, setToken] = useState<string | null>(null);
+  const [widgetFailed, setWidgetFailed] = useState(false);
+  const [needsVerify, setNeedsVerify] = useState(false);
+  const [resetSignal, setResetSignal] = useState(0);
+
+  // A failed submit consumes the single-use token — clear it and ask for a fresh
+  // challenge so a retry isn't rejected as a duplicate.
+  useEffect(() => {
+    if (error && enabled) {
+      setToken(null);
+      setResetSignal((n) => n + 1);
+    }
+  }, [error, enabled]);
+
+  // A token arriving clears stale "couldn't load" / "please verify" state — the
+  // error-callback can fire transiently and then recover on retry.
+  const handleToken = (value: string | null) => {
+    setToken(value);
+    if (value) {
+      setWidgetFailed(false);
+      setNeedsVerify(false);
+    }
+  };
+
+  // Block submit without a token even via Enter; the server rejects it anyway,
+  // but this gives feedback instead of a silently dead button.
+  const guard =
+    (submit: (event: FormEvent<HTMLFormElement>) => void) =>
+    (event: FormEvent<HTMLFormElement>) => {
+      if (enabled && !token) {
+        event.preventDefault();
+        setNeedsVerify(true);
+        return;
+      }
+      submit(event);
+    };
+
+  return {
+    enabled,
+    token,
+    widgetFailed,
+    needsVerify,
+    resetSignal,
+    handleToken,
+    onWidgetError: () => setWidgetFailed(true),
+    guard,
+  };
 }

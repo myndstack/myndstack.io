@@ -1,19 +1,26 @@
 "use client";
 
 import { useFormPost } from "@/lib/useFormPost";
+import { useTurnstileGate } from "@/lib/hooks";
 import Field, { Honeypot } from "./Field";
+import TurnstileField from "./TurnstileField";
 
 export default function ApplicationForm({
   role,
   contactEmail,
+  turnstileSiteKey,
 }: {
   role: string;
   contactEmail: string;
+  /** Cloudflare Turnstile site key (public). Empty ⇒ not configured (dev/e2e). */
+  turnstileSiteKey: string;
 }) {
   const { submit, pending, done, error, fieldErrors } = useFormPost(
     "/api/apply",
     "application",
   );
+
+  const gate = useTurnstileGate(turnstileSiteKey, error);
 
   if (done) {
     return (
@@ -37,7 +44,7 @@ export default function ApplicationForm({
   }
 
   return (
-    <form onSubmit={submit} noValidate className="relative flex flex-col gap-4">
+    <form onSubmit={gate.guard(submit)} noValidate className="relative flex flex-col gap-4">
       <Honeypot />
       {/* Carried in the payload so the notification email says which role. */}
       <input type="hidden" name="role" value={role} />
@@ -89,6 +96,8 @@ export default function ApplicationForm({
         )}
       </Field>
 
+      <TurnstileField siteKey={turnstileSiteKey} gate={gate} email={contactEmail} />
+
       {error ? (
         <p
           role="alert"
@@ -100,8 +109,8 @@ export default function ApplicationForm({
 
       <button
         type="submit"
-        disabled={pending}
-        className="btn btn-lime cursor-pointer border-none text-center"
+        disabled={pending || (gate.enabled && gate.widgetFailed)}
+        className="btn btn-lime cursor-pointer border-none text-center disabled:cursor-not-allowed disabled:opacity-60"
       >
         {pending ? "Sending…" : "Send application →"}
       </button>

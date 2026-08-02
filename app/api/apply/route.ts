@@ -14,5 +14,5 @@ export async function POST(request: Request) {
       ["Links", data.links],
       ["Note", data.note],
     ],
-  }));
+  }), [], { requireTurnstile: true });
 }

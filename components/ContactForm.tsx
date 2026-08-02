@@ -1,11 +1,11 @@
 "use client";
 
-import { useEffect, useState, type FormEvent } from "react";
 import { useFormPost } from "@/lib/useFormPost";
+import { useTurnstileGate } from "@/lib/hooks";
 import BookingEmbed from "./BookingEmbed";
 import Field, { Honeypot } from "./Field";
 import Reveal from "./Reveal";
-import TurnstileWidget from "./TurnstileWidget";
+import TurnstileField from "./TurnstileField";
 
 const BUDGETS = ["Under $10k", "$10k – $50k", "$50k – $150k", "$150k+"];
 const SOURCES = ["Search", "Referral", "Social", "Event", "Other"];
@@ -34,42 +34,7 @@ export default function ContactForm({
     "contact",
   );
 
-  const turnstileEnabled = turnstileSiteKey.length > 0;
-  const [token, setToken] = useState<string | null>(null);
-  const [widgetFailed, setWidgetFailed] = useState(false);
-  const [needsVerify, setNeedsVerify] = useState(false);
-  const [resetSignal, setResetSignal] = useState(0);
-
-  // A failed submit consumes the single-use token — clear it and ask the widget
-  // for a fresh one so a retry isn't rejected as a duplicate.
-  useEffect(() => {
-    if (error && turnstileEnabled) {
-      setToken(null);
-      setResetSignal((n) => n + 1);
-    }
-  }, [error, turnstileEnabled]);
-
-  // A token arriving clears any stale "couldn't load" / "please verify" state — an
-  // error-callback can fire transiently and then recover on retry.
-  const handleToken = (value: string | null) => {
-    setToken(value);
-    if (value) {
-      setWidgetFailed(false);
-      setNeedsVerify(false);
-    }
-  };
-
-  // Block submit without a token even via Enter (the server rejects a token-less
-  // request regardless). The button stays enabled while the challenge is pending
-  // so a click gives feedback rather than a mystery-disabled control.
-  const onSubmit = (event: FormEvent<HTMLFormElement>) => {
-    if (turnstileEnabled && !token) {
-      event.preventDefault();
-      setNeedsVerify(true);
-      return;
-    }
-    submit(event);
-  };
+  const gate = useTurnstileGate(turnstileSiteKey, error);
 
   return (
     <section id="contact" className="mx-auto max-w-[1200px] px-5 pt-[88px] sm:px-14">
@@ -129,7 +94,7 @@ export default function ContactForm({
             </div>
           ) : (
             <form
-              onSubmit={onSubmit}
+              onSubmit={gate.guard(submit)}
               noValidate
               className="relative grid grid-cols-1 gap-4 xs:grid-cols-2"
             >
@@ -219,33 +184,12 @@ export default function ContactForm({
                 )}
               </Field>
 
-              {turnstileEnabled ? (
-                <div className="xs:col-span-2">
-                  <TurnstileWidget
-                    siteKey={turnstileSiteKey}
-                    onToken={handleToken}
-                    onError={() => setWidgetFailed(true)}
-                    resetSignal={resetSignal}
-                  />
-                </div>
-              ) : null}
-
-              {widgetFailed ? (
-                <p
-                  role="alert"
-                  className="m-0 border border-danger/40 bg-danger/8 px-4 py-3 font-mono text-[11.5px] text-danger xs:col-span-2"
-                >
-                  Verification couldn&rsquo;t load. Disable any blockers and refresh,
-                  or email us directly at <a href={`mailto:${email}`}>{email}</a>.
-                </p>
-              ) : needsVerify && !token ? (
-                <p
-                  role="status"
-                  className="m-0 font-mono text-[11.5px] text-t4 xs:col-span-2"
-                >
-                  One moment — complete the verification just above, then send.
-                </p>
-              ) : null}
+              <TurnstileField
+                siteKey={turnstileSiteKey}
+                gate={gate}
+                email={email}
+                className="xs:col-span-2"
+              />
 
               {error ? (
                 <p
@@ -258,7 +202,7 @@ export default function ContactForm({
 
               <button
                 type="submit"
-                disabled={pending || (turnstileEnabled && widgetFailed)}
+                disabled={pending || (gate.enabled && gate.widgetFailed)}
                 className="btn btn-lime w-full cursor-pointer border-none text-center disabled:cursor-not-allowed disabled:opacity-60 xs:col-span-2"
               >
                 {pending ? "Sending…" : "Send message →"}
