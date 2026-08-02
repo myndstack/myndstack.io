@@ -18,8 +18,23 @@ const AREA_PER_NODE = 3800;
 /** Nodes closer than this get a link. Doubles as the spatial-hash cell size. */
 const LINK_DISTANCE = 120;
 const DRIFT = 0.3;
-const PARALLAX = 0.03;
-const PARALLAX_EASE = 0.06;
+/** Max tilt of the whole constellation toward the cursor, in radians (~7°). */
+const MAX_TILT = 0.12;
+/** How fast the tilt eases toward the cursor target each frame. */
+const TILT_EASE = 0.06;
+/**
+ * Perspective params fed to the vertex shader as `u_persp` AND used by the CPU
+ * proximity projection in the frame loop, so the cursor highlight and shockwave
+ * stay glued to where each node is actually drawn under tilt. One source of
+ * truth — MUST stay in sync with the projection in VERTEX_SHADER (lib/gl.ts):
+ *   z = (depth - DEPTH_MID) * Z_RANGE;  w = CAM_Z / (CAM_Z - rotatedZ).
+ * The cloud is centred on the mid-depth plane (mid of the seeded 0.35..1 range)
+ * so at tilt 0 the resting frame barely moves; CAM_Z dwarfs the rotated z, so
+ * the perspective stays gentle. These are the knobs for the effect's strength.
+ */
+const DEPTH_MID = 0.675;
+const Z_RANGE = 360;
+const CAM_Z = 1500;
 const CURSOR_RADIUS = 110;
 
 /** Signals travelling the network at any moment. */
@@ -266,8 +281,10 @@ export default function HeroNetwork() {
 
     // --- Pointer ----------------------------------------------------------
     const mouse = { x: -1e5, y: -1e5 };
-    let offsetX = 0;
-    let offsetY = 0;
+    // Eased tilt angles (radians) driven by the cursor. The shared vertex shader
+    // rotates + perspective-projects the whole cloud by these — see lib/gl.ts.
+    let tiltX = 0;
+    let tiltY = 0;
 
     const onMove = (event: MouseEvent) => {
       const rect = canvas.getBoundingClientRect();
@@ -304,15 +321,17 @@ export default function HeroNetwork() {
       target: Float32Array,
       x: number,
       y: number,
+      dep: number,
       size: number,
       alpha: number,
       tint: number,
     ) => {
       target[vi] = x;
       target[vi + 1] = y;
-      target[vi + 2] = size;
-      target[vi + 3] = alpha;
-      target[vi + 4] = tint;
+      target[vi + 2] = dep;
+      target[vi + 3] = size;
+      target[vi + 4] = alpha;
+      target[vi + 5] = tint;
       vi += STRIDE;
     };
 
@@ -327,6 +346,8 @@ export default function HeroNetwork() {
 
       gl.useProgram(program.program);
       gl.uniform2f(program.uniforms.res, width, height);
+      gl.uniform2f(program.uniforms.tilt, tiltX, tiltY);
+      gl.uniform3f(program.uniforms.persp, DEPTH_MID, Z_RANGE, CAM_Z);
       gl.uniform3fv(program.uniforms.base, WHITE);
       gl.uniform3fv(program.uniforms.accent, LIME);
       // Only the point shader declares u_dpr; on the line program the location
@@ -361,14 +382,19 @@ export default function HeroNetwork() {
       buildGrid();
 
       const hasCursor = mouse.x > -1e4;
-      const targetX = hasCursor ? (mouse.x - width / 2) * PARALLAX : 0;
-      const targetY = hasCursor ? (mouse.y - height / 2) * PARALLAX : 0;
-      offsetX += (targetX - offsetX) * PARALLAX_EASE;
-      offsetY += (targetY - offsetY) * PARALLAX_EASE;
+      // Cursor → tilt angles (normalised to ±1 across the viewport, scaled to
+      // MAX_TILT), eased so the volume glides rather than snaps. The GPU rotates
+      // + perspective-projects by these; positions written below are raw model
+      // space (no parallax fold), so nodes/links/pulses transform as one volume.
+      const targetTiltX = hasCursor ? ((mouse.x - width / 2) / (width / 2)) * MAX_TILT : 0;
+      const targetTiltY = hasCursor ? ((mouse.y - height / 2) / (height / 2)) * MAX_TILT : 0;
+      tiltX += (targetTiltX - tiltX) * TILT_EASE;
+      tiltY += (targetTiltY - tiltY) * TILT_EASE;
 
-      /** Screen position with this node's share of the parallax applied. */
-      const sx = (i: number) => px[i] + offsetX * depth[i];
-      const sy = (i: number) => py[i] + offsetY * depth[i];
+      // Trig for the CPU-side copy of the shader's rotation, hoisted out of the
+      // node loop. u_tilt.x rotates about Y, u_tilt.y about X — mirror exactly.
+      const sinY = Math.sin(tiltX), cosY = Math.cos(tiltX);
+      const sinX = Math.sin(tiltY), cosX = Math.cos(tiltY);
 
       // Links -------------------------------------------------------------
       vi = 0;
@@ -376,24 +402,21 @@ export default function HeroNetwork() {
       const maxLinkFloats = MAX_LINKS * 2 * STRIDE;
 
       for (let i = 0; i < nodeCount; i++) {
-        const xi = sx(i);
-        const yi = sy(i);
-
         forEachNeighbour(px[i], py[i], (j) => {
           if (j <= i || vi >= maxLinkFloats) return;
 
-          const xj = sx(j);
-          const yj = sy(j);
-          const dx = xi - xj;
-          const dy = yi - yj;
+          // Measured in model space, so the link topology no longer shifts with
+          // the cursor — the GPU tilt moves the drawn lines instead.
+          const dx = px[i] - px[j];
+          const dy = py[i] - py[j];
           const d2 = dx * dx + dy * dy;
           if (d2 >= LINK_DISTANCE * LINK_DISTANCE) return;
 
           const closeness = 1 - Math.sqrt(d2) / LINK_DISTANCE;
           const alpha = closeness * 0.15 * ((depth[i] + depth[j]) / 2);
 
-          write(lineVerts, xi, yi, 1, alpha, 0);
-          write(lineVerts, xj, yj, 1, alpha, 0);
+          write(lineVerts, px[i], py[i], depth[i], 1, alpha, 0);
+          write(lineVerts, px[j], py[j], depth[j], 1, alpha, 0);
           lineVertexCount += 2;
         });
       }
@@ -404,13 +427,11 @@ export default function HeroNetwork() {
 
         const headT = pulse.t;
         const tailT = Math.max(0, headT - PULSE_TAIL);
-        const x0 = sx(pulse.from);
-        const y0 = sy(pulse.from);
-        const x1 = sx(pulse.to);
-        const y1 = sy(pulse.to);
+        const fx = px[pulse.from], fy = py[pulse.from], fd = depth[pulse.from];
+        const tx = px[pulse.to], ty = py[pulse.to], td = depth[pulse.to];
 
-        write(lineVerts, x0 + (x1 - x0) * tailT, y0 + (y1 - y0) * tailT, 1, 0, 1);
-        write(lineVerts, x0 + (x1 - x0) * headT, y0 + (y1 - y0) * headT, 1, 0.75, 1);
+        write(lineVerts, fx + (tx - fx) * tailT, fy + (ty - fy) * tailT, fd + (td - fd) * tailT, 1, 0, 1);
+        write(lineVerts, fx + (tx - fx) * headT, fy + (ty - fy) * headT, fd + (td - fd) * headT, 1, 0.75, 1);
         lineVertexCount += 2;
       }
 
@@ -424,25 +445,43 @@ export default function HeroNetwork() {
 
       // Nodes ---------------------------------------------------------------
       vi = 0;
+      const interacting = hasCursor || bursts.length > 0;
       for (let i = 0; i < nodeCount; i++) {
-        const x = sx(i);
-        const y = sy(i);
-        const near =
-          hasCursor && Math.hypot(mouse.x - x, mouse.y - y) < CURSOR_RADIUS ? 1 : 0;
+        const mx = px[i];
+        const my = py[i];
 
-        // Shockwave: brightest for nodes sitting on the current wavefront,
-        // fading as each ring ages. `wave` is 0 in steady state (loop skipped).
+        // Highlight + shockwave test against the DRAWN position, so they stay
+        // glued to each node under tilt. Projected only while interacting — in
+        // steady state (no cursor, no burst) the loop pays nothing, and the raw
+        // model coords go to the GPU either way (it re-projects). Mirrors the
+        // projection in VERTEX_SHADER (lib/gl.ts); keep the two in sync.
+        let near = 0;
         let wave = 0;
-        for (const b of bursts) {
-          const radius = (1 - b.life) * BURST_MAX_RADIUS;
-          const prox = 1 - Math.min(1, Math.abs(Math.hypot(x - b.x, y - b.y) - radius) / BURST_BAND);
-          if (prox > 0) wave = Math.max(wave, prox * b.life);
+        if (interacting) {
+          const cx = mx - width / 2;
+          const cy = my - height / 2;
+          const zz = (depth[i] - DEPTH_MID) * Z_RANGE;
+          const rx = cx * cosY + zz * sinY;
+          let rz = -cx * sinY + zz * cosY;
+          const ry = cy * cosX - rz * sinX;
+          rz = cy * sinX + rz * cosX;
+          const w = CAM_Z / Math.max(CAM_Z - rz, 1);
+          const dx = width / 2 + rx * w;
+          const dy = height / 2 + ry * w;
+
+          if (hasCursor && Math.hypot(mouse.x - dx, mouse.y - dy) < CURSOR_RADIUS) near = 1;
+
+          for (const b of bursts) {
+            const radius = (1 - b.life) * BURST_MAX_RADIUS;
+            const prox = 1 - Math.min(1, Math.abs(Math.hypot(dx - b.x, dy - b.y) - radius) / BURST_BAND);
+            if (prox > 0) wave = Math.max(wave, prox * b.life);
+          }
         }
 
         const size = (near ? 5.2 : 3.2) * depth[i] * dpr * (1 + wave * 0.5);
         const alpha = near ? 0.95 : Math.min(0.95, 0.2 + 0.4 * depth[i] + wave * 0.6);
         // Push the wavefront toward lime; the cursor-near tint still wins.
-        write(nodeVerts, x, y, size, alpha, Math.max(near, wave));
+        write(nodeVerts, mx, my, depth[i], size, alpha, Math.max(near, wave));
       }
       draw(pointProgram, nodeVerts, nodeCount, gl.POINTS, true);
 
@@ -465,15 +504,14 @@ export default function HeroNetwork() {
           }
         }
 
-        const x0 = sx(pulse.from);
-        const y0 = sy(pulse.from);
-        const x1 = sx(pulse.to);
-        const y1 = sy(pulse.to);
+        const fx = px[pulse.from], fy = py[pulse.from], fd = depth[pulse.from];
+        const tx = px[pulse.to], ty = py[pulse.to], td = depth[pulse.to];
 
         write(
           pulseVerts,
-          x0 + (x1 - x0) * pulse.t,
-          y0 + (y1 - y0) * pulse.t,
+          fx + (tx - fx) * pulse.t,
+          fy + (ty - fy) * pulse.t,
+          fd + (td - fd) * pulse.t,
           5.5 * dpr,
           0.95,
           1,
