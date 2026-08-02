@@ -74,7 +74,7 @@ export default async function SelectedWork() {
         </Reveal>
 
         {/* Supporting cases */}
-        <div className="grid grid-cols-1 gap-[18px] sm:grid-cols-3">
+        <div className="card-grid grid grid-cols-1 gap-[18px] sm:grid-cols-3">
           {supporting.map((c) => (
             <Reveal key={c.slug}>
               {/* The card is inside the link so the hover lift and the reveal

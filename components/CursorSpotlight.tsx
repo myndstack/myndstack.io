@@ -16,7 +16,11 @@ export default function CursorSpotlight() {
 
     const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     const coarse = !window.matchMedia("(pointer: fine)").matches;
-    if (reduced || coarse) return;
+    // Respect reduced-transparency: the glow is a translucent layer, so users who
+    // ask for less transparency get none of it — the loop never starts and the
+    // div stays at its opacity-0 rest state.
+    const flat = window.matchMedia("(prefers-reduced-transparency: reduce)").matches;
+    if (reduced || coarse || flat) return;
 
     let targetX = window.innerWidth / 2;
     let targetY = window.innerHeight / 2;

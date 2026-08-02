@@ -243,6 +243,7 @@
     transition:
       border-color 0.16s var(--ease-brand),
       box-shadow 0.16s var(--ease-brand),
+      opacity 0.16s var(--ease-brand),
       transform 0.16s var(--ease-brand);
   }
   .card-lift:hover {
@@ -251,6 +252,13 @@
     box-shadow:
       0 0 0 1px rgba(201, 242, 77, 0.08),
       0 14px 34px rgba(0, 0, 0, 0.45);
+  }
+  /* Focus of attention: hovering/focusing one card in a marked grid recedes its
+     siblings so the active card leads. Pure CSS; the global reduced-motion block
+     collapses the opacity transition. Grids without `.card-grid` are unaffected. */
+  .card-grid:has(.card-lift:hover) .card-lift:not(:hover),
+  .card-grid:has(.card-lift:focus-visible) .card-lift:not(:focus-visible) {
+    opacity: 0.55;
   }
 
   .chip {
@@ -1074,6 +1082,30 @@
 }
 .scanline.is-on {
   animation: scan 1.15s var(--ease-brand) forwards;
+}
+
+/* ============================================================
+   STATUS PULSE
+   Footer live-health dot (StatusPulse.tsx). Square to stay on-brand; the pulse
+   is a box-shadow ring so it never shifts layout. Reduced-motion freezes it via
+   the global block, leaving a static dot.
+   ============================================================ */
+.status-dot {
+  width: 7px;
+  height: 7px;
+  flex: none;
+  background: var(--color-lime);
+  animation: status-pulse 2.4s var(--ease-brand) infinite;
+}
+.status-dot.is-degraded {
+  background: var(--color-danger);
+  box-shadow: 0 0 8px rgba(255, 122, 107, 0.5);
+  animation: none;
+}
+@keyframes status-pulse {
+  0% { box-shadow: 0 0 0 0 rgba(201, 242, 77, 0.45); }
+  70% { box-shadow: 0 0 0 6px rgba(201, 242, 77, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(201, 242, 77, 0); }
 }
 
 /* ============================================================

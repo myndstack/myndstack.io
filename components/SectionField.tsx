@@ -70,11 +70,14 @@ export default function SectionField({
   const fieldRef = useRef<HTMLDivElement>(null);
   const reduced = useReducedMotion();
   const isDesktop = useMediaQuery("(min-width: 47.5rem)");
+  // The cursor spotlight is a translucent lime layer; users who ask for reduced
+  // transparency get the plain grid with no spotlight (the rAF never starts, so
+  // .is-hot is never applied and field-grid-hot stays at opacity 0).
+  const flat = useMediaQuery("(prefers-reduced-transparency: reduce)");
   // Both effects are gated on desktop + motion-allowed. Canvas needs `signals`
-  // additionally; the spotlight always follows the pointer wherever the field
-  // renders (still hover-only, since touch has no hover).
+  // additionally; the spotlight also honours reduced-transparency.
   useSignalsCanvas(canvasRef, signals && isDesktop && !reduced);
-  useCursorSpotlight(fieldRef, isDesktop && !reduced);
+  useCursorSpotlight(fieldRef, isDesktop && !reduced && !flat);
 
   const runSignals = signals && isDesktop && !reduced;
   return (

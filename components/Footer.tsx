@@ -4,6 +4,7 @@ import { FOOTER_COLUMNS, LEGAL_LINKS } from "@/lib/content";
 import type { SiteSettings } from "@/lib/sanity/queries";
 import Newsletter from "./Newsletter";
 import SocialIcon from "./SocialIcon";
+import StatusPulse from "./StatusPulse";
 import Wordmark from "./Wordmark";
 
 const colHeadClass =
@@ -77,9 +78,12 @@ export default function Footer({ site }: { site: SiteSettings }) {
 
       <div className="mx-auto mt-14 max-w-[1200px] border-t border-surface-3 pt-6">
         <div className="flex flex-col-reverse items-start gap-4 text-[12.5px] text-t5 md:flex-row md:items-center md:justify-between md:gap-6">
-          <span className="whitespace-nowrap">
-            © 2026 Myndstack. Intelligence, engineered.
-          </span>
+          <div className="flex items-center gap-4">
+            <StatusPulse />
+            <span className="whitespace-nowrap">
+              © 2026 Myndstack. Intelligence, engineered.
+            </span>
+          </div>
           <nav
             aria-label="Legal"
             className="flex flex-wrap items-center gap-x-5 gap-y-2"

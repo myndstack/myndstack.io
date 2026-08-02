@@ -18,7 +18,7 @@ export default async function Capabilities() {
         aside="We architect cognitive infrastructure for mission-critical software, then build on it with you."
       />
 
-      <div className="grid grid-cols-1 gap-4 xs:grid-cols-2 md:grid-cols-4">
+      <div className="card-grid grid grid-cols-1 gap-4 xs:grid-cols-2 md:grid-cols-4">
         {capabilities.map((cap, i) => {
           const highlight = i === HIGHLIGHT_INDEX;
 
