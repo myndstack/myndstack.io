@@ -22,6 +22,7 @@ export default async function SelectedWork() {
   return (
     <Section id="work-cases">
       <SectionHeader
+        scrub
         className="mb-9"
         titleMaxWidth="620px"
         eyebrow="Selected work"
@@ -31,7 +32,7 @@ export default async function SelectedWork() {
 
       <div className="flex flex-col gap-[18px]">
         {/* Featured case */}
-        <Reveal>
+        <Reveal scrub>
           <Link
             href={`/work/${featured.slug}`}
             className="card clip-angular-32 grid grid-cols-1 items-center gap-11 px-10 py-[38px] text-white hover:border-lime-edge hover:text-white md:grid-cols-[1.25fr_1fr]"
@@ -76,7 +77,7 @@ export default async function SelectedWork() {
         {/* Supporting cases */}
         <div className="card-grid grid grid-cols-1 gap-[18px] sm:grid-cols-3">
           {supporting.map((c) => (
-            <Reveal key={c.slug}>
+            <Reveal scrub key={c.slug}>
               {/* The card is inside the link so the hover lift and the reveal
                   transform don't both try to own `transform`. */}
               <Link href={`/work/${c.slug}`} className="block h-full text-white">

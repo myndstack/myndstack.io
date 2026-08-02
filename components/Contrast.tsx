@@ -9,6 +9,7 @@ export default async function Contrast() {
   return (
     <Section>
       <SectionHeader
+        scrub
         className="mb-9 max-w-[620px]"
         eyebrow="Why one stack"
         title="Stop maintaining the glue."
@@ -16,7 +17,7 @@ export default async function Contrast() {
       />
 
       <div className="grid grid-cols-1 gap-[18px] sm:grid-cols-2">
-        <Reveal className="border border-line bg-surface px-9 py-[34px]">
+        <Reveal scrub className="border border-line bg-surface px-9 py-[34px]">
           <div className="mb-[22px] font-mono text-[11.5px] font-bold tracking-[0.12em] text-t5 uppercase">
             Without a unified stack
           </div>
@@ -34,6 +35,7 @@ export default async function Contrast() {
         </Reveal>
 
         <Reveal
+          scrub
           delay={0.08}
           className="clip-angular-28 relative overflow-hidden border border-lime bg-surface-3 px-9 py-[34px] shadow-[0_20px_50px_rgba(0,0,0,.4)]"
         >

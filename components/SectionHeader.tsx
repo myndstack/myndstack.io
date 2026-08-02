@@ -11,6 +11,8 @@ type Props = {
   align?: "start" | "center";
   className?: string;
   titleMaxWidth?: string;
+  /** Scroll-scrub the header's reveal — forwards to Reveal `scrub`. */
+  scrub?: boolean;
 };
 
 /** Eyebrow + H2 (+ optional aside/lede) — the header pattern every section shares. */
@@ -22,11 +24,13 @@ export default function SectionHeader({
   align = "start",
   className = "",
   titleMaxWidth = "560px",
+  scrub,
 }: Props) {
   const centered = align === "center";
 
   return (
     <Reveal
+      scrub={scrub}
       className={
         aside
           ? `flex flex-wrap items-end justify-between gap-10 ${className}`
