@@ -137,6 +137,7 @@ export default function StackStory() {
   return (
     <section
       ref={sectionRef}
+      id="platform"
       // No border-bottom on purpose: the section ends on the field's soft
       // vertical mask (see `.field` in globals.css), so it dissolves into the
       // plain ink of the section below rather than terminating on a hard line.

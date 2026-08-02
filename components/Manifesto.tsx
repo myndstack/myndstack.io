@@ -41,7 +41,7 @@ export default function Manifesto({ lead, keep }: { lead: string; keep: string }
   }, [inView, reduced, nativeView, WORDS]);
 
   return (
-    <section className="mx-auto max-w-[1120px] px-5 py-28 sm:px-14">
+    <section id="manifesto" className="mx-auto max-w-[1120px] px-5 py-28 sm:px-14">
       <div className="eyebrow mb-[26px] tracking-[0.16em]">Manifesto</div>
       <p
         ref={ref}

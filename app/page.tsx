@@ -64,22 +64,25 @@ export default async function Home() {
         ctaSecondary={home.hero.ctaSecondary}
       />
       <MarqueeBand />
+      {/* Client lockups ride high, right under the hero's brand beat: the first
+          thing after the pitch is proof of who already trusts the stack. */}
+      <LogoMarquee />
+      {/* Problem framing before the solution — name the pain (glue nobody owns)
+          before the stack that removes it assembles. */}
+      <Contrast />
       <StackStory />
       <Capabilities />
-      {/* Client-lockup strip sits directly after the "what we do" section so it
-          reads as "here's our work — and here are the brands that trust us with
-          it" rather than a decontextualised logo wall right under the hero. */}
-      <LogoMarquee />
       <Integrations />
+      {/* Proof: the work, then the numbers behind it. */}
       <SelectedWork />
-      <Process />
       <StatsStrip />
-      <Contrast />
-      <Manifesto lead={home.manifestoLead} keep={home.manifestoKeep} />
+      <Process />
       <Testimonials items={testimonials} />
       <Pricing tiers={tiers} />
       <Team />
       <Careers />
+      {/* Brand crescendo just before the close. */}
+      <Manifesto lead={home.manifestoLead} keep={home.manifestoKeep} />
       <Faq faqs={faqs} />
       <CtaBand />
       <ContactForm
