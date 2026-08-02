@@ -8,6 +8,7 @@ import Footer from "@/components/Footer";
 import Loader from "@/components/Loader";
 import Nav from "@/components/Nav";
 import ProgressSpine from "@/components/ProgressSpine";
+import SpeculationRules from "@/components/SpeculationRules";
 import { SITE_URL } from "@/lib/content";
 import { jsonLd } from "@/lib/format";
 import { LOADER_SEEN_SCRIPT } from "@/lib/loader-seen";
@@ -131,6 +132,7 @@ export default async function RootLayout({
         </div>
 
         <Analytics />
+        <SpeculationRules />
       </body>
     </html>
   );
