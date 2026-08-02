@@ -58,29 +58,45 @@ export const SITE = {
 } as const;
 
 /**
- * Top-level navigation.
+ * Top-level navigation — standard enterprise labels, each owning a contiguous
+ * "chapter" of the homepage so the scroll-spy highlight always matches the
+ * section in view.
  *
- * `section` is the homepage element the scroll-spy watches. Links without one
- * are real routes, so they are neither spied on nor scrolled to — Careers goes
- * straight to the listing rather than the homepage teaser, which would need a
- * second click to reach the actual openings.
+ * `href` decides the element: a root-relative hash (`/#…`) is a same-document
+ * scroll (rendered as a native `<a>`, and root-relative so it still resolves
+ * from /careers and the legal pages); a real path (`/work`, `/careers`) is a
+ * route (rendered as `<Link>`).
  *
- * Hash hrefs are root-relative so they still work from /careers and the legal
- * pages.
+ * `section` is the homepage element the scroll-spy watches. Most links are one
+ * or the other, but Customers is BOTH: it routes to `/work` on click yet also
+ * carries `section: "work-cases"` so it lights while the homepage case-studies
+ * chapter is in view. See the unified active logic in `Nav.tsx`.
+ *
+ * "Solutions" maps to the capabilities section ("What we do") — the site has no
+ * separate use-cases page — and "Company" to the studio/team section.
  */
 export type NavLink = { label: string; href: string; section?: string };
 
 export const NAV_LINKS: readonly NavLink[] = [
-  { label: "Work", href: "/work" },
-  { label: "Services", href: "/#work-grid", section: "work-grid" },
-  { label: "Process", href: "/#process", section: "process" },
+  { label: "Product", href: "/#platform", section: "platform" },
+  { label: "Solutions", href: "/#work-grid", section: "work-grid" },
+  { label: "Customers", href: "/work", section: "work-cases" },
   { label: "Pricing", href: "/#pricing", section: "pricing" },
-  { label: "Studio", href: "/#team", section: "team" },
+  { label: "Company", href: "/#team", section: "team" },
   { label: "Careers", href: "/careers" },
 ];
 
-/** Homepage section ids the scroll-spy tracks. */
-export const SPY_IDS = NAV_LINKS.flatMap((l) => (l.section ? [l.section] : []));
+/**
+ * Homepage section ids the scroll-spy tracks. The nav sections plus a tail
+ * SENTINEL (`manifesto`): once it becomes the deepest-crossed id, no nav link
+ * has a matching `data-section`, so the highlight clears over the closing
+ * sections (Manifesto / FAQ / CTA / Contact) rather than falsely holding the
+ * last chapter. Order is irrelevant — `activeSection` compares positions.
+ */
+export const SPY_IDS = [
+  ...NAV_LINKS.flatMap((l) => (l.section ? [l.section] : [])),
+  "manifesto",
+];
 
 /**
  * Profile URLs. `null` means not set up yet — the spine renders nothing for

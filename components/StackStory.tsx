@@ -138,10 +138,13 @@ export default function StackStory() {
     <section
       ref={sectionRef}
       id="platform"
+      // Programmatically focusable so a nav hash-jump moves focus here (a11y);
+      // -1 keeps it out of the tab order and the ring is suppressed.
+      tabIndex={-1}
       // No border-bottom on purpose: the section ends on the field's soft
       // vertical mask (see `.field` in globals.css), so it dissolves into the
       // plain ink of the section below rather than terminating on a hard line.
-      className="relative min-h-[70vh] sm:h-[340vh]"
+      className="relative min-h-[70vh] focus:outline-none sm:h-[340vh]"
     >
       {/* The Hybrid A+B field (grid + travelling signals + cursor spotlight) is
           this section's signature backdrop — placed INSIDE the sticky element,

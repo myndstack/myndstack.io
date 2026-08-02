@@ -1,51 +1,55 @@
 import { describe, expect, it } from "vitest";
 import { activeSection, type SectionOffset } from "./scroll-spy";
 
-const LINE = 140;
+const LINE = 96;
 
 /** Page order, which is not the nav's order — see the document-order tests. */
 const PAGE: SectionOffset[] = [
-  { id: "work-grid", top: 1200 },
-  { id: "process", top: 3400 },
-  { id: "pricing", top: 5600 },
-  { id: "team", top: 7200 },
+  { id: "platform", top: 1200 },
+  { id: "work-grid", top: 3400 },
+  { id: "work-cases", top: 5600 },
+  { id: "pricing", top: 7200 },
 ];
 
 const at = (y: number, offsets: readonly SectionOffset[] = PAGE) =>
   activeSection(offsets, y, LINE);
 
 describe("activeSection", () => {
-  it("returns the first section in the document above everything", () => {
-    expect(at(0)).toBe("work-grid");
+  it("highlights nothing until the first section's top crosses the line", () => {
+    // Above every landmark (the hero / intro) nothing is current — no
+    // first-in-document fallback, which used to light a section over the hero.
+    expect(at(0)).toBe(null);
+    expect(at(1200 - LINE - 1)).toBe(null);
   });
 
   it("activates a section as its top crosses the line", () => {
-    // One pixel short of the line the previous section is still current.
-    expect(at(1200 - LINE - 1)).toBe("work-grid");
-    expect(at(1200 - LINE)).toBe("work-grid");
-    expect(at(3400 - LINE - 1)).toBe("work-grid");
-    expect(at(3400 - LINE)).toBe("process");
+    // One pixel short of the line, nothing is current yet.
+    expect(at(1200 - LINE - 1)).toBe(null);
+    expect(at(1200 - LINE)).toBe("platform");
+    expect(at(3400 - LINE - 1)).toBe("platform");
+    expect(at(3400 - LINE)).toBe("work-grid");
   });
 
   it("keeps the deepest crossed section, not the first", () => {
-    expect(at(9000)).toBe("team");
+    expect(at(9000)).toBe("pricing");
   });
 
   it("is stable across the whole page", () => {
     const seen = new Set<string | null>();
     for (let y = 0; y <= 9000; y += 25) seen.add(at(y));
-    expect([...seen]).toEqual(["work-grid", "process", "pricing", "team"]);
+    // `null` over the intro, then each landmark in document order.
+    expect([...seen]).toEqual([null, "platform", "work-grid", "work-cases", "pricing"]);
   });
 
   describe("document order, not argument order", () => {
-    // The nav lists Work before Services while the page renders Services
-    // first. Iterating the nav's order and keeping the last match highlighted
-    // "Services" while you were reading Selected Work — a shipped regression.
+    // The nav lists sections in a different order than the page renders them.
+    // Iterating the nav's order and keeping the last match highlighted the wrong
+    // section while you were reading another — a shipped regression.
     const NAV_ORDER: SectionOffset[] = [
-      { id: "pricing", top: 5600 },
-      { id: "work-grid", top: 1200 },
-      { id: "team", top: 7200 },
-      { id: "process", top: 3400 },
+      { id: "work-cases", top: 5600 },
+      { id: "platform", top: 1200 },
+      { id: "pricing", top: 7200 },
+      { id: "work-grid", top: 3400 },
     ];
 
     it("picks the same section whatever order the offsets arrive in", () => {
@@ -54,8 +58,8 @@ describe("activeSection", () => {
       }
     });
 
-    it("falls back to the topmost section, not the first argument", () => {
-      expect(at(0, NAV_ORDER)).toBe("work-grid");
+    it("is null above every section, regardless of argument order", () => {
+      expect(at(0, NAV_ORDER)).toBe(null);
     });
   });
 
@@ -67,13 +71,13 @@ describe("activeSection", () => {
     });
 
     it("handles a single section", () => {
-      const one = [{ id: "work-grid", top: 1200 }];
-      expect(at(0, one)).toBe("work-grid");
-      expect(at(4000, one)).toBe("work-grid");
+      const one = [{ id: "platform", top: 1200 }];
+      expect(at(0, one)).toBe(null);
+      expect(at(4000, one)).toBe("platform");
     });
 
     it("does not care about negative scroll from overscroll", () => {
-      expect(at(-200)).toBe("work-grid");
+      expect(at(-200)).toBe(null);
     });
 
     it("breaks ties toward a single stable answer", () => {

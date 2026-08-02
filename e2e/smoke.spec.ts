@@ -543,7 +543,7 @@ test.describe("navigation reaches everything", () => {
     await expect(page.getByRole("heading", { name: /about the role/i })).toBeVisible();
   });
 
-  test("nav Work marks itself current and drops stale scroll-spy state", async ({
+  test("nav Customers marks itself current and drops stale scroll-spy state", async ({
     page,
   }) => {
     await landOnHome(page);
@@ -552,13 +552,16 @@ test.describe("navigation reaches everything", () => {
     // to reveal it — which is what someone reaching for the nav would do anyway.
     await scrollBySteps(page, -300, 4);
 
+    // Customers is a route link (/work) that also spies the homepage case-studies
+    // section; on /work its active state must come from the URL, and the stale
+    // homepage scroll-spy highlight must clear — exactly one link stays current.
     await page.locator('.navlink[href="/work"]').click();
     await expect(page).toHaveURL(/\/work$/);
 
     const active = await page.evaluate(() =>
       [...document.querySelectorAll(".navlink.is-active")].map((a) => a.textContent),
     );
-    expect(active).toEqual(["Work"]);
+    expect(active).toEqual(["Customers"]);
   });
 });
 
@@ -591,10 +594,11 @@ test.describe("scroll chrome", () => {
             ?.getAttribute("data-section") ?? null,
       );
 
-    expect(await current()).toBe("work-grid");
+    // Nothing is highlighted over the hero / intro (no first-in-document fallback).
+    expect(await current()).toBe(null);
 
-    // Land just past each section's top, in order, without ever jumping back.
-    for (const section of ["process", "pricing", "team"]) {
+    // Land just past each landmark's top, in document order, without jumping back.
+    for (const section of ["platform", "work-grid", "work-cases", "pricing", "team"]) {
       const target = await page.evaluate(
         (id) => document.getElementById(id)!.offsetTop + 40,
         section,
@@ -602,6 +606,14 @@ test.describe("scroll chrome", () => {
       await scrollBySteps(page, target - (await page.evaluate(() => window.scrollY)));
       expect(await current()).toBe(section);
     }
+
+    // Past the tail sentinel (#manifesto) the highlight clears — the closing
+    // sections (manifesto / FAQ / CTA / contact) are owned by no nav item.
+    const tail = await page.evaluate(
+      () => document.getElementById("manifesto")!.offsetTop + 40,
+    );
+    await scrollBySteps(page, tail - (await page.evaluate(() => window.scrollY)));
+    expect(await current()).toBe(null);
   });
 
   /**

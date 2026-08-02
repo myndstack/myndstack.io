@@ -15,8 +15,8 @@ import { activeSection, type SectionOffset } from "@/lib/scroll-spy";
 import MobileDrawer from "./MobileDrawer";
 import Wordmark from "./Wordmark";
 
-/** A section counts as active once its top is above this line. */
-const SPY_LINE_PX = 140;
+/** Fallback spy line if `--nav-offset` can't be read; overridden each measure. */
+const SPY_LINE_FALLBACK = 96;
 
 export default function Nav({ contactEmail }: { contactEmail: string }) {
   const navRef = useRef<HTMLElement>(null);
@@ -38,6 +38,14 @@ export default function Nav({ contactEmail }: { contactEmail: string }) {
   const offsetsRef = useRef<SectionOffset[]>([]);
 
   /**
+   * The spy line, in px from the top of the viewport — read from the shared
+   * `--nav-offset` token so it matches the CSS `scroll-padding-top` exactly (the
+   * section a click lands on is the section highlighted). Cached in `measure()`,
+   * never read per frame.
+   */
+  const spyLineRef = useRef(SPY_LINE_FALLBACK);
+
+  /**
    * The section links, and the last state actually written to them.
    *
    * The frame callback used to re-run `querySelectorAll` and then set a class
@@ -56,6 +64,13 @@ export default function Nav({ contactEmail }: { contactEmail: string }) {
 
     const measure = () => {
       pending = 0;
+      // Read --nav-offset once here (not per frame) so the spy line and the CSS
+      // scroll-padding stay one number.
+      const offset = parseFloat(
+        getComputedStyle(document.documentElement).getPropertyValue("--nav-offset"),
+      );
+      if (!Number.isNaN(offset)) spyLineRef.current = offset;
+
       offsetsRef.current = SPY_IDS.flatMap((id) => {
         const el = document.getElementById(id);
         return el ? [{ id, top: el.offsetTop }] : [];
@@ -100,6 +115,9 @@ export default function Nav({ contactEmail }: { contactEmail: string }) {
     );
 
     for (const link of linksRef.current) {
+      // Keep a link that is current-by-URL (e.g. Customers on /work): its active
+      // state is render-driven, not spy-driven, so the reset must not strip it.
+      if (link.getAttribute("href") === pathname) continue;
       link.classList.remove("is-active");
       link.removeAttribute("aria-current");
     }
@@ -136,13 +154,18 @@ export default function Nav({ contactEmail }: { contactEmail: string }) {
       nav.classList.toggle("is-tucked", tucked);
     }
 
-    const active = activeSection(offsetsRef.current, y, SPY_LINE_PX);
+    // No spy targets on this route (every sub-page) — highlighting is left to the
+    // URL (render-driven route-active), so the frame never clears it here.
+    if (offsetsRef.current.length === 0) return;
+
+    const active = activeSection(offsetsRef.current, y, spyLineRef.current);
     if (active === applied.active) return;
     applied.active = active;
 
-    // Route links carry no section — their active state comes from the URL, and
-    // they are not in this list.
     for (const link of linksRef.current) {
+      // A link that is current-by-URL owns its own active state; the spy must not
+      // fight it (matters where a route and a spy section coexist — Customers).
+      if (link.getAttribute("href") === pathname) continue;
       const isActive = link.dataset.section === active;
       link.classList.toggle("is-active", isActive);
       if (isActive) link.setAttribute("aria-current", "true");
@@ -165,27 +188,39 @@ export default function Nav({ contactEmail }: { contactEmail: string }) {
           </span>
 
           <ul ref={listRef} className="m-0 hidden list-none gap-[26px] p-0 sm:flex">
-            {NAV_LINKS.map((link) => (
-              <li key={link.href}>
-                {link.section ? (
-                  <a className="navlink" href={link.href} data-section={link.section}>
-                    {link.label}
-                  </a>
-                ) : (
-                  <Link
-                    className={`navlink${pathname === link.href ? " is-active" : ""}`}
-                    href={link.href}
-                    aria-current={pathname === link.href ? "page" : undefined}
-                  >
-                    {link.label}
-                  </Link>
-                )}
-              </li>
-            ))}
+            {NAV_LINKS.map((link) => {
+              // Same-doc hash → native <a>; a real path → <Link>. A link can be a
+              // route AND carry a spy section (Customers → /work + work-cases): it
+              // routes on click yet the frame lights it while its homepage chapter
+              // is in view.
+              const isAnchor = link.href.startsWith("/#");
+              const routeActive = !isAnchor && pathname === link.href;
+              return (
+                <li key={link.href}>
+                  {isAnchor ? (
+                    <a className="navlink" href={link.href} data-section={link.section}>
+                      {link.label}
+                    </a>
+                  ) : (
+                    <Link
+                      className={`navlink${routeActive ? " is-active" : ""}`}
+                      href={link.href}
+                      data-section={link.section}
+                      aria-current={routeActive ? "page" : undefined}
+                    >
+                      {link.label}
+                    </Link>
+                  )}
+                </li>
+              );
+            })}
           </ul>
 
+          {/* "Contact" (not "Start a project") keeps the pill within its tight
+              width budget once the longer enterprise labels are in the row; the
+              expansive mobile drawer keeps the fuller CTA. */}
           <a className="nav-cta hidden sm:inline-block" href="/#contact">
-            Start a project
+            Contact
           </a>
 
           <button

@@ -17,7 +17,14 @@ export default function Section({
   return (
     <section
       id={id}
-      className={`relative mx-auto max-w-[1200px] px-5 pt-[88px] pb-12 sm:px-14 ${className}`}
+      // Anchor targets are made programmatically focusable so a hash-nav click
+      // moves focus (and the SR reading cursor) into the section; -1 keeps them
+      // out of the tab order, and the ring is suppressed since the only focus
+      // here is programmatic.
+      tabIndex={id ? -1 : undefined}
+      className={`relative mx-auto max-w-[1200px] px-5 pt-[88px] pb-12 sm:px-14${
+        id ? " focus:outline-none" : ""
+      } ${className}`}
     >
       {scanline ? <Scanline /> : null}
       {children}

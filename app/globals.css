@@ -128,6 +128,11 @@
   :root {
     /* The nav overlays the page, so every non-hero route pads past it. */
     --nav-height: 80px;
+    /* One line for both in-page anchoring and the scroll-spy: `scroll-padding-top`
+       lands a clicked section's top here, and Nav.tsx reads this same value as its
+       spy line — so "the section a click would land on" is always "the section
+       highlighted." Nav height (80px) + a little breathing room. */
+    --nav-offset: 96px;
     /* One duration for every part of the bar → capsule morph, so the scrim,
        the capsule, the content column and the wordmark stay in lockstep.
        Slower than the 300ms it replaced: the morph now runs on the compositor,
@@ -157,7 +162,7 @@
 
   html {
     scroll-behavior: smooth;
-    scroll-padding-top: 90px;
+    scroll-padding-top: var(--nav-offset);
   }
 
   body {
@@ -614,6 +619,12 @@
   }
   .navlink:hover {
     color: #fff;
+  }
+  /* Active state in the bar (pre-capsule) state — the capsule rule below is more
+     specific and takes over once the pill engages. Lime clears AA on the dark
+     hero; this is what makes the scroll-spy highlight visible near the top. */
+  .navlink.is-active {
+    color: var(--color-lime);
   }
   .nav.is-cap .navlink {
     color: var(--color-lime-ink);
