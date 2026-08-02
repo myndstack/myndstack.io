@@ -91,6 +91,7 @@ export default async function Home() {
         phone={site.phone}
         phoneHref={site.phoneHref}
         location={site.location}
+        turnstileSiteKey={process.env.TURNSTILE_SITE_KEY ?? ""}
       />
     </>
   );

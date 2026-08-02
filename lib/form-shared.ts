@@ -12,6 +12,14 @@
  */
 export const HONEYPOT_FIELD = "website";
 
+/**
+ * The Cloudflare Turnstile token field. This is the fixed name the widget uses
+ * for its hidden input, so it's what the client reads back and the route reads
+ * off the JSON body. Kept here (zod-free) because both sides need it on first
+ * paint, before the zod schemas are dynamic-imported at submit time.
+ */
+export const TURNSTILE_RESPONSE_FIELD = "cf-turnstile-response";
+
 /** Shape every form route returns, success or failure. */
 export type FormResponse = {
   ok: boolean;

@@ -5,7 +5,13 @@ import type { z } from "zod";
 import { SITE } from "./content";
 import { sendFormMail, type Mail } from "./mail";
 import { clientIp, rateLimit } from "./rate-limit";
-import { HONEYPOT_FIELD, toFieldErrors, type FormResponse } from "./form-shared";
+import { isTurnstileConfigured, verifyTurnstile } from "./turnstile";
+import {
+  HONEYPOT_FIELD,
+  TURNSTILE_RESPONSE_FIELD,
+  toFieldErrors,
+  type FormResponse,
+} from "./form-shared";
 
 /**
  * The shared body of every form endpoint: rate limit → parse → validate →
@@ -17,13 +23,23 @@ import { HONEYPOT_FIELD, toFieldErrors, type FormResponse } from "./form-shared"
  */
 export type Sink<T> = (data: T) => Promise<void>;
 
+/** Per-route knobs for the shared handler. */
+export type FormOptions = {
+  /** Require a valid Cloudflare Turnstile token before processing. Enforced only
+   *  where Turnstile is configured (see `isTurnstileConfigured`), so local dev
+   *  and e2e without keys still run. */
+  readonly requireTurnstile?: boolean;
+};
+
 export async function handleFormSubmission<S extends z.ZodType>(
   request: Request,
   schema: S,
   buildMail: (data: z.infer<S>) => Mail,
   sinks: Sink<z.infer<S>>[] = [],
+  options: FormOptions = {},
 ): Promise<NextResponse<FormResponse>> {
-  const limit = rateLimit(clientIp(request));
+  const ip = clientIp(request);
+  const limit = rateLimit(ip);
   if (!limit.ok) {
     return NextResponse.json(
       { ok: false, error: "Too many attempts. Try again in a moment." },
@@ -49,6 +65,32 @@ export async function handleFormSubmission<S extends z.ZodType>(
     (body as Record<string, string>)[HONEYPOT_FIELD].length > 0
   ) {
     return NextResponse.json({ ok: true });
+  }
+
+  // Bot check, before any processing. Enforced only where Turnstile is
+  // configured; a token-less honeypot bot was already dropped above, and a real
+  // client always carries a token. The failure stays generic — never say why.
+  if (options.requireTurnstile && isTurnstileConfigured()) {
+    const token =
+      typeof body === "object" &&
+      body !== null &&
+      typeof (body as Record<string, unknown>)[TURNSTILE_RESPONSE_FIELD] === "string"
+        ? (body as Record<string, string>)[TURNSTILE_RESPONSE_FIELD]
+        : "";
+
+    const verdict = await verifyTurnstile(token, ip);
+    if (!verdict.success) {
+      return NextResponse.json(
+        { ok: false, error: "Verification failed. Please try again." },
+        { status: 400 },
+      );
+    }
+  } else if (options.requireTurnstile && process.env.NODE_ENV === "production") {
+    // Skipping is only meant for local dev / e2e. In production it means the
+    // secret is missing — bot protection is OFF. Make that loud in the logs.
+    console.warn(
+      "Turnstile is required for this route but TURNSTILE_SECRET_KEY is not set — bot protection is OFF.",
+    );
   }
 
   const parsed = schema.safeParse(body);

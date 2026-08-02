@@ -1,22 +1,75 @@
 "use client";
 
+import { useEffect, useState, type FormEvent } from "react";
 import { useFormPost } from "@/lib/useFormPost";
 import BookingEmbed from "./BookingEmbed";
 import Field, { Honeypot } from "./Field";
 import Reveal from "./Reveal";
+import TurnstileWidget from "./TurnstileWidget";
 
 const BUDGETS = ["Under $10k", "$10k – $50k", "$50k – $150k", "$150k+"];
 const SOURCES = ["Search", "Referral", "Social", "Event", "Other"];
 
 /** Contact details from site settings — kept to primitives so this client
  *  component needn't import the server-only query types. */
-type Props = { email: string; phone: string; phoneHref: string; location: string };
+type Props = {
+  email: string;
+  phone: string;
+  phoneHref: string;
+  location: string;
+  /** Cloudflare Turnstile site key (public). Empty ⇒ not configured for this
+   *  environment (local dev / e2e), so the widget is skipped — see the note. */
+  turnstileSiteKey: string;
+};
 
-export default function ContactForm({ email, phone, phoneHref, location }: Props) {
+export default function ContactForm({
+  email,
+  phone,
+  phoneHref,
+  location,
+  turnstileSiteKey,
+}: Props) {
   const { submit, pending, done, error, fieldErrors } = useFormPost(
     "/api/contact",
     "contact",
   );
+
+  const turnstileEnabled = turnstileSiteKey.length > 0;
+  const [token, setToken] = useState<string | null>(null);
+  const [widgetFailed, setWidgetFailed] = useState(false);
+  const [needsVerify, setNeedsVerify] = useState(false);
+  const [resetSignal, setResetSignal] = useState(0);
+
+  // A failed submit consumes the single-use token — clear it and ask the widget
+  // for a fresh one so a retry isn't rejected as a duplicate.
+  useEffect(() => {
+    if (error && turnstileEnabled) {
+      setToken(null);
+      setResetSignal((n) => n + 1);
+    }
+  }, [error, turnstileEnabled]);
+
+  // A token arriving clears any stale "couldn't load" / "please verify" state — an
+  // error-callback can fire transiently and then recover on retry.
+  const handleToken = (value: string | null) => {
+    setToken(value);
+    if (value) {
+      setWidgetFailed(false);
+      setNeedsVerify(false);
+    }
+  };
+
+  // Block submit without a token even via Enter (the server rejects a token-less
+  // request regardless). The button stays enabled while the challenge is pending
+  // so a click gives feedback rather than a mystery-disabled control.
+  const onSubmit = (event: FormEvent<HTMLFormElement>) => {
+    if (turnstileEnabled && !token) {
+      event.preventDefault();
+      setNeedsVerify(true);
+      return;
+    }
+    submit(event);
+  };
 
   return (
     <section id="contact" className="mx-auto max-w-[1200px] px-5 pt-[88px] sm:px-14">
@@ -76,7 +129,7 @@ export default function ContactForm({ email, phone, phoneHref, location }: Props
             </div>
           ) : (
             <form
-              onSubmit={submit}
+              onSubmit={onSubmit}
               noValidate
               className="relative grid grid-cols-1 gap-4 xs:grid-cols-2"
             >
@@ -166,6 +219,34 @@ export default function ContactForm({ email, phone, phoneHref, location }: Props
                 )}
               </Field>
 
+              {turnstileEnabled ? (
+                <div className="xs:col-span-2">
+                  <TurnstileWidget
+                    siteKey={turnstileSiteKey}
+                    onToken={handleToken}
+                    onError={() => setWidgetFailed(true)}
+                    resetSignal={resetSignal}
+                  />
+                </div>
+              ) : null}
+
+              {widgetFailed ? (
+                <p
+                  role="alert"
+                  className="m-0 border border-danger/40 bg-danger/8 px-4 py-3 font-mono text-[11.5px] text-danger xs:col-span-2"
+                >
+                  Verification couldn&rsquo;t load. Disable any blockers and refresh,
+                  or email us directly at <a href={`mailto:${email}`}>{email}</a>.
+                </p>
+              ) : needsVerify && !token ? (
+                <p
+                  role="status"
+                  className="m-0 font-mono text-[11.5px] text-t4 xs:col-span-2"
+                >
+                  One moment — complete the verification just above, then send.
+                </p>
+              ) : null}
+
               {error ? (
                 <p
                   role="alert"
@@ -177,8 +258,8 @@ export default function ContactForm({ email, phone, phoneHref, location }: Props
 
               <button
                 type="submit"
-                disabled={pending}
-                className="btn btn-lime w-full cursor-pointer border-none text-center xs:col-span-2"
+                disabled={pending || (turnstileEnabled && widgetFailed)}
+                className="btn btn-lime w-full cursor-pointer border-none text-center disabled:cursor-not-allowed disabled:opacity-60 xs:col-span-2"
               >
                 {pending ? "Sending…" : "Send message →"}
               </button>

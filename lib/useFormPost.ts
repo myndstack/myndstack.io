@@ -2,7 +2,7 @@
 
 import { useCallback, useState, type FormEvent } from "react";
 import type { z } from "zod";
-import { toFieldErrors, type FormResponse } from "./form-shared";
+import { TURNSTILE_RESPONSE_FIELD, toFieldErrors, type FormResponse } from "./form-shared";
 
 type State = {
   pending: boolean;
@@ -54,12 +54,20 @@ export function useFormPost(endpoint: string, schemaName: SchemaName) {
         return;
       }
 
+      // The Turnstile widget injects a `cf-turnstile-response` field into the
+      // form; zod strips it from `parsed.data`, so forward it explicitly. Absent
+      // on forms without Turnstile, in which case the body is unchanged.
+      const token = values[TURNSTILE_RESPONSE_FIELD];
+      const payload = token
+        ? { ...(parsed.data as Record<string, unknown>), [TURNSTILE_RESPONSE_FIELD]: token }
+        : parsed.data;
+
       let result: FormResponse;
       try {
         const response = await fetch(endpoint, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(parsed.data),
+          body: JSON.stringify(payload),
         });
         result = (await response.json()) as FormResponse;
       } catch {

@@ -24,5 +24,5 @@ export async function POST(request: Request) {
         company: data.company,
         message: data.message,
       }),
-  ]);
+  ], { requireTurnstile: true });
 }
