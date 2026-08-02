@@ -21,6 +21,7 @@ uniform vec2 u_res;
 
 varying float v_alpha;
 varying float v_tint;
+varying float v_size;
 
 void main() {
   vec2 clip = (a_pos / u_res) * 2.0 - 1.0;
@@ -28,6 +29,7 @@ void main() {
   gl_PointSize = a_size;
   v_alpha = a_alpha;
   v_tint = a_tint;
+  v_size = a_size;
 }
 `;
 
@@ -43,13 +45,23 @@ precision mediump float;
 
 uniform vec3 u_base;
 uniform vec3 u_accent;
+uniform float u_dpr;
 
 varying float v_alpha;
 varying float v_tint;
+varying float v_size;
 
 void main() {
   float r = length(gl_PointCoord - 0.5);
-  float a = smoothstep(0.5, 0.32, r) * v_alpha;
+  // Volumetric depth-of-field: the smoothstep's inner edge scales with the
+  // node's on-screen size (a depth proxy), so near/large nodes stay crisp and
+  // far/small nodes bloom into soft bokeh discs. Divide by dpr so the focus
+  // band is in CSS px and reads the same on retina. Prominent nodes land at
+  // ~0.34 (≈ the previous crisp 0.32); only genuinely small far nodes soften.
+  float sizePx = v_size / max(u_dpr, 1.0);
+  float focus = clamp((sizePx - 1.0) / 3.5, 0.0, 1.0);
+  float inner = mix(0.08, 0.34, focus);
+  float a = smoothstep(0.5, inner, r) * v_alpha;
   gl_FragColor = vec4(mix(u_base, u_accent, v_tint) * a, a);
 }
 `;
@@ -91,6 +103,8 @@ export type Program = {
     res: WebGLUniformLocation | null;
     base: WebGLUniformLocation | null;
     accent: WebGLUniformLocation | null;
+    /** Device pixel ratio — only read by the point shader's bokeh falloff. */
+    dpr: WebGLUniformLocation | null;
   };
 };
 
@@ -128,6 +142,9 @@ export function createProgram(gl: GL, fragmentSource: string): Program | null {
       res: gl.getUniformLocation(program, "u_res"),
       base: gl.getUniformLocation(program, "u_base"),
       accent: gl.getUniformLocation(program, "u_accent"),
+      // Absent from the line program (its fragment never declares it) — that
+      // just yields null, and setting a null uniform location is a no-op.
+      dpr: gl.getUniformLocation(program, "u_dpr"),
     },
   };
 }

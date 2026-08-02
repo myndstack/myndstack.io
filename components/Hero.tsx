@@ -35,8 +35,17 @@ export default function Hero({ eyebrow, subhead, ctaPrimary, ctaSecondary }: Pro
     return () => window.clearInterval(id);
   }, [reduced]);
 
-  // Hovering a CTA sends a burst of signals through the network behind it.
-  const burst = () => window.dispatchEvent(new Event(PULSE_EVENT));
+  // Hovering a CTA sends a burst of signals through the network behind it, plus
+  // a shockwave that rolls out from the button's centre — so the detail carries
+  // the CTA's viewport-space centre for HeroNetwork to convert to canvas coords.
+  const burst = (event: React.MouseEvent<HTMLAnchorElement>) => {
+    const rect = event.currentTarget.getBoundingClientRect();
+    window.dispatchEvent(
+      new CustomEvent(PULSE_EVENT, {
+        detail: { x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 },
+      }),
+    );
+  };
 
   // At rest the design lights the final line; the cycle walks the accent instead.
   const lit = reduced ? LAST : index;

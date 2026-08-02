@@ -29,6 +29,14 @@ const PULSE_SPEED = 0.011;
 const PULSE_TAIL = 0.34;
 /** Extra pulses spawned when a hero CTA is hovered. */
 const BURST_SIZE = 10;
+/** CTA shockwave: an expanding ring that brightens the nodes it sweeps past. */
+const BURST_MAX_RADIUS = 560;
+/** Life lost per frame (~0.8s at 60fps) — radius = (1 - life) * MAX_RADIUS. */
+const BURST_DECAY = 0.024;
+/** Half-width of the bright wavefront band, in CSS px. */
+const BURST_BAND = 72;
+/** Most concurrent shockwaves kept — extra hovers drop the oldest. */
+const BURST_MAX = 4;
 
 /** Fired by the hero CTAs — see `Hero`. */
 export const PULSE_EVENT = "myndstack:pulse";
@@ -250,10 +258,23 @@ export default function HeroNetwork() {
       mouse.y = -1e5;
     };
 
-    const onBurst = () => {
+    // Active CTA shockwaves. Each expands from its origin over its lifetime,
+    // brightening nodes on the wavefront; empty in steady state, so the node
+    // loop pays nothing when nobody is hovering a CTA.
+    const bursts: { x: number; y: number; life: number }[] = [];
+
+    const onBurst = (event: Event) => {
       for (let i = 0; i < BURST_SIZE; i++) pulses.push(spawnPulse());
       // Keep the steady-state population bounded.
       while (pulses.length > PULSE_COUNT + BURST_SIZE * 2) pulses.shift();
+
+      // Record a shockwave origin (CTA centre → canvas coords) if one was sent.
+      const detail = (event as CustomEvent<{ x: number; y: number }>).detail;
+      if (detail) {
+        const rect = canvas.getBoundingClientRect();
+        bursts.push({ x: detail.x - rect.left, y: detail.y - rect.top, life: 1 });
+        if (bursts.length > BURST_MAX) bursts.shift();
+      }
     };
 
     // --- Vertex writers ---------------------------------------------------
@@ -287,6 +308,9 @@ export default function HeroNetwork() {
       gl.uniform2f(program.uniforms.res, width, height);
       gl.uniform3fv(program.uniforms.base, WHITE);
       gl.uniform3fv(program.uniforms.accent, LIME);
+      // Only the point shader declares u_dpr; on the line program the location
+      // is null and this is a silent no-op.
+      gl.uniform1f(program.uniforms.dpr, dpr);
 
       gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
       gl.bufferSubData(gl.ARRAY_BUFFER, 0, data.subarray(0, count * STRIDE));
@@ -371,6 +395,12 @@ export default function HeroNetwork() {
 
       draw(lineProgram, lineVerts, lineVertexCount, gl.LINES, false);
 
+      // Advance CTA shockwaves once per frame; drop any that have decayed.
+      for (let b = bursts.length - 1; b >= 0; b--) {
+        bursts[b].life -= BURST_DECAY;
+        if (bursts[b].life <= 0) bursts.splice(b, 1);
+      }
+
       // Nodes ---------------------------------------------------------------
       vi = 0;
       for (let i = 0; i < nodeCount; i++) {
@@ -379,9 +409,19 @@ export default function HeroNetwork() {
         const near =
           hasCursor && Math.hypot(mouse.x - x, mouse.y - y) < CURSOR_RADIUS ? 1 : 0;
 
-        const size = (near ? 5.2 : 3.2) * depth[i] * dpr;
-        const alpha = near ? 0.95 : 0.2 + 0.4 * depth[i];
-        write(nodeVerts, x, y, size, alpha, near);
+        // Shockwave: brightest for nodes sitting on the current wavefront,
+        // fading as each ring ages. `wave` is 0 in steady state (loop skipped).
+        let wave = 0;
+        for (const b of bursts) {
+          const radius = (1 - b.life) * BURST_MAX_RADIUS;
+          const prox = 1 - Math.min(1, Math.abs(Math.hypot(x - b.x, y - b.y) - radius) / BURST_BAND);
+          if (prox > 0) wave = Math.max(wave, prox * b.life);
+        }
+
+        const size = (near ? 5.2 : 3.2) * depth[i] * dpr * (1 + wave * 0.5);
+        const alpha = near ? 0.95 : Math.min(0.95, 0.2 + 0.4 * depth[i] + wave * 0.6);
+        // Push the wavefront toward lime; the cursor-near tint still wins.
+        write(nodeVerts, x, y, size, alpha, Math.max(near, wave));
       }
       draw(pointProgram, nodeVerts, nodeCount, gl.POINTS, true);
 
