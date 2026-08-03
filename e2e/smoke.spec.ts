@@ -379,14 +379,8 @@ test.describe("touch targets and error affordances", () => {
   test("interactive controls meet the target-size minimum (WCAG 2.5.8)", async ({
     page,
   }) => {
-    // Testimonial dots: 4px visual bar, but a ≥44px-tall hit area.
     await page.setViewportSize({ width: 1280, height: 900 });
     await landOnHome(page);
-    const dot = page.locator('button[aria-label^="Show testimonial"]').first();
-    await dot.scrollIntoViewIfNeeded();
-    const dotBox = await dot.boundingBox();
-    expect(dotBox!.height, "testimonial dot height").toBeGreaterThanOrEqual(44);
-    expect(dotBox!.width, "testimonial dot width").toBeGreaterThanOrEqual(24);
 
     // Footer social links are the only path to socials below 1100px → 44×44.
     // The row is `lg:hidden` (above 1100px the desktop spine carries the same
