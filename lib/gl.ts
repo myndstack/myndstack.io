@@ -18,6 +18,10 @@ export type GL = WebGLRenderingContext;
  * At `u_tilt == 0` a mid-depth vertex (z == 0, w == 1) reduces to the old flat
  * projection `clip = a_pos / u_res * 2 - 1` exactly, so the resting frame barely
  * moves; only depth-separated nodes gain a gentle perspective offset.
+ *
+ * As the hero scrolls away, `u_recede` pushes the whole rotated cloud back along
+ * view z and fades it, so the constellation dives into the page and hands the
+ * frame to the content below — see RECEDE_* in HeroNetwork.tsx.
  */
 export const VERTEX_SHADER = `
 attribute vec2 a_pos;
@@ -27,8 +31,9 @@ attribute float a_alpha;
 attribute float a_tint;
 
 uniform vec2 u_res;
-uniform vec2 u_tilt;  // radians: (rotation about Y, rotation about X)
-uniform vec3 u_persp; // (depthMid, zRange px, camZ px) — one source in HeroNetwork.tsx
+uniform vec2 u_tilt;   // radians: (rotation about Y, rotation about X)
+uniform vec3 u_persp;  // (depthMid, zRange px, camZ px) — one source in HeroNetwork.tsx
+uniform vec2 u_recede; // (view-z push px, fade 0→1) as the hero scrolls away
 
 varying float v_alpha;
 varying float v_tint;
@@ -49,6 +54,12 @@ void main() {
   float ry =  P.y * cosX - rz * sinX;
   rz       =  P.y * sinX + rz * cosX;
 
+  // Scroll recede: push the rotated cloud back along view z as the hero exits,
+  // so the perspective divide below shrinks it toward the vanishing point. The
+  // px push is computed in HeroNetwork (RECEDE_PUSH) and mirrored by the CPU
+  // proximity projection, so this shader keeps no magic number of its own.
+  rz -= u_recede.x;
+
   // Perspective divide. The denominator stays positive because camZ (~1500)
   // dwarfs the largest rotated z — roughly |x|*sin(tilt) + zRange + |y|*sin(tilt),
   // a few hundred px on real viewports at a small MAX_TILT. max() is a
@@ -61,7 +72,10 @@ void main() {
   vec2 clip = proj / (u_res * 0.5);
   gl_Position = vec4(clip.x, -clip.y, 0.0, 1.0);
   gl_PointSize = a_size;
-  v_alpha = a_alpha;
+  // Fade the whole cloud as it recedes. Both fragment shaders output premultiplied
+  // color * v_alpha, so scaling v_alpha here fades rgb and alpha together and keeps
+  // premultiplication valid for the normal- and additive-blended passes alike.
+  v_alpha = a_alpha * (1.0 - u_recede.y);
   v_tint = a_tint;
   v_size = a_size;
 }
@@ -139,6 +153,8 @@ export type Program = {
     tilt: WebGLUniformLocation | null;
     /** Perspective params (depthMid, zRange, camZ) — shared vertex shader. */
     persp: WebGLUniformLocation | null;
+    /** Scroll recede (view-z push px, fade 0→1) — shared vertex shader. */
+    recede: WebGLUniformLocation | null;
     base: WebGLUniformLocation | null;
     accent: WebGLUniformLocation | null;
     /** Device pixel ratio — only read by the point shader's bokeh falloff. */
@@ -181,6 +197,7 @@ export function createProgram(gl: GL, fragmentSource: string): Program | null {
       res: gl.getUniformLocation(program, "u_res"),
       tilt: gl.getUniformLocation(program, "u_tilt"),
       persp: gl.getUniformLocation(program, "u_persp"),
+      recede: gl.getUniformLocation(program, "u_recede"),
       base: gl.getUniformLocation(program, "u_base"),
       accent: gl.getUniformLocation(program, "u_accent"),
       // Absent from the line program (its fragment never declares it) — that

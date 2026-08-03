@@ -10,6 +10,7 @@ import {
   type Program,
 } from "@/lib/gl";
 import { useMediaQuery, useReducedMotion } from "@/lib/hooks";
+import { subscribeToScroll } from "@/lib/scroll";
 import ParticleField from "./ParticleField";
 
 /** Nodes scale with viewport area, up to this ceiling. */
@@ -36,6 +37,19 @@ const DEPTH_MID = 0.675;
 const Z_RANGE = 360;
 const CAM_Z = 1500;
 const CURSOR_RADIUS = 110;
+
+/**
+ * Hero scroll recede. As the hero scrolls out of view the whole constellation
+ * pulls back along view-space z and fades, handing the frame to the content
+ * below (StackStory). `RECEDE_PUSH` is the pull-back depth at full exit as a
+ * multiple of `Z_RANGE` — fed to the shader in px, so lib/gl.ts keeps no magic
+ * number and the CPU proximity projection can mirror it from the same source.
+ * The ease runs across [RECEDE_START, RECEDE_END] of the hero's own scroll-out,
+ * so the resting hero (and the LCP paint) is untouched until you actually leave.
+ */
+const RECEDE_PUSH = 2.5;
+const RECEDE_START = 0.12;
+const RECEDE_END = 0.9;
 
 /** Signals travelling the network at any moment. */
 const PULSE_COUNT = 14;
@@ -286,6 +300,14 @@ export default function HeroNetwork() {
     let tiltX = 0;
     let tiltY = 0;
 
+    // Hero-exit scroll progress (0→1 across the hero's own height), written by
+    // the shared scroll frame below; the render loop eases it into the recede.
+    let heroExit = 0;
+    // Per-frame recede, derived from heroExit in the loop and read by draw() and
+    // the CPU proximity projection: view-z push (px) and the matching alpha fade.
+    let recedeZ = 0;
+    let recedeFade = 0;
+
     const onMove = (event: MouseEvent) => {
       const rect = canvas.getBoundingClientRect();
       mouse.x = event.clientX - rect.left;
@@ -348,6 +370,7 @@ export default function HeroNetwork() {
       gl.uniform2f(program.uniforms.res, width, height);
       gl.uniform2f(program.uniforms.tilt, tiltX, tiltY);
       gl.uniform3f(program.uniforms.persp, DEPTH_MID, Z_RANGE, CAM_Z);
+      gl.uniform2f(program.uniforms.recede, recedeZ, recedeFade);
       gl.uniform3fv(program.uniforms.base, WHITE);
       gl.uniform3fv(program.uniforms.accent, LIME);
       // Only the point shader declares u_dpr; on the line program the location
@@ -390,6 +413,17 @@ export default function HeroNetwork() {
       const targetTiltY = hasCursor ? ((mouse.y - height / 2) / (height / 2)) * MAX_TILT : 0;
       tiltX += (targetTiltX - tiltX) * TILT_EASE;
       tiltY += (targetTiltY - tiltY) * TILT_EASE;
+
+      // Ease hero-exit into the recede: hold at rest through the first sliver of
+      // scroll (so the resting hero is untouched), then smoothstep the pull-back
+      // and fade to full by RECEDE_END. recedeZ (px) drives both the shader's
+      // z-push and the CPU proximity mirror below; recedeFade drives the alpha.
+      const rt = Math.min(
+        1,
+        Math.max(0, (heroExit - RECEDE_START) / (RECEDE_END - RECEDE_START)),
+      );
+      recedeFade = rt * rt * (3 - 2 * rt);
+      recedeZ = recedeFade * Z_RANGE * RECEDE_PUSH;
 
       // Trig for the CPU-side copy of the shader's rotation, hoisted out of the
       // node loop. u_tilt.x rotates about Y, u_tilt.y about X — mirror exactly.
@@ -465,6 +499,7 @@ export default function HeroNetwork() {
           let rz = -cx * sinY + zz * cosY;
           const ry = cy * cosX - rz * sinX;
           rz = cy * sinX + rz * cosX;
+          rz -= recedeZ; // mirror the shader's scroll recede so the highlight stays glued
           const w = CAM_Z / Math.max(CAM_Z - rz, 1);
           const dx = width / 2 + rx * w;
           const dy = height / 2 + ry * w;
@@ -561,10 +596,21 @@ export default function HeroNetwork() {
     canvas.addEventListener("webglcontextlost", onContextLost);
     window.addEventListener(PULSE_EVENT, onBurst);
 
+    // Hero-exit progress off the one shared scroll frame (lib/scroll.ts). This
+    // is a write-only subscriber that does NO layout reads — `height` is the
+    // canvas client height cached in resize() and refreshed by the resize
+    // handler — and never calls setState; it only stores a scalar the render
+    // loop already running reads. The recede itself is drawn in that loop, so
+    // there is nothing to write per frame here.
+    const unsubscribeScroll = subscribeToScroll((s) => {
+      heroExit = height > 0 ? Math.min(1, Math.max(0, s.y / height)) : 0;
+    });
+
     frame();
 
       teardown = () => {
         io.disconnect();
+        unsubscribeScroll();
         cancelAnimationFrame(raf);
         window.clearTimeout(resizeTimer);
         window.removeEventListener("resize", onResize);
