@@ -252,6 +252,30 @@ export type RegionalPrice = {
   paymentNote?: string;
 };
 
+/**
+ * Machine-readable charge data for a self-serve purchasable tier. A tier is
+ * purchasable iff this is present (see `isPurchasable` in lib/pricing-amount).
+ *
+ * Amounts are in the currency's smallest unit (paise for INR) and are the ONLY
+ * authoritative source for a charge — the display `price`/`annualPrice` strings
+ * are marketing text and are never parsed for money. Per the current processor
+ * decision (Razorpay, India), every self-serve charge settles in INR regardless
+ * of the viewer's display region; non-IN buyers see a "billed in INR" note.
+ *
+ * The values seeded in code are PLACEHOLDERS — the real, owner-set amounts live
+ * in Sanity and must be verified before switching to live Razorpay keys.
+ */
+export type TierCheckout = {
+  /** URL slug for the tier's checkout page: /pricing/<slug>. */
+  slug: string;
+  /** Charge currency. Fixed to INR while Razorpay is the sole processor. */
+  currency: "INR";
+  /** Monthly charge, minor units (paise). e.g. ₹1,99,000 → 19_900_000. */
+  amountMinor: number;
+  /** Annual (one-time, 12-month) charge, minor units (paise). */
+  annualAmountMinor: number;
+};
+
 export type PricingTier = {
   name: string;
   blurb: string;
@@ -269,6 +293,12 @@ export type PricingTier = {
    * region wins; when absent, the tier's flat fields render as today.
    */
   regionalPrices?: readonly RegionalPrice[];
+  /**
+   * Present only on tiers with a self-serve online checkout (today: Scale).
+   * Free (Platform), quote (Projects), and custom (Studio) tiers omit it and
+   * keep their contact/sales CTA.
+   */
+  checkout?: TierCheckout;
 };
 
 /**
@@ -474,6 +504,16 @@ export const PRICING_TIERS: readonly PricingTier[] = [
         ...REGION_NOTES.UK,
       },
     ],
+    // Self-serve online checkout (Razorpay). These amounts — not the display
+    // strings above — are the authoritative charge, in INR paise. PLACEHOLDERS:
+    // set the real values in Sanity before switching to live keys. Monthly
+    // ₹1,99,000 = 19_900_000; annual = 12 × ₹1,65,000 = ₹19,80,000 = 198_000_000.
+    checkout: {
+      slug: "scale",
+      currency: "INR",
+      amountMinor: 19_900_000,
+      annualAmountMinor: 198_000_000,
+    },
   },
   {
     name: "Projects",

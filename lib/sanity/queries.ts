@@ -4,7 +4,7 @@ import { cache } from "react";
 import { z } from "zod";
 
 import type { CaseStudy } from "@/lib/cases";
-import type { PricingTier, RegionalPrice, Social } from "@/lib/content";
+import type { PricingTier, RegionalPrice, Social, TierCheckout } from "@/lib/content";
 import type { Role } from "@/lib/roles";
 import { sanityFetch } from "./client";
 import { TAGS } from "./tags";
@@ -173,6 +173,15 @@ const regionalPriceSchema = z.object({
   paymentNote: optionalString,
 }) satisfies z.ZodType<RegionalPrice>;
 
+const checkoutSchema = z.object({
+  slug: nonEmpty,
+  currency: z.literal("INR"),
+  // Positive safe integers only — a malformed amount must fail parsing here
+  // rather than reach the order route as a bad charge.
+  amountMinor: z.number().int().positive(),
+  annualAmountMinor: z.number().int().positive(),
+}) satisfies z.ZodType<TierCheckout>;
+
 const pricingSchema = z.object({
   name: nonEmpty,
   blurb: nonEmpty,
@@ -188,6 +197,7 @@ const pricingSchema = z.object({
     .array(regionalPriceSchema)
     .nullish()
     .transform((v) => v ?? undefined),
+  checkout: checkoutSchema.nullish().transform((v) => v ?? undefined),
 }) satisfies z.ZodType<PricingTier>;
 
 const capabilitySchema = z.object({
@@ -353,7 +363,8 @@ export const getPricingTiers = cache(async (): Promise<PricingTier[]> => {
       regionalPrices[]{
         region, currency, symbol, price, annualPrice, period, annualNote,
         taxNote, paymentNote
-      }
+      },
+      checkout{ slug, currency, amountMinor, annualAmountMinor }
     }`,
     {},
     [TAGS.pricingTier],

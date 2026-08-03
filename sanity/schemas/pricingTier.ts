@@ -127,6 +127,45 @@ export default defineType({
         },
       ],
     }),
+    defineField({
+      name: "checkout",
+      title: "Self-serve checkout",
+      description:
+        "Present only on tiers that can be bought online (today: Scale). These amounts — not the display price — are the authoritative charge, in INR paise. Leave empty for free, quote, and custom tiers.",
+      type: "object",
+      fields: [
+        defineField({
+          name: "slug",
+          title: "Slug",
+          type: "string",
+          description: "URL of the checkout page: /pricing/<slug>.",
+          validation: (rule) => rule.required(),
+        }),
+        defineField({
+          name: "currency",
+          title: "Currency",
+          type: "string",
+          options: { list: ["INR"] },
+          initialValue: "INR",
+          description: "Fixed to INR while Razorpay is the only processor.",
+          validation: (rule) => rule.required(),
+        }),
+        defineField({
+          name: "amountMinor",
+          title: "Monthly amount (paise)",
+          type: "number",
+          description: "e.g. ₹1,99,000 → 19900000.",
+          validation: (rule) => rule.required().integer().positive(),
+        }),
+        defineField({
+          name: "annualAmountMinor",
+          title: "Annual amount (paise)",
+          type: "number",
+          description: "One-time 12-month charge, e.g. ₹19,80,000 → 198000000.",
+          validation: (rule) => rule.required().integer().positive(),
+        }),
+      ],
+    }),
   ],
   orderings: [
     { title: "Display order", name: "order", by: [{ field: "order", direction: "asc" }] },

@@ -196,6 +196,9 @@ function buildDocs() {
             ),
           }
         : {}),
+      // Self-serve checkout amounts (INR paise). Present only on purchasable
+      // tiers; a plain object needs no _key (it is not inside an array).
+      ...(p.checkout ? { checkout: p.checkout } : {}),
     }),
   );
 
