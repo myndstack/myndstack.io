@@ -1,6 +1,6 @@
 import Link from "next/link";
 
-import { FOOTER_COLUMNS, LEGAL_LINKS } from "@/lib/content";
+import { FOOTER_COLUMNS, LEGAL_LINKS, SITE } from "@/lib/content";
 import type { SiteSettings } from "@/lib/sanity/queries";
 import Magnetic from "./Magnetic";
 import Newsletter from "./Newsletter";
@@ -79,9 +79,7 @@ export default function Footer({ site }: { site: SiteSettings }) {
 
       <div className="mx-auto mt-14 max-w-[1200px] border-t border-surface-3 pt-6">
         <div className="flex flex-col-reverse items-start gap-4 text-[12.5px] text-t5 md:flex-row md:items-center md:justify-between md:gap-6">
-          <span className="whitespace-nowrap">
-            © 2026 Myndstack. Intelligence, engineered.
-          </span>
+          <span className="whitespace-nowrap">© 2026 {SITE.legalName}</span>
           <nav
             aria-label="Legal"
             className="flex flex-wrap items-center gap-x-5 gap-y-2"

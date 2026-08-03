@@ -48,12 +48,16 @@ export const SITE_URL = resolveSiteUrl();
 
 export const SITE = {
   name: "Myndstack",
+  /** Registered legal entity — used in legal pages and the footer copyright. */
+  legalName: "Myndstack (OPC) Private Limited",
   email: "hello@myndstack.io",
   supportEmail: "support@myndstack.io",
   grievanceEmail: "grievance@myndstack.io",
+  /** Appointed Grievance Officer (Consumer Protection / DPDP requirement). */
+  grievanceOfficer: "Vibin Mathew",
   phone: "+91 99465 60607",
   phoneHref: "tel:+919946560607",
-  location: "Kerala, India",
+  location: "Malappuram, Kerala, India",
   version: "v3 · api.myndstack.io",
 } as const;
 

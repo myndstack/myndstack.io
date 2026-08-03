@@ -88,8 +88,7 @@ export const LEGAL_DOCS: Record<LegalDoc["slug"], LegalDoc> = {
         heading: "Grievance officer",
         body: [
           "In line with the Digital Personal Data Protection Act, 2023, the Information Technology (Intermediary Guidelines) Rules, 2021, and the Consumer Protection (E-Commerce) Rules, 2020, we publish a Grievance Officer contact so that data-protection concerns, takedown requests, and consumer grievances reach a named person.",
-          // TODO reviewer: replace with the appointed officer's full name.
-          `Grievance Officer — Myndstack. Email: ${SITE.grievanceEmail}. Post: Attention "Grievance Officer", Myndstack, ${SITE.location}. We acknowledge every grievance within 48 hours and aim to resolve it within 30 days.`,
+          `Grievance Officer — ${SITE.grievanceOfficer}, ${SITE.legalName}. Email: ${SITE.grievanceEmail}. Post: Attention "Grievance Officer", ${SITE.legalName}, ${SITE.location}. We acknowledge every grievance within 48 hours and aim to resolve it within 30 days.`,
         ],
       },
     ],
