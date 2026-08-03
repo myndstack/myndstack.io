@@ -1,6 +1,7 @@
 import Link from "next/link";
 
 import { getCases } from "@/lib/sanity/queries";
+import Magnetic from "./Magnetic";
 import Reveal from "./Reveal";
 import Section from "./Section";
 import SectionHeader from "./SectionHeader";
@@ -116,7 +117,9 @@ export default async function SelectedWork() {
       </div>
 
       <p className="mt-9 mb-0 text-[15px] text-t4">
-        <Link href="/work">See all work →</Link>
+        <Magnetic>
+          <Link href="/work">See all work →</Link>
+        </Magnetic>
       </p>
     </Section>
   );

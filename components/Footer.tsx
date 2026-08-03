@@ -2,6 +2,7 @@ import Link from "next/link";
 
 import { FOOTER_COLUMNS, LEGAL_LINKS } from "@/lib/content";
 import type { SiteSettings } from "@/lib/sanity/queries";
+import Magnetic from "./Magnetic";
 import Newsletter from "./Newsletter";
 import SocialIcon from "./SocialIcon";
 import Wordmark from "./Wordmark";
@@ -44,16 +45,17 @@ export default function Footer({ site }: { site: SiteSettings }) {
           {activeSocials.length > 0 && (
             <div className="-ml-2.5 flex items-center lg:hidden">
               {activeSocials.map((s) => (
-                <a
-                  key={s.label}
-                  href={s.href!}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  aria-label={s.label}
-                  className="ease-brand inline-flex size-11 items-center justify-center text-t4 transition-colors duration-160 hover:text-lime"
-                >
-                  <SocialIcon name={s.label} />
-                </a>
+                <Magnetic key={s.label}>
+                  <a
+                    href={s.href!}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label={s.label}
+                    className="ease-brand inline-flex size-11 items-center justify-center text-t4 transition-colors duration-160 hover:text-lime"
+                  >
+                    <SocialIcon name={s.label} />
+                  </a>
+                </Magnetic>
               ))}
             </div>
           )}

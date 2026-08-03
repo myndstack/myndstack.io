@@ -3,6 +3,7 @@
 import { useEffect, useRef } from "react";
 import { useScrollFrame } from "@/lib/hooks";
 import type { Social } from "@/lib/content";
+import Magnetic from "./Magnetic";
 import SocialIcon from "./SocialIcon";
 
 /** Where the hairline starts and how much room the socials need at the bottom. */
@@ -112,16 +113,17 @@ export default function ProgressSpine({ socials }: { socials: Social[] }) {
         className="pointer-events-auto absolute inset-x-0 bottom-[34px] flex flex-col items-center gap-5"
       >
         {socials.filter((s) => s.href).map((s) => (
-          <a
-            key={s.label}
-            className="spine-social"
-            href={s.href!}
-            target="_blank"
-            rel="noopener noreferrer"
-            aria-label={s.label}
-          >
-            <SocialIcon name={s.label} />
-          </a>
+          <Magnetic key={s.label}>
+            <a
+              className="spine-social"
+              href={s.href!}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label={s.label}
+            >
+              <SocialIcon name={s.label} />
+            </a>
+          </Magnetic>
         ))}
       </nav>
     </div>
