@@ -1,7 +1,9 @@
 "use client";
 
+import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { PricingTier, RegionCode } from "@/lib/content";
+import { isPurchasable } from "@/lib/pricing-amount";
 import {
   DEFAULT_REGION,
   resolveTiersForRegion,
@@ -203,6 +205,9 @@ function renderPricingRow(tiers: ResolvedTier[], annual: boolean) {
  */
 function PrimaryCard({ tier, annual }: { tier: ResolvedTier; annual: boolean }) {
   const price = annual && tier.annualPrice ? tier.annualPrice : tier.price;
+  const ctaClass = tier.highlighted
+    ? "mt-auto block bg-lime p-3 text-center text-[15px] font-semibold text-lime-ink transition-colors hover:bg-lime-hover hover:text-lime-ink"
+    : "btn-outline mt-auto block p-3 text-center text-[15px] font-semibold";
 
   return (
     <div
@@ -268,16 +273,17 @@ function PrimaryCard({ tier, annual }: { tier: ResolvedTier; annual: boolean }) 
         ))}
       </ul>
 
-      <a
-        href="#contact"
-        className={
-          tier.highlighted
-            ? "mt-auto block bg-lime p-3 text-center text-[15px] font-semibold text-lime-ink transition-colors hover:bg-lime-hover hover:text-lime-ink"
-            : "btn-outline mt-auto block p-3 text-center text-[15px] font-semibold"
-        }
-      >
-        {tier.cta}
-      </a>
+      {/* Purchasable tiers (a `checkout` block) go to their /pricing/[slug]
+          inner page; everything else keeps the contact anchor. */}
+      {isPurchasable(tier) ? (
+        <Link href={`/pricing/${tier.checkout.slug}`} className={ctaClass}>
+          {tier.cta}
+        </Link>
+      ) : (
+        <a href="#contact" className={ctaClass}>
+          {tier.cta}
+        </a>
+      )}
     </div>
   );
 }
