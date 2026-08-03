@@ -6,7 +6,7 @@ import { LAST_UPDATED, LEGAL_DOCS, LEGAL_SLUGS } from "@/lib/legal";
 
 const TITLE = "Policies";
 const LEDE =
-  "Every policy that governs this site, the platform, and the engagements we run. Grouped by audience so you can find the one that matters to you.";
+  "Every policy that governs this site and the engagements we run. Grouped by audience so you can find the one that matters to you.";
 
 export const metadata: Metadata = {
   title: `${TITLE} — Myndstack`,
@@ -31,9 +31,10 @@ const GROUPS: {
     slugs: ["privacy", "terms", "cookies"] as const,
   },
   {
-    title: "Product & billing",
-    blurb: "Applies once you subscribe to a paid tier or engage us on a build.",
-    slugs: ["acceptable-use", "refunds", "sla"] as const,
+    title: "Payments",
+    blurb:
+      "How the Discovery Sprint and project engagements are billed, cancelled, and refunded.",
+    slugs: ["refunds"] as const,
   },
   {
     title: "Enterprise & trust",

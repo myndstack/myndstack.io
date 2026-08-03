@@ -674,9 +674,7 @@ export const FOOTER_COLUMNS = [
   {
     title: "Trust",
     links: [
-      { label: "Acceptable use", href: "/acceptable-use" },
       { label: "Responsible AI", href: "/responsible-ai" },
-      { label: "SLA", href: "/sla" },
       { label: "DPA", href: "/dpa" },
       { label: "Subprocessors", href: "/subprocessors" },
       { label: "All policies", href: "/legal" },

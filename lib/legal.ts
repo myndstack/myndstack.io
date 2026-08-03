@@ -14,12 +14,10 @@ export type LegalDoc = {
     | "privacy"
     | "terms"
     | "security"
-    | "acceptable-use"
     | "refunds"
     | "cookies"
     | "dpa"
     | "subprocessors"
-    | "sla"
     | "responsible-ai";
   title: string;
   eyebrow: string;
@@ -192,59 +190,6 @@ export const LEGAL_DOCS: Record<LegalDoc["slug"], LegalDoc> = {
         heading: "Compliance",
         body: [
           "Enterprise security and compliance requirements are scoped per engagement. Ask us for our current posture, subprocessor list, and any certifications relevant to your programme.",
-        ],
-      },
-    ],
-  },
-
-  "acceptable-use": {
-    slug: "acceptable-use",
-    title: "Acceptable use",
-    eyebrow: "Legal · Acceptable use",
-    lede: `The behaviours that keep the platform safe for every tenant on it. If you build on Myndstack, this policy is part of your agreement with us.`,
-    sections: [
-      {
-        heading: "What the platform is for",
-        body: [
-          "Myndstack is a cognitive-infrastructure platform: hosted models, agent orchestration, evaluation, and the data plane underneath. It is designed for teams building products for their own customers, under their own name. It is not a general-purpose hosting or storage service, and it is not a proxy for reselling raw model access.",
-        ],
-      },
-      {
-        heading: "Prohibited content and use",
-        body: [
-          "Do not use the platform to generate, host, or distribute: child sexual abuse material or any content that sexualises a minor; content that promotes terrorism, mass violence, or genocide; targeted harassment of a real person; unlawful surveillance or stalking; deceptive impersonation of a real person or organisation; content designed to defraud, deceive, or manipulate voters or public health.",
-          "Do not use the platform to generate or refine malware, credential-stuffing lists, phishing kits, or working exploits against systems you do not own or have written authorisation to test.",
-          "Do not use the platform to make automated decisions with legal or similarly significant effect on a person — for example credit, housing, employment, insurance, or benefits — without a documented human review step and appropriate legal basis under applicable law.",
-        ],
-      },
-      {
-        heading: "Model and data misuse",
-        body: [
-          "Do not attempt to extract another tenant's data, prompts, or model artefacts. Do not use our models or outputs to train a competing foundation model. Do not deliberately bypass safety filters, rate limits, or content classifiers we run on your behalf. Where you deploy your own model behind our runtime, you remain responsible for the outputs it produces.",
-        ],
-      },
-      {
-        heading: "Fair-use limits",
-        body: [
-          "Requests per second, storage, egress, and compute are provisioned per tier. Sustained use materially above the tier you pay for — usually because of automation, retries, or a runaway job — will trigger a conversation about moving to a higher tier or a custom quota. We will always contact you before throttling, unless we are protecting the platform from an active abuse event.",
-        ],
-      },
-      {
-        heading: "Security testing",
-        body: [
-          "Test your own tenant. Do not test another customer's. Do not run denial-of-service, brute-force credential, or resource-exhaustion tests against the platform without a written, dated authorisation from us. Report anything you find through the process on the security page.",
-        ],
-      },
-      {
-        heading: "Enforcement",
-        body: [
-          "For a first, non-critical breach we will contact you and give you a reasonable window to fix it. For a critical breach — abuse of a person, unlawful content, an active security threat, or a court order — we may suspend or terminate access immediately. Where required by law we preserve and hand over relevant records; where not required, we don't.",
-        ],
-      },
-      {
-        heading: "Reporting abuse",
-        body: [
-          `To report a violation of this policy on Myndstack, email ${SITE.email} with the subject line "Abuse" and include enough detail for us to reproduce or verify the report.`,
         ],
       },
     ],
@@ -507,62 +452,11 @@ export const LEGAL_DOCS: Record<LegalDoc["slug"], LegalDoc> = {
     ],
   },
 
-  sla: {
-    slug: "sla",
-    title: "Service level agreement",
-    eyebrow: "Legal · SLA",
-    lede: `The uptime commitment on our paid platform tiers, and what we do when we miss it. Written to be plain about the number, the exclusions, and the credit.`,
-    sections: [
-      {
-        heading: "Scope",
-        body: [
-          "This SLA covers the production endpoints of the Scale tier and any higher tier that references it. The free Platform tier is provided as-is without an uptime commitment. Studio engagements have their own SLAs recorded in the order form.",
-        ],
-      },
-      {
-        heading: "Definitions",
-        body: [
-          "'Monthly Uptime' is the percentage of a calendar month during which the covered endpoints returned a valid response within their published latency budget. 'Downtime' is any five-minute period during which every request to a covered endpoint from a healthy client failed with a 5xx error, a network error, or a latency exceeding ten times the p50 target.",
-        ],
-      },
-      {
-        heading: "Target and credits",
-        body: [
-          "The Monthly Uptime target on the Scale tier is 99.99%. If we miss the target in a given calendar month, you are entitled to a service credit on the next invoice — 10% for uptime at or above 99.9%, 25% for uptime at or above 99.0%, and 50% for uptime below 99.0%. Credits cap at 50% of the monthly fee for the affected service.",
-        ],
-      },
-      {
-        heading: "Exclusions",
-        body: [
-          "The following are excluded from the Downtime calculation: scheduled maintenance announced at least 48 hours in advance; emergency maintenance where a delay would compromise security; force majeure events beyond our reasonable control; issues caused by your code, configuration, or third-party integrations we do not run; issues caused by suspension for a breach of the acceptable-use policy; and use exceeding the fair-use limits of your tier.",
-        ],
-      },
-      {
-        heading: "Measurement",
-        body: [
-          "We measure availability from our own monitoring at the platform edge, aggregated per endpoint per five-minute bucket. Where you have your own monitoring showing a materially different result, share the raw records with us and we will reconcile them in good faith.",
-        ],
-      },
-      {
-        heading: "How to claim a credit",
-        body: [
-          `Email ${SITE.email} with the subject line "SLA credit" and the affected account within 30 days of the end of the impacted month. Include the endpoint, the impacted window, and any client-side evidence you have. We confirm the credit or explain the exclusion within ten business days, and the credit lands on the following invoice.`,
-        ],
-      },
-      {
-        heading: "Sole remedy",
-        body: [
-          "Service credits are the sole and exclusive remedy for any failure to meet the target set out here. Anything beyond that — including termination rights for repeated misses — is governed by the order form or Master Services Agreement between us.",
-        ],
-      },
-    ],
-  },
-
   "responsible-ai": {
     slug: "responsible-ai",
     title: "Responsible AI",
     eyebrow: "Legal · Responsible AI",
-    lede: `The stance we hold on how AI systems are built, evaluated, and deployed on Myndstack. Read alongside the acceptable-use policy, which governs what tenants may do with the platform.`,
+    lede: `The stance we hold on how we build, evaluate, and deploy AI systems for the clients we work with.`,
     sections: [
       {
         heading: "Our position",
@@ -591,7 +485,7 @@ export const LEGAL_DOCS: Record<LegalDoc["slug"], LegalDoc> = {
       {
         heading: "Human oversight",
         body: [
-          "Automated decisions with legal or similarly significant effect on a person — credit, housing, employment, insurance, benefits, medical triage — require a documented human review step and an appropriate legal basis. This mirrors the acceptable-use policy and is enforced in our engagement contracts, not just in our documentation.",
+          "Automated decisions with legal or similarly significant effect on a person — credit, housing, employment, insurance, benefits, medical triage — require a documented human review step and an appropriate legal basis. This is enforced in our engagement contracts, not just in our documentation.",
         ],
       },
       {
@@ -609,7 +503,7 @@ export const LEGAL_DOCS: Record<LegalDoc["slug"], LegalDoc> = {
       {
         heading: "Incident response",
         body: [
-          "A safety incident is any output that causes real-world harm, plausibly could, or breaches the acceptable-use policy on our side. We roll back or gate the offending endpoint, notify affected customers on the same clock as any security incident, and publish a post-incident review to the engagement.",
+          "A safety incident is any output that causes real-world harm, plausibly could, or breaches the safety commitments in this policy on our side. We roll back or gate the offending work, notify the affected client on the same clock as any security incident, and publish a post-incident review to the engagement.",
         ],
       },
       {
