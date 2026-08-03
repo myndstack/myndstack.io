@@ -97,6 +97,8 @@ type Props = {
   readonly amountMinorMonthly: number;
   readonly amountMinorAnnual: number;
   readonly annualNote?: string;
+  /** A single fixed charge (e.g. the Discovery Sprint) — no monthly/annual toggle. */
+  readonly oneTime?: boolean;
 };
 
 export default function CheckoutPanel({
@@ -105,6 +107,7 @@ export default function CheckoutPanel({
   amountMinorMonthly,
   amountMinorAnnual,
   annualNote,
+  oneTime = false,
 }: Props) {
   const [billing, setBilling] = useState<Billing>("monthly");
   const [status, setStatus] = useState<Status>("idle");
@@ -218,8 +221,10 @@ export default function CheckoutPanel({
           You&apos;re in.
         </h2>
         <p className="m-0 text-sm leading-[1.6] text-t4">
-          Thanks for subscribing to {tierName}. We&apos;ll email you shortly to get
-          your workspace set up. A receipt is on its way from Razorpay.
+          {oneTime
+            ? `Thanks for booking the ${tierName}. We'll email you within one business day to schedule the kickoff.`
+            : `Thanks for subscribing to ${tierName}. We'll email you shortly to get your workspace set up.`}{" "}
+          A receipt is on its way from Razorpay.
         </p>
       </div>
     );
@@ -255,40 +260,46 @@ export default function CheckoutPanel({
         {tierName}
       </h2>
       <p className="mt-0 mb-6 text-sm leading-[1.55] text-t4">
-        Subscribe online and start today. Cancel anytime.
+        {oneTime
+          ? "Book online — we'll email you within one business day to schedule."
+          : "Subscribe online and start today. Cancel anytime."}
       </p>
 
-      <div
-        role="group"
-        aria-label="Billing period"
-        className="mb-6 inline-flex border border-line-3 bg-surface"
-      >
-        <button
-          type="button"
-          onClick={() => setBilling("monthly")}
-          aria-pressed={!annual}
-          disabled={busy}
-          className={`bill-btn${!annual ? " is-on" : ""}`}
+      {!oneTime ? (
+        <div
+          role="group"
+          aria-label="Billing period"
+          className="mb-6 inline-flex border border-line-3 bg-surface"
         >
-          Monthly
-        </button>
-        <button
-          type="button"
-          onClick={() => setBilling("annual")}
-          aria-pressed={annual}
-          disabled={busy}
-          className={`bill-btn${annual ? " is-on" : ""}`}
-        >
-          Annual · save 2 mo
-        </button>
-      </div>
+          <button
+            type="button"
+            onClick={() => setBilling("monthly")}
+            aria-pressed={!annual}
+            disabled={busy}
+            className={`bill-btn${!annual ? " is-on" : ""}`}
+          >
+            Monthly
+          </button>
+          <button
+            type="button"
+            onClick={() => setBilling("annual")}
+            aria-pressed={annual}
+            disabled={busy}
+            className={`bill-btn${annual ? " is-on" : ""}`}
+          >
+            Annual · save 2 mo
+          </button>
+        </div>
+      ) : null}
 
       <div className="mb-6" aria-live="polite">
         <div className="flex items-baseline gap-1.5">
           <span className="font-display text-[clamp(32px,5vw,44px)] font-bold tracking-[-0.02em]">
             {formatInrMinor(amountMinor)}
           </span>
-          <span className="text-sm text-t5">{annual ? "/ yr" : "/ mo"}</span>
+          <span className="text-sm text-t5">
+            {oneTime ? "one-time" : annual ? "/ yr" : "/ mo"}
+          </span>
         </div>
         <div className="mt-2 h-3.5 font-mono text-[11px] tracking-[0.04em] text-lime">
           {annual && annualNote ? annualNote : ""}

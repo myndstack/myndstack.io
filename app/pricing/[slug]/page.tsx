@@ -23,7 +23,8 @@ export async function generateMetadata({
   const tier = purchasableTierBySlug(await getPricingTiers(), (await params).slug);
   if (!tier) return {};
 
-  const title = `Subscribe to ${tier.name} — Myndstack`;
+  const oneTime = tier.checkout.amountMinor === tier.checkout.annualAmountMinor;
+  const title = `${oneTime ? "Book the" : "Subscribe to"} ${tier.name} — Myndstack`;
   return {
     title,
     description: tier.blurb,
@@ -42,11 +43,15 @@ export default async function CheckoutPage({
   const tier = purchasableTierBySlug(await getPricingTiers(), (await params).slug);
   if (!tier) notFound();
 
+  // Equal monthly/annual amounts means a single fixed charge (the sprint), not
+  // a subscription — the panel drops its billing toggle and the copy follows.
+  const oneTime = tier.checkout.amountMinor === tier.checkout.annualAmountMinor;
+
   return (
     <>
       <PageHeader
         eyebrow="Checkout"
-        title={<>Subscribe to {tier.name}</>}
+        title={oneTime ? <>Book the {tier.name}</> : <>Subscribe to {tier.name}</>}
         lede={tier.blurb}
         breadcrumbs={[
           { label: "Home", href: "/" },
@@ -89,6 +94,7 @@ export default async function CheckoutPage({
               amountMinorMonthly={tier.checkout.amountMinor}
               amountMinorAnnual={tier.checkout.annualAmountMinor}
               annualNote={tier.annualNote}
+              oneTime={oneTime}
             />
           </aside>
         </div>
