@@ -5,9 +5,10 @@ import { useReducedMotion } from "@/lib/hooks";
 import HeroNetwork, { PULSE_EVENT } from "./HeroNetwork";
 import Magnetic from "./Magnetic";
 
-const WORDS = ["Intelligence", "that", "runs", "on infrastructure."];
+const WORDS = ["Enterprise", "cognitive", "AI,", "architected and built."];
 const CYCLE_MS = 1400;
-// Non-breaking space keeps the lime last line from wrapping mid-phrase.
+// The hard line break falls after index 2 (see the <br/> below): line one reads
+// "Enterprise cognitive AI," and the lime last line is "architected and built."
 const LAST = WORDS.length - 1;
 
 /**
