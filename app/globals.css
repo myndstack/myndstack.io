@@ -286,29 +286,6 @@
     opacity: 0.55;
   }
 
-  /* Integrations is a FLUSH hairline grid (gap-px), not a gapped card grid, so it
-     can't use .card-lift: a drop shadow bleeds across the seams and a translate
-     tears them. Emphasis is light + focus instead — the hovered cell brightens
-     with the lit edge + an INSET lime hairline (inset so it can't bleed past its
-     own border), and its siblings recede. Hover-capable pointers only; touch
-     keeps the flat grid, and reduced motion collapses the transitions. */
-  .intg-cell {
-    background-color: var(--color-ink);
-    transition:
-      background-color 0.16s var(--ease-brand),
-      box-shadow 0.16s var(--ease-brand),
-      opacity 0.16s var(--ease-brand);
-  }
-  @media (hover: hover) {
-    .intg-grid:has(.intg-cell:hover) .intg-cell:not(:hover) {
-      opacity: 0.5;
-    }
-    .intg-cell:hover {
-      background-color: var(--color-surface-3);
-      box-shadow: var(--edge-lip), inset 0 0 0 1px rgba(201, 242, 77, 0.3);
-    }
-  }
-
   /* --- Pricing cards --- */
   /* The featured tier is filled by default; on a capable pointer the "active"
      treatment (lime border + glow + filled CTA) FOLLOWS the hovered/focused card
