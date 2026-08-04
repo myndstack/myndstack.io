@@ -19,10 +19,10 @@ export default function PageHeader({
   breadcrumbs?: Crumb[];
 }) {
   return (
-    <header className="border-b border-line">
-      <div className="mx-auto max-w-[1200px] px-5 pt-[calc(72px+var(--nav-height))] pb-14 sm:px-14">
+    <header className="masthead border-b border-line">
+      <div className="relative z-[1] mx-auto max-w-[1200px] px-5 pt-[calc(72px+var(--nav-height))] pb-14 sm:px-14">
         {breadcrumbs?.length ? (
-          <nav aria-label="Breadcrumb" className="mb-8">
+          <nav aria-label="Breadcrumb" className="animate-rise-in mb-8">
             <ol className="m-0 flex list-none flex-wrap items-center gap-2 p-0 font-mono text-[11px] tracking-[0.1em] text-t5 uppercase">
               {breadcrumbs.map((crumb) => (
                 <li key={crumb.href} className="flex items-center gap-2">
@@ -41,17 +41,19 @@ export default function PageHeader({
           </nav>
         ) : null}
 
-        <div className="eyebrow mb-3.5">{eyebrow}</div>
-        <h1 className="m-0 max-w-[880px] font-display text-[34px] leading-[1.02] font-bold tracking-[-0.03em] text-balance sm:text-[56px]">
+        <div className="eyebrow animate-rise-in mb-3.5 [animation-duration:0.7s]">
+          {eyebrow}
+        </div>
+        <h1 className="animate-rise-in m-0 max-w-[880px] font-display text-[34px] leading-[1.02] font-bold tracking-[-0.03em] text-balance sm:text-[56px] [animation-duration:0.8s]">
           {title}
         </h1>
         {lede ? (
-          <p className="mt-5 mb-0 max-w-[620px] text-[17px] leading-[1.55] text-t4">
+          <p className="animate-rise-in mt-5 mb-0 max-w-[620px] text-[17px] leading-[1.55] text-t4 [animation-duration:0.9s]">
             {lede}
           </p>
         ) : null}
         {meta ? (
-          <p className="mt-6 mb-0 font-mono text-[11px] tracking-[0.1em] text-t5 uppercase">
+          <p className="animate-rise-in mt-6 mb-0 font-mono text-[11px] tracking-[0.1em] text-t5 uppercase [animation-duration:1s]">
             {meta}
           </p>
         ) : null}

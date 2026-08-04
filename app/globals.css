@@ -427,6 +427,45 @@
     transform: translateY(0);
   }
 
+  /* --- Sub-page masthead (PageHeader) ---
+     PageHeader sits UNDER the fixed nav and on the page ink, so its depth has to
+     read below the nav line, not above it: a lit BOTTOM seam marks it as a
+     raised plane, and a faint top-down wash gives the content material light. A
+     one-shot lime hairline draws across the seam on load — the scanline
+     language, but pure CSS so PageHeader stays a server component. The global
+     reduced-motion block zeroes the sweep (scan ends invisible) and the
+     staggered entrance rides animate-rise-in, which it also collapses. */
+  .masthead {
+    position: relative;
+    box-shadow: inset 0 -1px 0 rgba(255, 255, 255, 0.04);
+  }
+  .masthead::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    background: radial-gradient(
+      100% 128% at 32% 0%,
+      rgba(255, 255, 255, 0.03),
+      transparent 58%
+    );
+  }
+  .masthead::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    z-index: 1;
+    height: 1px;
+    width: 100%;
+    transform: scaleX(0);
+    transform-origin: left;
+    background: linear-gradient(90deg, transparent, var(--color-lime), transparent);
+    box-shadow: 0 0 12px rgba(201, 242, 77, 0.4);
+    animation: scan 1.15s var(--ease-brand) 0.25s forwards;
+  }
+
   .chip {
     font-family: var(--font-mono);
     font-size: 10.5px;
