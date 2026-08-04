@@ -330,88 +330,164 @@ export type CompareSection = {
   rows: CompareRow[];
 };
 
-/** Tier names must match `PricingTier.name` — the table keys off them. */
+/**
+ * Tier names must match the pricing columns exactly — "Discovery Sprint",
+ * "Build", "Studio" come from Sanity `pricingTier.name`; "Enterprise" is the
+ * hardcoded band in `components/Pricing.tsx`. Grounded in real capabilities; no
+ * invented certifications (SLA is "Per SOW", security controls are the ones the
+ * security page actually documents). The Sprint architects rather than builds,
+ * so it reads "Architected" / "Scoped" where the others deliver.
+ */
 export const PRICING_COMPARISON: readonly CompareSection[] = [
   {
-    title: "Platform",
+    title: "Engagement",
     rows: [
       {
-        label: "Unified data + model API",
+        label: "Format",
         values: {
-          Platform: true,
-          Scale: true,
-          Projects: "As built",
-          Studio: "As built",
+          "Discovery Sprint": "1-week sprint",
+          Build: "Fixed-scope project",
+          Studio: "Monthly retainer",
+          Enterprise: "Custom program",
         },
       },
       {
-        label: "Endpoints",
+        label: "Starting price",
         values: {
-          Platform: "Up to 10",
-          Scale: "Unlimited",
-          Projects: "Per scope",
-          Studio: "Per scope",
+          "Discovery Sprint": "₹49,999",
+          Build: "from ₹39,999",
+          Studio: "from ₹99,999/mo",
+          Enterprise: "Custom",
         },
       },
       {
-        label: "Regions",
+        label: "Billing",
         values: {
-          Platform: "1",
-          Scale: "3",
-          Projects: "Per scope",
-          Studio: "Per scope",
+          "Discovery Sprint": "One-time",
+          Build: "Per milestone",
+          Studio: "Monthly",
+          Enterprise: "Per SOW",
         },
       },
       {
-        label: "Vector storage",
-        values: { Platform: true, Scale: true, Projects: true, Studio: true },
+        label: "Fee credited toward a build",
+        values: { "Discovery Sprint": true },
       },
     ],
   },
   {
-    title: "Service level",
+    title: "What we build",
     rows: [
       {
-        label: "SLA",
+        label: "Website / landing page",
         values: {
-          Platform: "—",
-          Scale: "99.99%",
-          Projects: "Per SOW",
-          Studio: "Per SOW",
+          "Discovery Sprint": "Scoped",
+          Build: "from ₹39,999",
+          Studio: true,
+          Enterprise: true,
         },
       },
       {
-        label: "p50 inference target",
-        values: { Scale: "12ms" },
+        label: "Web or mobile app",
+        values: {
+          "Discovery Sprint": "Scoped",
+          Build: "from ₹1,49,999",
+          Studio: true,
+          Enterprise: true,
+        },
       },
       {
-        label: "Dedicated solutions engineer",
-        values: { Scale: true, Studio: true },
+        label: "AI system / automation",
+        values: {
+          "Discovery Sprint": "Scoped",
+          Build: "from ₹2,49,999",
+          Studio: true,
+          Enterprise: true,
+        },
+      },
+      {
+        label: "You own the code",
+        values: { Build: true, Studio: true, Enterprise: true },
       },
     ],
   },
   {
-    title: "Delivery",
+    title: "AI engineering",
     rows: [
       {
-        label: "Design + engineering",
-        values: { Projects: true, Studio: true },
+        label: "Model routing & fallback",
+        values: { "Discovery Sprint": "Architected", Build: true, Studio: true, Enterprise: true },
       },
-      { label: "Embedded team", values: { Studio: true } },
-      { label: "Architecture consulting", values: { Studio: true } },
+      {
+        label: "Agent orchestration",
+        values: { "Discovery Sprint": "Architected", Build: true, Studio: true, Enterprise: true },
+      },
+      {
+        label: "Evals & guardrails",
+        values: { "Discovery Sprint": "Architected", Build: true, Studio: true, Enterprise: true },
+      },
+      {
+        label: "RAG / vector retrieval",
+        values: { "Discovery Sprint": "Architected", Build: true, Studio: true, Enterprise: true },
+      },
+      {
+        label: "Region-pinned inference",
+        values: { Build: "Optional", Studio: true, Enterprise: true },
+      },
+    ],
+  },
+  {
+    title: "Delivery & security",
+    rows: [
+      {
+        label: "System architecture & build plan",
+        values: { "Discovery Sprint": true, Build: true, Studio: true, Enterprise: true },
+      },
+      {
+        label: "Embedded engineers in your codebase",
+        values: { Build: true, Studio: true, Enterprise: true },
+      },
       {
         label: "Handover + documentation",
-        values: { Projects: true, Studio: true },
+        values: { "Discovery Sprint": true, Build: true, Studio: true, Enterprise: true },
+      },
+      {
+        label: "Least-privilege, MFA-gated prod access",
+        values: { Build: true, Studio: true, Enterprise: true },
+      },
+      {
+        label: "Dependency + container scanning in CI",
+        values: { Build: true, Studio: true, Enterprise: true },
+      },
+      {
+        label: "Security review, DPA & SLA",
+        values: { Build: "On request", Studio: "On request", Enterprise: true },
       },
     ],
   },
   {
-    title: "Support",
+    title: "Team & support",
     rows: [
-      { label: "Community", values: { Platform: true } },
-      { label: "Business hours", values: { Scale: true, Projects: true } },
-      { label: "24/7 on-call", values: { Studio: true } },
-      { label: "Post-launch retainer", values: { Projects: "Optional", Studio: true } },
+      {
+        label: "Dedicated standing team",
+        values: { Studio: true, Enterprise: "Ring-fenced" },
+      },
+      {
+        label: "Scale up or pause monthly",
+        values: { Studio: true, Enterprise: "By agreement" },
+      },
+      {
+        label: "Direct line to the people building",
+        values: { "Discovery Sprint": true, Build: true, Studio: true, Enterprise: true },
+      },
+      {
+        label: "Procurement, compliance & MSA",
+        values: { Enterprise: true },
+      },
+      {
+        label: "Post-launch retainer",
+        values: { Build: "Optional", Studio: true, Enterprise: true },
+      },
     ],
   },
 ];
