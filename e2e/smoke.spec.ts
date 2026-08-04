@@ -552,10 +552,11 @@ test.describe("navigation reaches everything", () => {
     await page.locator('.navlink[href="/work"]').click();
     await expect(page).toHaveURL(/\/work$/);
 
-    const active = await page.evaluate(() =>
-      [...document.querySelectorAll(".navlink.is-active")].map((a) => a.textContent),
-    );
-    expect(active).toEqual(["Customers"]);
+    // Web-first assertion so this settles the post-navigation active-state race
+    // rather than snapshotting once (the suite runs with retries: 0 locally):
+    // exactly one link stays current, and it's Customers — its URL-based active
+    // state, with the stale homepage scroll-spy highlight cleared.
+    await expect(page.locator(".navlink.is-active")).toHaveText(["Customers"]);
   });
 });
 
