@@ -115,9 +115,17 @@ export default function Nav({ contactEmail }: { contactEmail: string }) {
     );
 
     for (const link of linksRef.current) {
-      // Keep a link that is current-by-URL (e.g. Customers on /work): its active
-      // state is render-driven, not spy-driven, so the reset must not strip it.
-      if (link.getAttribute("href") === pathname) continue;
+      // A link that is current-by-URL (e.g. Customers on /work) owns the active
+      // state on this route. SET it here rather than leaning on the render: if the
+      // spy toggled this link's class imperatively on the previous route (Customers
+      // also spies the homepage work-cases section), React's className tracking is
+      // out of sync, and a bare re-render can leave it un-highlighted. Writing it
+      // explicitly keeps route-active reliable regardless of the prior spy state.
+      if (link.getAttribute("href") === pathname) {
+        link.classList.add("is-active");
+        link.setAttribute("aria-current", "page");
+        continue;
+      }
       link.classList.remove("is-active");
       link.removeAttribute("aria-current");
     }
