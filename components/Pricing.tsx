@@ -54,17 +54,22 @@ export default function Pricing({ tiers }: { tiers: PricingTier[] }) {
 }
 
 /**
- * Renders a "from ₹99,999" price as a small muted "from" + the big number, so
- * the leading word never competes with the amount. Plain strings (no "from ")
- * render whole, big.
+ * Renders a "from ₹99,999 / project" price with the leading "from" as a tiny
+ * mono micro-label (the app's label grammar — see the eyebrow / currency label)
+ * so it never competes with the amount, and the "/ project" period as a muted
+ * suffix. Plain strings (no "from ") render whole, big.
  */
 function Price({ price, period }: { price: string; period?: string }) {
   const from = /^from\s+/i.exec(price);
   const main = from ? price.slice(from[0].length) : price;
   return (
-    <div className="flex flex-wrap items-baseline gap-x-1.5">
-      {from ? <span className="text-[13px] font-normal text-t5">from</span> : null}
-      <span className="font-display text-[clamp(28px,4vw,38px)] font-bold tracking-[-0.02em]">
+    <div className="flex flex-wrap items-baseline gap-x-2">
+      {from ? (
+        <span className="font-mono text-[11px] font-medium tracking-[0.12em] text-t5 uppercase">
+          from
+        </span>
+      ) : null}
+      <span className="font-display text-[clamp(28px,4vw,38px)] font-bold leading-none tracking-[-0.02em]">
         {main}
       </span>
       {period ? <span className="text-[13px] text-t5">{period}</span> : null}
