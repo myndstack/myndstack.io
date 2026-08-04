@@ -65,10 +65,16 @@ export default function PricingCompare({ tierNames, onOpen }: Props) {
           <div className="overflow-x-auto border border-line">
             <table className="w-full min-w-[720px] border-collapse text-left">
               <thead>
+                {/* Lit header band — --edge-lip (inset, so the overflow-hidden
+                    reveal wrapper can't clip it) reads the row as a raised plane.
+                    Applied per-cell, not on the <tr>: under border-collapse
+                    Chromium drops row box-shadows but paints cell ones, and
+                    adjacent cells' top-edge highlights meet into one continuous
+                    line. */}
                 <tr className="border-b border-line bg-surface-3">
                   <th
                     scope="col"
-                    className="p-4 text-[12px] font-normal tracking-[0.12em] text-t5 uppercase"
+                    className="p-4 text-[12px] font-normal tracking-[0.12em] text-t5 uppercase shadow-[var(--edge-lip)]"
                   >
                     Feature
                   </th>
@@ -76,7 +82,7 @@ export default function PricingCompare({ tierNames, onOpen }: Props) {
                     <th
                       key={name}
                       scope="col"
-                      className="p-4 text-center font-display text-[15px] font-semibold text-t2"
+                      className="p-4 text-center font-display text-[15px] font-semibold text-t2 shadow-[var(--edge-lip)]"
                     >
                       {name}
                     </th>
@@ -122,7 +128,10 @@ function CompareSectionRows({
         </th>
       </tr>
       {rows.map((row) => (
-        <tr key={row.label} className="border-t border-line">
+        <tr
+          key={row.label}
+          className="border-t border-line transition-colors hover:bg-surface"
+        >
           <th
             scope="row"
             className="p-4 text-left text-[14px] font-normal text-t3"

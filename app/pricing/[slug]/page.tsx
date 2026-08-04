@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 
 import CheckoutPanel from "@/components/CheckoutPanel";
 import PageHeader from "@/components/PageHeader";
+import Reveal from "@/components/Reveal";
 import { isPurchasable, purchasableTierBySlug } from "@/lib/pricing-amount";
 import { getPricingTiers } from "@/lib/sanity/queries";
 
@@ -62,29 +63,33 @@ export default async function CheckoutPage({
       <div className="mx-auto max-w-[1200px] px-5 pt-14 pb-[88px] sm:px-14">
         <div className="grid grid-cols-1 gap-14 md:grid-cols-[1.15fr_1fr]">
           <article>
-            <section className="mb-11">
-              <h2 className="m-0 mb-4 font-display text-2xl font-semibold tracking-[-0.02em]">
-                What&apos;s included
-              </h2>
-              <ul className="m-0 flex list-none flex-col gap-3 p-0">
-                {tier.features.map((feature) => (
-                  <li
-                    key={feature}
-                    className="flex gap-3.5 text-[15.5px] leading-[1.55] text-t3"
-                  >
-                    <span aria-hidden="true" className="flex-none text-lime">
-                      ▸
-                    </span>
-                    {feature}
-                  </li>
-                ))}
-              </ul>
-            </section>
+            <Reveal>
+              <section className="mb-11">
+                <h2 className="m-0 mb-4 font-display text-2xl font-semibold tracking-[-0.02em]">
+                  What&apos;s included
+                </h2>
+                <ul className="m-0 flex list-none flex-col gap-3 p-0">
+                  {tier.features.map((feature) => (
+                    <li
+                      key={feature}
+                      className="flex gap-3.5 text-[15.5px] leading-[1.55] text-t3"
+                    >
+                      <span aria-hidden="true" className="flex-none text-lime">
+                        ▸
+                      </span>
+                      {feature}
+                    </li>
+                  ))}
+                </ul>
+              </section>
+            </Reveal>
 
-            <p className="legal-note">
-              Prefer to talk first? <Link href="/#contact">Contact sales</Link> — or
-              compare every plan on the <Link href="/#pricing">pricing page</Link>.
-            </p>
+            <Reveal>
+              <p className="legal-note">
+                Prefer to talk first? <Link href="/#contact">Contact sales</Link> — or
+                compare every plan on the <Link href="/#pricing">pricing page</Link>.
+              </p>
+            </Reveal>
           </article>
 
           <aside className="md:sticky md:top-28 md:self-start">

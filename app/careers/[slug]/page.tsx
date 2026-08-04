@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 
 import ApplicationForm from "@/components/ApplicationForm";
 import PageHeader from "@/components/PageHeader";
+import Reveal from "@/components/Reveal";
 import { SITE_URL } from "@/lib/content";
 import { jsonLd, numberWord } from "@/lib/format";
 import { getRole, getRoles, getRoleSlugs, getSiteSettings } from "@/lib/sanity/queries";
@@ -101,51 +102,61 @@ export default async function RolePage({ params }: { params: Promise<Params> }) 
               ))}
             </dl>
 
-            <section className="legal-prose mb-11">
-              <h2>About the role</h2>
-              {role.about.map((paragraph) => (
-                <p key={paragraph.slice(0, 40)}>{paragraph}</p>
-              ))}
-            </section>
+            {/* One Reveal per block (not per paragraph/item) — the facts grid
+                above stays static as the immediate "spec". */}
+            <Reveal>
+              <section className="legal-prose mb-11">
+                <h2>About the role</h2>
+                {role.about.map((paragraph) => (
+                  <p key={paragraph.slice(0, 40)}>{paragraph}</p>
+                ))}
+              </section>
+            </Reveal>
 
             {lists.map((list) => (
-              <section key={list.heading} className="mb-11">
-                <h2 className="m-0 mb-4 font-display text-2xl font-semibold tracking-[-0.02em]">
-                  {list.heading}
-                </h2>
-                <ul className="m-0 flex list-none flex-col gap-3 p-0">
-                  {list.items.map((item) => (
-                    <li
-                      key={item}
-                      className="flex gap-3.5 text-[15.5px] leading-[1.55] text-t3"
-                    >
-                      <span
-                        aria-hidden="true"
-                        className={`flex-none ${list.marker === "▸" ? "text-lime" : "text-t7"}`}
+              <Reveal key={list.heading}>
+                <section className="mb-11">
+                  <h2 className="m-0 mb-4 font-display text-2xl font-semibold tracking-[-0.02em]">
+                    {list.heading}
+                  </h2>
+                  <ul className="m-0 flex list-none flex-col gap-3 p-0">
+                    {list.items.map((item) => (
+                      <li
+                        key={item}
+                        className="flex gap-3.5 text-[15.5px] leading-[1.55] text-t3"
                       >
-                        {list.marker}
-                      </span>
-                      {item}
-                    </li>
-                  ))}
-                </ul>
-              </section>
+                        <span
+                          aria-hidden="true"
+                          className={`flex-none ${list.marker === "▸" ? "text-lime" : "text-t7"}`}
+                        >
+                          {list.marker}
+                        </span>
+                        {item}
+                      </li>
+                    ))}
+                  </ul>
+                </section>
+              </Reveal>
             ))}
 
             {otherCount > 0 ? (
-              <p className="legal-note">
-                Not quite your role?{" "}
-                <Link href="/careers">
-                  See the other {numberWord(otherCount)} opening
-                  {otherCount === 1 ? "" : "s"}
-                </Link>
-                .
-              </p>
+              <Reveal>
+                <p className="legal-note">
+                  Not quite your role?{" "}
+                  <Link href="/careers">
+                    See the other {numberWord(otherCount)} opening
+                    {otherCount === 1 ? "" : "s"}
+                  </Link>
+                  .
+                </p>
+              </Reveal>
             ) : null}
           </article>
 
           <aside className="md:sticky md:top-28 md:self-start">
-            <div className="clip-angular-26 border border-line bg-surface p-7">
+            {/* Lit sheet: --edge-lip (inset — clip-angular clips OUTSET shadows,
+                and light is what carries elevation on a dark plane). */}
+            <div className="clip-angular-26 border border-line bg-surface p-7 shadow-[var(--edge-lip)]">
               <div className="eyebrow mb-3.5">Apply</div>
               <h2 className="m-0 mb-2 font-display text-2xl font-semibold tracking-[-0.02em]">
                 {role.title}

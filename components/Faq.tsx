@@ -33,7 +33,11 @@ export default function Faq({ faqs }: { faqs: FaqItem[] }) {
           return (
             <div
               key={faq.q}
-              className={`ease-brand border border-line transition-colors duration-160 ${open ? "bg-surface-3" : "bg-transparent"}`}
+              // Open state lifts: the fill lightens AND a lit top edge
+              // (--edge-lip) reads it as a raised plane, same language as the
+              // masthead/footer seams. box-shadow joins the transition so the
+              // lip fades with the fill — no new motion, just the existing toggle.
+              className={`ease-brand border border-line transition-[background-color,box-shadow] duration-160 ${open ? "bg-surface-3 shadow-[var(--edge-lip)]" : "bg-transparent"}`}
             >
               <h3 className="m-0">
                 <button

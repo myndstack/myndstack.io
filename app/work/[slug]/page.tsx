@@ -3,6 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import PageHeader from "@/components/PageHeader";
+import Reveal from "@/components/Reveal";
 import { SITE_URL } from "@/lib/content";
 import { jsonLd } from "@/lib/format";
 import { getCase, getCaseSlugs } from "@/lib/sanity/queries";
@@ -94,23 +95,32 @@ export default async function CasePage({ params }: { params: Promise<Params> }) 
 
         <div className="grid grid-cols-1 gap-14 md:grid-cols-[1.15fr_1fr]">
           <article>
+            {/* One Reveal per block (not per paragraph) — each rises in as it
+                scrolls into view; they enter at different offsets, so no stagger. */}
             {sections.map((section) => (
-              <section key={section.heading} className="legal-prose mb-11">
-                <h2>{section.heading}</h2>
-                {section.body.map((paragraph) => (
-                  <p key={paragraph.slice(0, 40)}>{paragraph}</p>
-                ))}
-              </section>
+              <Reveal key={section.heading}>
+                <section className="legal-prose mb-11">
+                  <h2>{section.heading}</h2>
+                  {section.body.map((paragraph) => (
+                    <p key={paragraph.slice(0, 40)}>{paragraph}</p>
+                  ))}
+                </section>
+              </Reveal>
             ))}
 
-            <p className="legal-note">
-              Something similar on your side?{" "}
-              <Link href="/#contact">Tell us the shape of it</Link>.
-            </p>
+            <Reveal>
+              <p className="legal-note">
+                Something similar on your side?{" "}
+                <Link href="/#contact">Tell us the shape of it</Link>.
+              </p>
+            </Reveal>
           </article>
 
           <aside className="md:sticky md:top-28 md:self-start">
-            <div className="clip-angular-26 border border-line bg-surface p-7">
+            {/* Lit sheet: --edge-lip (inset — clip-angular clips OUTSET shadows,
+                and a black drop shadow would vanish on ink anyway; light is what
+                carries elevation on a dark plane). */}
+            <div className="clip-angular-26 border border-line bg-surface p-7 shadow-[var(--edge-lip)]">
               <dl className="m-0">
                 {facts.map((fact, i) => (
                   <div
