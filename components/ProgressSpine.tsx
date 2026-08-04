@@ -64,6 +64,7 @@ export default function ProgressSpine({ socials }: { socials: Social[] }) {
   });
 
   return (
+    <>
     <div className="pointer-events-none fixed inset-y-0 left-0 z-58 hidden w-16 lg:block">
       {/* The full-bleed horizontal rules (masthead divider, section seams, the
           footer + contact-block borders) don't hard-stop at the spine — they
@@ -72,7 +73,10 @@ export default function ProgressSpine({ socials }: { socials: Social[] }) {
           back in, so nothing crosses and nothing chops. Full height, to catch
           every rule at any scroll position; the soft edge also lets the hero
           network thin toward the gutter instead of getting a hard cut. Under the
-          hairline / fill / dot / label (first child = painted first). */}
+          hairline / fill / dot / label (first child = painted first) so the
+          opaque band can cover the rule where it passes the spine WITHOUT
+          covering the spine itself. The right edge gets the mirror of this (the
+          sibling below) so every rule feathers out at both ends, not just here. */}
       <div
         aria-hidden="true"
         className="absolute inset-y-0 left-0 w-24"
@@ -143,5 +147,23 @@ export default function ProgressSpine({ socials }: { socials: Social[] }) {
         ))}
       </nav>
     </div>
+    {/* Right-edge mirror of the left feather. There's no spine on this side —
+        this is pure symmetry: every full-bleed rule fades out as it approaches
+        the right edge exactly the way it feathers into the spine, so the rules
+        float and soften at BOTH ends instead of one end fading and the other
+        hard-hitting the viewport edge. Same width and curve as the left
+        (w-24, opaque 0–38px → transparent by 92px), just aimed inward. A
+        standalone fixed sibling because the left rail is pinned left-0; both
+        are z-58 fixed overlays, so this covers the same rules on every route
+        and at every scroll position. Only ≥lg, in lockstep with the spine. */}
+    <div
+      aria-hidden="true"
+      className="pointer-events-none fixed inset-y-0 right-0 z-58 hidden w-24 lg:block"
+      style={{
+        background:
+          "linear-gradient(to left, var(--color-ink) 0, var(--color-ink) 38px, transparent 92px)",
+      }}
+    />
+    </>
   );
 }
