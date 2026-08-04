@@ -39,6 +39,16 @@ export default function SectionHeader({
       style={centered && !aside ? { maxWidth: "620px" } : undefined}
     >
       <div style={aside ? { maxWidth: titleMaxWidth } : undefined}>
+        {/* Editorial index marker — a mono ordinal (CSS counter) + a hairline
+            tick. Decorative: the number is a position cue, not content, so it's
+            aria-hidden and the "current" lighting is a class SectionIndexRail
+            toggles. Centred headers centre the marker too. */}
+        <div
+          className={`ms-index${centered ? " ms-index--center" : ""}`}
+          aria-hidden="true"
+        >
+          <span className="ms-index-tick" />
+        </div>
         <div className="eyebrow mb-3.5">{eyebrow}</div>
         <h2 className="h2-section">{title}</h2>
         {lede ? (

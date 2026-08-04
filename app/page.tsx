@@ -9,6 +9,7 @@ import Manifesto from "@/components/Manifesto";
 import MarqueeBand from "@/components/MarqueeBand";
 import Pricing from "@/components/Pricing";
 import Process from "@/components/Process";
+import SectionIndexRail from "@/components/SectionIndexRail";
 import SelectedWork from "@/components/SelectedWork";
 import StackStory from "@/components/StackStory";
 import Team from "@/components/Team";
@@ -46,6 +47,9 @@ export default async function Home() {
           }}
         />
       ) : null}
+      {/* No markup — lights the current section's ordinal in the index rail off
+          the shared scroll loop. Homepage-only, where the SectionHeaders live. */}
+      <SectionIndexRail />
       <Hero
         eyebrow={home.hero.eyebrow}
         subhead={home.hero.subhead}

@@ -263,6 +263,62 @@
     color: var(--color-t5);
   }
 
+  /* --- Editorial index rail ---
+     A mono ordinal + a short hairline tick above every SectionHeader — a printed
+     table-of-contents down the homepage. Auto-numbered by a CSS counter (DOM
+     order, so a section reorder re-counts itself; SectionHeader only ever renders
+     on the homepage, so nothing else picks up a numeral). The ordinal is
+     aria-hidden decoration — SectionIndexRail lights the *current* one lime by
+     reading the shared scroll loop and toggling `.is-current`, nothing more. */
+  main {
+    counter-reset: msindex;
+  }
+  .ms-index {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 18px;
+    counter-increment: msindex;
+  }
+  .ms-index--center {
+    justify-content: center;
+  }
+  .ms-index::before {
+    content: counter(msindex, decimal-leading-zero);
+    font-family: var(--font-mono);
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.16em;
+    color: var(--color-t6);
+    font-variant-numeric: tabular-nums;
+    transition: color 0.45s var(--ease-brand);
+  }
+  .ms-index-tick {
+    width: 34px;
+    height: 1px;
+    flex: none;
+    background: var(--color-line-3);
+    transition:
+      width 0.45s var(--ease-brand),
+      background 0.45s var(--ease-brand),
+      box-shadow 0.45s var(--ease-brand);
+  }
+  .ms-index.is-current::before {
+    color: var(--color-lime);
+  }
+  .ms-index.is-current .ms-index-tick {
+    width: 44px;
+    background: var(--color-lime);
+    box-shadow: 0 0 8px var(--color-lime-edge);
+  }
+  /* Colour is fine to fade; the tick's width change is motion — snap it. */
+  @media (prefers-reduced-motion: reduce) {
+    .ms-index::before,
+    .ms-index-tick {
+      transition: none;
+    }
+  }
+
   /* --- Surfaces --- */
   .card {
     background: var(--color-surface-3);
