@@ -5,10 +5,12 @@ import { useReducedMotion } from "@/lib/hooks";
 import HeroNetwork, { PULSE_EVENT } from "./HeroNetwork";
 import Magnetic from "./Magnetic";
 
-const WORDS = ["Enterprise", "cognitive", "AI,", "architected and built."];
+const WORDS = ["Intelligence", "that", "runs", "on", "infrastructure."];
 const CYCLE_MS = 1400;
 // The hard line break falls after index 2 (see the <br/> below): line one reads
-// "Enterprise cognitive AI," and the lime last line is "architected and built."
+// "Intelligence that runs" and line two "on infrastructure." Every word is its
+// own array element so the cycling accent lights ONE word at a time — a
+// multi-word element (the old "architected and built.") lit all its words at once.
 const LAST = WORDS.length - 1;
 
 /**
