@@ -65,16 +65,17 @@ export default function ProgressSpine({ socials }: { socials: Social[] }) {
 
   return (
     <div className="pointer-events-none fixed inset-y-0 left-0 z-58 hidden w-16 lg:block">
-      {/* Page-coloured channel behind the rail, so every full-bleed horizontal
+      {/* Page-coloured gutter mask behind the rail: every full-bleed horizontal
           rule (the masthead divider, section seams, the footer + contact-block
-          borders) breaks cleanly at the spine instead of crossing it — at ANY
-          scroll position, so it runs the full height, not just the track. Sits
+          borders) stops at the spine's gutter instead of crossing it, at ANY
+          scroll position (full height). Masks from the LEFT EDGE across the rail
+          so the rules terminate cleanly — no faint stub left of the spine. Sits
           UNDER the hairline / fill / dot / label (first child = painted first).
-          Ink-coloured, so on plain sections it's invisible except where it masks
-          a line; over the hero it's a thin backing behind the prominent rail. */}
+          Ink-coloured, so on plain sections it's invisible except where it ends
+          a rule; the far-left gutter is empty/sparse, so nothing else is lost. */}
       <div
         aria-hidden="true"
-        className="absolute inset-y-0 left-1/2 w-3 -translate-x-1/2 bg-ink"
+        className="absolute inset-y-0 left-0 w-12 bg-ink"
       />
       {/* The label and the whole progress track are decoration — a scroll-
           position indicator conveys nothing to a screen reader, and the "Follow"
