@@ -28,10 +28,10 @@ export default function Integrations() {
         aside="Cognitive infrastructure that plugs into your models, cloud, data, and delivery — instead of demanding a rebuild."
       />
 
-      <div className="grid grid-cols-1 gap-px bg-line-3 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="intg-grid grid grid-cols-1 gap-px bg-line-3 sm:grid-cols-2 lg:grid-cols-4">
         {INTEGRATIONS.map((group, i) => (
           <Reveal key={group.title} delay={i * 0.06}>
-            <div className="ease-brand flex h-full flex-col gap-4 bg-ink p-6 transition-colors duration-160 hover:bg-surface-3">
+            <div className="intg-cell flex h-full flex-col gap-4 p-6">
               <div>
                 <div className="label-mono mb-1.5 text-t3">{group.title}</div>
                 <p className="m-0 text-[13px] leading-[1.5] text-t5">

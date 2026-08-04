@@ -4,6 +4,7 @@ import { FOOTER_COLUMNS, LEGAL_LINKS, SITE } from "@/lib/content";
 import type { SiteSettings } from "@/lib/sanity/queries";
 import Magnetic from "./Magnetic";
 import Newsletter from "./Newsletter";
+import Reveal from "./Reveal";
 import SocialIcon from "./SocialIcon";
 import Wordmark from "./Wordmark";
 
@@ -17,8 +18,8 @@ export default function Footer({ site }: { site: SiteSettings }) {
   const activeSocials = socials.filter((s) => s.href);
 
   return (
-    <footer className="mt-[88px] border-t border-line px-5 pt-16 pb-10 sm:px-14">
-      <div className="mx-auto grid max-w-[1200px] grid-cols-1 gap-10 xs:grid-cols-2 md:grid-cols-[minmax(0,1.6fr)_repeat(3,minmax(0,1fr))] md:gap-12">
+    <footer className="mt-[88px] border-t border-line px-5 pt-16 pb-10 shadow-[var(--edge-lip)] sm:px-14">
+      <Reveal className="mx-auto grid max-w-[1200px] grid-cols-1 gap-10 xs:grid-cols-2 md:grid-cols-[minmax(0,1.6fr)_repeat(3,minmax(0,1fr))] md:gap-12">
         {/* Brand block — wordmark, tagline, newsletter, contact, socials. Absorbs
             what used to be a separate "Connect" column so the right side stays
             three lean nav columns and the whole footer breathes at md+. */}
@@ -75,7 +76,7 @@ export default function Footer({ site }: { site: SiteSettings }) {
             </ul>
           </div>
         ))}
-      </div>
+      </Reveal>
 
       <div className="mx-auto mt-14 max-w-[1200px] border-t border-surface-3 pt-6">
         <div className="flex flex-col-reverse items-start gap-4 text-[12.5px] text-t5 md:flex-row md:items-center md:justify-between md:gap-6">
