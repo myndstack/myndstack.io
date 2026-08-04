@@ -37,7 +37,7 @@ export default async function Contrast() {
         <Reveal
           scrub
           delay={0.08}
-          className="clip-angular-28 relative overflow-hidden border border-lime bg-surface-3 px-9 py-[34px] shadow-[0_20px_50px_rgba(0,0,0,.4)]"
+          className="clip-angular-28 relative overflow-hidden border border-lime bg-surface-3 px-9 py-[34px] shadow-float"
         >
           <div className="mb-[22px] font-mono text-[11.5px] font-bold tracking-[0.12em] text-lime uppercase">
             With Myndstack

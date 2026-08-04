@@ -68,6 +68,20 @@
   /* Motion — one easing curve for the whole site */
   --ease-brand: cubic-bezier(0.2, 0, 0, 1);
 
+  /* Elevation — one ladder the whole site composes from. Drops only, so the lit
+     edge and accent rings layer on top. Values are lifted verbatim from the
+     recipes these tokens replace: lift = .card-lift:hover, float = the pricing
+     featured card, panel = the pricing hover. `--shadow-*` is a Tailwind
+     namespace, so these also emit shadow-lift / -float / -panel utilities. The
+     edge lip + rings carry box-shadow values (not a width/colour), so they stay
+     OUT of Tailwind's ring and shadow namespaces and are referenced via var(). */
+  --shadow-lift: 0 14px 34px rgba(0, 0, 0, 0.45);
+  --shadow-float: 0 20px 50px rgba(0, 0, 0, 0.5);
+  --shadow-panel: 0 24px 55px rgba(0, 0, 0, 0.55);
+  --edge-lip: inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  --edge-ring-faint: 0 0 0 1px rgba(201, 242, 77, 0.08);
+  --edge-ring: 0 0 0 1px var(--color-lime);
+
   /* Keyframes */
   --animate-marq: marq 26s linear infinite;
   --animate-marq-slow: marq 30s linear infinite;
@@ -262,9 +276,7 @@
   .card-lift:hover {
     border-color: var(--color-lime-edge);
     transform: translateY(-4px);
-    box-shadow:
-      0 0 0 1px rgba(201, 242, 77, 0.08),
-      0 14px 34px rgba(0, 0, 0, 0.45);
+    box-shadow: var(--edge-ring-faint), var(--shadow-lift);
   }
   /* Focus of attention: hovering/focusing one card in a marked grid recedes its
      siblings so the active card leads. Pure CSS; the global reduced-motion block
@@ -281,11 +293,10 @@
      not a fixed selection. Touch/keyboard-only keep the static default. The lime
      ring uses the token, not a hardcoded hex. */
   .pricing-card {
-    /* A hairline top-highlight: a lit-from-above edge that reads as material
-       depth without any rounding (the brand is sharp-cornered). Held in a var
-       so every elevated state below layers it UNDER its own shadow instead of
-       overwriting it — the lit edge survives featured / hover / relaxed. */
-    --card-lip: inset 0 1px 0 rgba(255, 255, 255, 0.05);
+    /* Alias the global lit-edge token, so the pricing rules below keep reading
+       `var(--card-lip)` unchanged while the value now lives in @theme — the same
+       lit-from-above edge every raised surface shares (depth without rounding). */
+    --card-lip: var(--edge-lip);
     position: relative;
     display: flex;
     flex-direction: column;
@@ -302,10 +313,7 @@
   }
   .pricing-card--featured {
     border-color: var(--color-lime);
-    box-shadow:
-      var(--card-lip),
-      0 0 0 1px var(--color-lime),
-      0 20px 50px rgba(0, 0, 0, 0.5);
+    box-shadow: var(--card-lip), var(--edge-ring), var(--shadow-float);
   }
 
   .pricing-cta {
@@ -332,10 +340,7 @@
   /* Keyboard parity: focus-within activates a card and relaxes the featured one. */
   .pricing-card:focus-within {
     border-color: var(--color-lime);
-    box-shadow:
-      var(--card-lip),
-      0 0 0 1px var(--color-lime),
-      0 20px 50px rgba(0, 0, 0, 0.5);
+    box-shadow: var(--card-lip), var(--edge-ring), var(--shadow-float);
   }
   .pricing-card:focus-within .pricing-cta {
     background: var(--color-lime);
@@ -359,10 +364,7 @@
     .pricing-card:hover {
       border-color: var(--color-lime);
       transform: translateY(-3px);
-      box-shadow:
-        var(--card-lip),
-        0 0 0 1px var(--color-lime),
-        0 24px 55px rgba(0, 0, 0, 0.55);
+      box-shadow: var(--card-lip), var(--edge-ring), var(--shadow-panel);
     }
     .pricing-card:hover .pricing-cta {
       background: var(--color-lime);

@@ -210,7 +210,7 @@ export default function CheckoutPanel({
     return (
       <div
         role="status"
-        className="clip-angular-26 border border-lime bg-surface-3 p-7 shadow-[0_0_0_1px_#C9F24D]"
+        className="clip-angular-26 border border-lime bg-surface-3 p-7 shadow-[var(--edge-ring)]"
       >
         <div className="eyebrow mb-3 text-lime">Payment received</div>
         <h2
