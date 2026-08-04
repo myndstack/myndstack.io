@@ -281,6 +281,11 @@
      not a fixed selection. Touch/keyboard-only keep the static default. The lime
      ring uses the token, not a hardcoded hex. */
   .pricing-card {
+    /* A hairline top-highlight: a lit-from-above edge that reads as material
+       depth without any rounding (the brand is sharp-cornered). Held in a var
+       so every elevated state below layers it UNDER its own shadow instead of
+       overwriting it — the lit edge survives featured / hover / relaxed. */
+    --card-lip: inset 0 1px 0 rgba(255, 255, 255, 0.05);
     position: relative;
     display: flex;
     flex-direction: column;
@@ -288,6 +293,7 @@
     padding: 30px;
     background: var(--color-surface-3);
     border: 1px solid var(--color-line);
+    box-shadow: var(--card-lip);
     transition:
       transform 0.18s var(--ease-brand),
       border-color 0.16s var(--ease-brand),
@@ -297,6 +303,7 @@
   .pricing-card--featured {
     border-color: var(--color-lime);
     box-shadow:
+      var(--card-lip),
       0 0 0 1px var(--color-lime),
       0 20px 50px rgba(0, 0, 0, 0.5);
   }
@@ -326,6 +333,7 @@
   .pricing-card:focus-within {
     border-color: var(--color-lime);
     box-shadow:
+      var(--card-lip),
       0 0 0 1px var(--color-lime),
       0 20px 50px rgba(0, 0, 0, 0.5);
   }
@@ -336,7 +344,7 @@
   .pricing-grid:has(.pricing-card:not(.pricing-card--featured):focus-within)
     .pricing-card--featured:not(:focus-within) {
     border-color: var(--color-line);
-    box-shadow: none;
+    box-shadow: var(--card-lip);
   }
   .pricing-grid:has(.pricing-card:not(.pricing-card--featured):focus-within)
     .pricing-card--featured:not(:focus-within)
@@ -352,6 +360,7 @@
       border-color: var(--color-lime);
       transform: translateY(-3px);
       box-shadow:
+        var(--card-lip),
         0 0 0 1px var(--color-lime),
         0 24px 55px rgba(0, 0, 0, 0.55);
     }
@@ -362,7 +371,7 @@
     .pricing-grid:has(.pricing-card:not(.pricing-card--featured):hover)
       .pricing-card--featured:not(:hover) {
       border-color: var(--color-line);
-      box-shadow: none;
+      box-shadow: var(--card-lip);
     }
     .pricing-grid:has(.pricing-card:not(.pricing-card--featured):hover)
       .pricing-card--featured:not(:hover)
@@ -370,6 +379,50 @@
       background: var(--color-ink);
       color: #fff;
     }
+  }
+
+  /* --- Compare-table disclosure ---
+     The "Compare all plans" table expands with an animated height (the grid
+     0fr→1fr trick) rather than a hard display swap, which read as broken. The
+     inner wrapper clips with overflow:hidden and also fades + rises a touch so
+     the body doesn't unfold flatly. `visibility` flips discretely — delayed to
+     the END of the collapse — so the closed table leaves the tab order + a11y
+     tree, not merely clipped out of sight. The global reduced-motion block
+     zeroes the duration AND the delay, so this degrades to an instant
+     open/close; @media print forces it open (see the print block). */
+  .compare-reveal {
+    display: grid;
+    grid-template-rows: 0fr;
+    visibility: hidden;
+    transition:
+      grid-template-rows 0.26s var(--ease-brand),
+      visibility 0s linear 0.26s;
+  }
+  .compare-reveal[data-open="true"] {
+    grid-template-rows: 1fr;
+    visibility: visible;
+    transition:
+      grid-template-rows 0.26s var(--ease-brand),
+      visibility 0s linear 0s;
+  }
+  .compare-reveal__inner {
+    min-height: 0;
+    overflow: hidden;
+    opacity: 0;
+    transform: translateY(-4px);
+    transition:
+      opacity 0.26s var(--ease-brand),
+      transform 0.26s var(--ease-brand),
+      padding-top 0.26s var(--ease-brand);
+  }
+  /* The trigger→table gap is applied ONLY when open (and animates in with the
+     height) so the closed clipper has zero intrinsic size. A static padding
+     here would leak into the collapsed 0fr track and leave a dead strip under
+     the button. */
+  .compare-reveal[data-open="true"] .compare-reveal__inner {
+    padding-top: 40px;
+    opacity: 1;
+    transform: translateY(0);
   }
 
   .chip {
@@ -1063,6 +1116,21 @@
     a[href^="mailto:"]::after,
     a[href^="tel:"]::after {
       content: "";
+    }
+    /* Reveal-wrapped content prints even if it was never scrolled into view,
+       and the comparison prints expanded — procurement PDFs it without first
+       clicking to open. */
+    .reveal {
+      opacity: 1 !important;
+      transform: none !important;
+    }
+    .compare-reveal {
+      grid-template-rows: 1fr !important;
+      visibility: visible !important;
+    }
+    .compare-reveal__inner {
+      opacity: 1 !important;
+      transform: none !important;
     }
   }
 

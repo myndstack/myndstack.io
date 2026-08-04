@@ -22,9 +22,8 @@ type Props = {
  * the same trigger button label can flip. Table wraps in an overflow-x-auto
  * container so it scrolls horizontally on mobile without breaking the page.
  *
- * Print behaviour: the wrapper carries `print:!block` + we force the table
- * open when printed so procurement can PDF a comparison sheet without having
- * to click first.
+ * Print behaviour: an @media print rule (globals.css) forces the reveal open
+ * so procurement can PDF a full comparison sheet without clicking first.
  */
 export default function PricingCompare({ tierNames, onOpen }: Props) {
   const [open, setOpen] = useState(false);
@@ -55,41 +54,47 @@ export default function PricingCompare({ tierNames, onOpen }: Props) {
 
       <div
         id="pricing-compare-table"
-        // Force the table visible when printed regardless of open state.
-        className={`${open ? "mt-10 block" : "hidden"} print:!mt-10 print:!block`}
+        // Animated height reveal (grid 0fr→1fr in CSS) instead of a hard
+        // display swap, which read as broken. The CSS flips `visibility` at the
+        // ends so the closed table leaves the tab order + a11y tree; @media
+        // print forces it open so procurement can PDF the full sheet.
+        className="compare-reveal"
+        data-open={open ? "true" : "false"}
       >
-        <div className="overflow-x-auto border border-line">
-          <table className="w-full min-w-[720px] border-collapse text-left">
-            <thead>
-              <tr className="border-b border-line bg-surface-3">
-                <th
-                  scope="col"
-                  className="p-4 text-[12px] font-normal tracking-[0.12em] text-t5 uppercase"
-                >
-                  Feature
-                </th>
-                {tierNames.map((name) => (
+        <div className="compare-reveal__inner">
+          <div className="overflow-x-auto border border-line">
+            <table className="w-full min-w-[720px] border-collapse text-left">
+              <thead>
+                <tr className="border-b border-line bg-surface-3">
                   <th
-                    key={name}
                     scope="col"
-                    className="p-4 text-center font-display text-[15px] font-semibold text-t2"
+                    className="p-4 text-[12px] font-normal tracking-[0.12em] text-t5 uppercase"
                   >
-                    {name}
+                    Feature
                   </th>
+                  {tierNames.map((name) => (
+                    <th
+                      key={name}
+                      scope="col"
+                      className="p-4 text-center font-display text-[15px] font-semibold text-t2"
+                    >
+                      {name}
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {PRICING_COMPARISON.map((section) => (
+                  <CompareSectionRows
+                    key={section.title}
+                    title={section.title}
+                    rows={section.rows}
+                    tierNames={tierNames}
+                  />
                 ))}
-              </tr>
-            </thead>
-            <tbody>
-              {PRICING_COMPARISON.map((section) => (
-                <CompareSectionRows
-                  key={section.title}
-                  title={section.title}
-                  rows={section.rows}
-                  tierNames={tierNames}
-                />
-              ))}
-            </tbody>
-          </table>
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
     </div>

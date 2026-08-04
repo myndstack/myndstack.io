@@ -34,11 +34,15 @@ export default function Pricing({ tiers }: { tiers: PricingTier[] }) {
         ))}
       </div>
 
-      <EnterpriseBand />
+      <Reveal>
+        <EnterpriseBand />
+      </Reveal>
 
       {/* Deep, granular comparison lives here (opt-in) so the cards stay concise.
           Columns = the live tier names + the hardcoded Enterprise band. */}
-      <PricingCompare tierNames={[...tiers.map((t) => t.name), ENTERPRISE.name]} />
+      <Reveal>
+        <PricingCompare tierNames={[...tiers.map((t) => t.name), ENTERPRISE.name]} />
+      </Reveal>
 
       <p className="mt-8 mb-0 text-[13.5px] text-t5">
         Prices in INR, excl. GST.{" "}
