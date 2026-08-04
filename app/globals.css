@@ -289,6 +289,7 @@
     background: var(--color-surface-3);
     border: 1px solid var(--color-line);
     transition:
+      transform 0.18s var(--ease-brand),
       border-color 0.16s var(--ease-brand),
       box-shadow 0.16s var(--ease-brand),
       background-color 0.16s var(--ease-brand);
@@ -311,6 +312,7 @@
     color: #fff;
     border: 1px solid var(--color-lime);
     transition:
+      transform 0.14s var(--ease-brand),
       background 0.16s var(--ease-brand),
       border-color 0.16s var(--ease-brand),
       color 0.16s var(--ease-brand);
@@ -344,11 +346,14 @@
   }
 
   @media (hover: hover) {
+    /* A small lift on hover gives the flat dark surface real elevation — depth
+       from shadow + offset, never from rounding. Pairs with the lime ring. */
     .pricing-card:hover {
       border-color: var(--color-lime);
+      transform: translateY(-3px);
       box-shadow:
         0 0 0 1px var(--color-lime),
-        0 20px 50px rgba(0, 0, 0, 0.5);
+        0 24px 55px rgba(0, 0, 0, 0.55);
     }
     .pricing-card:hover .pricing-cta {
       background: var(--color-lime);
@@ -386,6 +391,7 @@
     font-size: 15px;
     padding: 15px 26px;
     transition:
+      transform 0.14s var(--ease-brand),
       background 0.16s var(--ease-brand),
       border-color 0.16s var(--ease-brand),
       color 0.16s var(--ease-brand);
@@ -420,9 +426,14 @@
     border-color: var(--color-lime-hover);
     color: var(--color-lime);
   }
+  /* `.btn-outline` is used standalone (e.g. the Enterprise band) as well as
+     alongside `.btn`, so give it the transition here too — otherwise its hover
+     and press would snap with no ease. */
+  .btn-outline,
   .btn-icon {
     cursor: pointer;
     transition:
+      transform 0.14s var(--ease-brand),
       background 0.16s var(--ease-brand),
       border-color 0.16s var(--ease-brand),
       color 0.16s var(--ease-brand);
@@ -431,6 +442,24 @@
   .btn[aria-disabled="true"] {
     opacity: 0.6;
     cursor: progress;
+  }
+
+  /* --- Press feedback ---
+     Every pressable primitive scales down a hair on :active so the click or tap
+     reads as *heard* — the first rule of button feel. Tiny (0.97), and fast
+     because transform is on each primitive's transition above; the snap-back
+     rides the same curve. Disabled / mid-send buttons don't press. The global
+     reduced-motion block collapses the transition to ~0ms, so the scale becomes
+     an instant state rather than motion. Magnetic-wrapped CTAs translate the
+     wrapper; the inner button still gets its own press. */
+  .btn:not(:disabled):not([aria-disabled="true"]):active,
+  .btn-outline:active,
+  .btn-icon:active,
+  .pricing-cta:active {
+    transform: scale(0.97);
+  }
+  .navlink:active {
+    transform: scale(0.97);
   }
 
   /* --- Form fields --- */
@@ -715,6 +744,7 @@
     font-size: 14px;
     font-weight: 500;
     transition:
+      transform 0.14s var(--ease-brand),
       color 0.16s var(--ease-brand),
       background 0.16s var(--ease-brand);
   }
@@ -914,6 +944,9 @@
   }
   .totop.is-visible:hover {
     transform: translateY(0) scale(1.06);
+  }
+  .totop.is-visible:active {
+    transform: translateY(0) scale(0.94);
   }
 
   /* --- Long-form legal copy --- */
