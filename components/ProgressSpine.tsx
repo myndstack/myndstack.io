@@ -65,6 +65,16 @@ export default function ProgressSpine({ socials }: { socials: Social[] }) {
 
   return (
     <div className="pointer-events-none fixed inset-y-0 left-0 z-58 hidden w-16 lg:block">
+      {/* Page-coloured channel behind the rail, so full-bleed horizontal rules
+          (the sub-page masthead divider, section seams) break cleanly at the
+          spine instead of crossing it. Sits UNDER the hairline / fill / dot /
+          label (first child = painted first). Spans the rail's own range so it
+          never bands content above the track. */}
+      <div
+        aria-hidden="true"
+        className="absolute left-1/2 w-3 -translate-x-1/2 bg-ink"
+        style={{ top: TRACK_TOP, bottom: TRACK_BOTTOM_GAP }}
+      />
       {/* The label and the whole progress track are decoration — a scroll-
           position indicator conveys nothing to a screen reader, and the "Follow"
           label is dim ornament beside the labelled social icons below. Hidden
