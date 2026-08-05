@@ -164,6 +164,54 @@ export default defineType({
           description: "One-time 12-month charge, e.g. ₹19,80,000 → 198000000.",
           validation: (rule) => rule.required().integer().positive(),
         }),
+        defineField({
+          name: "howItWorks",
+          title: "How it works (steps)",
+          description: "Optional. Numbered steps shown on the checkout page.",
+          type: "array",
+          of: [
+            {
+              type: "object",
+              fields: [
+                defineField({ name: "title", title: "Title", type: "string", validation: (r) => r.required() }),
+                defineField({ name: "body", title: "Body", type: "text", rows: 2, validation: (r) => r.required() }),
+              ],
+              preview: { select: { title: "title", subtitle: "body" } },
+            },
+          ],
+        }),
+        defineField({
+          name: "assurance",
+          title: "Assurance points",
+          description: 'Optional. Short risk-reversal tiles, e.g. "Fixed price", "Fee credited".',
+          type: "array",
+          of: [
+            {
+              type: "object",
+              fields: [
+                defineField({ name: "title", title: "Title", type: "string", validation: (r) => r.required() }),
+                defineField({ name: "body", title: "Body", type: "string", validation: (r) => r.required() }),
+              ],
+              preview: { select: { title: "title", subtitle: "body" } },
+            },
+          ],
+        }),
+        defineField({
+          name: "faqs",
+          title: "Checkout FAQ",
+          description: "Optional. Common questions shown on the checkout page.",
+          type: "array",
+          of: [
+            {
+              type: "object",
+              fields: [
+                defineField({ name: "q", title: "Question", type: "string", validation: (r) => r.required() }),
+                defineField({ name: "a", title: "Answer", type: "text", rows: 3, validation: (r) => r.required() }),
+              ],
+              preview: { select: { title: "q", subtitle: "a" } },
+            },
+          ],
+        }),
       ],
     }),
   ],

@@ -180,6 +180,20 @@ const checkoutSchema = z.object({
   // rather than reach the order route as a bad charge.
   amountMinor: z.number().int().positive(),
   annualAmountMinor: z.number().int().positive(),
+  // Editorial checkout context — optional, edited in Studio. `nullish → undefined`
+  // matches the regionalPrices pattern so an empty CMS field is simply absent.
+  howItWorks: z
+    .array(z.object({ title: nonEmpty, body: nonEmpty }))
+    .nullish()
+    .transform((v) => v ?? undefined),
+  assurance: z
+    .array(z.object({ title: nonEmpty, body: nonEmpty }))
+    .nullish()
+    .transform((v) => v ?? undefined),
+  faqs: z
+    .array(z.object({ q: nonEmpty, a: nonEmpty }))
+    .nullish()
+    .transform((v) => v ?? undefined),
 }) satisfies z.ZodType<TierCheckout>;
 
 const pricingSchema = z.object({
@@ -364,7 +378,10 @@ export const getPricingTiers = cache(async (): Promise<PricingTier[]> => {
         region, currency, symbol, price, annualPrice, period, annualNote,
         taxNote, paymentNote
       },
-      checkout{ slug, currency, amountMinor, annualAmountMinor }
+      checkout{
+        slug, currency, amountMinor, annualAmountMinor,
+        howItWorks[]{ title, body }, assurance[]{ title, body }, faqs[]{ q, a }
+      }
     }`,
     {},
     [TAGS.pricingTier],

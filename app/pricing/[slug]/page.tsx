@@ -90,6 +90,75 @@ export default async function CheckoutPage({
               </section>
             </Reveal>
 
+            {tier.checkout.howItWorks?.length ? (
+              <Reveal>
+                <section className="mb-11">
+                  <h2 className="m-0 mb-5 font-display text-2xl font-semibold tracking-[-0.02em]">
+                    How it works
+                  </h2>
+                  <ol className="m-0 flex list-none flex-col gap-5 p-0">
+                    {tier.checkout.howItWorks.map((step, i) => (
+                      <li key={step.title} className="flex gap-4">
+                        <span className="mt-0.5 flex-none font-mono text-[12px] font-bold tracking-[0.12em] text-lime tabular-nums">
+                          {String(i + 1).padStart(2, "0")}
+                        </span>
+                        <div>
+                          <div className="mb-1 font-display text-[15.5px] font-semibold text-t1">
+                            {step.title}
+                          </div>
+                          <p className="m-0 text-[14.5px] leading-[1.55] text-t4">
+                            {step.body}
+                          </p>
+                        </div>
+                      </li>
+                    ))}
+                  </ol>
+                </section>
+              </Reveal>
+            ) : null}
+
+            {tier.checkout.assurance?.length ? (
+              <Reveal>
+                <ul className="mb-11 grid list-none grid-cols-1 gap-px overflow-hidden border border-line bg-line p-0 sm:grid-cols-3">
+                  {tier.checkout.assurance.map((point) => (
+                    <li
+                      key={point.title}
+                      className="bg-surface-3 p-5 shadow-[var(--edge-lip)]"
+                    >
+                      <div className="mb-1 font-mono text-[11px] font-bold tracking-[0.1em] text-lime uppercase">
+                        {point.title}
+                      </div>
+                      <p className="m-0 text-[13px] leading-[1.5] text-t4">
+                        {point.body}
+                      </p>
+                    </li>
+                  ))}
+                </ul>
+              </Reveal>
+            ) : null}
+
+            {tier.checkout.faqs?.length ? (
+              <Reveal>
+                <section className="mb-11">
+                  <h2 className="m-0 mb-5 font-display text-2xl font-semibold tracking-[-0.02em]">
+                    Common questions
+                  </h2>
+                  <dl className="m-0 flex flex-col gap-0">
+                    {tier.checkout.faqs.map((faq) => (
+                      <div key={faq.q} className="border-t border-line py-5 last:pb-0">
+                        <dt className="mb-1.5 font-display text-[15.5px] font-semibold text-t2">
+                          {faq.q}
+                        </dt>
+                        <dd className="m-0 text-[14.5px] leading-[1.55] text-t4">
+                          {faq.a}
+                        </dd>
+                      </div>
+                    ))}
+                  </dl>
+                </section>
+              </Reveal>
+            ) : null}
+
             <Reveal>
               <p className="legal-note">
                 Prefer to talk first? <Link href="/#contact">Contact sales</Link> — or

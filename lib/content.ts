@@ -278,6 +278,14 @@ export type TierCheckout = {
   amountMinor: number;
   /** Annual (one-time, 12-month) charge, minor units (paise). */
   annualAmountMinor: number;
+  /**
+   * Enterprise-grade checkout context, all optional and edited in Sanity Studio
+   * (structure lives in code; copy lives in the CMS). Absent → the section is
+   * simply not rendered on the checkout page.
+   */
+  howItWorks?: readonly { title: string; body: string }[];
+  assurance?: readonly { title: string; body: string }[];
+  faqs?: readonly { q: string; a: string }[];
 };
 
 export type PricingTier = {
