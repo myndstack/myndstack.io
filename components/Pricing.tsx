@@ -1,7 +1,8 @@
 import Link from "next/link";
 
 import type { PricingTier } from "@/lib/content";
-import { isPurchasable } from "@/lib/pricing-amount";
+import { DEFAULT_REGION, resolveTiersForRegion } from "@/lib/region";
+import PricingCards from "./PricingCards";
 import PricingCompare from "./PricingCompare";
 import Reveal from "./Reveal";
 import Section from "./Section";
@@ -11,11 +12,18 @@ import SectionHeader from "./SectionHeader";
  * Pricing ladder: three tiers as cards (Discovery Sprint / Build / Studio, from
  * Sanity) plus a hardcoded Enterprise band below for bespoke, contact-only work.
  * The featured card is filled by default; on a capable pointer the fill FOLLOWS
- * the hovered/focused card (see `.pricing-*` in globals.css). INR display for
- * now — region-aware currency lands in a later slice.
+ * the hovered/focused card (see `.pricing-*` in globals.css).
+ *
+ * Currency is region-aware: this server render resolves the DEFAULT_REGION so
+ * the page stays static, and the client <PricingCards> swaps to the visitor's
+ * region (geo + picker) on mount via /api/pricing. See lib/region.ts.
  */
 export default function Pricing({ tiers }: { tiers: PricingTier[] }) {
   if (tiers.length === 0) return null;
+
+  // Static, default-region prices for SSR; the client layer swaps in the
+  // visitor's region after hydration. Non-region tiers fall back to flat fields.
+  const initialTiers = resolveTiersForRegion(tiers, DEFAULT_REGION);
 
   return (
     <Section id="pricing">
@@ -26,13 +34,7 @@ export default function Pricing({ tiers }: { tiers: PricingTier[] }) {
         lede="Begin with a fixed-price Discovery Sprint — no long proposal, no risk. Move into a full build, or an embedded team, when you're ready."
       />
 
-      <div className="pricing-grid grid grid-cols-1 gap-[18px] md:grid-cols-3">
-        {tiers.map((tier, i) => (
-          <Reveal key={tier.name} delay={i * 0.08} className="h-full">
-            <PricingCard tier={tier} />
-          </Reveal>
-        ))}
-      </div>
+      <PricingCards initialTiers={initialTiers} />
 
       <Reveal>
         <EnterpriseBand />
@@ -44,8 +46,9 @@ export default function Pricing({ tiers }: { tiers: PricingTier[] }) {
         <PricingCompare tierNames={[...tiers.map((t) => t.name), ENTERPRISE.name]} />
       </Reveal>
 
+      {/* Per-currency tax/settlement lives on each card now (taxNote); this stays
+          a plain prompt so it reads the same in every region. */}
       <p className="mt-8 mb-0 text-[13.5px] text-t5">
-        Prices in INR, excl. GST.{" "}
         <Link
           href="#contact"
           className="text-t3 underline underline-offset-2 hover:text-lime"
@@ -54,79 +57,6 @@ export default function Pricing({ tiers }: { tiers: PricingTier[] }) {
         </Link>
       </p>
     </Section>
-  );
-}
-
-/**
- * Renders a "from ₹99,999 / project" price with the leading "from" as a tiny
- * mono micro-label (the app's label grammar — see the eyebrow / currency label)
- * so it never competes with the amount, and the "/ project" period as a muted
- * suffix. Plain strings (no "from ") render whole, big.
- */
-function Price({ price, period }: { price: string; period?: string }) {
-  const from = /^from\s+/i.exec(price);
-  const main = from ? price.slice(from[0].length) : price;
-  return (
-    <div className="flex flex-wrap items-baseline gap-x-2">
-      {from ? (
-        <span className="font-mono text-[11px] font-medium tracking-[0.12em] text-t5 uppercase">
-          from
-        </span>
-      ) : null}
-      <span className="font-display text-[clamp(28px,4vw,38px)] font-bold leading-none tracking-[-0.02em]">
-        {main}
-      </span>
-      {period ? <span className="text-[13px] text-t5">{period}</span> : null}
-    </div>
-  );
-}
-
-function PricingCard({ tier }: { tier: PricingTier }) {
-  return (
-    <div className={`pricing-card${tier.highlighted ? " pricing-card--featured" : ""}`}>
-      {tier.badge ? (
-        <div className="absolute top-5 right-5 bg-lime px-2.5 py-1 font-mono text-[10.5px] font-bold tracking-[0.12em] text-lime-ink uppercase">
-          {tier.badge}
-        </div>
-      ) : null}
-
-      <div className="mb-1.5 font-display text-[19px] font-semibold">{tier.name}</div>
-      {/* Reserve two lines so a one-line blurb doesn't misalign the price row. */}
-      <div className="mb-[22px] min-h-[42px] text-[13.5px] leading-[1.5] text-t4">
-        {tier.blurb}
-      </div>
-
-      <div className="mb-6">
-        <Price price={tier.price} period={tier.period} />
-      </div>
-
-      {/* flex-1 pins the CTA to the bottom so cards in the row align. */}
-      <ul className="m-0 mb-6 flex flex-1 list-none flex-col gap-3 p-0">
-        {tier.features.map((feature) => (
-          <li
-            key={feature}
-            className={`flex gap-2.5 text-[14.5px] leading-[1.45] ${
-              tier.highlighted ? "text-t2" : "text-t3"
-            }`}
-          >
-            <span aria-hidden="true" className="mt-0.5 flex-none text-lime">
-              ▸
-            </span>
-            {feature}
-          </li>
-        ))}
-      </ul>
-
-      {isPurchasable(tier) ? (
-        <Link href={`/pricing/${tier.checkout.slug}`} className="pricing-cta">
-          {tier.cta}
-        </Link>
-      ) : (
-        <a href="#contact" className="pricing-cta">
-          {tier.cta}
-        </a>
-      )}
-    </div>
   );
 }
 
