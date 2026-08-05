@@ -47,6 +47,16 @@ describe("regionFromCountry", () => {
     expect(regionFromCountry(undefined)).toBe(DEFAULT_REGION);
   });
 
+  it("routes other Americas + rest of world to the USD default", () => {
+    // Product contract: only IN, UK and the EEA get their own currency. Every
+    // other market — the rest of the Americas, APAC, the Middle East, Africa,
+    // and Switzerland (which is NOT in the EEA) — resolves to the USD default.
+    for (const code of ["MX", "BR", "AR", "CL", "AU", "JP", "SG", "AE", "ZA", "CN", "CH"]) {
+      expect(regionFromCountry(code)).toBe(DEFAULT_REGION);
+    }
+    expect(DEFAULT_REGION).toBe("US");
+  });
+
   it("is case-insensitive on input", () => {
     expect(regionFromCountry("in")).toBe("IN");
     expect(regionFromCountry("gB")).toBe("UK");

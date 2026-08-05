@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import type { RegionCode } from "@/lib/content";
 import { formatInrMinor, type Billing } from "@/lib/pricing-amount";
 
 /**
@@ -99,6 +100,11 @@ type Props = {
   readonly annualNote?: string;
   /** A single fixed charge (e.g. the Discovery Sprint) — no monthly/annual toggle. */
   readonly oneTime?: boolean;
+  /** Region shown on first paint (server-resolved to DEFAULT_REGION). */
+  readonly initialRegion: RegionCode;
+  /** Region display price string (e.g. "$599") for SSR; the charge stays INR. */
+  readonly initialDisplayPrice: string;
+  readonly initialDisplayAnnualPrice?: string;
 };
 
 export default function CheckoutPanel({
@@ -108,16 +114,61 @@ export default function CheckoutPanel({
   amountMinorAnnual,
   annualNote,
   oneTime = false,
+  initialRegion,
+  initialDisplayPrice,
+  initialDisplayAnnualPrice,
 }: Props) {
   const [billing, setBilling] = useState<Billing>("monthly");
   const [status, setStatus] = useState<Status>("idle");
   const [error, setError] = useState<string | null>(null);
   const headingRef = useRef<HTMLHeadingElement>(null);
 
+  // Region-aware DISPLAY only — the charge below is ALWAYS INR. SSR paints the
+  // default region; on mount we fetch /api/pricing (geo + cookie) so the shown
+  // currency matches the pricing section the buyer came from. A failed fetch
+  // keeps the server-rendered default rather than blanking the price.
+  const [region, setRegion] = useState<RegionCode>(initialRegion);
+  const [displayPrice, setDisplayPrice] = useState(initialDisplayPrice);
+  const [displayAnnualPrice, setDisplayAnnualPrice] = useState(initialDisplayAnnualPrice);
+
+  useEffect(() => {
+    let live = true;
+    (async () => {
+      try {
+        const res = await fetch("/api/pricing", { headers: { accept: "application/json" } });
+        if (!res.ok) return;
+        const data = (await res.json()) as {
+          region: RegionCode;
+          tiers: Array<{ checkout?: { slug?: string }; price?: string; annualPrice?: string }>;
+        };
+        const match = data.tiers?.find((t) => t.checkout?.slug === slug);
+        if (live && match?.price) {
+          setRegion(data.region);
+          setDisplayPrice(match.price);
+          setDisplayAnnualPrice(match.annualPrice);
+        }
+      } catch {
+        // Keep the server-rendered default region.
+      }
+    })();
+    return () => {
+      live = false;
+    };
+  }, [slug]);
+
   const annual = billing === "annual";
   const amountMinor = annual ? amountMinorAnnual : amountMinorMonthly;
   const busy = status === "starting" || status === "verifying";
   const settled = status === "success" || status === "paid_unverified";
+
+  // The charge is INR, so IN shows the real charge amount; other regions show
+  // their indicative display string with the INR charge spelled out beneath.
+  const isIN = region === "IN";
+  const headline = isIN
+    ? formatInrMinor(amountMinor)
+    : annual && displayAnnualPrice
+      ? displayAnnualPrice
+      : displayPrice;
 
   // Move focus to the terminal confirmation once it renders. The Razorpay modal
   // that held focus is gone and the Pay button has unmounted, so without this
@@ -295,7 +346,7 @@ export default function CheckoutPanel({
       <div className="mb-6" aria-live="polite">
         <div className="flex items-baseline gap-1.5">
           <span className="font-display text-[clamp(32px,5vw,44px)] font-bold tracking-[-0.02em]">
-            {formatInrMinor(amountMinor)}
+            {headline}
           </span>
           <span className="text-sm text-t5">
             {oneTime ? "one-time" : annual ? "/ yr" : "/ mo"}
@@ -305,8 +356,9 @@ export default function CheckoutPanel({
           {annual && annualNote ? annualNote : ""}
         </div>
         <p className="mt-3 mb-0 font-mono text-[11.5px] leading-[1.5] tracking-[0.04em] text-t5">
-          Billed in INR via Razorpay — UPI, cards &amp; netbanking. International
-          cards are accepted and charged in INR.
+          {isIN
+            ? "Paid in INR via Razorpay — UPI, cards & netbanking."
+            : `Billed in INR (${formatInrMinor(amountMinor)}) via Razorpay — international cards accepted, charged in INR.`}
         </p>
       </div>
 
