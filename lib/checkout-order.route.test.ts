@@ -34,6 +34,21 @@ vi.mock("@/lib/razorpay", () => ({
     createOrderMock(input),
 }));
 
+// The route now reads the region from the pref_region cookie + the geo header —
+// control both per test. Default (no cookie, no geo) → US default → INR base.
+const cookieRegion = vi.fn((): string | undefined => undefined);
+const geoCountry = vi.fn((): string | null => null);
+vi.mock("next/headers", () => ({
+  cookies: async () => ({
+    get: (name: string) => {
+      const v = name === "pref_region" ? cookieRegion() : undefined;
+      return v ? { value: v } : undefined;
+    },
+  }),
+  headers: async () => ({ get: () => geoCountry() }),
+}));
+
+import { getPricingTiers } from "@/lib/sanity/queries";
 import { POST } from "@/app/api/checkout/order/route";
 
 const post = (body: unknown) =>
@@ -45,7 +60,11 @@ const post = (body: unknown) =>
     }),
   );
 
-afterEach(() => createOrderMock.mockClear());
+afterEach(() => {
+  createOrderMock.mockClear();
+  cookieRegion.mockReturnValue(undefined);
+  geoCountry.mockReturnValue(null);
+});
 
 describe("POST /api/checkout/order", () => {
   it("charges the SERVER-resolved amount, ignoring any price the client sends", async () => {
@@ -69,6 +88,27 @@ describe("POST /api/checkout/order", () => {
     expect(createOrderMock.mock.calls[0][0].amountMinor).toBe(
       scale.checkout!.annualAmountMinor,
     );
+  });
+
+  it("creates the order in the region's currency when the cookie region has one", async () => {
+    // A EU buyer with International Payments data → the order is EUR 54900, not INR.
+    const intlScale = {
+      ...scale,
+      checkout: {
+        ...scale.checkout!,
+        regionalCharges: [
+          { region: "EU" as const, currency: "EUR" as const, amountMinor: 54_900, annualAmountMinor: 54_900 },
+        ],
+      },
+    };
+    vi.mocked(getPricingTiers).mockResolvedValueOnce([intlScale]);
+    cookieRegion.mockReturnValue("EU");
+
+    await post({ tierSlug: "scale", billing: "monthly" });
+    expect(createOrderMock.mock.calls[0][0]).toMatchObject({
+      amountMinor: 54_900,
+      currency: "EUR",
+    });
   });
 
   it("404s a non-purchasable tier and never creates an order", async () => {

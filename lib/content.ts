@@ -286,6 +286,20 @@ export type TierCheckout = {
   howItWorks?: readonly { title: string; body: string }[];
   assurance?: readonly { title: string; body: string }[];
   faqs?: readonly { q: string; a: string }[];
+  /**
+   * Per-region charge amounts for Razorpay International Payments. When the
+   * visitor's region has a valid entry, the order is created in that currency
+   * (the customer pays €549; Razorpay settles to us in INR). Any region absent
+   * here — or any malformed amount — charges the INR base above. The customer
+   * pays in the currency they were shown; never a silent wrong amount.
+   */
+  regionalCharges?: readonly {
+    region: RegionCode;
+    currency: "INR" | "USD" | "EUR" | "GBP";
+    /** Smallest unit of `currency` — paise / cents / pence. */
+    amountMinor: number;
+    annualAmountMinor: number;
+  }[];
 };
 
 export type PricingTier = {

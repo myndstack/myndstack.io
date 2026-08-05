@@ -23,9 +23,10 @@ const ORDERS_URL = "https://api.razorpay.com/v1/orders";
 const TIMEOUT_MS = 8_000;
 
 export type CreateOrderInput = {
-  /** Smallest currency unit (paise). Resolved server-side; never from the client. */
+  /** Smallest currency unit (paise/cents/pence). Resolved server-side; never from the client. */
   readonly amountMinor: number;
-  readonly currency: "INR";
+  /** Charge currency. INR for domestic; USD/EUR/GBP need International Payments enabled. */
+  readonly currency: "INR" | "USD" | "EUR" | "GBP";
   /** ≤ 40 chars per Razorpay; a human-traceable reference for the dashboard. */
   readonly receipt: string;
   readonly notes?: Readonly<Record<string, string>>;

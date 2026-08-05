@@ -212,6 +212,57 @@ export default defineType({
             },
           ],
         }),
+        defineField({
+          name: "regionalCharges",
+          title: "Regional charge amounts (International Payments)",
+          description:
+            "Optional. A region listed here is CHARGED in its currency via Razorpay; regions absent charge the INR amount above. Amounts are in the currency's smallest unit — €549 → 54900 (cents). For one-time tiers set annual = amount.",
+          type: "array",
+          of: [
+            {
+              type: "object",
+              fields: [
+                defineField({
+                  name: "region",
+                  title: "Region",
+                  type: "string",
+                  options: {
+                    list: [
+                      { title: "India (INR)", value: "IN" },
+                      { title: "United States (USD)", value: "US" },
+                      { title: "Eurozone (EUR)", value: "EU" },
+                      { title: "United Kingdom (GBP)", value: "UK" },
+                    ],
+                    layout: "radio",
+                  },
+                  validation: (r) => r.required(),
+                }),
+                defineField({
+                  name: "currency",
+                  title: "Currency",
+                  type: "string",
+                  options: { list: ["INR", "USD", "EUR", "GBP"] },
+                  validation: (r) => r.required(),
+                }),
+                defineField({
+                  name: "amountMinor",
+                  title: "Amount (minor units)",
+                  type: "number",
+                  description: "e.g. €549 → 54900 (cents). Charged as-is.",
+                  validation: (r) => r.required().integer().positive(),
+                }),
+                defineField({
+                  name: "annualAmountMinor",
+                  title: "Annual amount (minor units)",
+                  type: "number",
+                  description: "Same as Amount for one-time tiers.",
+                  validation: (r) => r.required().integer().positive(),
+                }),
+              ],
+              preview: { select: { title: "region", subtitle: "currency" } },
+            },
+          ],
+        }),
       ],
     }),
   ],

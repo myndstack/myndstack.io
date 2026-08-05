@@ -1,3 +1,4 @@
+import { cookies, headers } from "next/headers";
 import { NextResponse } from "next/server";
 import { z } from "zod";
 
@@ -5,6 +6,12 @@ import { purchasableTierBySlug, resolveCharge } from "@/lib/pricing-amount";
 import { clientIp, rateLimit } from "@/lib/rate-limit";
 import { createOrder } from "@/lib/razorpay";
 import { isRazorpayConfigured } from "@/lib/razorpay-config";
+import {
+  COOKIE_REGION,
+  DEFAULT_REGION,
+  isRegionCode,
+  regionFromCountry,
+} from "@/lib/region";
 import { getPricingTiers } from "@/lib/sanity/queries";
 
 // node runtime: lib/razorpay uses node:crypto + Basic auth. Not edge.
@@ -57,7 +64,20 @@ export async function POST(request: Request) {
   // `checkout` block are purchasable; everything else 404s here.
   const tiers = await getPricingTiers();
   const tier = purchasableTierBySlug(tiers, parsed.data.tierSlug);
-  const charge = tier && resolveCharge(tier, parsed.data.billing);
+
+  // Resolve the region the SAME way /api/pricing does — the picker's cookie,
+  // then geo, then the default — so the charge currency matches the price the
+  // buyer was shown. A missing/malformed regional amount fails safe to INR
+  // inside chargeFor; it can never become a wrong foreign charge.
+  const cookieStore = await cookies();
+  const headerStore = await headers();
+  const cookieRegion = cookieStore.get(COOKIE_REGION)?.value;
+  const region =
+    (cookieRegion && isRegionCode(cookieRegion) ? cookieRegion : null) ??
+    regionFromCountry(headerStore.get("x-vercel-ip-country")) ??
+    DEFAULT_REGION;
+
+  const charge = tier && resolveCharge(tier, parsed.data.billing, region);
   if (!tier || !charge) {
     return NextResponse.json(
       { ok: false, error: "That plan isn't available to buy online." },

@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { PRICING_TIERS, type PricingTier } from "./content";
 import {
+  formatChargeMinor,
   formatInrMinor,
   isPurchasable,
   purchasableTierBySlug,
@@ -83,5 +84,66 @@ describe("formatInrMinor", () => {
     expect(formatInrMinor(90_000)).toBe("₹900");
     expect(formatInrMinor(900)).toBe("₹9");
     expect(formatInrMinor(0)).toBe("₹0");
+  });
+});
+
+/** A purchasable tier with region charges, incl. a deliberately-broken UK one. */
+const regionalTier: PricingTier = {
+  name: "Regional",
+  blurb: "x",
+  price: "x",
+  cta: "x",
+  highlighted: false,
+  features: ["x"],
+  checkout: {
+    slug: "regional",
+    currency: "INR",
+    amountMinor: 4_999_900,
+    annualAmountMinor: 4_999_900,
+    regionalCharges: [
+      { region: "EU", currency: "EUR", amountMinor: 54_900, annualAmountMinor: 54_900 },
+      { region: "US", currency: "USD", amountMinor: 59_900, annualAmountMinor: 59_900 },
+      // Malformed on purpose — must never become a £0 charge.
+      { region: "UK", currency: "GBP", amountMinor: 0, annualAmountMinor: 0 },
+    ],
+  },
+};
+
+describe("resolveCharge — regional (International Payments)", () => {
+  it("charges in the region's currency + amount when present", () => {
+    expect(resolveCharge(regionalTier, "monthly", "EU")).toEqual({ amountMinor: 54_900, currency: "EUR" });
+    expect(resolveCharge(regionalTier, "monthly", "US")).toEqual({ amountMinor: 59_900, currency: "USD" });
+    expect(resolveCharge(regionalTier, "annual", "EU")).toEqual({ amountMinor: 54_900, currency: "EUR" });
+  });
+
+  it("falls back to the INR base for a region with no entry (IN here)", () => {
+    expect(resolveCharge(regionalTier, "monthly", "IN")).toEqual({ amountMinor: 4_999_900, currency: "INR" });
+  });
+
+  it("fails SAFE to the INR base on a malformed regional amount — never a bad foreign charge", () => {
+    // UK's amount is 0 → must charge the INR base, not £0.
+    expect(resolveCharge(regionalTier, "monthly", "UK")).toEqual({ amountMinor: 4_999_900, currency: "INR" });
+  });
+
+  it("charges INR when no region is given (backward compatible)", () => {
+    expect(resolveCharge(regionalTier, "monthly")).toEqual({ amountMinor: 4_999_900, currency: "INR" });
+  });
+});
+
+describe("formatChargeMinor", () => {
+  it("formats foreign currencies with symbol + thousands, dropping .00", () => {
+    expect(formatChargeMinor(54_900, "EUR")).toBe("€549");
+    expect(formatChargeMinor(59_900, "USD")).toBe("$599");
+    expect(formatChargeMinor(45_900, "GBP")).toBe("£459");
+    expect(formatChargeMinor(129_900, "USD")).toBe("$1,299");
+    expect(formatChargeMinor(1_234_567, "USD")).toBe("$12,345.67");
+  });
+
+  it("shows cents only when present", () => {
+    expect(formatChargeMinor(54_950, "EUR")).toBe("€549.50");
+  });
+
+  it("keeps Indian grouping for INR", () => {
+    expect(formatChargeMinor(4_999_900, "INR")).toBe("₹49,999");
   });
 });

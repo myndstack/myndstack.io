@@ -6,7 +6,7 @@ import CheckoutPanel from "@/components/CheckoutPanel";
 import PageHeader from "@/components/PageHeader";
 import Reveal from "@/components/Reveal";
 import { isPurchasable, purchasableTierBySlug } from "@/lib/pricing-amount";
-import { DEFAULT_REGION, resolveTierForRegion } from "@/lib/region";
+import { DEFAULT_REGION } from "@/lib/region";
 import { getPricingTiers } from "@/lib/sanity/queries";
 
 type Params = { slug: string };
@@ -48,11 +48,6 @@ export default async function CheckoutPage({
   // Equal monthly/annual amounts means a single fixed charge (the sprint), not
   // a subscription — the panel drops its billing toggle and the copy follows.
   const oneTime = tier.checkout.amountMinor === tier.checkout.annualAmountMinor;
-
-  // Region-aware DISPLAY for the panel (the charge stays INR). SSR uses the
-  // default region; the panel swaps to the visitor's region on mount. See
-  // lib/region.ts — same source the pricing section resolves from.
-  const display = resolveTierForRegion(tier, DEFAULT_REGION);
 
   return (
     <>
@@ -176,8 +171,7 @@ export default async function CheckoutPage({
               annualNote={tier.annualNote}
               oneTime={oneTime}
               initialRegion={DEFAULT_REGION}
-              initialDisplayPrice={display.price}
-              initialDisplayAnnualPrice={display.annualPrice}
+              regionalCharges={tier.checkout.regionalCharges}
             />
           </aside>
         </div>

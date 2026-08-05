@@ -194,6 +194,19 @@ const checkoutSchema = z.object({
     .array(z.object({ q: nonEmpty, a: nonEmpty }))
     .nullish()
     .transform((v) => v ?? undefined),
+  // Per-region charge amounts (International Payments). Positive safe ints only,
+  // so a malformed CMS value fails parsing here rather than becoming a charge.
+  regionalCharges: z
+    .array(
+      z.object({
+        region: z.enum(["IN", "US", "EU", "UK"]),
+        currency: z.enum(["INR", "USD", "EUR", "GBP"]),
+        amountMinor: z.number().int().positive(),
+        annualAmountMinor: z.number().int().positive(),
+      }),
+    )
+    .nullish()
+    .transform((v) => v ?? undefined),
 }) satisfies z.ZodType<TierCheckout>;
 
 const pricingSchema = z.object({
@@ -380,7 +393,8 @@ export const getPricingTiers = cache(async (): Promise<PricingTier[]> => {
       },
       checkout{
         slug, currency, amountMinor, annualAmountMinor,
-        howItWorks[]{ title, body }, assurance[]{ title, body }, faqs[]{ q, a }
+        howItWorks[]{ title, body }, assurance[]{ title, body }, faqs[]{ q, a },
+        regionalCharges[]{ region, currency, amountMinor, annualAmountMinor }
       }
     }`,
     {},

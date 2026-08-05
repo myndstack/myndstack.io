@@ -1,8 +1,8 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import type { RegionCode } from "@/lib/content";
-import { formatInrMinor, type Billing } from "@/lib/pricing-amount";
+import type { RegionCode, TierCheckout } from "@/lib/content";
+import { chargeFor, formatChargeMinor, type Billing } from "@/lib/pricing-amount";
 
 /**
  * The buy panel on /pricing/[slug]. It never sees a secret and never sets an
@@ -11,8 +11,11 @@ import { formatInrMinor, type Billing } from "@/lib/pricing-amount";
  * POSTs the success payload to /api/checkout/verify. The webhook is the
  * authoritative fulfilment signal; this is the buyer's immediate confirmation.
  *
- * Every charge settles in INR (Razorpay, India) — international cards included —
- * so the displayed amount and the note say INR regardless of the viewer's region.
+ * The order is created in the visitor's currency via chargeFor (Razorpay
+ * International Payments) — €549 to a EU buyer, ₹49,999 to an IN one — and Razorpay
+ * settles it to us in INR. The shown price, the button, and the created order all
+ * come from the SAME chargeFor, so they can never diverge; a malformed regional
+ * amount fails safe to the INR base.
  *
  * Critical state rule: Razorpay's `handler` fires ONLY after money has actually
  * moved. So a failure inside verify() is a post-payment failure and must never
@@ -102,9 +105,9 @@ type Props = {
   readonly oneTime?: boolean;
   /** Region shown on first paint (server-resolved to DEFAULT_REGION). */
   readonly initialRegion: RegionCode;
-  /** Region display price string (e.g. "$599") for SSR; the charge stays INR. */
-  readonly initialDisplayPrice: string;
-  readonly initialDisplayAnnualPrice?: string;
+  /** Per-region charge amounts — drives the shown price, the button, and (via the
+   *  same chargeFor on the server) the created order. Absent region → INR base. */
+  readonly regionalCharges?: TierCheckout["regionalCharges"];
 };
 
 export default function CheckoutPanel({
@@ -115,21 +118,18 @@ export default function CheckoutPanel({
   annualNote,
   oneTime = false,
   initialRegion,
-  initialDisplayPrice,
-  initialDisplayAnnualPrice,
+  regionalCharges,
 }: Props) {
   const [billing, setBilling] = useState<Billing>("monthly");
   const [status, setStatus] = useState<Status>("idle");
   const [error, setError] = useState<string | null>(null);
   const headingRef = useRef<HTMLHeadingElement>(null);
 
-  // Region-aware DISPLAY only — the charge below is ALWAYS INR. SSR paints the
-  // default region; on mount we fetch /api/pricing (geo + cookie) so the shown
-  // currency matches the pricing section the buyer came from. A failed fetch
-  // keeps the server-rendered default rather than blanking the price.
+  // The buyer's region decides which currency we charge in. SSR paints the
+  // default region; on mount we read the same region /api/pricing resolves
+  // (geo + cookie), so the checkout charges in the currency the pricing section
+  // showed. A failed fetch keeps the server default rather than blanking.
   const [region, setRegion] = useState<RegionCode>(initialRegion);
-  const [displayPrice, setDisplayPrice] = useState(initialDisplayPrice);
-  const [displayAnnualPrice, setDisplayAnnualPrice] = useState(initialDisplayAnnualPrice);
 
   useEffect(() => {
     let live = true;
@@ -137,16 +137,8 @@ export default function CheckoutPanel({
       try {
         const res = await fetch("/api/pricing", { headers: { accept: "application/json" } });
         if (!res.ok) return;
-        const data = (await res.json()) as {
-          region: RegionCode;
-          tiers: Array<{ checkout?: { slug?: string }; price?: string; annualPrice?: string }>;
-        };
-        const match = data.tiers?.find((t) => t.checkout?.slug === slug);
-        if (live && match?.price) {
-          setRegion(data.region);
-          setDisplayPrice(match.price);
-          setDisplayAnnualPrice(match.annualPrice);
-        }
+        const data = (await res.json()) as { region?: RegionCode };
+        if (live && data.region) setRegion(data.region);
       } catch {
         // Keep the server-rendered default region.
       }
@@ -154,21 +146,30 @@ export default function CheckoutPanel({
     return () => {
       live = false;
     };
-  }, [slug]);
+  }, []);
 
   const annual = billing === "annual";
   const amountMinor = annual ? amountMinorAnnual : amountMinorMonthly;
   const busy = status === "starting" || status === "verifying";
   const settled = status === "success" || status === "paid_unverified";
 
-  // The charge is INR, so IN shows the real charge amount; other regions show
-  // their indicative display string with the INR charge spelled out beneath.
-  const isIN = region === "IN";
-  const headline = isIN
-    ? formatInrMinor(amountMinor)
-    : annual && displayAnnualPrice
-      ? displayAnnualPrice
-      : displayPrice;
+  // Single source of truth for money — the SAME chargeFor the order route runs.
+  // The shown price, the button and the created order are one number; any missing
+  // or malformed regional amount falls back here to the INR base.
+  const charge =
+    chargeFor(
+      {
+        slug,
+        currency: "INR",
+        amountMinor: amountMinorMonthly,
+        annualAmountMinor: amountMinorAnnual,
+        regionalCharges,
+      },
+      billing,
+      region,
+    ) ?? { amountMinor, currency: "INR" as const };
+  const isIN = charge.currency === "INR";
+  const headline = formatChargeMinor(charge.amountMinor, charge.currency);
 
   // Move focus to the terminal confirmation once it renders. The Razorpay modal
   // that held focus is gone and the Pay button has unmounted, so without this
@@ -357,8 +358,8 @@ export default function CheckoutPanel({
         </div>
         <p className="mt-3 mb-0 font-mono text-[11.5px] leading-[1.5] tracking-[0.04em] text-t5">
           {isIN
-            ? "Paid in INR via Razorpay — UPI, cards & netbanking."
-            : `Billed in INR (${formatInrMinor(amountMinor)}) via Razorpay — international cards accepted, charged in INR.`}
+            ? "Pay in INR via Razorpay — UPI, cards & netbanking."
+            : "Secure international payment via Razorpay — cards, Apple Pay & more."}
         </p>
       </div>
 
@@ -372,7 +373,7 @@ export default function CheckoutPanel({
           ? "Starting…"
           : status === "verifying"
             ? "Confirming…"
-            : `Pay ${formatInrMinor(amountMinor)}`}
+            : `Pay ${headline}`}
       </button>
 
       {status === "error" && error ? (
