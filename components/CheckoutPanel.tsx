@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { RegionCode, TierCheckout } from "@/lib/content";
 import { chargeFor, formatChargeMinor, type Billing } from "@/lib/pricing-amount";
+import PaymentMarks from "./PaymentMarks";
 
 /**
  * The buy panel on /pricing/[slug]. It never sees a secret and never sets an
@@ -168,7 +169,6 @@ export default function CheckoutPanel({
       billing,
       region,
     ) ?? { amountMinor, currency: "INR" as const };
-  const isIN = charge.currency === "INR";
   const headline = formatChargeMinor(charge.amountMinor, charge.currency);
 
   // Move focus to the terminal confirmation once it renders. The Razorpay modal
@@ -344,7 +344,7 @@ export default function CheckoutPanel({
         </div>
       ) : null}
 
-      <div className="mb-6" aria-live="polite">
+      <div className="mb-5" aria-live="polite">
         <div className="flex items-baseline gap-1.5">
           <span className="font-display text-[clamp(32px,5vw,44px)] font-bold tracking-[-0.02em]">
             {headline}
@@ -356,11 +356,12 @@ export default function CheckoutPanel({
         <div className="mt-2 h-3.5 font-mono text-[11px] tracking-[0.04em] text-lime">
           {annual && annualNote ? annualNote : ""}
         </div>
-        <p className="mt-3 mb-0 font-mono text-[11.5px] leading-[1.5] tracking-[0.04em] text-t5">
-          {isIN
-            ? "Pay in INR via Razorpay — UPI, cards & netbanking."
-            : "Secure international payment via Razorpay — cards, Apple Pay & more."}
-        </p>
+      </div>
+
+      {/* Accepted-method marks (region-aware) — clean monochrome renditions; the
+          official logos also show inside the Razorpay modal on Pay. */}
+      <div className="mb-4">
+        <PaymentMarks region={region} />
       </div>
 
       <button
@@ -382,9 +383,29 @@ export default function CheckoutPanel({
         </p>
       ) : null}
 
-      <p className="mt-4 mb-0 text-[12px] leading-[1.5] text-t5">
-        Secure payment handled by Razorpay. Card details never touch Myndstack.
-      </p>
+      {/* Trust + branding footer. "Powered by Razorpay" as styled text is the
+          branding Razorpay asks merchants to show; the security claims are true
+          (Razorpay is PCI-DSS Level 1) and the card-data line is real (their JS,
+          not ours, handles the card). */}
+      <div className="mt-5 border-t border-line pt-4">
+        <div className="flex items-start gap-2">
+          <svg
+            viewBox="0 0 16 16"
+            fill="none"
+            aria-hidden="true"
+            className="mt-px size-3.5 flex-none text-t5"
+          >
+            <rect x="3.25" y="7" width="9.5" height="6.75" rx="1.25" stroke="currentColor" strokeWidth="1.3" />
+            <path d="M5.5 7V5.25a2.5 2.5 0 0 1 5 0V7" stroke="currentColor" strokeWidth="1.3" />
+          </svg>
+          <p className="m-0 text-[12px] leading-[1.5] text-t5">
+            Secured by Razorpay · PCI-DSS Level 1. Card details never touch Myndstack.
+          </p>
+        </div>
+        <div className="mt-3 flex items-center gap-1.5 font-mono text-[10px] font-medium tracking-[0.12em] text-t5 uppercase">
+          Powered by <span className="text-t2">Razorpay</span>
+        </div>
+      </div>
     </div>
   );
 }
