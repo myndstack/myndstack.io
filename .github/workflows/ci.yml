@@ -25,26 +25,44 @@ jobs:
           node-version: 22
           cache: npm
 
-      - run: npm ci
+      - id: install
+        run: npm ci
 
+      # Every check below runs even when an earlier one failed. GitHub's default
+      # is to abandon the job at the first failure, which meant a lint error —
+      # the cheapest check, and the first to run — silently skipped the unit
+      # tests, the build and the whole browser suite. Three days of red main
+      # runs reported nothing except "lint failed"; nobody knew whether the site
+      # still built. A failing step still fails the job, so this hides nothing;
+      # it just stops one failure from suppressing every other answer.
+      #
+      # Gated on the install rather than `always()`: with no node_modules the
+      # remaining steps cannot say anything useful, and `always()` would also
+      # run them after a cancellation.
       - name: Typecheck
+        if: ${{ !cancelled() && steps.install.outcome == 'success' }}
         run: npx tsc --noEmit
 
       - name: Lint
+        if: ${{ !cancelled() && steps.install.outcome == 'success' }}
         run: npx eslint .
 
       - name: Unit tests
+        if: ${{ !cancelled() && steps.install.outcome == 'success' }}
         run: npm test
 
       - name: Build
+        if: ${{ !cancelled() && steps.install.outcome == 'success' }}
         run: npm run build
 
       # Chromium only — the full browser set triples the download for no gain
       # on a suite this size.
       - name: Install Playwright Chromium
+        if: ${{ !cancelled() && steps.install.outcome == 'success' }}
         run: npx playwright install --with-deps chromium
 
       - name: Browser smoke tests
+        if: ${{ !cancelled() && steps.install.outcome == 'success' }}
         run: npm run test:e2e
 
       - uses: actions/upload-artifact@v4
