@@ -15,6 +15,35 @@ type Props = {
 };
 
 /**
+ * Fetch the caller's region-resolved pricing. Module scope, and returns a plain
+ * result rather than setting state — the same shape as CheckoutPanel's
+ * `fetchRegions`, and for the same reason: a setState hidden behind a plain
+ * function call is invisible to the effect lint rule, which then has to assume
+ * the worst and flags the call site.
+ *
+ * Returns null on any failure, which callers read as "keep what we have" rather
+ * than blanking the section.
+ */
+async function fetchRegionPricing(): Promise<
+  { region: RegionCode; tiers: ResolvedTier[] } | null
+> {
+  try {
+    const res = await fetch("/api/pricing", {
+      headers: { accept: "application/json" },
+    });
+    if (!res.ok) return null;
+    const data = (await res.json()) as {
+      region: RegionCode;
+      tiers: ResolvedTier[];
+    };
+    return data?.tiers?.length ? data : null;
+  } catch {
+    // Network hiccup — the caller keeps the server-rendered default.
+    return null;
+  }
+}
+
+/**
  * Client layer of the Pricing section: the currency picker plus the tier cards.
  *
  * SSR renders the default-region (US) prices the server resolved — matching what
@@ -28,28 +57,32 @@ export default function PricingCards({ initialTiers }: Props) {
   const [region, setRegion] = useState<RegionCode>(DEFAULT_REGION);
   const [tiers, setTiers] = useState<ResolvedTier[]>(initialTiers);
 
-  async function load() {
-    try {
-      const res = await fetch("/api/pricing", { headers: { accept: "application/json" } });
-      if (!res.ok) return;
-      const data = (await res.json()) as { region: RegionCode; tiers: ResolvedTier[] };
-      if (data?.tiers?.length) {
-        setTiers(data.tiers);
-        setRegion(data.region);
-      }
-    } catch {
-      // Network hiccup — keep the server-rendered default rather than blanking.
-    }
-  }
-
-  // Sync to the visitor's real region once, after hydration.
+  // Sync to the visitor's real region once, after hydration. `live` guards the
+  // unmount race — a response landing after the section has gone sets state on
+  // the way out. The setState calls sit inside the async closure rather than
+  // behind a plain call so the effect lint rule can see they are not
+  // synchronous; same shape as CheckoutPanel.
   useEffect(() => {
-    void load();
+    let live = true;
+    void (async () => {
+      const next = await fetchRegionPricing();
+      if (!live || !next) return;
+      setTiers(next.tiers);
+      setRegion(next.region);
+    })();
+    return () => {
+      live = false;
+    };
   }, []);
 
-  const onPick = (next: RegionCode | null) => {
+  // An event handler, not an effect — a plain await reads fine here.
+  const onPick = async (next: RegionCode | null) => {
     if (next) setRegion(next); // optimistic — the select reflects the pick at once
-    void load(); // the picker already wrote the cookie; fetch that region's prices
+    // The picker already wrote the cookie; fetch that region's prices.
+    const data = await fetchRegionPricing();
+    if (!data) return;
+    setTiers(data.tiers);
+    setRegion(data.region);
   };
 
   return (

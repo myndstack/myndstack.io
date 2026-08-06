@@ -9,7 +9,7 @@ import {
   STRIDE,
   type Program,
 } from "@/lib/gl";
-import { useMediaQuery, useReducedMotion } from "@/lib/hooks";
+import { useMediaQuery, useReducedMotion, useSaveData } from "@/lib/hooks";
 import { subscribeToScroll } from "@/lib/scroll";
 import ParticleField from "./ParticleField";
 
@@ -95,19 +95,14 @@ export default function HeroNetwork() {
   const [unsupported, setUnsupported] = useState(false);
   const reduced = useReducedMotion();
   const isDesktop = useMediaQuery("(min-width: 47.5rem)");
+  // Data-saver clients skip the WebGL cost entirely and get the light 2D field
+  // instead. Read as an external store rather than set into `unsupported` from
+  // inside the effect: that was a setState in an effect body, and it also meant
+  // the GL bootstrap was scheduled before the check could cancel it.
+  const saveData = useSaveData();
 
   useEffect(() => {
-    if (reduced || !isDesktop) return;
-
-    // Data-saver clients skip the ~WebGL cost entirely and get the light 2D
-    // field instead (rendered via the `unsupported` branch below).
-    const conn = (
-      navigator as Navigator & { connection?: { saveData?: boolean } }
-    ).connection;
-    if (conn?.saveData) {
-      setUnsupported(true);
-      return;
-    }
+    if (reduced || !isDesktop || saveData) return;
 
     // Defer the whole GL bootstrap — shader compile + node-graph build + first
     // frame — until the browser is idle, so the hero H1 (the LCP element) paints
@@ -639,14 +634,15 @@ export default function HeroNetwork() {
       else window.clearTimeout(idleId as number);
       teardown();
     };
-  }, [reduced, isDesktop]);
+  }, [reduced, isDesktop, saveData]);
 
   if (reduced) return null;
   // Below 760px the GPU network is too heavy for the battery, so the hero gets the
   // lighter 2D field instead — dimmed, so it reads as texture rather than a bare
   // black panel. Naturally sparse at phone dimensions (area-scaled node count).
   if (!isDesktop) return <ParticleField dim />;
-  if (unsupported) return <ParticleField />;
+  // No WebGL context, or the client asked us not to spend their data on one.
+  if (unsupported || saveData) return <ParticleField />;
 
   return (
     <canvas

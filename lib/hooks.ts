@@ -53,6 +53,40 @@ export function useReducedMotion(): boolean {
   return useMediaQuery(REDUCED_MOTION_QUERY);
 }
 
+type SaveDataConnection = {
+  saveData?: boolean;
+  addEventListener?: (type: "change", listener: () => void) => void;
+  removeEventListener?: (type: "change", listener: () => void) => void;
+};
+
+const getConnection = (): SaveDataConnection | undefined =>
+  (navigator as Navigator & { connection?: SaveDataConnection }).connection;
+
+/**
+ * Whether the client asked for reduced data use (`navigator.connection.saveData`).
+ *
+ * Same primitive as useMediaQuery, for the same reason: this is an external
+ * store, and reading it through `useSyncExternalStore` keeps it out of an
+ * effect — a `setState` in an effect body is the cascade React's lint rules
+ * flag. `false` during SSR and hydration so the markup matches; the real value
+ * lands immediately after, exactly as the media queries do.
+ *
+ * The Network Information API is Chromium-only and every member is optional
+ * here, so an absent `connection` (Safari, Firefox) simply reads as "no
+ * preference" rather than throwing.
+ */
+export function useSaveData(): boolean {
+  return useSyncExternalStore(
+    (onStoreChange) => {
+      const conn = getConnection();
+      conn?.addEventListener?.("change", onStoreChange);
+      return () => conn?.removeEventListener?.("change", onStoreChange);
+    },
+    () => getConnection()?.saveData === true,
+    getServerSnapshot,
+  );
+}
+
 /**
  * Subscribes to the shared scroll loop. The callback runs inside the rAF frame
  * and should mutate styles directly rather than call setState — these fire on
@@ -226,12 +260,22 @@ export function useTurnstileGate(
 
   // A failed submit consumes the single-use token — clear it and ask for a fresh
   // challenge so a retry isn't rejected as a duplicate.
-  useEffect(() => {
+  //
+  // Adjusted during render against the previous `error` rather than in an
+  // effect. React re-runs the component immediately with the new state and
+  // never commits the intermediate render, so the widget is reset before the
+  // user can see a stale token; the effect version painted once with the dead
+  // token still in hand. It also drops `enabled` from the trigger — that is
+  // derived from a site key which cannot change at runtime, so the only real
+  // trigger was ever `error`.
+  const [seenError, setSeenError] = useState(error);
+  if (error !== seenError) {
+    setSeenError(error);
     if (error && enabled) {
       setToken(null);
       setResetSignal((n) => n + 1);
     }
-  }, [error, enabled]);
+  }
 
   // A token arriving clears stale "couldn't load" / "please verify" state — the
   // error-callback can fire transiently and then recover on retry.
