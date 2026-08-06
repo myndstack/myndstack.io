@@ -391,43 +391,40 @@ compositor wash the whole link mesh out.
 It falls back to the 2D [ParticleField](components/ParticleField.tsx) where WebGL is
 unavailable, and renders nothing below 760px or under reduced motion.
 
-### Background: aurora + section fields
+### Background: the stack-story field
 
-The page's middle run — **StackStory → Studio (the Team section, the nav labels it
-"Studio")** — carries a two-layer backdrop, wrapped once in
-[app/page.tsx](app/page.tsx). Everything above (hero, marquee) and below (Careers,
-FAQ, CTA, contact) stays on plain ink.
+The page sits on plain ink. One section — **StackStory** — carries a decorated
+backdrop, the Hybrid A+B **field** ([SectionField](components/SectionField.tsx)):
+a blueprint grid, a canvas of travelling lime *signals* that ride the grid lines,
+and a **cursor spotlight** that brightens the grid cells under the pointer (a
+masked opacity layer in CSS, positioned by two custom properties). Earlier
+iterations layered drifting glows over the open sections and then a page-wide
+aurora behind the whole StackStory → Team run; both read as busy on an already
+animation-rich page and were pulled back to the one signature moment. The grid's
+cell size must match `GRID` in SectionField.tsx — the signals ride the lines the
+CSS draws.
 
-**Layer 1 — [Aurora](components/Aurora.tsx):** the continuous base, a handful of
-large, slowly drifting lime glows over the ink, no grid and no dots, behind the
-whole run. Pure CSS (a plain server component; `auroraDrift*` keyframes in
-`globals.css`; reduced motion freezes it). Two decisions, both held by `the aurora
-stays in its lane` in [e2e/smoke.spec.ts](e2e/smoke.spec.ts):
+Three constraints, all held by tests in [e2e/smoke.spec.ts](e2e/smoke.spec.ts):
 
-- **Viewport-pinned, not stretched over the run.** A zero-height `sticky` anchor
-  keeps a `100vh` layer at the top of the screen while you scroll, so the glow is
-  uniform. Stretching one tall `absolute` layer instead pools all the light behind
-  the 340vh pinned StackStory and starves the shorter sections below — the first
-  attempt did exactly that.
-- **The run wrapper must stay clip-free.** StackStory pins with `position: sticky`,
-  and an `overflow`-clip ancestor would break the pin. So the wrapper is `relative
-  isolate` (no clip); the aurora sits at a negative z-index and clips its *own*
-  blobs.
+- **The field lives *inside* StackStory's sticky element.** StackStory pins with
+  `position: sticky`, and an ancestor that scroll-clips overflow breaks the pin
+  silently — nothing errors, the section just scrolls through. The clip that
+  contains the field is on the sticky box itself, which is safe. Held by `the
+  stack story keeps its pin`, which walks the sticky element's ancestors and
+  asserts none is a vertical scroll container (`overflow: clip` stays legal — it
+  creates no scroll container, which is why `#site`'s `overflow-x-clip` is fine).
+- **The signals canvas runs on desktop with motion only**, and pauses off screen
+  via an `IntersectionObserver`; mobile and reduced motion get the static grid.
+  Held by `the section fields stay in their lane`.
+- **The spotlight does no layout reads on its hot path.** Pointer coordinates
+  convert against a cached document-space origin (refreshed by a `ResizeObserver`,
+  the same pattern as Nav and StackStory) — a `getBoundingClientRect()` in the
+  per-move rAF would land in the same frames as the scroll loop's class writes
+  and force synchronous layout whenever the user scrolls with the cursor over
+  the pinned section. Hover-only: it never binds on touch or under reduced
+  motion, and the hover tests in the same describe hold both directions.
 
-**Layer 2 — the Hybrid A+B field** ([SectionField](components/SectionField.tsx)): a
-blueprint grid + drifting glow + travelling *signals* canvas, kept **for the
-StackStory moment only** — every other section in the run floats on the aurora
-alone. This is deliberate restraint: the earlier version layered the field across
-all five "open" sections, which read as busy on an already animation-rich page, so
-it was pulled back to the one signature moment. The field's own glows are dialled
-back so they add grid-and-signal texture over the aurora rather than doubling the
-lime; its `signals` canvas is paused off-screen by an `IntersectionObserver`, and
-mobile/reduced-motion get grid + glow only. It lives *inside* StackStory's own
-sticky element (an `overflow-clip` wrapper would break the pin, same reason as the
-aurora). Held by `the section fields stay in their lane` in
-[e2e/smoke.spec.ts](e2e/smoke.spec.ts).
-
-Because glow sits under a lot of headings and muted copy, the standing axe guard
+Because the grid sits under headings and muted copy, the standing axe guard
 (below) is what confirms it never pushes text below contrast — it stayed at zero
 serious violations.
 
