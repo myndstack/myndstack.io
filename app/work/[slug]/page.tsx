@@ -76,7 +76,7 @@ export default async function CasePage({ params }: { params: Promise<Params> }) 
         ]}
       />
 
-      <div className="mx-auto max-w-[1200px] px-5 pt-14 pb-[88px] sm:px-14">
+      <div className="page-column pt-14 pb-[88px]">
         {/* Headline metrics — gap-px hairlines, same device as the homepage card. */}
         <div className="mb-14 grid grid-cols-2 gap-px overflow-hidden border border-line bg-line md:grid-cols-4">
           {study.metrics.map((m) => (

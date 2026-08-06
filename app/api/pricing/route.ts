@@ -10,10 +10,15 @@ import {
   resolveTiersForRegion,
 } from "@/lib/region";
 
-export const runtime = "edge";
+// nodejs, not edge: the perf win here is small (a plain Sanity GROQ read),
+// and the sanity query chain would have to stay edge-safe forever otherwise —
+// one future helper touching node:crypto or Buffer would break this route at
+// request time with no build-time signal. The rest of the API sits on nodejs
+// for the same reason. Move to edge only when a benchmark says it matters.
+export const runtime = "nodejs";
 // The response body varies by cookie + geo, so we must not let a shared cache
-// stash a single response. `private, no-store` keeps CDN/edge caches out of
-// the loop; the client picker refetches on region change anyway.
+// stash a single response. `private, no-store` keeps CDN caches out of the
+// loop; the client picker refetches on region change anyway.
 export const dynamic = "force-dynamic";
 
 /**

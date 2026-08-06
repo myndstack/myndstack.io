@@ -34,7 +34,11 @@ export default function Footer({ site }: { site: SiteSettings }) {
 
           <div className="max-w-[360px]">
             <div className={colHeadClass}>Newsletter</div>
-            <Newsletter />
+            {/* Pass the Turnstile site key through — Newsletter runs the same
+                Turnstile gate the contact and careers forms use. Widget stays
+                invisible under normal traffic (interaction-only mode); a
+                visible challenge appears only if Cloudflare escalates. */}
+            <Newsletter turnstileSiteKey={process.env.TURNSTILE_SITE_KEY ?? ""} />
           </div>
 
           {/* Socials shown at ≤lg only. Contact details (email/phone/location)

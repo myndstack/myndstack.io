@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { useInView, useReducedMotion } from "@/lib/hooks";
+import { useCssSupports, useInView, useReducedMotion } from "@/lib/hooks";
 
 /** Delay between each word lighting up. */
 const STEP_MS = 55;
@@ -20,9 +20,13 @@ export default function Manifesto({ lead, keep }: { lead: string; keep: string }
    * the compositor — see `.manifesto-word` in globals.css. There the JS timer
    * path is redundant, so it's skipped and `litCount` stays 0 (the CSS
    * animation owns the colour). Older browsers keep the timer cascade.
+   *
+   * `useCssSupports` reads `false` during SSR and hydration; the real answer
+   * arrives after mount. Same primitive `useMediaQuery` uses — via
+   * `useSyncExternalStore`, so no set-state-in-effect and no risk that a
+   * future JSX read produces a hydration mismatch.
    */
-  const nativeView =
-    typeof CSS !== "undefined" && CSS.supports("animation-timeline: view()");
+  const nativeView = useCssSupports("animation-timeline: view()");
 
   /**
    * Under reduced motion every word is simply lit — derived here rather than

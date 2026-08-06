@@ -53,6 +53,26 @@ export function useReducedMotion(): boolean {
   return useMediaQuery(REDUCED_MOTION_QUERY);
 }
 
+const noopSubscribe = () => () => {};
+
+/**
+ * Whether the browser supports a specific `animation-timeline` feature via
+ * `CSS.supports()`. `false` during SSR and hydration; the real answer arrives
+ * after mount, which matches how the media-query hooks behave.
+ *
+ * `useSyncExternalStore` instead of `useEffect`+`setState`: the value is
+ * static per browser session and the rule that flags "setState in an effect"
+ * would (correctly) reject the naive shape. This is the same primitive
+ * `useMediaQuery` reaches for, for the same reason.
+ */
+export function useCssSupports(query: string): boolean {
+  return useSyncExternalStore(
+    noopSubscribe,
+    () => typeof CSS !== "undefined" && CSS.supports(query),
+    getServerSnapshot,
+  );
+}
+
 type SaveDataConnection = {
   saveData?: boolean;
   addEventListener?: (type: "change", listener: () => void) => void;

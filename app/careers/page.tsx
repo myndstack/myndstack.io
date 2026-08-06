@@ -48,7 +48,7 @@ export default async function CareersPage() {
         breadcrumbs={[{ label: "Home", href: "/" }]}
       />
 
-      <section className="mx-auto max-w-[1200px] px-5 pt-14 pb-12 sm:px-14">
+      <section className="page-column pt-14 pb-12">
         <h2 className="sr-only">How we work</h2>
         <div className="grid grid-cols-1 gap-px border-t border-line bg-line xs:grid-cols-2 md:grid-cols-3">
           {PRINCIPLES.map((p) => (
@@ -63,7 +63,7 @@ export default async function CareersPage() {
 
       <section
         id="open-roles"
-        className="mx-auto max-w-[1200px] scroll-mt-28 px-5 pt-12 pb-[88px] sm:px-14"
+        className="page-column scroll-mt-28 pt-12 pb-[88px]"
       >
         <div className="eyebrow mb-3.5">Open roles</div>
         <h2 className="h2-section mb-9">

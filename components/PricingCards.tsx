@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import type { RegionCode } from "@/lib/content";
 import { isPurchasable } from "@/lib/pricing-amount";
@@ -57,6 +57,17 @@ export default function PricingCards({ initialTiers }: Props) {
   const [region, setRegion] = useState<RegionCode>(DEFAULT_REGION);
   const [tiers, setTiers] = useState<ResolvedTier[]>(initialTiers);
 
+  // Track mount for the handler below. The mount effect already uses a local
+  // `live`; this ref covers `onPick`, which may resolve after the section is
+  // gone (route change during the fetch).
+  const alive = useRef(true);
+  useEffect(() => {
+    alive.current = true;
+    return () => {
+      alive.current = false;
+    };
+  }, []);
+
   // Sync to the visitor's real region once, after hydration. `live` guards the
   // unmount race — a response landing after the section has gone sets state on
   // the way out. The setState calls sit inside the async closure rather than
@@ -80,7 +91,7 @@ export default function PricingCards({ initialTiers }: Props) {
     if (next) setRegion(next); // optimistic — the select reflects the pick at once
     // The picker already wrote the cookie; fetch that region's prices.
     const data = await fetchRegionPricing();
-    if (!data) return;
+    if (!alive.current || !data) return;
     setTiers(data.tiers);
     setRegion(data.region);
   };

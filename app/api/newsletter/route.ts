@@ -5,21 +5,29 @@ import { newsletterSchema } from "@/lib/schemas";
 export const runtime = "nodejs";
 
 /**
- * Bot protection here is honeypot + the per-IP rate limit only — deliberately
- * NOT Turnstile. Contact and Careers apply carry a visible Turnstile widget
- * because the cost of a false positive on those (missed lead, missed
- * application) is bounded; a challenge on the footer newsletter would fire on
- * every marketing page for every visitor. See lib/form-route.ts for how
- * requireTurnstile behaves when enabled.
+ * Bot protection is honeypot + the per-IP rate limit + Turnstile. Turnstile
+ * runs in interaction-only mode so the footer widget stays invisible under
+ * normal traffic and only becomes visible if Cloudflare escalates. That
+ * balances the two competing concerns: a challenge on every marketing-page
+ * footer would be too much friction, and honeypot alone lets a determined
+ * botnet flood the Resend audience and the notification inbox.
  *
- * If newsletter spam becomes real: switch this route to `requireTurnstile:
- * true` AND add the Turnstile widget to components/Newsletter.tsx (invisible
- * or size="compact" so the footer stays quiet), NOT one without the other.
+ * The partial-config guard in handleFormSubmission means this route falls
+ * through under a deploy with no Turnstile keys at all (dev / e2e / a first
+ * cut of prod that omits Cloudflare deliberately) but refuses whenever the
+ * SITE key is set without the SECRET — the "widget visible, verification
+ * off" trap.
  */
 export async function POST(request: Request) {
-  return handleFormSubmission(request, newsletterSchema, (data) => ({
-    subject: `Newsletter signup — ${data.email}`,
-    replyTo: data.email,
-    fields: [["Email", data.email]],
-  }), [(data) => subscribe(data.email)]);
+  return handleFormSubmission(
+    request,
+    newsletterSchema,
+    (data) => ({
+      subject: `Newsletter signup — ${data.email}`,
+      replyTo: data.email,
+      fields: [["Email", data.email]],
+    }),
+    [(data) => subscribe(data.email)],
+    { requireTurnstile: true },
+  );
 }

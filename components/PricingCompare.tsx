@@ -62,7 +62,16 @@ export default function PricingCompare({ tierNames, onOpen }: Props) {
         data-open={open ? "true" : "false"}
       >
         <div className="compare-reveal__inner">
-          <div className="overflow-x-auto border border-line">
+          {/*
+            The scroll container wants a visible right-edge affordance below the
+            720px min-table-width, where content is hidden off-screen and a
+            trackpad user gets no scrollbar to hint at it. `.compare-scroll`
+            (globals.css) fades the right ~48px when the table is horizontally
+            scrollable and the user hasn't reached the end — a plain
+            mask-image with `mask-composite: intersect` fed by a scroll-driven
+            gradient stop, no JS.
+          */}
+          <div className="compare-scroll overflow-x-auto border border-line">
             <table className="w-full min-w-[720px] border-collapse text-left">
               <thead>
                 {/* Lit header band — --edge-lip (inset, so the overflow-hidden

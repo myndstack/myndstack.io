@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import { useScrollFrame } from "@/lib/hooks";
+import { useCssSupports, useScrollFrame } from "@/lib/hooks";
 import type { Social } from "@/lib/content";
 import Magnetic from "./Magnetic";
 import SocialIcon from "./SocialIcon";
@@ -23,10 +23,13 @@ export default function ProgressSpine({ socials }: { socials: Social[] }) {
    * (see `.spine-fill` / `.spine-dot` in globals.css), the JS path below is
    * pure overhead — and a running CSS animation overrides inline transforms
    * anyway. Skip the per-frame writes there so modern browsers do zero
-   * per-frame work. Computed on the client (this is a "use client" component).
+   * per-frame work.
+   *
+   * `useCssSupports` reads `false` during SSR and hydration; the real answer
+   * arrives after mount via `useSyncExternalStore`, so there's no
+   * set-state-in-effect and no hydration mismatch if this ever gets read in JSX.
    */
-  const nativeTimeline =
-    typeof CSS !== "undefined" && CSS.supports("animation-timeline: scroll(root)");
+  const nativeTimeline = useCssSupports("animation-timeline: scroll(root)");
 
   useEffect(() => {
     if (nativeTimeline) return;

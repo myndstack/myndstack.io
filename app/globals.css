@@ -495,6 +495,40 @@
     transform: translateY(0);
   }
 
+  /* A fade on the right edge that only shows when the table overflows and the
+     user hasn't reached the end. `--_end` reads the horizontal scroll offset
+     against `animation-timeline: scroll(self inline)`, which reaches 1 at the
+     end. The fade multiplies by (1 − end), so it's fully opaque at rest,
+     softens as you scroll, and disappears at the far right.
+
+     Under 720px the min-width table always overflows; above it the mask stays
+     but the gradient stop is past the right edge and paints nothing. Reduced
+     motion browsers without scroll-timeline get a permanent fade, which is
+     imperfect but better than nothing — the alternative was a JS scroll listener
+     duplicating what the platform can now do declaratively. */
+  .compare-scroll {
+    --_end: 0;
+    mask-image: linear-gradient(
+      to right,
+      #000 calc(100% - 48px * (1 - var(--_end))),
+      transparent
+    );
+  }
+  @supports (animation-timeline: scroll()) {
+    .compare-scroll {
+      animation: compare-scroll-end linear both;
+      animation-timeline: scroll(self inline);
+    }
+    @keyframes compare-scroll-end {
+      from { --_end: 0; }
+      to   { --_end: 1; }
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    /* Freeze the fade in its default (visible) state — never announce motion. */
+    .compare-scroll { animation: none; }
+  }
+
   /* --- Sub-page masthead (PageHeader) ---
      PageHeader sits UNDER the fixed nav and on the page ink, so its depth has to
      read below the nav line, not above it: a lit BOTTOM seam marks it as a
@@ -599,6 +633,58 @@
       background 0.16s var(--ease-brand),
       border-color 0.16s var(--ease-brand),
       color 0.16s var(--ease-brand);
+  }
+  /* Standard sub-page content column: 1200px max, 20px inline gutter,
+     56px at sm+. Vertical padding stays per-page because the leading section
+     under a PageHeader often wants a tighter top than the section under it —
+     `<Section>` (the homepage-style variant) bakes both dimensions; this
+     primitive is horizontal only. Extracted after six sub-page files carried
+     the same `mx-auto max-w-[1200px] px-5 sm:px-14` block by hand. */
+  .page-column {
+    margin-inline: auto;
+    max-width: 1200px;
+    padding-inline: 20px;
+  }
+  @media (min-width: 640px) {
+    .page-column { padding-inline: 56px; }
+  }
+
+  /* Small ghost button — the primitive for the Apply / "Have a promo code?"
+     controls in the checkout panel and anywhere else a tertiary action wants
+     mono-uppercase weight without competing with the primary button visually.
+     Half the height of .btn and a fraction of the padding; border comes on
+     hover rather than at rest so it stays quiet in dense contexts. */
+  .btn-ghost-sm {
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+    color: var(--color-t3);
+    border: 1px solid var(--color-line-3);
+    padding: 8px 12px;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    transition:
+      border-color 0.16s var(--ease-brand),
+      color 0.16s var(--ease-brand);
+  }
+  .btn-ghost-sm:hover:not(:disabled):not([aria-disabled="true"]) {
+    border-color: var(--color-lime);
+    color: var(--color-lime);
+  }
+  .btn-ghost-sm:focus-visible {
+    outline: none;
+    border-color: var(--color-lime);
+    box-shadow: 0 0 0 1px var(--color-lime);
+  }
+  .btn-ghost-sm:disabled,
+  .btn-ghost-sm[aria-disabled="true"] {
+    cursor: not-allowed;
+    opacity: 0.5;
   }
   .btn:disabled,
   .btn[aria-disabled="true"] {

@@ -24,14 +24,22 @@ export default function Faq({ faqs }: { faqs: FaqItem[] }) {
         title="Frequently asked."
       />
 
-      <Reveal className="flex flex-col gap-3">
+      {/*
+        A <ul>/<li> pair, not bare <div>s: screen readers announce this as
+        "list, N items" and let the user step through them with list-nav
+        commands. The visible design is the standard WAI accordion — buttons
+        with aria-expanded and per-panel region — and the list wrapping adds a
+        landmark on top of that rather than replacing anything.
+      */}
+      <Reveal>
+        <ul className="m-0 flex list-none flex-col gap-3 p-0">
         {faqs.map((faq, i) => {
           const open = openIndex === i;
           const panelId = `${baseId}-panel-${i}`;
           const buttonId = `${baseId}-button-${i}`;
 
           return (
-            <div
+            <li
               key={faq.q}
               // Open state lifts: the fill lightens AND a lit top edge
               // (--edge-lip) reads it as a raised plane, same language as the
@@ -76,9 +84,10 @@ export default function Faq({ faqs }: { faqs: FaqItem[] }) {
                   </p>
                 </div>
               </div>
-            </div>
+            </li>
           );
         })}
+        </ul>
       </Reveal>
     </section>
   );

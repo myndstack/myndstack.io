@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useState, type FormEvent } from "react";
+import { useCallback, useEffect, useRef, useState, type FormEvent } from "react";
 import type { z } from "zod";
 import { TURNSTILE_RESPONSE_FIELD, toFieldErrors, type FormResponse } from "./form-shared";
 
@@ -36,6 +36,18 @@ async function loadSchema(name: SchemaName): Promise<z.ZodType> {
 export function useFormPost(endpoint: string, schemaName: SchemaName) {
   const [state, setState] = useState<State>(IDLE);
 
+  // Track mount so a submit that resolves after the form unmounts (route
+  // change, terminal state replacing the form) doesn't setState on a dead
+  // tree. React 19 no-ops the setState silently, but the request+parse still
+  // runs against the dead closure and the intent stays clearer this way.
+  const alive = useRef(true);
+  useEffect(() => {
+    alive.current = true;
+    return () => {
+      alive.current = false;
+    };
+  }, []);
+
   const submit = useCallback(
     async (event: FormEvent<HTMLFormElement>) => {
       event.preventDefault();
@@ -45,6 +57,7 @@ export function useFormPost(endpoint: string, schemaName: SchemaName) {
       setState({ ...IDLE, pending: true });
 
       const schema = await loadSchema(schemaName);
+      if (!alive.current) return;
       const parsed = schema.safeParse(values);
 
       if (!parsed.success) {
@@ -71,12 +84,15 @@ export function useFormPost(endpoint: string, schemaName: SchemaName) {
         });
         result = (await response.json()) as FormResponse;
       } catch {
+        if (!alive.current) return;
         setState({
           ...IDLE,
           error: "Couldn't reach the server. Check your connection and try again.",
         });
         return;
       }
+
+      if (!alive.current) return;
 
       if (!result.ok) {
         const fieldErrors = result.fieldErrors ?? {};

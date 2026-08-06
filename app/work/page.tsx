@@ -29,7 +29,7 @@ export default async function WorkPage() {
         breadcrumbs={[{ label: "Home", href: "/" }]}
       />
 
-      <section className="mx-auto max-w-[1200px] px-5 pt-14 pb-[88px] sm:px-14">
+      <section className="page-column pt-14 pb-[88px]">
         <h2 className="sr-only">Case studies</h2>
 
         <div className="grid grid-cols-1 gap-[18px] sm:grid-cols-2">

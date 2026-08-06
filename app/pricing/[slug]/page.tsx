@@ -61,7 +61,7 @@ export default async function CheckoutPage({
         ]}
       />
 
-      <div className="mx-auto max-w-[1200px] px-5 pt-14 pb-[88px] sm:px-14">
+      <div className="page-column pt-14 pb-[88px]">
         {/* Mobile order is deliberate and differs from desktop: what you get,
             then the buy panel, then the long-form detail. Source order alone
             gets it — the single-column grid stacks these three children as

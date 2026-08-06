@@ -178,6 +178,21 @@ export default function CheckoutPanel({
   const [region, setRegion] = useState<RegionCode>(initialRegion);
   const [taxRegion, setTaxRegion] = useState<RegionCode>(initialRegion);
 
+  // Track mount for the user-initiated async paths below (verify, applyPromo,
+  // pay). The mount effect already uses a `live` local; this ref covers the
+  // handlers, which can complete after the panel unmounts — a route change
+  // during a slow Razorpay verify, or the terminal success screen replacing
+  // the form mid-request. React 19 no-ops setState on unmounted components,
+  // but the promises resolve against a dead closure regardless; guarding is
+  // clearer than relying on that.
+  const alive = useRef(true);
+  useEffect(() => {
+    alive.current = true;
+    return () => {
+      alive.current = false;
+    };
+  }, []);
+
   /**
    * Promo state. `applied` holds the CODE and the previewed discount, but the
    * discount is only ever for display — the order route looks the code up and
@@ -289,11 +304,13 @@ export default function CheckoutPanel({
         }),
       });
       const data = (await res.json()) as { ok?: boolean };
+      if (!alive.current) return;
       // Any post-payment failure lands in paid_unverified — never back to an
       // armed Pay button. The money already moved; the signed webhook still
       // reaches us even if this confirmation call didn't.
       setStatus(res.ok && data.ok ? "success" : "paid_unverified");
     } catch {
+      if (!alive.current) return;
       setStatus("paid_unverified");
     }
   }, []);
@@ -320,6 +337,7 @@ export default function CheckoutPanel({
         code?: string;
         discountMinor?: number;
       };
+      if (!alive.current) return;
       if (data.ok && data.code && typeof data.discountMinor === "number") {
         setApplied({ code: data.code, discountMinor: data.discountMinor });
         setPromoInput("");
@@ -328,9 +346,11 @@ export default function CheckoutPanel({
         setPromoError(data.message ?? "That code isn't valid.");
       }
     } catch {
+      if (!alive.current) return;
       setPromoError("Couldn't check that code. Try again.");
     } finally {
-      setPromoBusy(false);
+      // `finally` still runs on unmount — guard the setState explicitly.
+      if (alive.current) setPromoBusy(false);
     }
   }, [promoInput, promoBusy, slug, billing]);
 
@@ -372,6 +392,7 @@ export default function CheckoutPanel({
         amount?: number;
         currency?: string;
       };
+      if (!alive.current) return;
       if (!orderRes.ok || !order.ok || !order.keyId || !order.orderId) {
         // Pre-payment failure — no money moved, so Pay stays retryable.
         setStatus("error");
@@ -380,6 +401,7 @@ export default function CheckoutPanel({
       }
 
       const ready = await loadRazorpay();
+      if (!alive.current) return;
       if (!ready || !window.Razorpay) {
         setStatus("error");
         setError("The payment window couldn't load. Check your connection and try again.");
@@ -405,6 +427,7 @@ export default function CheckoutPanel({
       setStatus("idle");
       rzp.open();
     } catch {
+      if (!alive.current) return;
       setStatus("error");
       setError("Something went wrong starting the payment. Please try again.");
     }
@@ -649,7 +672,7 @@ export default function CheckoutPanel({
                     type="button"
                     onClick={() => void applyPromo()}
                     disabled={promoBusy || !promoInput.trim()}
-                    className="ease-brand shrink-0 border border-line-3 px-3 py-2 font-mono text-[11px] font-bold tracking-[0.1em] text-t3 uppercase transition-colors duration-160 hover:border-lime hover:text-lime disabled:cursor-not-allowed disabled:opacity-50"
+                    className="btn-ghost-sm shrink-0"
                   >
                     {promoBusy ? "…" : "Apply"}
                   </button>

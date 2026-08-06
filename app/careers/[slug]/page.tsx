@@ -88,7 +88,7 @@ export default async function RolePage({ params }: { params: Promise<Params> }) 
         ]}
       />
 
-      <div className="mx-auto max-w-[1200px] px-5 pt-14 pb-[88px] sm:px-14">
+      <div className="page-column pt-14 pb-[88px]">
         <div className="grid grid-cols-1 gap-14 md:grid-cols-[1.15fr_1fr]">
           <article>
             <dl className="mb-11 grid grid-cols-2 gap-px overflow-hidden border border-line bg-line xs:grid-cols-4">
