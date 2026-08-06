@@ -43,10 +43,15 @@ export default function Manifesto({ lead, keep }: { lead: string; keep: string }
   return (
     <section
       id="manifesto"
+      // A landmark with no accessible name announces as "region" — the eyebrow
+      // is the visible name, so point at it. Screen readers now list this in
+      // the landmark rotor as "Manifesto region", the same as any other
+      // sectioned block.
+      aria-labelledby="manifesto-eyebrow"
       tabIndex={-1}
       className="mx-auto max-w-[1120px] px-5 py-28 focus:outline-none sm:px-14"
     >
-      <div className="eyebrow mb-[26px] tracking-[0.16em]">Manifesto</div>
+      <div id="manifesto-eyebrow" className="eyebrow mb-[26px] tracking-[0.16em]">Manifesto</div>
       <p
         ref={ref}
         className="m-0 font-display text-[30px] leading-[1.16] font-medium tracking-[-0.02em] text-balance sm:text-[50px]"

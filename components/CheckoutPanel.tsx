@@ -643,7 +643,7 @@ export default function CheckoutPanel({
                     autoCapitalize="characters"
                     spellCheck={false}
                     disabled={promoBusy}
-                    className="ease-brand min-w-0 flex-1 border border-line-3 bg-surface px-3 py-2 font-mono text-[12px] tracking-[0.06em] text-t2 uppercase transition-colors duration-160 placeholder:text-t6 placeholder:normal-case focus:border-lime focus:outline-none"
+                    className="ease-brand min-w-0 flex-1 border border-line-3 bg-surface px-3 py-2 font-mono text-[12px] tracking-[0.06em] text-t2 uppercase transition-colors duration-160 placeholder:text-t6 placeholder:normal-case focus:border-lime focus:shadow-[0_0_0_1px_var(--color-lime)] focus:outline-none"
                   />
                   <button
                     type="button"

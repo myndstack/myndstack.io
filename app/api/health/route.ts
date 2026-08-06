@@ -22,6 +22,13 @@ export function GET() {
 
   return NextResponse.json(
     { ok, deliverable: MAIL_STATUS.state === "deliverable" },
-    { status: ok ? 200 : 503 },
+    {
+      status: ok ? 200 : 503,
+      // `dynamic = "force-dynamic"` disables Next's own cache but any CDN or
+      // corporate proxy sitting in front is free to cache the JSON body. A
+      // stale 200 is precisely the failure mode this endpoint exists to
+      // prevent, so refuse to be cached at every layer.
+      headers: { "cache-control": "no-store" },
+    },
   );
 }

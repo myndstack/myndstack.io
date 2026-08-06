@@ -1,3 +1,9 @@
+// Server-only: this module holds an in-memory IP hit map. It has no reason to
+// reach a client bundle, and shipping the map would leak visitor IPs. Every
+// current caller is an API route, so this is preventive rather than a fix — but
+// the marker was drifted-off from the rest of the secret-adjacent lib/.
+import "server-only";
+
 /**
  * Sliding-window rate limit held in process memory.
  *

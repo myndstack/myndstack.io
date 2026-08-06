@@ -85,11 +85,26 @@ export async function handleFormSubmission<S extends z.ZodType>(
         { status: 400 },
       );
     }
-  } else if (options.requireTurnstile && process.env.NODE_ENV === "production") {
-    // Skipping is only meant for local dev / e2e. In production it means the
-    // secret is missing — bot protection is OFF. Make that loud in the logs.
-    console.warn(
-      "Turnstile is required for this route but TURNSTILE_SECRET_KEY is not set — bot protection is OFF.",
+  } else if (
+    options.requireTurnstile &&
+    process.env.NODE_ENV === "production" &&
+    process.env.TURNSTILE_SITE_KEY
+  ) {
+    // PARTIAL configuration in production: the site key is set, so the client
+    // is showing a Turnstile widget and asking users to solve it, but the
+    // secret is missing so we can't verify anything they send. The widget then
+    // functions as security theatre — every request gets through, and the
+    // deployment looks protected without being so. Refuse rather than proceed.
+    //
+    // If BOTH keys are unset, the client doesn't render the widget at all and
+    // no one is misled: fall through, matching the previous behaviour and how
+    // the e2e suite runs a production build without any Turnstile config.
+    console.error(
+      "Turnstile is partially configured (site key set, secret missing) — refusing requests.",
+    );
+    return NextResponse.json(
+      { ok: false, error: "The form isn't available right now." },
+      { status: 503 },
     );
   }
 

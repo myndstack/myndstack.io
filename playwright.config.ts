@@ -35,6 +35,12 @@ export default defineConfig({
     env: {
       // Lets the contact form succeed without a live provider. See lib/mail.ts.
       MAIL_TRANSPORT: "console",
+      // No Turnstile keys — this suite exercises the "unconfigured deploy"
+      // path deliberately. handleFormSubmission's fail-closed only fires when
+      // the SITE key is set but the SECRET isn't (a partial config, which is
+      // the real deploy mistake); with both unset, the client doesn't render
+      // the widget and the server skips verification, matching how the
+      // production build behaves without either variable.
     },
   },
 });

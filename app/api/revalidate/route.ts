@@ -33,10 +33,14 @@ const KNOWN_TAG = new Set<string>(Object.values(TAGS));
 export async function POST(req: NextRequest) {
   if (!secret) {
     // A misconfiguration, not a client error: refuse rather than revalidate on
-    // an unverifiable request.
+    // an unverifiable request. The body used to name the missing env var,
+    // which is helpful in dev and unhelpful to anyone probing this URL on
+    // production. Log it instead; the caller gets the generic 401 the
+    // signature branch would return.
+    console.error("SANITY_REVALIDATE_SECRET is not set");
     return NextResponse.json(
-      { revalidated: false, error: "SANITY_REVALIDATE_SECRET is not set" },
-      { status: 500 },
+      { revalidated: false, error: "Unauthorized" },
+      { status: 401 },
     );
   }
 

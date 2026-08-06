@@ -1,4 +1,11 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
+
+// `import "server-only"` throws at import time in a non-server context (vitest
+// runs its own environment), so stub it here — same pattern as the other route
+// tests. This does not weaken the marker's real job: it's still enforced by
+// the Next bundler when a client module tries to import rate-limit.
+vi.mock("server-only", () => ({}));
+
 import { clientIp, rateLimit } from "./rate-limit";
 
 /** Unique key per test so the module-level window doesn't leak between them. */

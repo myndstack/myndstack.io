@@ -17,3 +17,11 @@ next-env.d.ts
 .vercel
 *.tsbuildinfo
 _import/
+
+# Agent/tooling state, machine-local (Ruflo, Serena, Claude Code proven-config).
+# .claude/settings.local.json is Claude Code's per-machine settings file, likewise.
+.claude-flow/
+.serena/
+.claude/settings.local.json
+.claude/.proven-config-version
+.claude/proven-config.json
