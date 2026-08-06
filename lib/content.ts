@@ -82,7 +82,13 @@ export const SITE = {
 export type NavLink = { label: string; href: string; section?: string };
 
 export const NAV_LINKS: readonly NavLink[] = [
-  { label: "Product", href: "/#platform", section: "platform" },
+  // Product's href targets `#platform-anchor` (a hidden span 120vh into the
+  // StackStory section), NOT the section's own `#platform`. Landing flush at
+  // the section top puts the reveal formula at `progress = 0`, which paints
+  // every tile at opacity 0 — see StackStory.tsx for the anchor span itself
+  // and the reasoning. `section: "platform"` stays because scroll-spy watches
+  // the section, not the anchor.
+  { label: "Product", href: "/#platform-anchor", section: "platform" },
   { label: "Solutions", href: "/#work-grid", section: "work-grid" },
   { label: "Customers", href: "/work", section: "work-cases" },
   { label: "Pricing", href: "/#pricing", section: "pricing" },
