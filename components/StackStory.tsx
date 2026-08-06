@@ -91,6 +91,57 @@ export default function StackStory() {
     }
   }, [reduced]);
 
+  /**
+   * Land the "Product" nav click INSIDE the section, not at its very top.
+   *
+   * The scroll frame maps `progress = (scrollY − sectionTop) / total` to each
+   * tile's opacity via `raw = clamp((progress − k*STAGGER) / WINDOW, 0, 1)`.
+   * Anchor navigation lands the browser flush at the section top (globals.css
+   * sets `scroll-padding-top: 0` deliberately), which is `progress = 0` — and
+   * `raw` is 0 for every tile, so every tile is `opacity: 0`. The right-hand
+   * column reads as empty until the visitor produces scroll delta. Same
+   * behaviour the reduced-motion path already dodges via the pre-assemble
+   * above; motion-allowed visitors were the ones seeing the bug.
+   *
+   * Rather than warp the reveal formula, land the anchor at ~50 % progress —
+   * layers 0 and 1 fully locked, layer 2 nearly locked, layer 3 partially
+   * cascading. The section reads as "story in progress" the moment you arrive,
+   * and forward scroll still completes the assembly.
+   *
+   * Runs on mount when the URL already carries `#platform`, and on every
+   * subsequent `hashchange` (a Product nav click while already on the page).
+   * Reduced-motion opts out — those visitors already see the assembled state.
+   */
+  useEffect(() => {
+    if (reduced) return;
+
+    const landInside = () => {
+      if (window.location.hash !== "#platform") return;
+      const section = sectionRef.current;
+      if (!section) return;
+      const top = section.getBoundingClientRect().top + window.scrollY;
+      const total = section.offsetHeight - window.innerHeight;
+      if (total <= 0) return;
+      // Overrides the browser's own smooth-scroll toward top; the destination
+      // is what matters, and browsers coalesce successive scrollTos into one
+      // continuous animation.
+      window.scrollTo({ top: top + total * 0.5, behavior: "smooth" });
+    };
+
+    // Initial load with #platform already in the URL. Defer a frame so the
+    // measure effect above has run and the layout is stable.
+    if (window.location.hash === "#platform") {
+      const raf = requestAnimationFrame(landInside);
+      window.addEventListener("hashchange", landInside);
+      return () => {
+        cancelAnimationFrame(raf);
+        window.removeEventListener("hashchange", landInside);
+      };
+    }
+    window.addEventListener("hashchange", landInside);
+    return () => window.removeEventListener("hashchange", landInside);
+  }, [reduced]);
+
   useScrollFrame(({ y }) => {
     // Under reduced motion the tiles are pre-assembled by the effect above; don't
     // drive the scatter/fly-in per scroll frame.
