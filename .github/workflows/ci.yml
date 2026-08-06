@@ -2,7 +2,10 @@ name: CI
 
 on:
   push:
-    branches: [main]
+    # dev is where all work lands (see AGENTS.md); main only ever fast-forwards
+    # to it. Without dev here nothing runs until the merge — which is how a red
+    # lint and a broken browser test once sat on dev unnoticed.
+    branches: [main, dev]
   pull_request:
 
 jobs:
