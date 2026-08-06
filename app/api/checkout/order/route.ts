@@ -2,7 +2,12 @@ import { cookies, headers } from "next/headers";
 import { NextResponse } from "next/server";
 import { z } from "zod";
 
-import { purchasableTierBySlug, resolveCharge } from "@/lib/pricing-amount";
+import {
+  chargeFor,
+  purchasableTierBySlug,
+  resolveBreakdown,
+} from "@/lib/pricing-amount";
+import { evaluatePromo, normalizeCode } from "@/lib/promo";
 import { clientIp, rateLimit } from "@/lib/rate-limit";
 import { createOrder } from "@/lib/razorpay";
 import { isRazorpayConfigured } from "@/lib/razorpay-config";
@@ -12,7 +17,7 @@ import {
   isRegionCode,
   regionFromCountry,
 } from "@/lib/region";
-import { getPricingTiers } from "@/lib/sanity/queries";
+import { getPricingTiers, getPromoCode } from "@/lib/sanity/queries";
 
 // node runtime: lib/razorpay uses node:crypto + Basic auth. Not edge.
 export const runtime = "nodejs";
@@ -26,6 +31,13 @@ export const runtime = "nodejs";
 const bodySchema = z.object({
   tierSlug: z.string().min(1).max(64),
   billing: z.enum(["monthly", "annual"]),
+  /**
+   * The CODE only — never a discount amount. The server looks it up and
+   * evaluates it again from scratch; a `discountMinor` sent from the browser is
+   * not in this schema and so cannot reach the charge, for exactly the reason
+   * an `amount` cannot.
+   */
+  promoCode: z.string().min(1).max(64).optional(),
 });
 
 export async function POST(request: Request) {
@@ -72,13 +84,77 @@ export async function POST(request: Request) {
   const cookieStore = await cookies();
   const headerStore = await headers();
   const cookieRegion = cookieStore.get(COOKIE_REGION)?.value;
+
+  // Read the header raw rather than through regionFromCountry, which folds a
+  // missing country into DEFAULT_REGION — that would make "no geo available"
+  // indistinguishable from "genuinely in the US", and an Indian buyer on a
+  // deploy without the header would silently lose their GST.
+  const geoCountry = headerStore.get("x-vercel-ip-country");
+  const geoRegion = geoCountry ? regionFromCountry(geoCountry) : null;
+
+  // CURRENCY: the buyer's own pick wins. That is what the dropdown is for.
   const region =
     (cookieRegion && isRegionCode(cookieRegion) ? cookieRegion : null) ??
-    regionFromCountry(headerStore.get("x-vercel-ip-country")) ??
+    geoRegion ??
     DEFAULT_REGION;
 
-  const charge = tier && resolveCharge(tier, parsed.data.billing, region);
-  if (!tier || !charge) {
+  // PLACE OF SUPPLY: geo, and only geo, whenever we have it. A dropdown cannot
+  // move a buyer to another country. Before this split, one value drove both,
+  // so picking "USD" on /#pricing switched off an Indian buyer's 18% GST — an
+  // 18% leak reachable from the UI, no tampering required.
+  //
+  // Caveat, unchanged by this: `x-vercel-ip-country` is not authoritative
+  // against a caller who forges it (see the note in /api/pricing). This closes
+  // the accidental path, not header spoofing — that needs a strip-and-reinject
+  // upstream, which is infrastructure rather than code.
+  const taxRegion = geoRegion ?? region;
+
+  if (!tier) {
+    return NextResponse.json(
+      { ok: false, error: "That plan isn't available to buy online." },
+      { status: 404 },
+    );
+  }
+
+  /**
+   * Re-evaluate the promo HERE, from the code alone. The panel already previewed
+   * it, but that answer reached us via the browser and is therefore a
+   * suggestion. Same `evaluatePromo` the preview route runs, so the two cannot
+   * disagree about what a code is worth.
+   *
+   * An invalid code yields no discount rather than failing the order. By this
+   * point the buyer has committed to the gesture, and a code that expired
+   * between preview and slide should charge the honest full price rather than
+   * dead-end them — Razorpay's sheet restates the amount before any money moves.
+   */
+  const netForPromo = chargeFor(tier.checkout, parsed.data.billing, region);
+  let discountMinor = 0;
+  let appliedCode: string | null = null;
+  if (parsed.data.promoCode && netForPromo) {
+    const result = evaluatePromo(await getPromoCode(parsed.data.promoCode), {
+      tierSlug: tier.checkout.slug,
+      netMinor: netForPromo.amountMinor,
+      currency: netForPromo.currency,
+      now: new Date(),
+    });
+    if (result.ok) {
+      discountMinor = result.discountMinor;
+      appliedCode = normalizeCode(result.code);
+    }
+  }
+
+  // The breakdown, not the bare charge: the discount comes off first, then
+  // statutory tax (GST for IN) on what remains — by the SAME pure function the
+  // panel renders from, so the total on screen and the order amount cannot
+  // drift apart.
+  const charge = resolveBreakdown(
+    tier,
+    parsed.data.billing,
+    region,
+    taxRegion,
+    discountMinor,
+  );
+  if (!charge) {
     return NextResponse.json(
       { ok: false, error: "That plan isn't available to buy online." },
       { status: 404 },
@@ -90,13 +166,30 @@ export async function POST(request: Request) {
     40,
   );
   const result = await createOrder({
-    amountMinor: charge.amountMinor,
+    // grossMinor — net plus tax. Never charge `netMinor`.
+    amountMinor: charge.grossMinor,
     currency: charge.currency,
     receipt,
+    // The split rides along on the order so the tax on any payment can be
+    // reconciled from Razorpay alone, without re-deriving it from the CMS
+    // amounts as they stood on the day. Notes are strings.
     notes: {
       tier: tier.name,
       slug: tier.checkout.slug,
       billing: parsed.data.billing,
+      // `region` is the PLACE OF SUPPLY — the one that justifies the tax line,
+      // and so the one an auditor needs. The currency choice is recorded
+      // separately; the two differ whenever a buyer picks a foreign currency.
+      region: taxRegion,
+      currency_region: region,
+      net_minor: String(charge.netMinor),
+      // The redemption record. Written here, on the payment itself, so usage
+      // can be counted from Razorpay alone — and so a counter added later can
+      // be backfilled from real history rather than starting at zero.
+      promo_code: appliedCode ?? "none",
+      discount_minor: String(charge.discountMinor),
+      tax_minor: String(charge.taxMinor),
+      tax_label: charge.taxLabel ?? "none",
     },
   });
 

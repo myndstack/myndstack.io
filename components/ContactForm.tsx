@@ -50,9 +50,11 @@ export default function ContactForm({
           <div className="flex flex-col gap-[18px]">
             <div>
               <div className="label-mono mb-[5px]">Email</div>
+              {/* Inline element, so the vertical padding costs no layout at all
+                  — it only grows the hit area from 22px to 30px (WCAG 2.5.8). */}
               <a
                 href={`mailto:${email}`}
-                className="font-display text-[17px] text-white hover:text-lime"
+                className="py-1 font-display text-[17px] text-white hover:text-lime"
               >
                 {email}
               </a>
@@ -61,7 +63,7 @@ export default function ContactForm({
               <div className="label-mono mb-[5px]">Phone</div>
               <a
                 href={phoneHref}
-                className="font-display text-[17px] text-white hover:text-lime"
+                className="py-1 font-display text-[17px] text-white hover:text-lime"
               >
                 {phone}
               </a>

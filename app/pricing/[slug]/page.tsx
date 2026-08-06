@@ -62,32 +62,69 @@ export default async function CheckoutPage({
       />
 
       <div className="mx-auto max-w-[1200px] px-5 pt-14 pb-[88px] sm:px-14">
-        <div className="grid grid-cols-1 gap-14 md:grid-cols-[1.15fr_1fr]">
-          <article>
-            <Reveal>
-              <section className="mb-11">
-                <h2 className="m-0 mb-4 font-display text-2xl font-semibold tracking-[-0.02em]">
-                  What&apos;s included
-                </h2>
-                <ul className="m-0 flex list-none flex-col gap-3 p-0">
-                  {tier.features.map((feature) => (
-                    <li
-                      key={feature}
-                      className="flex gap-3.5 text-[15.5px] leading-[1.55] text-t3"
-                    >
-                      <span aria-hidden="true" className="flex-none text-lime">
-                        ▸
-                      </span>
-                      {feature}
-                    </li>
-                  ))}
-                </ul>
-              </section>
-            </Reveal>
+        {/* Mobile order is deliberate and differs from desktop: what you get,
+            then the buy panel, then the long-form detail. Source order alone
+            gets it — the single-column grid stacks these three children as
+            written, and the md: placement puts the text back in one column with
+            the panel beside it. No `order` utilities, so the DOM order a screen
+            reader and a keyboard walk IS the visual order at every width.
 
+            Before this, the panel came after all four sections: on a phone the
+            only call to action sat roughly three screens below the fold. */}
+        <div className="grid grid-cols-1 gap-11 md:grid-cols-[1.15fr_1fr] md:gap-x-14">
+          <Reveal className="md:col-start-1 md:row-start-1">
+            <section>
+              <h2 className="m-0 mb-4 font-display text-2xl font-semibold tracking-[-0.02em]">
+                What&apos;s included
+              </h2>
+              <ul className="m-0 flex list-none flex-col gap-3 p-0">
+                {tier.features.map((feature) => (
+                  <li
+                    key={feature}
+                    className="flex gap-3.5 text-[15.5px] leading-[1.55] text-t3"
+                  >
+                    <span aria-hidden="true" className="flex-none text-lime">
+                      ▸
+                    </span>
+                    {feature}
+                  </li>
+                ))}
+              </ul>
+            </section>
+          </Reveal>
+
+          {/* Row-spanning so the sticky panel has a tall grid area to travel
+              inside on desktop; on mobile it is simply the second block. */}
+          {/* Reveal-wrapped so the panel's angular corner ANIMATES open: the
+              `.reveal:not(.is-in) [class*=clip-angular]` rule pins `--cut` to 0
+              and releases it on entry, which is the site's own tell. Outside a
+              Reveal the cut is simply frozen at its final value — the panel was
+              wearing the shape without the gesture. */}
+          {/* Capped and pushed right. At the column's full width the panel ran
+              ~480px, which left every summary row stranded — a label at the far
+              left, a number at the far right, nothing between. 400px is the
+              width a checkout card wants; the slack goes to the reading column
+              instead of stretching the card. */}
+          <aside className="md:col-start-2 md:row-start-1 md:row-span-2 md:sticky md:top-28 md:w-full md:max-w-[400px] md:justify-self-end md:self-start">
+            <Reveal>
+              <CheckoutPanel
+                slug={tier.checkout.slug}
+                tierName={tier.name}
+                description={tier.blurb}
+                amountMinorMonthly={tier.checkout.amountMinor}
+                amountMinorAnnual={tier.checkout.annualAmountMinor}
+                annualNote={tier.annualNote}
+                oneTime={oneTime}
+                initialRegion={DEFAULT_REGION}
+                regionalCharges={tier.checkout.regionalCharges}
+              />
+            </Reveal>
+          </aside>
+
+          <div className="md:col-start-1 md:row-start-2">
             {tier.checkout.howItWorks?.length ? (
               <Reveal>
-                <section className="mb-11">
+                <section>
                   <h2 className="m-0 mb-5 font-display text-2xl font-semibold tracking-[-0.02em]">
                     How it works
                   </h2>
@@ -112,69 +149,51 @@ export default async function CheckoutPage({
               </Reveal>
             ) : null}
 
-            {tier.checkout.assurance?.length ? (
-              <Reveal>
-                <ul className="mb-11 grid list-none grid-cols-1 gap-px overflow-hidden border border-line bg-line p-0 sm:grid-cols-3">
-                  {tier.checkout.assurance.map((point) => (
-                    <li
-                      key={point.title}
-                      className="bg-surface-3 p-5 shadow-[var(--edge-lip)]"
-                    >
-                      <div className="mb-1 font-mono text-[11px] font-bold tracking-[0.1em] text-lime uppercase">
-                        {point.title}
-                      </div>
-                      <p className="m-0 text-[13px] leading-[1.5] text-t4">
-                        {point.body}
-                      </p>
-                    </li>
-                  ))}
-                </ul>
-              </Reveal>
-            ) : null}
-
-            {tier.checkout.faqs?.length ? (
-              <Reveal>
-                <section className="mb-11">
-                  <h2 className="m-0 mb-5 font-display text-2xl font-semibold tracking-[-0.02em]">
-                    Common questions
-                  </h2>
-                  <dl className="m-0 flex flex-col gap-0">
-                    {tier.checkout.faqs.map((faq) => (
-                      <div key={faq.q} className="border-t border-line py-5 last:pb-0">
-                        <dt className="mb-1.5 font-display text-[15.5px] font-semibold text-t2">
-                          {faq.q}
-                        </dt>
-                        <dd className="m-0 text-[14.5px] leading-[1.55] text-t4">
-                          {faq.a}
-                        </dd>
-                      </div>
-                    ))}
-                  </dl>
-                </section>
-              </Reveal>
-            ) : null}
-
-            <Reveal>
-              <p className="legal-note">
-                Prefer to talk first? <Link href="/#contact">Contact sales</Link> — or
-                compare every plan on the <Link href="/#pricing">pricing page</Link>.
-              </p>
-            </Reveal>
-          </article>
-
-          <aside className="md:sticky md:top-28 md:self-start">
-            <CheckoutPanel
-              slug={tier.checkout.slug}
-              tierName={tier.name}
-              amountMinorMonthly={tier.checkout.amountMinor}
-              amountMinorAnnual={tier.checkout.annualAmountMinor}
-              annualNote={tier.annualNote}
-              oneTime={oneTime}
-              initialRegion={DEFAULT_REGION}
-              regionalCharges={tier.checkout.regionalCharges}
-            />
-          </aside>
+            {/* `tier.checkout.assurance` is deliberately NOT rendered here.
+                Its three cells restate features 3, 4 and 5 — two of them almost
+                word for word ("yours to keep", "if you start within 30 days") —
+                so it read as the same list twice, forty pixels apart, dressed
+                as reassurance. The field is still in the schema and in Sanity;
+                if it comes back it needs copy that says something the feature
+                list doesn't. */}
+          </div>
         </div>
+
+        {/* Second zone. The panel's job ends with "How it works" — everything
+            above is deciding, everything below is answering. The rule marks that
+            change, and going full-width here means the FAQs stop sharing a row
+            with a column the sticky panel has already left empty.
+
+            Two columns, not one: at 1200px a single column runs ~150 characters
+            per line, twice a comfortable measure. */}
+        {tier.checkout.faqs?.length ? (
+          <Reveal>
+            <section className="mt-16 border-t border-line pt-12">
+              <h2 className="m-0 mb-6 font-display text-2xl font-semibold tracking-[-0.02em]">
+                Common questions
+              </h2>
+              <dl className="m-0 grid grid-cols-1 gap-x-14 md:grid-cols-2">
+                {tier.checkout.faqs.map((faq) => (
+                  <div key={faq.q} className="border-t border-line py-5">
+                    <dt className="mb-1.5 font-display text-[15.5px] font-semibold text-t2">
+                      {faq.q}
+                    </dt>
+                    <dd className="m-0 text-[14.5px] leading-[1.55] text-t4">
+                      {faq.a}
+                    </dd>
+                  </div>
+                ))}
+              </dl>
+            </section>
+          </Reveal>
+        ) : null}
+
+        <Reveal>
+          <p className="legal-note">
+            Prefer to talk first? <Link href="/#contact">Contact sales</Link> — or
+            compare every plan on the <Link href="/#pricing">pricing page</Link>.
+          </p>
+        </Reveal>
       </div>
     </>
   );

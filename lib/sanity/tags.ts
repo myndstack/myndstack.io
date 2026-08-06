@@ -14,6 +14,7 @@ export const TAGS = {
   teamMember: "teamMember",
   faq: "faq",
   pricingTier: "pricingTier",
+  promoCode: "promoCode",
   homepage: "homepage",
   siteSettings: "siteSettings",
 } as const;

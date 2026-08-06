@@ -37,6 +37,26 @@ export default function Reveal({
     <div
       ref={ref}
       id={id}
+      /**
+       * `is-in` is added to this node's classList imperatively — by the
+       * IntersectionObserver in `useReveal`, and en masse by the reveal
+       * watchdog when the observer never delivers. Neither is something the
+       * server can know about, so the prerendered HTML says `reveal` and the
+       * live DOM can already say `reveal is-in` by the time React hydrates
+       * (a slow or backgrounded tab is enough for the watchdog's 1.5s fallback
+       * to land first). React then reports an attribute mismatch on every
+       * revealed element on the page.
+       *
+       * This is the case the API is for: the difference is intentional, and
+       * React must NOT patch it up — reverting `is-in` would blank the section.
+       * Scoped to this element's own attributes, so a genuine mismatch in the
+       * children still surfaces.
+       *
+       * Note this does not risk the class being clobbered later: React only
+       * writes `className` when the prop value itself changes, and it is
+       * static per usage here.
+       */
+      suppressHydrationWarning
       className={`reveal ${scrub ? "reveal-scrub " : ""}${className}`}
       // Stagger is part of the motion, so it goes when motion does.
       style={delay && !reduced ? { ...style, transitionDelay: `${delay}s` } : style}

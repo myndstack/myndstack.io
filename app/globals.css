@@ -96,6 +96,18 @@
   from { transform: translateX(0); }
   to { transform: translateX(-50%); }
 }
+/* Slide-to-pay affordance: each chevron brightens and steps right in turn. */
+@keyframes slide-hint {
+  0%,
+  100% {
+    opacity: 0.16;
+    transform: translateX(0);
+  }
+  45% {
+    opacity: 0.6;
+    transform: translateX(4px);
+  }
+}
 @keyframes sweep {
   0% { transform: translateX(-120%); }
   100% { transform: translateX(320%); }
@@ -605,11 +617,235 @@
   .btn:not(:disabled):not([aria-disabled="true"]):active,
   .btn-outline:active,
   .btn-icon:active,
-  .pricing-cta:active {
+  .pricing-cta:active,
+  /* .bill-btn was missing from this list while the comment above claimed
+     "every pressable primitive" — the billing toggle was the one control on
+     the site that did not acknowledge a press. Its own transition below now
+     carries `transform` so this actually eases. */
+  .bill-btn:not(:disabled):active {
     transform: scale(0.97);
   }
   .navlink:active {
     transform: scale(0.97);
+  }
+
+  /* --- Slide to pay ---
+     A real <button> that can also be dragged. Click and Enter/Space still pay:
+     a drag-only control cannot be operated by a keyboard or a screen reader, and
+     dragging with a mouse is measurably worse than clicking on desktop. The
+     gesture is the tactile path, never the only one.
+
+     No keyline. The track sits on `ink`, a step DARKER than the panel's
+     `surface-3`, so it reads as a recessed slot with a lit knob in it rather
+     than another outlined button — the panel already carries the one lime
+     frame, and a second one inside it flattened the hierarchy.
+
+     Track, knob and the in-flight sweep are all the SAME parallelogram, leaning
+     into the direction of travel. The angle is shared: 12/52 on the track and
+     10/44 on the knob are the same slope to within a fraction of a degree, so
+     the edges read as parallel rather than nearly-parallel, which is the thing
+     an eye picks up instantly.
+
+     52px tall because a knob you drag wants more than a button you tap; the
+     knob is 44px — the WCAG target size — leaving a 4px inset each side. */
+  .slide {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 52px;
+    padding: 0;
+    overflow: hidden;
+    background: var(--color-ink);
+    border: 0;
+    cursor: pointer;
+    clip-path: polygon(12px 0, 100% 0, calc(100% - 12px) 100%, 0 100%);
+    /* pan-y keeps vertical page scrolling working under the thumb while this
+       control takes the horizontal axis — `none` would trap the scroll. */
+    touch-action: pan-y;
+    user-select: none;
+    -webkit-user-select: none;
+  }
+  .slide:disabled {
+    cursor: progress;
+    opacity: 0.6;
+  }
+
+  /* The trail. Full track width, clipped so its LEADING edge carries the same
+     slant as the knob and the track, then slid in with translateX from -100%.
+
+     Not scaleX: scaling a slanted edge squashes it horizontally, so the angle
+     would flatten as the bar filled and the trail would never be parallel to
+     the knob riding on it. Translating a pre-clipped shape keeps one angle
+     throughout. At 100% its right edge lands exactly on the track's own right
+     edge — same two points — so the bar fills flush. */
+  .slide-fill {
+    position: absolute;
+    /* Inset to exactly the knob's height, not the track's. Full-height was the
+       bug: the knob is inset 4px, so in the 4px strips above and below it the
+       trail's own leading edge was exposed and the two read as separate shapes
+       with a notch between them. Matched heights merge them into one band, and
+       the trail's edge stays hidden inside the knob's silhouette throughout. */
+    /* Inset on all four sides to exactly the knob's box, so the fill's width is
+       knob + travel. That is what lets the two share ONE leading edge: the fill
+       is translated by (p-1)*travel px, the knob by p*travel px, and their right
+       edges coincide at every p. Spanning the full track width instead made the
+       fill advance at trackWidth per unit of progress while the knob advanced at
+       `travel` — different rates, so the trail lagged the nose in the middle and
+       overtook it near the end. That drift is the "unlinked" look. */
+    top: 4px;
+    bottom: 4px;
+    left: 4px;
+    right: 4px;
+    transform: translateX(-100%);
+    background: var(--color-lime);
+    /* 10/44 — the knob's slope, since this is now the knob's height. */
+    clip-path: polygon(10px 0, 100% 0, calc(100% - 10px) 100%, 0 100%);
+    pointer-events: none;
+  }
+
+  .slide-label {
+    position: relative;
+    font-family: var(--font-body);
+    font-size: 15px;
+    font-weight: 600;
+    color: #fff;
+    /* The label sits above the trail, so it has to survive the lime sweeping
+       under it — hence the flip to ink once the fill passes half way. */
+    transition: color 0.16s var(--ease-brand);
+    pointer-events: none;
+  }
+  .slide[data-past-half="true"] .slide-label {
+    color: var(--color-lime-ink);
+  }
+
+  .slide-knob {
+    position: absolute;
+    top: 4px;
+    left: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    /* 50 wide, not 44: the slant eats 10px of horizontal extent, so this keeps
+       roughly a 40px face. Height stays 44 — the WCAG target — and the button
+       itself is the hit area regardless, since the knob is aria-hidden. */
+    width: 50px;
+    height: 44px;
+    background: var(--color-lime);
+    color: var(--color-lime-ink);
+    pointer-events: none;
+    /* The slant is a clip-path, NOT a transform: the drag writes translateX to
+       this element every pointermove, and a transform-based skew would be
+       overwritten on the first move. clip-path leaves transform free.
+       Top edge sits right of the bottom edge, so it leans into the direction
+       of travel — 10/44, the track's own slope. */
+    clip-path: polygon(10px 0, 100% 0, calc(100% - 10px) 100%, 0 100%);
+  }
+  /* No transition while the finger is down — the knob must track 1:1, any
+     easing there reads as lag. The class is removed on release so the spring
+     back below applies. Release is fast (the system responding); the drag
+     itself is however slow the user wants (the user deciding). */
+  .slide:not(.is-dragging) .slide-knob,
+  .slide:not(.is-dragging) .slide-fill {
+    transition: transform 0.22s var(--ease-brand);
+  }
+
+  /* Mid-flight. Between the release and Razorpay's modal there is an order
+     round-trip and a checkout.js load — one to three seconds. A static filled
+     bar reads as stalled, so the site's own `sweep` keyframe (the loader's)
+     runs across it at button speed; a faster sweep makes the wait feel shorter.
+     Under reduced motion the global block collapses the duration and the band
+     parks off-screen behind `overflow: hidden`. */
+  .slide[data-busy="true"]::after {
+    content: "";
+    position: absolute;
+    inset-block: 0;
+    left: 0;
+    width: 35%;
+    background: linear-gradient(
+      90deg,
+      transparent,
+      rgba(255, 255, 255, 0.55),
+      transparent
+    );
+    /* The band leans with everything else. clip-path again, not skew — `sweep`
+       animates `transform`, so a skew there would be overwritten every frame. */
+    clip-path: polygon(12px 0, 100% 0, calc(100% - 12px) 100%, 0 100%);
+    animation: sweep 1.1s ease-in-out infinite;
+    pointer-events: none;
+  }
+
+  /* Hint: the knob breathes to the right, once, telling you it is draggable.
+     Only where a pointer can actually drag, and only while idle. */
+  @media (hover: hover) and (pointer: fine) {
+    .slide:not(:disabled):not(.is-dragging):hover .slide-knob {
+      transform: translateX(4px);
+    }
+  }
+
+  /* --- The chevrons ---
+     Three angled strokes just ahead of the knob, travelling right in sequence.
+     Their job is affordance: a control that only *looks* like a button gets
+     clicked, not dragged, and the direction of travel is the one thing the
+     shape alone cannot say. Angle matches the knob's slant, so they read as the
+     same family rather than borrowed iOS chevrons.
+
+     Justified by frequency — seen once per purchase, not hundreds of times a
+     day — and it stops the moment the gesture starts, because by then it has
+     said everything it had to say. Opacity and transform only, so it stays off
+     the main thread; the global reduced-motion block collapses it to a static
+     row. */
+  .slide-hint {
+    position: absolute;
+    top: 50%;
+    display: flex;
+    gap: 5px;
+    pointer-events: none;
+    transform: translateY(-50%);
+    transition: opacity 0.18s var(--ease-brand);
+  }
+  /* A real chevron, not a bar — bars read as texture and say nothing about
+     direction. Drawn as one polygon so it stays a crisp single shape at 15px
+     instead of two hairlines that alias.
+
+     SHEARED to the strip's own lean. The track, trail and knob all slant at
+     10px over 44px — 12.8° off vertical — and a symmetric chevron sitting among
+     them looked borrowed. Its arms cannot literally be 12.8°: at that angle a
+     15px chevron is 1.7px wide, a sliver rather than an arrow. So the glyph is
+     sheared by that angle instead, the way an italic joins a roman — the whole
+     mark leans with the strip while staying a readable chevron. The shear is
+     baked into the polygon, not a transform, because the animation below owns
+     `transform` and would overwrite a skew every frame.
+
+     Points are the symmetric chevron displaced by (7.5 - y) × 0.2273, then
+     nudged +2px so the sheared bottom-left stays inside the box. */
+  .slide-hint span {
+    width: 13px;
+    height: 15px;
+    background: var(--color-lime);
+    opacity: 0.18;
+    clip-path: polygon(
+      3.7px 0,
+      7.1px 0,
+      11px 50%,
+      3.7px 100%,
+      0.3px 100%,
+      7.6px 50%
+    );
+    animation: slide-hint 1.7s ease-in-out infinite;
+  }
+  .slide-hint span:nth-child(2) {
+    animation-delay: 0.16s;
+  }
+  .slide-hint span:nth-child(3) {
+    animation-delay: 0.32s;
+  }
+  /* Once the gesture is under way — or the payment is — the hint has no job. */
+  .slide.is-dragging .slide-hint,
+  .slide[data-busy="true"] .slide-hint,
+  .slide:disabled .slide-hint {
+    opacity: 0;
   }
 
   /* --- Form fields --- */
@@ -986,6 +1222,15 @@
   .spine-social {
     color: var(--color-t6);
     display: flex;
+    /* The glyph is 16px, which is under the WCAG 2.5.8 floor. Centring it in a
+       24px box grows only the hit area — the icon does not change size, and the
+       rail is wide enough to absorb it. Above 1100px this spine is the only
+       path to these profiles (the footer row is lg:hidden), so it cannot be the
+       one that misses the target size. */
+    align-items: center;
+    justify-content: center;
+    min-width: 24px;
+    min-height: 24px;
     transition: color 0.16s var(--ease-brand);
   }
   .spine-social:hover {
@@ -1043,6 +1288,22 @@
   .bill-btn.is-on {
     color: var(--color-lime-ink);
     background: var(--color-lime);
+  }
+
+  /* --- Accepted-payment marks (checkout panel) ---
+     Height is the only dimension pinned, so each vendored mark keeps its own
+     aspect and the row still reads as a set. 24px is the floor at which the
+     densest of them (Amex, whose mark is set type) resolves rather than
+     smudging; the Apple Pay asset is cropped to its card so it lands on the
+     same 780×500 ratio as the network tiles instead of rendering 12% short. */
+  .pay-mark {
+    display: block;
+    height: 24px;
+    width: auto;
+    border-radius: 2px;
+    /* The tiles are light and saturated against a #101012 panel. A hairline of
+       the panel's own ink keeps them from vibrating at the edges. */
+    box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.35);
   }
 
   /* --- Manifesto word-by-word brighten --- */

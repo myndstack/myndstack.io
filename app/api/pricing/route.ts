@@ -42,7 +42,10 @@ export async function GET(request: Request) {
   // section, which the picker lets them override anyway). Do NOT treat this
   // value as authoritative for anything security-sensitive without adding a
   // strip-and-reinject step upstream.
-  const geoRegion = regionFromCountry(headerStore.get("x-vercel-ip-country"));
+  const geoCountry = headerStore.get("x-vercel-ip-country");
+  // Raw, so "no geo" stays distinguishable from "genuinely US" —
+  // regionFromCountry folds the first into the second.
+  const geoRegion = geoCountry ? regionFromCountry(geoCountry) : null;
 
   const region =
     (debugOverride && isRegionCode(debugOverride) ? debugOverride : null) ??
@@ -50,11 +53,19 @@ export async function GET(request: Request) {
     geoRegion ??
     DEFAULT_REGION;
 
+  /**
+   * Place of supply, resolved the SAME way the order route resolves it, so the
+   * tax the checkout panel displays is the tax the server will actually charge.
+   * Deliberately ignores the cookie and the debug override: those pick a
+   * currency, and a currency cannot move a buyer to another country.
+   */
+  const taxRegion = geoRegion ?? region;
+
   const tiers = await getPricingTiers();
   const resolved = resolveTiersForRegion(tiers, region);
 
   return NextResponse.json(
-    { region, tiers: resolved },
+    { region, taxRegion, tiers: resolved },
     {
       headers: {
         "cache-control": "private, no-store",

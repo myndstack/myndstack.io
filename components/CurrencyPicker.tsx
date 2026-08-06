@@ -27,6 +27,14 @@ type Props = {
    * old "Auto" pill; today no path in the picker calls it with null.)
    */
   onChange: (region: RegionCode | null) => void;
+  /**
+   * Drops the visible "Currency" label, keeping it as the select's accessible
+   * name. For the checkout panel, where the control shares a 350px row with the
+   * section eyebrow and the label is redundant anyway — the select already
+   * reads "£ GBP". The Pricing section keeps the label, since there the control
+   * sits alone in open space with nothing else to identify it.
+   */
+  compact?: boolean;
 };
 
 /**
@@ -44,7 +52,7 @@ type Props = {
  * = user). This matches how Vercel and Stripe do it — clearing site data
  * "resets to auto".
  */
-export default function CurrencyPicker({ region, onChange }: Props) {
+export default function CurrencyPicker({ region, onChange, compact }: Props) {
   // The select simply reflects the parent's `region`. Hydration is safe with no
   // local state: the parent seeds `region` with the same default the server
   // rendered, and only moves it after its own post-mount /api/pricing fetch.
@@ -57,16 +65,22 @@ export default function CurrencyPicker({ region, onChange }: Props) {
 
   return (
     <div className="flex items-center gap-2.5 print:hidden">
-      <label
-        htmlFor="currency-picker"
-        className="font-mono text-[11px] tracking-[0.14em] text-t5 uppercase"
-      >
-        Currency
-      </label>
+      {compact ? null : (
+        <label
+          htmlFor="currency-picker"
+          className="font-mono text-[11px] tracking-[0.14em] text-t5 uppercase"
+        >
+          Currency
+        </label>
+      )}
       <div className="relative">
         <select
           id="currency-picker"
           value={region}
+          // Compact drops the <label>, so the name has to come from here —
+          // a select whose only name is its current value announces as "GBP",
+          // which says what it is but not what it does.
+          aria-label={compact ? "Currency" : undefined}
           onChange={(e) => handleChange(e.target.value)}
           className="ease-brand cursor-pointer appearance-none border border-line-3 bg-surface py-2 pr-8 pl-3 font-mono text-[12px] tracking-[0.04em] text-t2 uppercase transition-colors duration-160 hover:border-lime-edge focus:border-lime focus:outline-none"
         >

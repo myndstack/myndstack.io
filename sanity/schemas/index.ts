@@ -4,6 +4,7 @@ import caseStudy from "./caseStudy";
 import faq from "./faq";
 import homepage from "./homepage";
 import pricingTier from "./pricingTier";
+import promoCode from "./promoCode";
 import role from "./role";
 import siteSettings from "./siteSettings";
 import teamMember from "./teamMember";
@@ -20,4 +21,5 @@ export const schemaTypes: SchemaTypeDefinition[] = [
   teamMember,
   faq,
   pricingTier,
+  promoCode,
 ];

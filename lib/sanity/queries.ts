@@ -5,6 +5,7 @@ import { z } from "zod";
 
 import type { CaseStudy } from "@/lib/cases";
 import type { PricingTier, RegionalPrice, Social, TierCheckout } from "@/lib/content";
+import { normalizeCode, type PromoCode } from "@/lib/promo";
 import type { Role } from "@/lib/roles";
 import { sanityFetch } from "./client";
 import { TAGS } from "./tags";
@@ -160,6 +161,34 @@ const faqSchema = z.object({
   q: nonEmpty,
   a: nonEmpty,
 }) satisfies z.ZodType<Faq>;
+
+/** Mirrors `PromoCode` in lib/promo.ts. Amounts are positive safe integers, so
+ *  a malformed CMS value fails parsing rather than becoming a wrong discount. */
+const promoCodeSchema = z.object({
+  code: nonEmpty,
+  label: optionalString,
+  kind: z.enum(["percent", "fixed"]),
+  percent: z.number().min(1).max(100).nullish().transform((v) => v ?? undefined),
+  fixedAmounts: z
+    .array(
+      z.object({
+        region: z.enum(["IN", "US", "EU", "UK"]),
+        currency: z.enum(["INR", "USD", "EUR", "GBP"]),
+        amountMinor: z.number().int().positive(),
+      }),
+    )
+    .nullish()
+    .transform((v) => v ?? undefined),
+  active: z.boolean(),
+  startsAt: optionalString,
+  expiresAt: optionalString,
+  tierSlugs: z
+    .array(nonEmpty)
+    .nullish()
+    .transform((v) => v ?? undefined),
+  maxRedemptions: z.number().int().positive().nullish().transform((v) => v ?? undefined),
+  maxPerCustomer: z.number().int().positive().nullish().transform((v) => v ?? undefined),
+}) satisfies z.ZodType<PromoCode>;
 
 const regionalPriceSchema = z.object({
   region: z.enum(["IN", "US", "EU", "UK"]),
@@ -425,6 +454,40 @@ export const getHomepage = cache(async (): Promise<Homepage> => {
   );
   return parse(homepageSchema, data, "homepage");
 });
+
+/**
+ * One promo code by its typed value, or null.
+ *
+ * Fetched by code rather than fetching all and filtering, so an unknown code
+ * costs one indexed lookup and the full list of live codes never travels to
+ * anything the buyer can see.
+ *
+ * Unlike every other query here this does NOT throw on a schema mismatch. A
+ * malformed promo document must degrade to "that code isn't valid" — a buyer
+ * who mistypes a code, or an owner who half-filled one in Studio, should never
+ * be shown an error page on the checkout screen. Everything else about it is
+ * validated exactly as strictly.
+ */
+export const getPromoCode = cache(
+  async (code: string): Promise<PromoCode | null> => {
+    const normalized = normalizeCode(code);
+    if (!normalized || normalized.length > 64) return null;
+
+    const data = await sanityFetch<unknown>(
+      `*[_type == "promoCode" && upper(code) == $code][0]{
+        code, label, kind, percent, active, startsAt, expiresAt, tierSlugs,
+        maxRedemptions, maxPerCustomer,
+        fixedAmounts[]{ region, currency, amountMinor }
+      }`,
+      { code: normalized },
+      [TAGS.promoCode],
+    );
+    if (!data) return null;
+
+    const result = promoCodeSchema.safeParse(data);
+    return result.success ? result.data : null;
+  },
+);
 
 export const getSiteSettings = cache(async (): Promise<SiteSettings> => {
   const data = await sanityFetch<unknown>(

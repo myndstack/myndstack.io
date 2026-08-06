@@ -5,6 +5,7 @@ import {
   formatInrMinor,
   isPurchasable,
   purchasableTierBySlug,
+  resolveBreakdown,
   resolveCharge,
 } from "./pricing-amount";
 
@@ -85,6 +86,15 @@ describe("formatInrMinor", () => {
     expect(formatInrMinor(900)).toBe("₹9");
     expect(formatInrMinor(0)).toBe("₹0");
   });
+
+  it("shows paise only when the amount actually has them (GST totals do)", () => {
+    // The displayed total must equal the charge to the paise — the old
+    // round-to-rupees printed ₹58,999 over a ₹58,998.82 Razorpay sheet.
+    expect(formatInrMinor(5_899_882)).toBe("₹58,998.82");
+    expect(formatInrMinor(899_982)).toBe("₹8,999.82");
+    // A single-digit paise value keeps its leading zero.
+    expect(formatInrMinor(100_005)).toBe("₹1,000.05");
+  });
 });
 
 /** A purchasable tier with region charges, incl. a deliberately-broken UK one. */
@@ -127,6 +137,123 @@ describe("resolveCharge — regional (International Payments)", () => {
 
   it("charges INR when no region is given (backward compatible)", () => {
     expect(resolveCharge(regionalTier, "monthly")).toEqual({ amountMinor: 4_999_900, currency: "INR" });
+  });
+});
+
+describe("resolveBreakdown — statutory tax", () => {
+  it("adds 18% GST on top for an IN buyer", () => {
+    expect(resolveBreakdown(regionalTier, "monthly", "IN")).toEqual({
+      netMinor: 4_999_900,
+      discountMinor: 0,
+      taxMinor: 899_982,
+      grossMinor: 5_899_882,
+      currency: "INR",
+      taxLabel: "GST 18%",
+      taxName: "GST",
+    });
+  });
+
+  it("names the tax per region even when none is charged", () => {
+    // A zero should still say WHICH tax is zero. "VAT" for an EU/UK buyer
+    // matches the "excl. VAT" their pricing card showed; the US has no VAT at
+    // all, so naming its row "VAT" would invent a tax that does not exist there.
+    for (const [region, expected] of [
+      ["EU", "VAT"],
+      ["UK", "VAT"],
+      ["US", "Sales tax"],
+      ["IN", "GST"],
+    ] as const) {
+      expect(resolveBreakdown(regionalTier, "monthly", region)?.taxName).toBe(
+        expected,
+      );
+    }
+  });
+
+  it("adds nothing for export-of-services regions, in their own currency", () => {
+    for (const [region, amountMinor, currency, taxName] of [
+      ["EU", 54_900, "EUR", "VAT"],
+      ["US", 59_900, "USD", "Sales tax"],
+    ] as const) {
+      expect(resolveBreakdown(regionalTier, "monthly", region)).toEqual({
+        netMinor: amountMinor,
+        discountMinor: 0,
+        taxMinor: 0,
+        grossMinor: amountMinor,
+        currency,
+        taxLabel: null,
+        taxName,
+      });
+    }
+  });
+
+  it("taxes the INR fallback for IN even though IN has no regional entry", () => {
+    // IN falls back to the INR base inside chargeFor; the tax rule keys on
+    // region, so it still applies to whatever amount won.
+    const b = resolveBreakdown(regionalTier, "annual", "IN")!;
+    expect(b.netMinor).toBe(4_999_900);
+    expect(b.grossMinor).toBe(5_899_882);
+  });
+
+  it("does NOT tax a UK buyer who fell back to an INR charge", () => {
+    // UK's regional amount is malformed → INR base. Place of supply is still
+    // the UK, so an INR-denominated charge must not pick up GST.
+    expect(resolveBreakdown(regionalTier, "monthly", "UK")).toEqual({
+      netMinor: 4_999_900,
+      discountMinor: 0,
+      taxMinor: 0,
+      grossMinor: 4_999_900,
+      currency: "INR",
+      taxLabel: null,
+      taxName: "VAT",
+    });
+  });
+
+  it("takes currency from `region` and tax from `taxRegion`, independently", () => {
+    // Currency is a preference; place of supply is a fact. An Indian buyer who
+    // picks USD pays in USD AND pays GST.
+    expect(resolveBreakdown(regionalTier, "monthly", "US", "IN")).toEqual({
+      netMinor: 59_900,
+      discountMinor: 0,
+      taxMinor: 10_782,
+      grossMinor: 70_682,
+      currency: "USD",
+      taxLabel: "GST 18%",
+      taxName: "GST",
+    });
+    // And the mirror: a UK buyer who picks INR pays in INR and owes nothing.
+    expect(resolveBreakdown(regionalTier, "monthly", "IN", "UK")).toEqual({
+      netMinor: 4_999_900,
+      discountMinor: 0,
+      taxMinor: 0,
+      grossMinor: 4_999_900,
+      currency: "INR",
+      taxLabel: null,
+      taxName: "VAT",
+    });
+  });
+
+  it("adds no tax when no region is resolved — fails safe, never guesses", () => {
+    expect(resolveBreakdown(regionalTier, "monthly")).toMatchObject({
+      taxMinor: 0,
+      grossMinor: 4_999_900,
+      taxLabel: null,
+    });
+  });
+
+  it("is null wherever resolveCharge is null — a bad amount never grows tax", () => {
+    expect(resolveBreakdown(platform, "monthly", "IN")).toBeNull();
+    expect(resolveBreakdown(malformed(0), "monthly", "IN")).toBeNull();
+    expect(resolveBreakdown(malformed(-100), "monthly", "IN")).toBeNull();
+    expect(resolveBreakdown(malformed(Number.NaN), "monthly", "IN")).toBeNull();
+  });
+
+  it("keeps gross === net + tax exactly, in integers", () => {
+    for (const region of ["IN", "US", "EU", "UK"] as const) {
+      const b = resolveBreakdown(regionalTier, "monthly", region)!;
+      expect(b.grossMinor).toBe(b.netMinor + b.taxMinor);
+      expect(Number.isSafeInteger(b.grossMinor)).toBe(true);
+      expect(Number.isSafeInteger(b.taxMinor)).toBe(true);
+    }
   });
 });
 

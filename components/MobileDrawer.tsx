@@ -139,9 +139,12 @@ export default function MobileDrawer({ open, onClose, contactEmail }: Props) {
         >
           Start a project →
         </a>
+        {/* A flex child, so padding moves layout — the top margin drops by the
+            same 8px to keep the gap under the CTA at 18px. 16px → 32px hit
+            area (WCAG 2.5.8); this is the mobile nav, where it matters most. */}
         <a
           href={`mailto:${contactEmail}`}
-          className="mt-[18px] font-mono text-xs tracking-[0.04em] text-t5"
+          className="mt-[10px] py-2 font-mono text-xs tracking-[0.04em] text-t5"
         >
           {contactEmail}
         </a>

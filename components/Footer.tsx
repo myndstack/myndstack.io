@@ -85,11 +85,15 @@ export default function Footer({ site }: { site: SiteSettings }) {
             aria-label="Legal"
             className="flex flex-wrap items-center gap-x-5 gap-y-2"
           >
+            {/* py/-my pair: the padding lifts the hit area from 20px to 32px
+                for WCAG 2.5.8, the equal negative margin gives the space back
+                to the flex line so the bar's height and rhythm are unchanged.
+                These are flex items, so padding alone would move the layout. */}
             {LEGAL_LINKS.map((item) => (
               <Link
                 key={item.href}
                 href={item.href}
-                className="text-[12.5px] text-t5 transition-colors duration-160 hover:text-lime"
+                className="-my-1.5 py-1.5 text-[12.5px] text-t5 transition-colors duration-160 hover:text-lime"
               >
                 {item.label}
               </Link>

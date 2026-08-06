@@ -135,6 +135,51 @@ test.describe("layout holds at every width", () => {
     });
   }
 
+  /**
+   * The loop above only ever visited the home page, so a layout that broke on,
+   * say, /subprocessors or a checkout page went unseen. A full sweep (15 routes
+   * × 11 widths) found the site clean, so what this guards is the regression:
+   * every route at the two extremes it has to survive — 320px is the narrowest
+   * phone still in use, 1280px the common desktop.
+   */
+  test("no route overflows horizontally at the extremes", async ({ page }) => {
+    const routes = [
+      "/",
+      "/work",
+      "/work/aperture-health",
+      "/careers",
+      "/careers/ml-systems-engineer",
+      "/pricing/discovery-sprint",
+      "/legal",
+      "/privacy",
+      "/terms",
+      "/cookies",
+      "/dpa",
+      "/refunds",
+      "/security",
+      "/subprocessors",
+      "/responsible-ai",
+    ];
+
+    const broken: string[] = [];
+    for (const width of [320, 1280]) {
+      await page.setViewportSize({ width, height: 900 });
+      for (const route of routes) {
+        await page.goto(route);
+        // Not `networkidle` — the marquees and the hero canvas keep the page
+        // busy, so it never settles and the wait times out. A short beat after
+        // load is enough: overflow is a layout fact, not an animation one.
+        await page.waitForTimeout(400);
+        const overflow = await page.evaluate(() => {
+          const el = document.documentElement;
+          return el.scrollWidth - el.clientWidth;
+        });
+        if (overflow > 0) broken.push(`${route} @ ${width}px: +${overflow}px`);
+      }
+    }
+    expect(broken, `routes overflow horizontally:\n${broken.join("\n")}`).toEqual([]);
+  });
+
   test("nav capsule fits in the tight band without squeezing the mark", async ({
     page,
   }) => {
@@ -403,6 +448,55 @@ test.describe("touch targets and error affordances", () => {
     const closeBox = await close.boundingBox();
     expect(closeBox!.width, "drawer close width").toBeGreaterThanOrEqual(44);
     expect(closeBox!.height, "drawer close height").toBeGreaterThanOrEqual(44);
+  });
+
+  /**
+   * The four targets a full-site sweep caught under the 24px WCAG 2.5.8 floor.
+   * The test above checks the controls someone thought about; these are the ones
+   * that were missed because they are text links, and text links are where the
+   * floor is easiest to fall through — a 12.5px legal link is 20px tall, and a
+   * 16px social glyph is 16px square.
+   *
+   * Each is fixed with padding that costs no layout (a negative-margin pair on
+   * flex items, plain padding on inline ones), so a future "tidy up the
+   * spacing" is exactly what would silently undo it.
+   */
+  test("text links and icon links clear the 24px target floor", async ({ page }) => {
+    const atLeast24 = async (locator: ReturnType<Page["locator"]>, what: string) => {
+      const box = await locator.boundingBox();
+      expect(box, `${what} did not render`).not.toBeNull();
+      expect(box!.height, `${what} height`).toBeGreaterThanOrEqual(24);
+      expect(box!.width, `${what} width`).toBeGreaterThanOrEqual(24);
+    };
+
+    // Footer legal row — present at every width, so check the narrowest.
+    await page.setViewportSize({ width: 320, height: 900 });
+    await landOnHome(page);
+    const legal = page.locator('nav[aria-label="Legal"] a').first();
+    await legal.scrollIntoViewIfNeeded();
+    await atLeast24(legal, "footer legal link");
+
+    // Contact email + phone on /#contact.
+    await atLeast24(page.locator('a[href^="mailto:"]').first(), "contact email");
+    await atLeast24(page.locator('a[href^="tel:"]').first(), "contact phone");
+
+    // Drawer email — only interactive while the drawer is open (it is `inert`
+    // otherwise), and the drawer is the only nav a phone gets.
+    await page.setViewportSize({ width: 390, height: 844 });
+    await page.evaluate(() => window.scrollTo(0, 0));
+    await page.waitForTimeout(400);
+    await page.getByRole("button", { name: /open menu/i }).click();
+    await page.waitForTimeout(400);
+    await atLeast24(
+      page.locator('#mobile-drawer a[href^="mailto:"]'),
+      "drawer email",
+    );
+
+    // Desktop spine socials. Above 1100px the footer social row is `lg:hidden`,
+    // so the spine is the ONLY route to these profiles.
+    await page.setViewportSize({ width: 1280, height: 900 });
+    await landOnHome(page);
+    await atLeast24(page.locator(".spine-social").first(), "spine social link");
   });
 
   test("field validation errors use the danger colour, not white", async ({ page }) => {

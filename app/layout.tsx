@@ -16,8 +16,23 @@ import { getSiteSettings } from "@/lib/sanity/queries";
 
 import "./globals.css";
 
+/**
+ * `latin-ext` is here for ONE glyph: ₹ (U+20B9).
+ *
+ * Google's `latin` subset covers the euro at U+20AC but stops short of the
+ * rupee — the ranges either side of it, U+20A0–20AB and U+20AD–20C0, live in
+ * `latin-ext`. With `latin` alone the browser cannot find ₹ in any of these
+ * three faces and substitutes a system glyph for that character only, which is
+ * why the rupee looked wrong beside its own digits while $ € £ were all fine.
+ * It showed up worst in the largest type, where the metric mismatch is most
+ * visible, and barely at all at 15px.
+ *
+ * Loaded on all three faces because prices are set in the display face, the
+ * body face and the mono label voice in different places. The extra subset is
+ * a separate woff2 that only downloads when a ₹ is actually rendered.
+ */
 const spaceGrotesk = Space_Grotesk({
-  subsets: ["latin"],
+  subsets: ["latin", "latin-ext"],
   weight: ["400", "500", "600", "700"],
   variable: "--font-space-grotesk",
   display: "swap",
@@ -26,14 +41,14 @@ const spaceGrotesk = Space_Grotesk({
 // 800 is deliberately absent: nothing on the site renders it, and every weight
 // listed here is a woff2 that next/font preloads ahead of the first paint.
 const hankenGrotesk = Hanken_Grotesk({
-  subsets: ["latin"],
+  subsets: ["latin", "latin-ext"],
   weight: ["400", "500", "600", "700"],
   variable: "--font-hanken-grotesk",
   display: "swap",
 });
 
 const spaceMono = Space_Mono({
-  subsets: ["latin"],
+  subsets: ["latin", "latin-ext"],
   weight: ["400", "700"],
   variable: "--font-space-mono",
   display: "swap",

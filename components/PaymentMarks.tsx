@@ -1,107 +1,67 @@
-import type { CSSProperties, ReactNode } from "react";
+/* eslint-disable @next/next/no-img-element -- same call as Wordmark: tiny
+   static SVGs, so the optimizer has nothing to do and next/image would only add
+   a runtime wrapper (and want `dangerouslyAllowSVG` turned on globally). */
+
 import type { RegionCode } from "@/lib/content";
 
 /**
  * Accepted-payment marks for the checkout panel.
  *
- * These are clean MONOCHROME renditions (currentColor) crafted to sit on the
- * dark panel — a wordmark for the card networks, the interlocking circles for
- * Mastercard, and glyph+word for the wallets — NOT the full-colour official
- * brand assets. Showing accepted-method marks is nominative use, and the real
- * official logos also appear inside the Razorpay modal on Pay. For pixel-perfect
- * or strictly brand-compliant marks (Apple Pay and Google Pay have guidelines),
- * drop official SVGs into public/payment/ and render <img> here instead.
+ * Every entry is a REAL official mark, vendored as a colour card tile in
+ * `public/payment/` (source + licence noted inside each file) and served as
+ * <img> — out of the client bundle, cached by the browser, and swappable
+ * without touching this component. Showing the marks of the methods you take is
+ * nominative use. UPI and Apple Pay are the same renditions Razorpay uses inside
+ * Checkout, so the mark here is pixel-identical to the one the buyer meets in
+ * the modal a click later — the strongest version of "this will work".
+ *
+ * Marks only, no typeset labels. Netbanking was a chip here and looked exactly
+ * like what it was: a placeholder among four logos. It is a *category*, not a
+ * brand — there is no netbanking mark to vendor, because real Indian checkouts
+ * list individual bank logos or say the word in prose. This page already says it
+ * in prose, in the tier's own "Secure checkout" step. If a method has no mark,
+ * it does not belong in a row of marks.
+ *
+ * This row is a promise about what will work on the next screen, not
+ * decoration. Every mark must correspond to a method actually enabled on the
+ * Razorpay account — if Apple Pay is ever switched off there, delete it here in
+ * the same change.
  */
 
-const svgCls = "h-[15px] w-auto flex-none";
-const wordmark = (
-  weight: number,
-  size: number,
-  extra?: CSSProperties,
-): CSSProperties => ({
-  fontFamily: "var(--font-display)",
-  fontWeight: weight,
-  fontSize: `${size}px`,
-  letterSpacing: "-0.5px",
-  ...extra,
-});
+type Mark = { readonly src: string; readonly label: string };
 
-const Visa = (
-  <svg viewBox="0 0 48 16" className={svgCls} role="img" aria-label="Visa">
-    <text x="0" y="13.5" fill="currentColor" style={wordmark(800, 16, { fontStyle: "italic", letterSpacing: "-1.2px" })}>
-      VISA
-    </text>
-  </svg>
-);
+const VISA: Mark = { src: "/payment/visa.svg", label: "Visa" };
+const MASTERCARD: Mark = { src: "/payment/mastercard.svg", label: "Mastercard" };
+const AMEX: Mark = { src: "/payment/amex.svg", label: "American Express" };
+const UPI: Mark = { src: "/payment/upi.svg", label: "UPI" };
+const APPLE_PAY: Mark = { src: "/payment/apple-pay.svg", label: "Apple Pay" };
 
-const Mastercard = (
-  <svg viewBox="0 0 30 20" className={svgCls} role="img" aria-label="Mastercard">
-    <circle cx="11.5" cy="10" r="8" fill="currentColor" fillOpacity="0.85" />
-    <circle cx="18.5" cy="10" r="8" fill="currentColor" fillOpacity="0.45" />
-  </svg>
-);
+const INTL: readonly Mark[] = [VISA, MASTERCARD, AMEX, APPLE_PAY];
+const DOMESTIC: readonly Mark[] = [VISA, MASTERCARD, UPI, APPLE_PAY];
 
-const Amex = (
-  <svg viewBox="0 0 44 18" className={svgCls} role="img" aria-label="American Express">
-    <rect x="0.6" y="0.6" width="42.8" height="16.8" rx="2.4" fill="none" stroke="currentColor" strokeOpacity="0.55" />
-    <text x="22" y="12.4" textAnchor="middle" fill="currentColor" style={{ fontFamily: "var(--font-mono)", fontWeight: 700, fontSize: "8.5px", letterSpacing: "0.6px" }}>
-      AMEX
-    </text>
-  </svg>
-);
-
-const RuPay = (
-  <svg viewBox="0 0 52 16" className={svgCls} role="img" aria-label="RuPay">
-    <text x="0" y="13" fill="currentColor" style={wordmark(700, 14)}>
-      RuPay
-    </text>
-  </svg>
-);
-
-const Upi = (
-  <svg viewBox="0 0 34 16" className={svgCls} role="img" aria-label="UPI">
-    <text x="0" y="13" fill="currentColor" style={wordmark(700, 14)}>
-      UPI
-    </text>
-  </svg>
-);
-
-const ApplePay = (
-  <svg viewBox="0 0 40 18" className={svgCls} role="img" aria-label="Apple Pay">
-    <path
-      d="M7.6 4.3c.5-.6.8-1.4.7-2.3-.7 0-1.6.5-2.1 1.1-.5.5-.9 1.4-.7 2.2.8.1 1.6-.4 2.1-1zM8.3 5.5c-1.2-.1-2.2.7-2.8.7-.6 0-1.4-.7-2.3-.6-1.2 0-2.3.7-2.9 1.8-1.2 2.1-.3 5.3.9 7 .6.9 1.3 1.8 2.2 1.7.9 0 1.2-.6 2.3-.6s1.4.6 2.3.6c.9 0 1.6-.9 2.2-1.7.4-.6.6-1 .8-1.6-2-.8-2.3-3.6-.3-4.7-.6-.8-1.5-1.4-2.4-1.4z"
-      fill="currentColor"
-    />
-    <text x="16.5" y="13.5" fill="currentColor" style={wordmark(600, 12.5)}>
-      Pay
-    </text>
-  </svg>
-);
-
-const GooglePay = (
-  <svg viewBox="0 0 42 18" className={svgCls} role="img" aria-label="Google Pay">
-    <text x="0" y="13.5" fill="currentColor" style={wordmark(700, 13.5)}>
-      G
-    </text>
-    <text x="10.5" y="13.5" fill="currentColor" style={wordmark(600, 12.5)}>
-      Pay
-    </text>
-  </svg>
-);
-
-const INTL: ReactNode[] = [Visa, Mastercard, Amex, ApplePay, GooglePay];
-const DOMESTIC: ReactNode[] = [Visa, Mastercard, RuPay, Upi, ApplePay];
-
-/** A row of accepted-payment marks for the visitor's region. */
+/** The accepted-method row for the visitor's region. */
 export default function PaymentMarks({ region }: { region: RegionCode }) {
   const marks = region === "IN" ? DOMESTIC : INTL;
   return (
-    <div className="flex flex-wrap items-center gap-x-3.5 gap-y-2 text-t4" aria-label="Accepted payment methods">
-      {marks.map((mark, i) => (
-        <span key={i} className="inline-flex items-center">
-          {mark}
-        </span>
+    <ul
+      aria-label="Accepted payment methods"
+      // Centred while the panel is full-page-width (below xs), so a row that
+      // wraps stays balanced instead of leaving a ragged last line.
+      className="m-0 flex list-none flex-wrap items-center justify-center gap-1.5 p-0 xs:justify-start"
+    >
+      {marks.map((mark) => (
+        <li key={mark.label} className="flex">
+          {/* Intrinsic size given so the row never reflows when the tiles land.
+              37×24 is the 780×500 ratio; `.pay-mark` pins the height. */}
+          <img
+            src={mark.src}
+            alt={mark.label}
+            width={37}
+            height={24}
+            className="pay-mark"
+          />
+        </li>
       ))}
-    </div>
+    </ul>
   );
 }

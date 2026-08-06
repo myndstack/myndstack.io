@@ -107,7 +107,9 @@ function PricingCard({ tier }: { tier: ResolvedTier }) {
 
       <div className="mb-6">
         <Price price={tier.price} period={tier.period} />
-        {/* Per-region note — e.g. "Billed in INR" for non-IN, "excl. GST 18%" for IN.
+        {/* Per-region note — e.g. "billed in USD" for US, "excl. GST 18%" for IN.
+            Since International Payments shipped, the charge is in the shown
+            currency, so this must NOT say "billed in INR" for a non-IN region.
             t5, not t6: t5 is the AA-safe floor for small text on these surfaces
             (the axe e2e guards exactly this). */}
         {tier.taxNote ? (
