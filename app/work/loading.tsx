@@ -10,8 +10,8 @@ export default function Loading() {
           reflows a 3-col grid into the real 2-col one on hydration. */}
       <PageHeader
         eyebrow="Selected work"
-        title="Stacks we built, running in production."
-        lede="Each of these replaced something that already worked, badly. The interesting part is rarely the model — it's the seams around it."
+        title="Cognitive infrastructure, built end to end."
+        lede="PharmaLaunch is the stack we designed and built: AI generation paired with deterministic rule engines and automated quality gates. In private validation."
         meta="Loading…"
         breadcrumbs={[{ label: "Home", href: "/" }]}
       />

@@ -7,7 +7,7 @@ import { getCases } from "@/lib/sanity/queries";
 
 const title = "Selected work — Myndstack";
 const description =
-  "Cognitive infrastructure we've architected and shipped with partner teams — logistics, healthcare, banking and energy, running in production.";
+  "PharmaLaunch — cognitive infrastructure for pharma manufacturing feasibility: generated, quality-gated GMP documents, designed and built by Myndstack. In private validation.";
 
 export const metadata: Metadata = {
   title,
@@ -23,8 +23,8 @@ export default async function WorkPage() {
     <>
       <PageHeader
         eyebrow="Selected work"
-        title="Stacks we built, running in production."
-        lede="Each of these replaced something that already worked, badly. The interesting part is rarely the model — it's the seams around it."
+        title="Cognitive infrastructure, built end to end."
+        lede="PharmaLaunch is the stack we designed and built: AI generation paired with deterministic rule engines and automated quality gates. In private validation."
         meta={`${cases.length} case stud${cases.length === 1 ? "y" : "ies"}`}
         breadcrumbs={[{ label: "Home", href: "/" }]}
       />

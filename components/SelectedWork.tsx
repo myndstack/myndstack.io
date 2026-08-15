@@ -27,8 +27,8 @@ export default async function SelectedWork() {
         className="mb-9"
         titleMaxWidth="620px"
         eyebrow="Selected work"
-        title="Stacks we built, running in production."
-        aside="A sample of the cognitive infrastructure we've architected and shipped with partner teams."
+        title="Cognitive infrastructure, built end to end."
+        aside="PharmaLaunch — a platform that generates GMP facility-feasibility documents, quality-gated by a deterministic rule engine. In private validation."
       />
 
       <div className="flex flex-col gap-[18px]">
