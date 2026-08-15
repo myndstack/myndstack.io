@@ -1,4 +1,3 @@
-import Capabilities from "@/components/Capabilities";
 import ContactForm from "@/components/ContactForm";
 import Contrast from "@/components/Contrast";
 import CtaBand from "@/components/CtaBand";
@@ -60,7 +59,10 @@ export default async function Home() {
           before the stack that removes it assembles. */}
       <Contrast />
       <StackStory />
-      <Capabilities />
+      {/* Capabilities was cut — it restated StackStory ("one stack, every
+          layer" / "from data plane to model, one team") one section later, and
+          opened a run of three near-identical card grids. Integrations now
+          carries the "what we plug into" beat in a distinct spec-matrix layout. */}
       <Integrations />
       <SelectedWork />
       <Process />
