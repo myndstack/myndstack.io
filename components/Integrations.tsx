@@ -33,17 +33,22 @@ export default function Integrations() {
       <Reveal>
         <div className="border border-line">
           {INTEGRATIONS.map((group, i) => (
+            // Two columns from `sm` (760px), NOT `md` (1000px). This project's
+            // md is 1000px, so gating the 2-col on md left every 760–1000px
+            // window in a sparse, full-width single-column stack. Label column
+            // is fixed so the tag columns line up row to row; tightened padding
+            // and gaps so it reads as a dense spec sheet.
             <div
               key={group.title}
-              className={`grid grid-cols-1 gap-x-10 gap-y-4 p-6 sm:p-8 md:grid-cols-[minmax(0,280px)_1fr] md:items-baseline${
+              className={`grid grid-cols-1 gap-x-8 gap-y-3 px-5 py-6 sm:grid-cols-[190px_1fr] sm:items-baseline sm:px-7${
                 i > 0 ? " border-t border-line" : ""
               }`}
             >
               <div>
-                <div className="font-display text-[19px] font-semibold">
+                <div className="font-display text-[17px] font-semibold">
                   {group.title}
                 </div>
-                <p className="m-0 mt-1.5 max-w-[240px] text-[13px] leading-[1.5] text-t5">
+                <p className="m-0 mt-1 text-[13px] leading-[1.45] text-t5">
                   {group.blurb}
                 </p>
               </div>
