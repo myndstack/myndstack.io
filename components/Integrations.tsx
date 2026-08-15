@@ -1,4 +1,5 @@
 import { INTEGRATIONS } from "@/lib/content";
+import { INTEGRATION_LOGOS } from "@/lib/integration-logos";
 import Reveal from "./Reveal";
 import Section from "./Section";
 import SectionHeader from "./SectionHeader";
@@ -52,17 +53,37 @@ export default function Integrations() {
                   {group.blurb}
                 </p>
               </div>
-              {/* Natural-case mono tags — brand casing preserved (OpenAI,
-                  BigQuery), so NOT the uppercase `.chip` primitive. */}
+              {/* Official monochrome marks where the licensed set has them,
+                  tinted to the theme via fill=currentColor; a name chip in the
+                  same 36px frame for the 6 vendors with no faithful mark
+                  (OpenAI, AWS, Azure, Cohere, Pinecone, Meta Llama) so the row
+                  reads as one system. Drop an official SVG for those into
+                  lib/integration-logos.ts to promote them to a mark. */}
               <ul className="m-0 flex list-none flex-wrap gap-2 p-0">
-                {group.items.map((item) => (
-                  <li
-                    key={item}
-                    className="ease-brand border border-line-3 px-2.5 py-1 font-mono text-[12px] tracking-[0.01em] text-t3 transition-colors duration-160 hover:border-lime-edge hover:text-t2"
-                  >
-                    {item}
-                  </li>
-                ))}
+                {group.items.map((item) => {
+                  const path = INTEGRATION_LOGOS[item];
+                  return (
+                    <li
+                      key={item}
+                      className="ease-brand inline-flex h-9 items-center border border-line-3 px-3 text-t3 transition-colors duration-160 hover:border-lime-edge hover:text-t1"
+                    >
+                      {path ? (
+                        <svg
+                          viewBox="0 0 24 24"
+                          role="img"
+                          aria-label={item}
+                          className="h-[18px] w-auto fill-current"
+                        >
+                          <path d={path} />
+                        </svg>
+                      ) : (
+                        <span className="font-mono text-[12px] tracking-[0.01em]">
+                          {item}
+                        </span>
+                      )}
+                    </li>
+                  );
+                })}
               </ul>
             </div>
           ))}
