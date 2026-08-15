@@ -224,11 +224,13 @@ export default function Nav({ contactEmail }: { contactEmail: string }) {
             })}
           </ul>
 
-          {/* "Contact" (not "Start a project") keeps the pill within its tight
-              width budget once the longer enterprise labels are in the row; the
-              expansive mobile drawer keeps the fuller CTA. */}
+          {/* Unified to the site's one conversion verb, matching the drawer and
+              CTA band. The shorter 5-item row (Platform · Work · Pricing ·
+              Company · Careers) freed the width budget that previously forced
+              the terse "Contact"; the capsule-fit e2e test guards the tucked
+              state. */}
           <a className="nav-cta hidden sm:inline-block" href="/#contact">
-            Contact
+            Start a project
           </a>
 
           <button

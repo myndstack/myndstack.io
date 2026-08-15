@@ -168,7 +168,7 @@ export default function Loader() {
       <canvas ref={canvasRef} className="absolute inset-0 h-full w-full opacity-60" />
       <Wordmark height={44} className="relative z-2 animate-load-mark" />
       <div className="animate-load-line relative z-2 h-0.5 bg-lime shadow-[0_0_14px_#C9F24D]" />
-      <div className="animate-load-fade relative z-2 font-mono text-[11px] font-bold tracking-[0.22em] text-t7 uppercase">
+      <div className="animate-load-fade relative z-2 font-mono text-[11px] font-bold tracking-[0.22em] text-t5 uppercase">
         Initializing cognitive stack
       </div>
     </div>

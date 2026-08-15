@@ -16,7 +16,8 @@
   --color-ink: #0a0a0b;
   --color-true-black: #000000;
   --color-surface: #101012;
-  --color-surface-2: #111113;
+  /* No --color-surface-2: it was #111113, one value/channel off --surface
+     (imperceptible) and used exactly once. Folded into --surface. */
   --color-surface-3: #151517;
 
   /* Hairlines */

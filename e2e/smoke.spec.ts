@@ -631,7 +631,7 @@ test.describe("navigation reaches everything", () => {
     await expect(page.getByRole("heading", { name: /about the role/i })).toBeVisible();
   });
 
-  test("nav Customers marks itself current and drops stale scroll-spy state", async ({
+  test("nav Work marks itself current and drops stale scroll-spy state", async ({
     page,
   }) => {
     await landOnHome(page);
@@ -640,7 +640,7 @@ test.describe("navigation reaches everything", () => {
     // to reveal it — which is what someone reaching for the nav would do anyway.
     await scrollBySteps(page, -300, 4);
 
-    // Customers is a route link (/work) that also spies the homepage case-studies
+    // Work is a route link (/work) that also spies the homepage case-studies
     // section; on /work its active state must come from the URL, and the stale
     // homepage scroll-spy highlight must clear — exactly one link stays current.
     await page.locator('.navlink[href="/work"]').click();
@@ -648,9 +648,9 @@ test.describe("navigation reaches everything", () => {
 
     // Web-first assertion so this settles the post-navigation active-state race
     // rather than snapshotting once (the suite runs with retries: 0 locally):
-    // exactly one link stays current, and it's Customers — its URL-based active
+    // exactly one link stays current, and it's Work — its URL-based active
     // state, with the stale homepage scroll-spy highlight cleared.
-    await expect(page.locator(".navlink.is-active")).toHaveText(["Customers"]);
+    await expect(page.locator(".navlink.is-active")).toHaveText(["Work"]);
   });
 });
 
@@ -686,8 +686,10 @@ test.describe("scroll chrome", () => {
     // Nothing is highlighted over the hero / intro (no first-in-document fallback).
     expect(await current()).toBe(null);
 
-    // Land just past each landmark's top, in document order, without jumping back.
-    for (const section of ["platform", "work-grid", "work-cases", "pricing", "team"]) {
+    // Land just past each landmark's top, in document order, without jumping
+    // back. `work-grid` (the old "Solutions" section) is no longer a spied nav
+    // section — the 5-item IA folded it into Platform — so it's not asserted.
+    for (const section of ["platform", "work-cases", "pricing", "team"]) {
       const target = await page.evaluate(
         (id) => document.getElementById(id)!.offsetTop + 40,
         section,

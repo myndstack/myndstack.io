@@ -107,7 +107,7 @@ export default function MobileDrawer({ open, onClose, contactEmail }: Props) {
           {/* Exactly the desktop set — the wider surface should never offer less
               navigation than the narrower one. FAQ lives in the footer. */}
           {NAV_LINKS.map((link) => {
-            // Same-doc hash → native <a>; a real path (incl. Customers → /work,
+            // Same-doc hash → native <a>; a real path (incl. Work → /work,
             // which also carries a spy section) → client <Link>.
             const isAnchor = link.href.startsWith("/#");
             return isAnchor ? (

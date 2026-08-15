@@ -72,25 +72,27 @@ export const SITE = {
  * route (rendered as `<Link>`).
  *
  * `section` is the homepage element the scroll-spy watches. Most links are one
- * or the other, but Customers is BOTH: it routes to `/work` on click yet also
+ * or the other, but Work is BOTH: it routes to `/work` on click yet also
  * carries `section: "work-cases"` so it lights while the homepage case-studies
  * chapter is in view. See the unified active logic in `Nav.tsx`.
  *
- * "Solutions" maps to the capabilities section ("What we do") — the site has no
- * separate use-cases page — and "Company" to the studio/team section.
+ * Five honest items. The previous six had real redundancy — "Product"
+ * (→#platform), "Solutions" (→#work-grid) and "Customers" (→/work) were three
+ * overlapping "what/who we do" entry points. "Solutions" is folded into
+ * Platform (the stack IS the product AND the solution here), "Customers"
+ * becomes the plainer "Work", and "Company" points at the studio/team section.
  */
 export type NavLink = { label: string; href: string; section?: string };
 
 export const NAV_LINKS: readonly NavLink[] = [
-  // Product's href targets `#platform-anchor` (a hidden span 120vh into the
+  // Platform's href targets `#platform-anchor` (a hidden span 120vh into the
   // StackStory section), NOT the section's own `#platform`. Landing flush at
   // the section top puts the reveal formula at `progress = 0`, which paints
   // every tile at opacity 0 — see StackStory.tsx for the anchor span itself
   // and the reasoning. `section: "platform"` stays because scroll-spy watches
   // the section, not the anchor.
-  { label: "Product", href: "/#platform-anchor", section: "platform" },
-  { label: "Solutions", href: "/#work-grid", section: "work-grid" },
-  { label: "Customers", href: "/work", section: "work-cases" },
+  { label: "Platform", href: "/#platform-anchor", section: "platform" },
+  { label: "Work", href: "/work", section: "work-cases" },
   { label: "Pricing", href: "/#pricing", section: "pricing" },
   { label: "Company", href: "/#team", section: "team" },
   { label: "Careers", href: "/careers" },
@@ -761,8 +763,11 @@ export const FOOTER_COLUMNS = [
   {
     title: "Platform",
     links: [
-      { label: "AI platforms", href: "/#work-grid" },
-      { label: "Consulting", href: "/#work-grid" },
+      // Was two labels ("AI platforms" / "Consulting") pointing at the same
+      // #work-grid anchor — a padded menu that reads as a dark pattern. Now
+      // three distinct, honest destinations mirroring the nav.
+      { label: "Platform", href: "/#platform-anchor" },
+      { label: "Work", href: "/work" },
       { label: "Pricing", href: "/#pricing" },
     ],
   },

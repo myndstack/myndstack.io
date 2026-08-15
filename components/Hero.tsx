@@ -1,16 +1,12 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { useReducedMotion } from "@/lib/hooks";
 import HeroNetwork, { PULSE_EVENT } from "./HeroNetwork";
 import Magnetic from "./Magnetic";
 
 const WORDS = ["Intelligence", "that", "runs", "on", "infrastructure."];
-const CYCLE_MS = 1400;
 // The hard line break falls after index 2 (see the <br/> below): line one reads
-// "Intelligence that runs" and line two "on infrastructure." Every word is its
-// own array element so the cycling accent lights ONE word at a time — a
-// multi-word element (the old "architected and built.") lit all its words at once.
+// "Intelligence that runs" and line two "on infrastructure." The final word
+// carries a fixed lime accent — "infrastructure." IS the thesis, so it stays lit.
 const LAST = WORDS.length - 1;
 
 /**
@@ -26,18 +22,6 @@ type Props = {
 };
 
 export default function Hero({ eyebrow, subhead, ctaPrimary, ctaSecondary }: Props) {
-  const reduced = useReducedMotion();
-  const [index, setIndex] = useState(0);
-
-  useEffect(() => {
-    if (reduced) return;
-    const id = window.setInterval(
-      () => setIndex((i) => (i + 1) % WORDS.length),
-      CYCLE_MS,
-    );
-    return () => window.clearInterval(id);
-  }, [reduced]);
-
   // Hovering a CTA sends a burst of signals through the network behind it, plus
   // a shockwave that rolls out from the button's centre — so the detail carries
   // the CTA's viewport-space centre for HeroNetwork to convert to canvas coords.
@@ -49,9 +33,6 @@ export default function Hero({ eyebrow, subhead, ctaPrimary, ctaSecondary }: Pro
       }),
     );
   };
-
-  // At rest the design lights the final line; the cycle walks the accent instead.
-  const lit = reduced ? LAST : index;
 
   return (
     <header
@@ -85,7 +66,7 @@ export default function Hero({ eyebrow, subhead, ctaPrimary, ctaSecondary }: Pro
         <h1 className="animate-rise-in m-0 max-w-[1000px] font-display text-[clamp(30px,7.2vw,92px)] leading-none font-normal tracking-[-0.03em] text-balance [animation-duration:0.7s]">
           {WORDS.map((word, i) => (
             <span key={word}>
-              <span className={`hero-word${i === lit ? " is-lit" : ""}`}>{word}</span>
+              <span className={`hero-word${i === LAST ? " is-lit" : ""}`}>{word}</span>
               {i === 2 ? <br /> : i < LAST ? " " : null}
             </span>
           ))}
