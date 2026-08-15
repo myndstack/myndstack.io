@@ -65,14 +65,19 @@ export default async function Home() {
           carries the "what we plug into" beat in a distinct spec-matrix layout. */}
       <Integrations />
       <SelectedWork />
-      <Process />
+      {/* Brand wordline as a mid-page texture beat — breaks the card-dense run
+          between the work grid and the pricing grid, and gives the middle of the
+          page the visual variety the old six-grid stretch lacked. */}
+      <MarqueeBand />
       <Pricing tiers={tiers} />
+      {/* "How we engage" lands AFTER the price — proof (work) → price → method
+          — instead of interrupting the proof→price adjacency, where it sat
+          between SelectedWork and Pricing before. */}
+      <Process />
       <Team />
       {/* Brand crescendo just before the close. */}
       <Manifesto lead={home.manifestoLead} keep={home.manifestoKeep} />
       <Faq faqs={faqs} />
-      {/* Brand wordline as a texture beat leading into the final CTA. */}
-      <MarqueeBand />
       <CtaBand />
       <ContactForm
         email={site.email}
