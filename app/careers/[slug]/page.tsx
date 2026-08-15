@@ -123,7 +123,7 @@ export default async function RolePage({ params }: { params: Promise<Params> }) 
                     {list.items.map((item) => (
                       <li
                         key={item}
-                        className="flex gap-3.5 text-[15.5px] leading-[1.55] text-t3"
+                        className="flex gap-3.5 text-[15px] leading-[1.55] text-t3"
                       >
                         <span
                           aria-hidden="true"

@@ -18,14 +18,14 @@ export default async function Contrast() {
 
       <div className="grid grid-cols-1 gap-[18px] sm:grid-cols-2">
         <Reveal scrub className="border border-line bg-surface px-9 py-[34px]">
-          <div className="mb-[22px] font-mono text-[11.5px] font-bold tracking-[0.12em] text-t5 uppercase">
+          <div className="mb-[22px] font-mono text-[11px] font-bold tracking-[0.12em] text-t5 uppercase">
             Without a unified stack
           </div>
           <ul className="m-0 flex list-none flex-col gap-[15px] p-0">
             {contrastWithout.map((item) => (
               <li
                 key={item}
-                className="flex gap-3.5 text-[15.5px] leading-[1.4] text-t4"
+                className="flex gap-3.5 text-[15px] leading-[1.4] text-t4"
               >
                 <span className="flex-none text-t7">—</span>
                 {item}
@@ -39,14 +39,14 @@ export default async function Contrast() {
           delay={0.08}
           className="clip-angular-28 relative overflow-hidden border border-lime bg-surface-3 px-9 py-[34px] shadow-float"
         >
-          <div className="mb-[22px] font-mono text-[11.5px] font-bold tracking-[0.12em] text-lime uppercase">
+          <div className="mb-[22px] font-mono text-[11px] font-bold tracking-[0.12em] text-lime uppercase">
             With Myndstack
           </div>
           <ul className="m-0 flex list-none flex-col gap-[15px] p-0">
             {contrastWith.map((item) => (
               <li
                 key={item}
-                className="flex gap-3.5 text-[15.5px] leading-[1.4] text-t2"
+                className="flex gap-3.5 text-[15px] leading-[1.4] text-t2"
               >
                 <span className="flex-none text-lime">▸</span>
                 {item}

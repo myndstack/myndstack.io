@@ -66,7 +66,7 @@ export default async function SelectedWork() {
                   >
                     {m.v}
                   </div>
-                  <div className="mt-[3px] font-mono text-[10.5px] tracking-[0.08em] text-t5 uppercase">
+                  <div className="mt-[3px] font-mono text-[11px] tracking-[0.08em] text-t5 uppercase">
                     {m.l}
                   </div>
                 </div>
@@ -94,7 +94,7 @@ export default async function SelectedWork() {
                     <div className="mb-[9px] font-display text-[21px] font-semibold">
                       {c.client}
                     </div>
-                    <p className="m-0 text-[13.5px] leading-[1.55] text-t4">{c.summary}</p>
+                    <p className="m-0 text-[13px] leading-[1.55] text-t4">{c.summary}</p>
                   </div>
 
                   <div className="mt-6 flex gap-[26px] border-t border-line pt-4">

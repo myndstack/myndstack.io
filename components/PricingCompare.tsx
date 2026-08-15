@@ -46,7 +46,7 @@ export default function PricingCompare({ tierNames, onOpen }: Props) {
           onClick={toggle}
           aria-expanded={open}
           aria-controls="pricing-compare-table"
-          className="btn-outline px-6 py-2.5 text-[13.5px] font-semibold"
+          className="btn-outline px-6 py-2.5 text-[13px] font-semibold"
         >
           {open ? "Hide comparison" : "Compare all plans →"}
         </button>
@@ -153,7 +153,7 @@ function CompareSectionRows({
           {tierNames.map((name) => (
             <td
               key={name}
-              className="p-4 text-center text-[13.5px] text-t3 align-middle"
+              className="p-4 text-center text-[13px] text-t3 align-middle"
             >
               <CellValue value={row.values[name]} />
             </td>

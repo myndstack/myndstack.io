@@ -82,7 +82,7 @@ export default async function CareersPage() {
                     <span className="block font-display text-[19px] font-semibold">
                       {role.title}
                     </span>
-                    <span className="mt-1 block max-w-[560px] text-[13.5px] leading-[1.5] text-t4">
+                    <span className="mt-1 block max-w-[560px] text-[13px] leading-[1.5] text-t4">
                       {role.lede}
                     </span>
                   </span>

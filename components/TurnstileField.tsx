@@ -31,13 +31,13 @@ export default function TurnstileField({ siteKey, gate, email, className = "" }:
       {gate.widgetFailed ? (
         <p
           role="alert"
-          className="m-0 mt-3 border border-danger/40 bg-danger/8 px-4 py-3 font-mono text-[11.5px] text-danger"
+          className="m-0 mt-3 border border-danger/40 bg-danger/8 px-4 py-3 font-mono text-[11px] text-danger"
         >
           Verification couldn&rsquo;t load. Disable any blockers and refresh, or email
           us directly at <a href={`mailto:${email}`}>{email}</a>.
         </p>
       ) : gate.needsVerify && !gate.token ? (
-        <p role="status" className="m-0 mt-3 font-mono text-[11.5px] text-t4">
+        <p role="status" className="m-0 mt-3 font-mono text-[11px] text-t4">
           One moment — complete the verification just above, then send.
         </p>
       ) : null}

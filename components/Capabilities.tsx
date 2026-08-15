@@ -48,7 +48,7 @@ export default async function Capabilities() {
                       {cap.points.map((point) => (
                         <li
                           key={point}
-                          className={`flex gap-2 text-[12.5px] ${highlight ? "text-lime-ink-3" : "text-t4"}`}
+                          className={`flex gap-2 text-[13px] ${highlight ? "text-lime-ink-3" : "text-t4"}`}
                         >
                           <span className={highlight ? "text-lime-ink-2" : "text-lime"}>
                             ▸

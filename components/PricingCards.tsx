@@ -138,14 +138,14 @@ function PricingCard({ tier }: { tier: ResolvedTier }) {
   return (
     <div className={`pricing-card${tier.highlighted ? " pricing-card--featured" : ""}`}>
       {tier.badge ? (
-        <div className="absolute top-5 right-5 bg-lime px-2.5 py-1 font-mono text-[10.5px] font-bold tracking-[0.12em] text-lime-ink uppercase">
+        <div className="absolute top-5 right-5 bg-lime px-2.5 py-1 font-mono text-[11px] font-bold tracking-[0.12em] text-lime-ink uppercase">
           {tier.badge}
         </div>
       ) : null}
 
       <div className="mb-1.5 font-display text-[19px] font-semibold">{tier.name}</div>
       {/* Reserve two lines so a one-line blurb doesn't misalign the price row. */}
-      <div className="mb-[22px] min-h-[42px] text-[13.5px] leading-[1.5] text-t4">
+      <div className="mb-[22px] min-h-[42px] text-[13px] leading-[1.5] text-t4">
         {tier.blurb}
       </div>
 
@@ -168,7 +168,7 @@ function PricingCard({ tier }: { tier: ResolvedTier }) {
         {tier.features.map((feature) => (
           <li
             key={feature}
-            className={`flex gap-2.5 text-[14.5px] leading-[1.45] ${
+            className={`flex gap-2.5 text-[15px] leading-[1.45] ${
               tier.highlighted ? "text-t2" : "text-t3"
             }`}
           >

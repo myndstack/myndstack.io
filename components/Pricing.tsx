@@ -48,7 +48,7 @@ export default function Pricing({ tiers }: { tiers: PricingTier[] }) {
 
       {/* Per-currency tax/settlement lives on each card now (taxNote); this stays
           a plain prompt so it reads the same in every region. */}
-      <p className="mt-8 mb-0 text-[13.5px] text-t5">
+      <p className="mt-8 mb-0 text-[13px] text-t5">
         <Link
           href="#contact"
           className="text-t3 underline underline-offset-2 hover:text-lime"
@@ -89,12 +89,12 @@ function EnterpriseBand() {
           </span>
           <span className="font-mono text-[12px] text-t5">{ENTERPRISE.tag}</span>
         </div>
-        <p className="m-0 text-[13.5px] leading-[1.5] text-t4">{ENTERPRISE.blurb}</p>
+        <p className="m-0 text-[13px] leading-[1.5] text-t4">{ENTERPRISE.blurb}</p>
         <ul className="mt-4 flex list-none flex-col flex-wrap gap-x-7 gap-y-2 p-0 sm:flex-row">
           {ENTERPRISE.points.map((pt) => (
             <li
               key={pt}
-              className="flex gap-2.5 text-[13.5px] leading-[1.4] text-t3"
+              className="flex gap-2.5 text-[13px] leading-[1.4] text-t3"
             >
               <span aria-hidden="true" className="mt-0.5 flex-none text-lime">
                 ▸

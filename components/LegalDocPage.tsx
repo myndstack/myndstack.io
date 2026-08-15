@@ -60,7 +60,7 @@ export default function LegalDocPage({ slug }: { slug: LegalDoc["slug"] }) {
                 <li key={section.heading}>
                   <a
                     href={`#${sectionId(section.heading)}`}
-                    className="ease-brand flex gap-2.5 text-[13.5px] leading-snug text-t4 transition-colors duration-160 hover:text-t2"
+                    className="ease-brand flex gap-2.5 text-[13px] leading-snug text-t4 transition-colors duration-160 hover:text-t2"
                   >
                     <span className="font-mono text-[11px] text-t5">
                       {String(i + 1).padStart(2, "0")}

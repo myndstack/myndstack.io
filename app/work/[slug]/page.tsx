@@ -86,7 +86,7 @@ export default async function CasePage({ params }: { params: Promise<Params> }) 
               >
                 {m.v}
               </div>
-              <div className="mt-1.5 font-mono text-[10.5px] tracking-[0.08em] text-t5 uppercase">
+              <div className="mt-1.5 font-mono text-[11px] tracking-[0.08em] text-t5 uppercase">
                 {m.l}
               </div>
             </div>

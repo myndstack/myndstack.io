@@ -81,7 +81,7 @@ export default async function CheckoutPage({
                 {tier.features.map((feature) => (
                   <li
                     key={feature}
-                    className="flex gap-3.5 text-[15.5px] leading-[1.55] text-t3"
+                    className="flex gap-3.5 text-[15px] leading-[1.55] text-t3"
                   >
                     <span aria-hidden="true" className="flex-none text-lime">
                       ▸
@@ -135,10 +135,10 @@ export default async function CheckoutPage({
                           {String(i + 1).padStart(2, "0")}
                         </span>
                         <div>
-                          <div className="mb-1 font-display text-[15.5px] font-semibold text-t1">
+                          <div className="mb-1 font-display text-[15px] font-semibold text-t1">
                             {step.title}
                           </div>
-                          <p className="m-0 text-[14.5px] leading-[1.55] text-t4">
+                          <p className="m-0 text-[15px] leading-[1.55] text-t4">
                             {step.body}
                           </p>
                         </div>
@@ -175,10 +175,10 @@ export default async function CheckoutPage({
               <dl className="m-0 grid grid-cols-1 gap-x-14 md:grid-cols-2">
                 {tier.checkout.faqs.map((faq) => (
                   <div key={faq.q} className="border-t border-line py-5">
-                    <dt className="mb-1.5 font-display text-[15.5px] font-semibold text-t2">
+                    <dt className="mb-1.5 font-display text-[15px] font-semibold text-t2">
                       {faq.q}
                     </dt>
-                    <dd className="m-0 text-[14.5px] leading-[1.55] text-t4">
+                    <dd className="m-0 text-[15px] leading-[1.55] text-t4">
                       {faq.a}
                     </dd>
                   </div>

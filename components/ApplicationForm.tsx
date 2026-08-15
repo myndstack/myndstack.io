@@ -34,7 +34,7 @@ export default function ApplicationForm({
         <div className="font-display text-2xl leading-tight font-semibold">
           Thanks — we read every application.
         </div>
-        <p className="m-0 text-[14.5px] text-t4">
+        <p className="m-0 text-[15px] text-t4">
           You&rsquo;ll hear from a person, not an autoresponder, within five business
           days. Questions in the meantime:{" "}
           <a href={`mailto:${contactEmail}`}>{contactEmail}</a>.
@@ -101,7 +101,7 @@ export default function ApplicationForm({
       {error ? (
         <p
           role="alert"
-          className="m-0 border border-danger/40 bg-danger/8 px-4 py-3 font-mono text-[11.5px] text-danger"
+          className="m-0 border border-danger/40 bg-danger/8 px-4 py-3 font-mono text-[11px] text-danger"
         >
           {error}
         </p>

@@ -79,7 +79,7 @@ export default function Faq({ faqs }: { faqs: FaqItem[] }) {
                 style={{ gridTemplateRows: open ? "1fr" : "0fr" }}
               >
                 <div className="overflow-hidden">
-                  <p className="m-0 max-w-[640px] px-6 pb-6 text-[15.5px] leading-[1.6] text-t4">
+                  <p className="m-0 max-w-[640px] px-6 pb-6 text-[15px] leading-[1.6] text-t4">
                     {faq.a}
                   </p>
                 </div>

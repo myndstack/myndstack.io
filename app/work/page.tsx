@@ -48,7 +48,7 @@ export default async function WorkPage() {
                     <div className="mb-2.5 font-display text-[clamp(21px,3vw,26px)] font-bold tracking-[-0.02em]">
                       {c.client}
                     </div>
-                    <p className="m-0 max-w-[460px] text-[14.5px] leading-[1.55] text-t4">
+                    <p className="m-0 max-w-[460px] text-[15px] leading-[1.55] text-t4">
                       {c.lede}
                     </p>
                   </div>

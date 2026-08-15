@@ -83,7 +83,7 @@ export default function Footer({ site }: { site: SiteSettings }) {
       </Reveal>
 
       <div className="mx-auto mt-14 max-w-[1200px] border-t border-surface-3 pt-6">
-        <div className="flex flex-col-reverse items-start gap-4 text-[12.5px] text-t5 md:flex-row md:items-center md:justify-between md:gap-6">
+        <div className="flex flex-col-reverse items-start gap-4 text-[13px] text-t5 md:flex-row md:items-center md:justify-between md:gap-6">
           <span className="whitespace-nowrap">© 2026 {SITE.legalName}</span>
           <nav
             aria-label="Legal"
@@ -97,7 +97,7 @@ export default function Footer({ site }: { site: SiteSettings }) {
               <Link
                 key={item.href}
                 href={item.href}
-                className="-my-1.5 py-1.5 text-[12.5px] text-t5 transition-colors duration-160 hover:text-lime"
+                className="-my-1.5 py-1.5 text-[13px] text-t5 transition-colors duration-160 hover:text-lime"
               >
                 {item.label}
               </Link>

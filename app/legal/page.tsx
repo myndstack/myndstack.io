@@ -70,7 +70,7 @@ export default function Page() {
             <section key={group.title}>
               <div className="mb-6 border-b border-line pb-3">
                 <h2 className="label-mono m-0 text-t3">{group.title}</h2>
-                <p className="mt-1.5 mb-0 max-w-[560px] text-[13.5px] text-t5">
+                <p className="mt-1.5 mb-0 max-w-[560px] text-[13px] text-t5">
                   {group.blurb}
                 </p>
               </div>
@@ -86,7 +86,7 @@ export default function Page() {
                         <div className="font-display text-[17px] font-semibold text-t2 group-hover:text-lime">
                           {doc.title}
                         </div>
-                        <p className="m-0 text-[13.5px] leading-[1.55] text-t5">
+                        <p className="m-0 text-[13px] leading-[1.55] text-t5">
                           {doc.lede}
                         </p>
                       </Link>

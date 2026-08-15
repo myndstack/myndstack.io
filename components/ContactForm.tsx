@@ -89,7 +89,7 @@ export default function ContactForm({
               <div className="font-display text-2xl leading-tight font-semibold">
                 Thanks — we&rsquo;ll be in touch within one business day.
               </div>
-              <p className="m-0 text-[14.5px] text-t4">
+              <p className="m-0 text-[15px] text-t4">
                 In the meantime, reach us directly at{" "}
                 <a href={`mailto:${email}`}>{email}</a>.
               </p>
@@ -196,7 +196,7 @@ export default function ContactForm({
               {error ? (
                 <p
                   role="alert"
-                  className="m-0 border border-danger/40 bg-danger/8 px-4 py-3 font-mono text-[11.5px] text-danger xs:col-span-2"
+                  className="m-0 border border-danger/40 bg-danger/8 px-4 py-3 font-mono text-[11px] text-danger xs:col-span-2"
                 >
                   {error}
                 </p>
