@@ -72,7 +72,7 @@ export default function Hero({ eyebrow, subhead, ctaPrimary, ctaSecondary }: Pro
           ))}
         </h1>
 
-        <p className="animate-rise-in mx-0 mt-8 mb-10 max-w-[580px] text-22 leading-[1.5] text-t3 [animation-duration:0.8s]">
+        <p className="animate-rise-in mx-0 mt-8 mb-10 max-w-[580px] text-17 leading-[1.5] sm:text-22 text-t3 [animation-duration:0.8s]">
           {subhead}
         </p>
 

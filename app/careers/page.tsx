@@ -49,7 +49,7 @@ export default async function CareersPage() {
         <h2 className="sr-only">How we work</h2>
         <div className="grid grid-cols-1 gap-px border-t border-line bg-line xs:grid-cols-2 md:grid-cols-3">
           {PRINCIPLES.map((p) => (
-            <Reveal key={p.n} className="bg-ink px-6 pt-7 pb-8">
+            <Reveal key={p.n} className="bg-ink xs:last:odd:col-span-2 md:last:odd:col-span-1 px-6 pt-7 pb-8">
               <div className="mb-8 font-mono text-13 text-lime">{p.n}</div>
               <h3 className="m-0 mb-2 font-display text-22 font-semibold">{p.t}</h3>
               <p className="m-0 text-15 leading-[1.55] text-t4">{p.d}</p>
