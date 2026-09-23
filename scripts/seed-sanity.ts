@@ -40,9 +40,9 @@ import { ROLES } from "../lib/roles";
 
 // Copy that lived inline in components/Hero.tsx and components/LogoMarquee.tsx.
 const HERO = {
-  eyebrow: "Enterprise AI · Cognitive infrastructure",
+  eyebrow: "Founder-led studio · AI + software",
   subhead:
-    "One stack that connects your data, compute, and models — engineered so your teams ship mission-critical AI, not plumbing.",
+    "A founder-led studio that ships the whole stack — AI systems, the web and mobile products around them, and the architecture underneath. From first sketch to production.",
   ctaPrimary: "Start a project →",
   ctaSecondary: "See our work ▸",
 };

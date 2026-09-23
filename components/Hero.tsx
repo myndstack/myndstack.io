@@ -3,15 +3,14 @@
 import HeroNetwork, { PULSE_EVENT } from "./HeroNetwork";
 import Magnetic from "./Magnetic";
 
-const WORDS = ["Intelligence", "that", "runs", "on", "infrastructure."];
-// The hard line break falls after index 2 (see the <br/> below): line one reads
-// "Intelligence that runs" and line two "on infrastructure." The final word
-// carries a fixed lime accent — "infrastructure." IS the thesis, so it stays lit.
-const LAST = WORDS.length - 1;
+const WORDS = ["Architected", "and", "built,", "end", "to", "end."];
+/** The hard line break falls after this index: line one reads "Architected and
+ *  built," and line two "end to end." — the promise, so the whole line stays lit. */
+const BREAK_AFTER = 2;
 
 /**
- * The headline words stay in code — the cycle animation and the hard line break
- * after index 2 are written against that exact array. Everything else here is
+ * The headline words stay in code — the lit line and the hard line break after
+ * `BREAK_AFTER` are written against that exact array. Everything else here is
  * editorial copy and arrives from the CMS.
  */
 type Props = {
@@ -65,9 +64,10 @@ export default function Hero({ eyebrow, subhead, ctaPrimary, ctaSecondary }: Pro
 
         <h1 className="animate-rise-in m-0 max-w-[1000px] font-display text-[clamp(30px,7.2vw,92px)] leading-none font-normal tracking-[-0.03em] text-balance [animation-duration:0.7s]">
           {WORDS.map((word, i) => (
-            <span key={word}>
-              <span className={`hero-word${i === LAST ? " is-lit" : ""}`}>{word}</span>
-              {i === 2 ? <br /> : i < LAST ? " " : null}
+            // Index key: "end" appears twice, and the array is static.
+            <span key={i}>
+              <span className={`hero-word${i > BREAK_AFTER ? " is-lit" : ""}`}>{word}</span>
+              {i === BREAK_AFTER ? <br /> : i < WORDS.length - 1 ? " " : null}
             </span>
           ))}
         </h1>
