@@ -3,8 +3,7 @@
 import { useEffect, useRef, useState, type ReactNode } from "react";
 
 import { useReducedMotion, useScrollFrame } from "@/lib/hooks";
-import { createScope } from "@/lib/motion/anime/core";
-import { createTimer, type Timer } from "@/lib/motion/anime/timer";
+import type { Timer } from "@/lib/motion/anime/timer";
 import type { ChapterBuilder, ChapterMotion, ChapterState } from "@/lib/motion/chapter";
 import { PIN_QUERY } from "@/lib/motion/pin";
 import { chapterProgress, quantize, type ChapterGeometry } from "@/lib/motion/progress";
@@ -12,6 +11,9 @@ import { registerChapter } from "@/lib/motion/registry";
 import { segmentTime, type RunGeometry } from "@/lib/motion/segments";
 import { clampDt, clampLag, glideStep, isJump } from "@/lib/motion/smooth";
 import { documentTop } from "@/lib/scroll-spy";
+
+type Runtime = typeof import("@/lib/motion/runtime");
+type Loaded = { readonly build: ChapterBuilder; readonly runtime: Runtime };
 
 import { CHAPTER_LOADERS, type ChapterId } from "./loaders";
 
@@ -85,7 +87,7 @@ export default function MotionChapter({ id, kind, eager = false, className, chil
   const reduced = useReducedMotion();
   const desktop = useLiveMediaQuery(PIN_QUERY);
   const coarse = useLiveMediaQuery("(pointer: coarse)");
-  const [builder, setBuilder] = useState<ChapterBuilder | null>(null);
+  const [builder, setBuilder] = useState<Loaded | null>(null);
 
   const motionRef = useRef<ChapterMotion | null>(null);
   const glideRef = useRef<Timer | null>(null);
@@ -286,9 +288,9 @@ export default function MotionChapter({ id, kind, eager = false, className, chil
           if (!cancelled && !motionRef.current) finish();
         }, BUILD_TIMEOUT_MS);
       }
-      CHAPTER_LOADERS[id]().then(
-        (mod) => {
-          if (!cancelled) setBuilder(() => mod.default);
+      Promise.all([CHAPTER_LOADERS[id](), import("@/lib/motion/runtime")]).then(
+        ([mod, runtime]) => {
+          if (!cancelled) setBuilder({ build: mod.default, runtime });
         },
         () => {
           if (!cancelled) finish();
@@ -326,16 +328,17 @@ export default function MotionChapter({ id, kind, eager = false, className, chil
     if (!builder || reduced || !motionAllowed() || !root || !root.isConnected) return;
 
     let failed = false;
-    const scope = createScope({ root }).add(() => {
+    const { build, runtime } = builder;
+    const scope = runtime.createScope({ root }).add(() => {
       try {
-        const motion = builder({ root, desktop, coarse });
+        const motion = build({ root, desktop, coarse });
         motionRef.current = motion;
         // Explicitly paused: in anime 4.5 the first seek() on a timeline that
         // was never started resumes it, and a scrubbed chapter would then keep
         // re-rendering on anime's clock. Only scroll and play() move a chapter.
         motion.timeline.pause();
         motion.intro?.pause();
-        glideRef.current = motion.smooth ? createTimer({ autoplay: false, onUpdate: tickGlide }) : null;
+        glideRef.current = motion.smooth ? runtime.createTimer({ autoplay: false, onUpdate: tickGlide }) : null;
       } catch (error) {
         failed = true;
         motionRef.current = null;

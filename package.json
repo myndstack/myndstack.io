@@ -13,6 +13,7 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:e2e": "playwright test",
+    "budget": "node scripts/bundle-budget.mjs",
     "seed": "node --env-file=.env.local --import tsx scripts/seed-sanity.ts",
     "studio:dev": "sanity dev",
     "studio:build": "sanity build",

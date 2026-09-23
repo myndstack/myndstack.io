@@ -2,9 +2,12 @@
 
 import { useEffect, useRef, type ReactNode } from "react";
 
-import { animate } from "@/lib/motion/anime/core";
-import { spring } from "@/lib/motion/anime/spring";
 import { SPRING_UI } from "@/lib/motion/tokens";
+
+type Anime = {
+  readonly animate: typeof import("@/lib/motion/anime/core").animate;
+  readonly ease: ReturnType<typeof import("@/lib/motion/anime/spring").spring>;
+};
 
 /** How far (px) the wrapped control may lean toward the pointer. */
 const MAX_PX = 10;
@@ -24,21 +27,33 @@ export default function MagneticSpring({ children }: { readonly children: ReactN
     const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     if (!fine || reduced) return;
 
-    const ease = spring(SPRING_UI);
+    // The engine loads on the first hover, not with the page.
+    let anime: Anime | null = null;
+    let loading = false;
+    const load = () => {
+      if (anime || loading) return;
+      loading = true;
+      void Promise.all([import("@/lib/motion/anime/core"), import("@/lib/motion/anime/spring")]).then(
+        ([core, springs]) => {
+          anime = { animate: core.animate, ease: springs.spring(SPRING_UI) };
+        },
+      );
+    };
     let rect: DOMRect | null = null;
 
     const onEnter = () => {
+      load();
       rect = el.getBoundingClientRect();
     };
     const onMove = (e: PointerEvent) => {
-      if (!rect) return;
+      if (!rect || !anime) return;
       const dx = (e.clientX - (rect.left + rect.width / 2)) / (rect.width / 2);
       const dy = (e.clientY - (rect.top + rect.height / 2)) / (rect.height / 2);
-      animate(el, { x: dx * MAX_PX, y: dy * MAX_PX, ease });
+      anime.animate(el, { x: dx * MAX_PX, y: dy * MAX_PX, ease: anime.ease });
     };
     const onLeave = () => {
       rect = null;
-      animate(el, { x: 0, y: 0, ease });
+      anime?.animate(el, { x: 0, y: 0, ease: anime.ease });
     };
 
     el.addEventListener("pointerenter", onEnter);

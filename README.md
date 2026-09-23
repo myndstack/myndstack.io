@@ -445,37 +445,71 @@ also forced open under `<noscript>`.
 
 ### Landing redesign — motion (`/preview`)
 
-The "Blueprint → Build" redesign is built at `/preview` (noindex: meta + an
-`X-Robots-Tag` header, not in the sitemap) until it is swapped in as `/`. Plan:
-sections start as lime line drawings and build into finished UI.
+The "Full Spectrum" redesign is built at `/preview` (noindex: meta + an
+`X-Robots-Tag` header, not in the sitemap) until it is swapped in as `/`. The
+concept: a ring instrument, the **Core**, whose arcs are the disciplines (AI,
+product, design, architecture, plus the lime brand arc); scrolling lights them
+one by one until the ring closes into the full spectrum — "end to end".
+Code: `components/landing/` (chapters, core, motion, styles),
+`lib/landing/` (structure + tested geometry), `lib/motion/` (pure motion maths).
 
+- **Content scrolls in normal flow; only decoration is pinned.** Each Core run
+  (`core-hero`, `core-caps`) is a grid cell holding a sticky `[data-stage]`
+  (`aria-hidden`, `inert`, nothing focusable — an e2e test enforces it) under a
+  `.core-flow` layer that carries every word and link. Text is never covered,
+  hidden or moved by motion, so find-in-page, focus and screen readers work,
+  and a failed animation freezes decoration without changing layout.
+- **Pinning is CSS, decided before paint.** The `pin:` custom variant in
+  `globals.css` applies only with `html[data-anim="on"]` (the pre-paint flag,
+  off for reduced motion and `?motion=off`) and `PIN_QUERY` (width *and*
+  height; `lib/motion/pin.ts`, kept identical by a unit test). JS state may
+  change paint, never layout. Phones, short screens, reduced motion, no JS and
+  print get the static, fully built layout.
 - **anime.js 4.5.0, one entry point.** Only `lib/motion/anime/*` imports
-  `animejs`, one file per subpath so each chunk carries only what it uses.
-  ESLint enforces it, and bans `animejs/events` (`onScroll`): it adds its own
-  scroll listener and reads layout per frame, and this site has exactly one
-  scroll loop (`lib/scroll.ts`). An e2e test counts window scroll listeners.
-- **Scrubbed chapters** (Stack, Work pipeline) are paused timelines seeked from
-  that loop via `useScrollFrame`, with geometry cached outside the frame
-  (ResizeObserver + `fonts.ready`) and progress quantised, so a steady scroll
-  writes nothing. Timelines are `pause()`d explicitly after build — in 4.5 the
-  first `seek()` on a never-started timeline *resumes* it.
-- **Play-once chapters** (the hero) run on anime's own rAF, which idles when no
-  animation is active (checked in `engine.js`: the tick stops when `_head` is
-  empty).
-- **Lines draw without measuring.** Every `.bp-line` has `pathLength="1"`, so
-  `stroke-dashoffset` 1 → 0 draws it; the pipeline glyph moves along a path
-  computed by `lib/motion/pipeline-geometry.ts`. No `getTotalLength`, no
-  `createDrawable`/`createMotionPath` (both measure the DOM).
-- **Server HTML is the built page.** The blueprint "draft" state is CSS only,
-  under `html[data-anim="on"]` (set pre-paint when motion is allowed), so no JS,
-  reduced motion, print and a failed chunk all show it built. React never owns
-  a node the motion rewrites: scramble overlays are empty `aria-hidden` spans,
-  counters render from `data-count` via CSS `attr()`.
-- **Test hook:** dispatching `motion:finish-all` on `document` (or `beforeprint`)
-  finishes every chapter; `e2e/helpers.ts` → `finishAllMotion()`.
-- Checked in the anime source: `splitText` inserts a visually-hidden accessible
-  copy by default; `Draggable` adds no scroll listener (document pointer/touch
-  listeners during a drag only).
+  `animejs` (ESLint-enforced), never `animejs/events` (`onScroll` would add a
+  scroll listener and read layout per frame; the site has one scroll loop,
+  `lib/scroll.ts`, and an e2e test counts listeners). `createDrawable`,
+  `createMotionPath` and `splitText` are not exported — they measure the DOM.
+  The engine loads lazily with the first chapter builder (`lib/motion/runtime.ts`),
+  so it isn't first-load JS (`node scripts/bundle-budget.mjs` after a build).
+- **Smoothed scrub on the one loop.** A run maps scroll → timeline time by its
+  `[data-segment]` children (`lib/motion/segments.ts`; offsets cached outside the
+  frame). The frame computes a quantised target and returns early if unchanged —
+  which is why a settled page writes nothing (an e2e MutationObserver test) —
+  then an anime timer glides the displayed time toward it (`lib/motion/smooth.ts`:
+  exponential, frame-rate independent, lag-clamped, snapping on jumps, builds,
+  re-measures and bfcache restores) and pauses itself once settled, leaving
+  anime's engine idle.
+- **No two animations share a property on an element.** anime's default
+  `replace` composition cancels overlapping tweens, so the hero's intro (dash
+  offsets, decode overlay; `composition: 'none'`), the scrubbed camera
+  (`[data-core-3d]`) and the pointer lean (`[data-core-lean]`) touch disjoint
+  targets. Timelines are `pause()`d after build — in 4.5 the first `seek()` on a
+  never-started timeline resumes it.
+- **Everything a builder creates is owned.** Builders run inside
+  `createScope().add()` (timelines, timers, animatables are reverted with the
+  scope) and return `dispose()` for the rest (listeners, observers, canvas,
+  data attributes). `finish()` (test hook, print, a failed chunk) lands a
+  play-once chapter on its end state and snaps a run to the *current* scroll
+  position with the glide and ambient motion off. Only play-once chapters
+  have the 3s build watchdog.
+- **Rendering.** Ring geometry is computed on the server (`core-geometry.ts`);
+  lines draw via `pathLength="1"` + dash offset, the tick sweep through a
+  single-contour mask (Skia restarts dashes per subpath). Glow is static
+  blurred layers whose opacity alone animates (never an animated SVG filter).
+  The particle field is a canvas on an anime timer (`field-canvas.ts`) with
+  device budgets, a pixel cap, adaptive quality, and no canvas at all under
+  automation, save-data or reduced motion.
+- **Truthful content.** The HUD shows only real values (coordinates, IST clock,
+  build); the case shows its CMS metrics (counted up on an `aria-hidden` layer,
+  settling on the exact CMS string); the founder panel shows only CMS data.
+  Copy marked DRAFT in `lib/landing/chapters.ts` awaits the owner's approval.
+- **Test hooks:** `motion:finish-all` on `document` (or `beforeprint`) finishes
+  every chapter; runs expose `data-built`, `data-glide`, `data-intro`,
+  `data-cap-active`; `window.__MS_FIELD_TEST = true` opts a test into the
+  canvas. Helpers in `e2e/helpers.ts`. Note: the root `loading.tsx` streams the
+  page into a hidden Suspense segment revealed shortly after DOMContentLoaded —
+  helpers wait for real layout before scrolling.
 
 ### Accessibility guard
 
