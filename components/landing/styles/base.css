@@ -78,6 +78,31 @@
   }
 }
 
+/* Inline links: a hairline that grows in from the left and leaves to the right. */
+.ulink {
+  color: var(--color-t1);
+  background-image: linear-gradient(currentColor, currentColor);
+  background-repeat: no-repeat;
+  background-position: 100% 100%;
+  background-size: 0% 1px;
+  padding-bottom: 2px;
+  transition:
+    background-size 300ms var(--ease-out-expo),
+    color var(--dur-fast) var(--ease-brand);
+}
+.ulink:hover,
+.ulink:focus-visible {
+  color: var(--color-lime);
+  background-position: 0% 100%;
+  background-size: 100% 1px;
+}
+[data-surface="paper"] .ulink {
+  color: var(--color-ink);
+}
+[data-surface="paper"] .ulink:hover {
+  color: var(--color-lime-deep);
+}
+
 /* Press feedback on every landing button. */
 .landing .btn:active {
   transform: scale(0.97);

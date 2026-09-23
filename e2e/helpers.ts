@@ -49,6 +49,16 @@ export async function seriousViolations(page: Page, include?: string): Promise<s
  * the test measures.
  */
 export async function scrollChapterTo(page: Page, target: string, fraction: number) {
+  // The root loading.tsx streams the page into a hidden Suspense segment that
+  // React reveals a moment later; scrolling before that clamps to the top.
+  await page.waitForFunction(
+    (sel) => {
+      const el = (document.getElementById(sel) ?? document.querySelector(sel)) as HTMLElement | null;
+      return !!el && el.offsetHeight > 0;
+    },
+    target,
+    { polling: 50 },
+  );
   await page.evaluate(
     ([sel, f]) => {
       const el = (document.getElementById(sel as string) ?? document.querySelector(sel as string)) as HTMLElement;

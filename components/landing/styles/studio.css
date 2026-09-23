@@ -1,0 +1,271 @@
+/* §07 Studio (founder + contrast) and §08 Pricing. */
+@reference "../../../app/globals.css";
+
+/* ================= §07 Studio ================= */
+.founder {
+  position: relative;
+  z-index: 2;
+  padding-block: 140px;
+  background: var(--color-ink);
+}
+.founder-head {
+  max-width: 760px;
+  margin-bottom: 64px;
+}
+.founder-title {
+  font-size: var(--text-title);
+  line-height: 1.02;
+}
+.founder-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 48px;
+
+  @media (width >= 62.5rem) {
+    grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+    align-items: start;
+  }
+}
+.founder-people {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.founder-card {
+  display: grid;
+  grid-template-columns: 132px minmax(0, 1fr);
+  gap: 24px;
+  align-items: start;
+  padding: 24px;
+  border: 1px solid var(--color-line);
+  border-top: 2px solid var(--color-lime);
+  background: var(--color-surface);
+}
+.founder-badge {
+  position: relative;
+  aspect-ratio: 1;
+}
+.founder-initials {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  font-family: var(--font-display);
+  font-size: var(--text-30);
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  color: var(--color-t1);
+}
+.founder-name {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: var(--text-30);
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
+.founder-role {
+  margin: 4px 0 0;
+  font-family: var(--font-mono);
+  font-size: var(--text-12);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--color-lime);
+}
+.founder-facts {
+  display: grid;
+  gap: 6px;
+  margin: 20px 0 0;
+}
+.founder-facts div {
+  display: flex;
+  gap: 12px;
+}
+.founder-facts dt {
+  width: 56px;
+}
+.founder-facts dd {
+  margin: 0;
+}
+.founder-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 20px;
+  margin: 20px 0 0;
+  padding: 16px 0 0;
+  border-top: 1px solid var(--color-line);
+  list-style: none;
+  font-size: var(--text-15);
+}
+
+/* Agency ↔ Myndstack. */
+.contrast {
+  padding: 28px;
+  border: 1px solid var(--color-line);
+  background: var(--color-surface);
+}
+.contrast-head {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  margin-bottom: 24px;
+}
+.contrast-ring {
+  flex: none;
+  width: 88px;
+  height: 88px;
+}
+/* Agency: the arcs go grey and break apart — the hand-offs. */
+.contrast[data-state="agency"] .core-mini-arc {
+  stroke: var(--color-t6) !important;
+  stroke-dasharray: 60 34;
+  opacity: 0.8;
+}
+.contrast-toggle {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  font-family: var(--font-mono);
+  font-size: var(--text-12);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+.contrast-label {
+  color: var(--color-t5);
+  transition: color var(--dur-base) var(--ease-brand);
+}
+.contrast[data-state="agency"] .contrast-label[data-side="agency"],
+.contrast[data-state="ours"] .contrast-label[data-side="ours"] {
+  color: var(--color-t1);
+}
+.contrast-switch {
+  position: relative;
+  width: 56px;
+  height: 30px;
+  padding: 0;
+  border: 1px solid var(--color-line-3);
+  background: var(--color-ink);
+}
+.contrast-knob {
+  position: absolute;
+  top: 4px;
+  left: 4px;
+  width: 20px;
+  height: 20px;
+  background: var(--color-t5);
+  transition:
+    translate var(--dur-base) var(--ease-out-expo),
+    background var(--dur-base) var(--ease-brand);
+}
+.contrast-switch[aria-checked="true"] .contrast-knob {
+  translate: 26px 0;
+  background: var(--color-lime);
+  box-shadow: var(--shadow-glow);
+}
+.contrast-table {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+  font-size: var(--text-15);
+}
+.contrast-table th {
+  padding: 0 12px 12px 0;
+  text-align: left;
+  font-family: var(--font-mono);
+  font-size: var(--text-11);
+  font-weight: 400;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--color-t5);
+}
+.contrast-table td {
+  padding: 14px 16px 14px 0;
+  border-top: 1px solid var(--color-line);
+  vertical-align: top;
+  line-height: 1.45;
+  transition:
+    color var(--dur-base) var(--ease-brand),
+    opacity var(--dur-base) var(--ease-brand);
+}
+.contrast-table td[data-side="agency"] {
+  color: var(--color-t4);
+}
+.contrast-table td[data-side="ours"] {
+  color: var(--color-t1);
+}
+.contrast-table td[data-side="ours"]::before {
+  content: "→ ";
+  font-family: var(--font-mono);
+  color: var(--color-lime);
+}
+.contrast[data-state="agency"] td[data-side="agency"] {
+  color: var(--color-t1);
+}
+.contrast[data-state="agency"] td[data-side="ours"] {
+  color: var(--color-t5);
+}
+.contrast[data-state="ours"] td[data-side="agency"] {
+  text-decoration: line-through;
+  text-decoration-color: var(--color-t6);
+}
+
+/* ================= §08 Pricing ================= */
+.pricing-ch {
+  position: relative;
+  z-index: 2;
+  padding-block: 140px 120px;
+  background: var(--color-graphite);
+}
+.pricing-head {
+  display: grid;
+  gap: 24px;
+  margin-bottom: 56px;
+
+  @media (width >= 62.5rem) {
+    grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
+    align-items: end;
+  }
+}
+.pricing-head .chapter-lede {
+  margin: 0;
+}
+.pricing-title {
+  font-size: var(--text-title);
+  line-height: 1.02;
+}
+.pricing-note {
+  margin: 32px 0 0;
+  font-size: var(--text-13);
+}
+
+/* The featured tier wears the spectrum as a travelling beam. */
+@property --beam {
+  syntax: "<angle>";
+  inherits: false;
+  initial-value: 0deg;
+}
+.pricing-ch .pricing-card--featured {
+  border-color: transparent;
+  background:
+    linear-gradient(var(--color-surface-3), var(--color-surface-3)) padding-box,
+    conic-gradient(
+        from var(--beam),
+        var(--color-lime),
+        var(--color-spec-ai),
+        var(--color-spec-product),
+        var(--color-spec-design),
+        var(--color-spec-arch),
+        var(--color-lime)
+      )
+      border-box;
+}
+.pricing-run.is-ambient .pricing-card--featured {
+  animation: beam 6s linear infinite;
+}
+@keyframes beam {
+  to {
+    --beam: 360deg;
+  }
+}

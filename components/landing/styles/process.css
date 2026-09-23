@@ -1,0 +1,196 @@
+/* §05 — Process: the pinned horizontal track and its rail. */
+@reference "../../../app/globals.css";
+
+.process {
+  position: relative;
+  z-index: 2;
+  background: var(--color-graphite);
+}
+.process-run {
+  position: relative;
+
+  @variant pin {
+    height: 300svh;
+  }
+}
+.process-frame {
+  padding-block: 120px;
+
+  @variant pin {
+    position: sticky;
+    top: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 48px;
+    height: 100svh;
+    padding-block: 72px 40px;
+    overflow: hidden;
+  }
+}
+.process-title {
+  max-width: 18ch;
+  font-size: var(--text-title);
+  line-height: 1.02;
+}
+
+/* The rail: the spectral bar, now a timeline. */
+.process-rail {
+  position: relative;
+  display: none;
+  height: 44px;
+
+  @variant pin {
+    display: block;
+  }
+}
+.rail-track,
+.rail-fill {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 8px;
+  height: 2px;
+}
+.rail-track {
+  background: var(--color-graphite-line);
+}
+.rail-fill {
+  transform-origin: left center;
+  background: linear-gradient(
+    90deg,
+    var(--color-lime),
+    var(--color-spec-ai),
+    var(--color-spec-product),
+    var(--color-spec-design),
+    var(--color-spec-arch)
+  );
+}
+.rail-stop {
+  position: absolute;
+  top: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  translate: -50% 0;
+}
+.rail-stop:first-of-type {
+  translate: 0 0;
+  align-items: flex-start;
+}
+.rail-stop:last-of-type {
+  translate: -100% 0;
+  align-items: flex-end;
+}
+.rail-stop i {
+  width: 18px;
+  height: 18px;
+  border: 2px solid var(--color-t6);
+  background: var(--color-graphite);
+  transition:
+    border-color var(--dur-base) var(--ease-brand),
+    background var(--dur-base) var(--ease-brand);
+}
+.rail-stop b {
+  font-family: var(--font-mono);
+  font-size: var(--text-11);
+  font-weight: 400;
+  color: var(--color-t4);
+}
+.rail-stop.is-lit i {
+  border-color: var(--color-lime);
+  background: var(--color-lime);
+  box-shadow: var(--shadow-glow);
+}
+
+/* The track: grid on wide static screens, snap carousel on phones, a
+   translated strip when pinned. */
+.process-viewport {
+  @variant pin {
+    overflow: visible;
+  }
+}
+.process-track {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: 86vw;
+  gap: 16px;
+  margin: 0;
+  padding: 0 clamp(20px, 5vw, 80px) 8px;
+  list-style: none;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scroll-padding-inline: clamp(20px, 5vw, 80px);
+  scrollbar-width: none;
+
+  @media (width >= 62.5rem) {
+    grid-auto-flow: row;
+    grid-template-columns: repeat(var(--steps), minmax(0, 1fr));
+    max-width: 1440px;
+    margin-inline: auto;
+    overflow: visible;
+  }
+  @variant pin {
+    display: flex;
+    gap: 2vw;
+    max-width: none;
+    padding-inline: clamp(20px, 5vw, 80px);
+    overflow: visible;
+    will-change: transform;
+  }
+}
+.process-track:focus-visible {
+  outline-offset: 6px;
+}
+.step {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  min-height: 360px;
+  padding: 28px;
+  border: 1px solid var(--color-graphite-line);
+  background: var(--color-graphite-2);
+  scroll-snap-align: start;
+
+  @variant pin {
+    flex: 0 0 40vw;
+    min-height: min(52svh, 460px);
+    padding: 36px;
+  }
+}
+.step-glyph {
+  width: 72px;
+  height: 72px;
+  margin-bottom: clamp(32px, 12svh, 120px);
+}
+.step-glyph path {
+  fill: none;
+  stroke: var(--color-lime);
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-dasharray: 1;
+  stroke-dashoffset: 0;
+}
+.step-n {
+  font-family: var(--font-mono);
+  font-size: var(--text-13);
+  color: var(--color-lime);
+}
+.step-t {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: var(--text-30);
+  font-weight: 500;
+  letter-spacing: -0.02em;
+}
+.step-d {
+  margin: 0;
+  max-width: 40ch;
+  font-size: var(--text-15);
+  line-height: 1.55;
+  color: var(--color-t4);
+}
+

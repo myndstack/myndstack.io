@@ -184,6 +184,29 @@
   display: none;
 }
 
+/* CoreRingMini — the small static Core (badges, switches, horizons). */
+.core-mini {
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+.core-mini-tick {
+  stroke: var(--color-t7);
+  stroke-width: 6;
+}
+.core-mini-tick.is-major {
+  stroke: var(--color-t4);
+}
+.core-mini-arc {
+  fill: none;
+  stroke-width: 16;
+  transition:
+    opacity var(--dur-slow) var(--ease-brand),
+    stroke var(--dur-slow) var(--ease-brand),
+    stroke-dasharray var(--dur-slow) var(--ease-brand);
+}
+
 /* The particle canvas box is 1.5× the ring (FIELD_SCALE in field-canvas.ts). */
 .core-field {
   position: absolute;

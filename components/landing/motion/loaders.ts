@@ -9,6 +9,11 @@ export const CHAPTER_LOADERS = {
   "core-hero": () => import("../chapters/hero.motion"),
   platform: () => import("../chapters/platform.motion"),
   "core-caps": () => import("../chapters/capabilities.motion"),
+  cases: () => import("../chapters/cases.motion"),
+  process: () => import("../chapters/process.motion"),
+  tools: () => import("../chapters/tools.motion"),
+  pricing: () => import("../chapters/ambient.motion"),
+  cta: () => import("../chapters/ambient.motion"),
 } satisfies Record<string, () => Promise<ChapterModule>>;
 
 export type ChapterId = keyof typeof CHAPTER_LOADERS;

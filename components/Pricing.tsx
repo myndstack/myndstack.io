@@ -66,7 +66,7 @@ export default function Pricing({ tiers }: { tiers: PricingTier[] }) {
  * Hardcoded here (like the section header) since it's positioning, not editorial
  * copy; it still appears as a column in the comparison table.
  */
-const ENTERPRISE = {
+export const ENTERPRISE = {
   name: "Enterprise",
   tag: "Custom · priced per engagement",
   blurb:
@@ -80,7 +80,7 @@ const ENTERPRISE = {
   cta: "Start a project →",
 } as const;
 
-function EnterpriseBand() {
+export function EnterpriseBand() {
   return (
     <div className="mt-4 flex flex-col gap-6 border border-line bg-surface-3 p-8 md:flex-row md:items-center md:justify-between md:gap-10">
       <div className="md:max-w-[640px]">

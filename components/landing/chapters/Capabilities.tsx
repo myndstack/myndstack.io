@@ -4,7 +4,7 @@ import { CAPABILITY_HUES, CAPABILITY_SPECS, FINALE } from "@/lib/landing/chapter
 import type { Capability } from "@/lib/sanity/queries";
 
 import CapDemos from "../core/CapDemos";
-import CoreRing from "../core/CoreRing";
+import CoreRingMini from "../core/CoreRingMini";
 import CoreStage from "../core/CoreStage";
 import SpecPanel from "../core/SpecPanel";
 import MotionChapter from "../motion/MotionChapter";
@@ -115,7 +115,7 @@ export default function Capabilities({ capabilities, cta }: Props) {
 
                   <div className="cap-inline" aria-hidden="true">
                     <div className="cap-mini" data-hue={hue}>
-                      <CoreRing prefix={`cap-mini-${i}`} />
+                      <CoreRingMini />
                     </div>
                     <SpecPanel
                       file={CAPABILITY_SPECS[i].file}

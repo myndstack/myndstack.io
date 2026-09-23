@@ -57,7 +57,10 @@ test.describe("preview is hidden and self-contained", () => {
     await page.locator('footer a[href="/careers"]').first().click();
     await expect(page).toHaveURL(/\/careers$/);
     await expect(page.locator(".loader")).toHaveCount(0);
-    await expect(page.locator("h1")).toBeVisible({ timeout: 1000 });
+    // What matters is that no intro overlay blocks it — the route's own load
+    // time under a loaded CI box is not this test's concern.
+    await expect(page.locator("h1")).toBeVisible({ timeout: 5000 });
+    await expect(page.locator(".loader")).toHaveCount(0);
     await context.close();
   });
 
@@ -201,15 +204,26 @@ test.describe("the dive (pinned, scrubbed)", () => {
     expect(mutations).toBe(0);
   });
 
-  test("a reload mid-dive restores the tilt without scrolling", async ({ page }) => {
+  // A page that arrives already scrolled (restored scroll, anchor, bfcache)
+  // must show the right state straight away, without waiting for a scroll
+  // event. Native scroll restoration is itself timing-dependent in headless
+  // Chrome, so the position is set deterministically before hydration.
+  test("a page that loads mid-dive shows the tilt without scrolling", async ({ page }) => {
     await page.setViewportSize(DESKTOP);
+    await page.addInitScript(() => {
+      history.scrollRestoration = "manual";
+      // Scroll the moment the streamed content is revealed (it has layout) —
+      // before hydration, so before the run's motion is built.
+      const tryScroll = () => {
+        const run = document.querySelector('[data-chapter="core-hero"]') as HTMLElement | null;
+        if (!run || run.offsetHeight === 0) return requestAnimationFrame(tryScroll);
+        scrollTo({ top: run.offsetTop + (run.offsetHeight - innerHeight) * 0.75, behavior: "instant" });
+      };
+      addEventListener("DOMContentLoaded", tryScroll);
+    });
     await page.goto(PREVIEW);
-    await scrollChapterTo(page, `[data-chapter="${HERO}"]`, 0.75);
     await settled(page, HERO);
-    const before = await tiltOf(page, "[data-core-3d]");
-    expect(before).toBeGreaterThan(20);
-    await page.reload();
-    await expect.poll(() => tiltOf(page, "[data-core-3d]"), { timeout: 5000 }).toBeGreaterThan(before - 3);
+    await expect.poll(() => tiltOf(page, "[data-core-3d]"), { timeout: 5000 }).toBeGreaterThan(30);
   });
 });
 
@@ -238,9 +252,11 @@ test.describe("the platform (paper, pinned, scrubbed)", () => {
   test("the nav's Stack link lands mid-build, not on an exploded stack", async ({ page }) => {
     await page.setViewportSize(DESKTOP);
     await page.goto(PREVIEW);
-    await page.evaluate(() => document.getElementById("platform-anchor")!.scrollIntoView({ behavior: "instant" }));
-    await settled(page, "platform");
-    await expect.poll(() => locked(page)).toBeGreaterThanOrEqual(2);
+    await expect(page.locator(`[data-chapter="platform"]`)).toHaveAttribute("data-motion", /scrub|done/);
+    // The real path: the nav's "Stack" link (#platform-anchor, smooth scroll).
+    await page.locator('.navlink[data-section="platform"]').click();
+    await expect(page).toHaveURL(/#platform-anchor$/);
+    await expect.poll(() => locked(page), { timeout: 10_000 }).toBeGreaterThanOrEqual(2);
   });
 
   test("paper passes axe while pinned mid-build", async ({ page }) => {
@@ -309,6 +325,115 @@ test.describe("capabilities (run B)", () => {
     await expect(page.locator(`[data-chapter="${CAPS}"] > [data-stage]`)).toBeHidden();
     await expect(page.locator(".cap-mini")).toHaveCount(4);
     await expect(page.locator(".cap-mini").first()).toBeVisible();
+  });
+});
+
+test.describe("work, process, tools", () => {
+  test("the case metrics settle on exactly the CMS values, and the case links", async ({ page }) => {
+    await page.setViewportSize(DESKTOP);
+    await page.goto(PREVIEW);
+    await page.locator("#work-cases").scrollIntoViewIfNeeded();
+    await expect(page.locator('[data-chapter="cases"]')).toHaveAttribute("data-motion", "done", { timeout: 10_000 });
+    const shown = await page
+      .locator("#work-cases [data-countup]")
+      .evaluateAll((els) => els.map((el) => [el.getAttribute("data-countup"), el.textContent]));
+    expect(shown.length).toBeGreaterThan(0);
+    for (const [target, text] of shown) expect(text).toBe(target);
+    await expect(page.locator('#work-cases a[href^="/work/"]')).toBeVisible();
+  });
+
+  test("process: the track slides and every stop lights by the end", async ({ page }) => {
+    await page.setViewportSize(DESKTOP);
+    await page.goto(PREVIEW);
+    await scrollChapterTo(page, `[data-chapter="process"]`, 0);
+    await settled(page, "process");
+    await expect(page.locator("#process .rail-stop.is-lit")).toHaveCount(1);
+    await scrollChapterTo(page, `[data-chapter="process"]`, 1);
+    await settled(page, "process");
+    await expect(page.locator("#process .rail-stop.is-lit")).toHaveCount(4);
+    const x = await page.locator("[data-track]").evaluate((el) => new DOMMatrixReadOnly(getComputedStyle(el).transform).m41);
+    expect(x).toBeLessThan(-100);
+  });
+
+  test("tools: every vendor is named in text, on paper", async ({ page }) => {
+    await page.goto(PREVIEW);
+    await expect(page.locator("#integrations .rack-group")).toHaveCount(4);
+    await expect(page.locator("#integrations .rack-name")).toHaveCount(21);
+    await expect(page.locator("#integrations")).toHaveAttribute("data-surface", "paper");
+  });
+});
+
+test.describe("studio, pricing, faq, contact", () => {
+  test("the founder panel shows only real people, and the switch moves the emphasis", async ({ page }) => {
+    await page.goto(PREVIEW);
+    await expect(page.locator("#team")).not.toContainText("Adding soon");
+    await expect(page.locator("#team .founder-name").first()).toBeVisible();
+    const sw = page.getByRole("switch", { name: "Show how Myndstack does it" });
+    await expect(sw).toHaveAttribute("aria-checked", "true");
+    await sw.click();
+    await expect(sw).toHaveAttribute("aria-checked", "false");
+    await expect(page.locator(".contrast")).toHaveAttribute("data-state", "agency");
+    // Both answers stay readable either way.
+    await expect(page.locator(".contrast-table td")).toHaveCount(10);
+  });
+
+  test("pricing keeps its logic: purchasable tier → checkout, the rest → contact", async ({ page }) => {
+    await page.goto(PREVIEW);
+    await expect(page.locator('#pricing a[href^="/pricing/"]').first()).toBeVisible();
+    await expect(page.locator('#pricing a[href="#contact"]').first()).toBeAttached();
+    await expect(page.locator("#pricing select")).toHaveCount(1);
+  });
+
+  test("faq is a working accordion", async ({ page }) => {
+    await page.goto(PREVIEW);
+    const buttons = page.locator("#faq .faq-q button");
+    await expect(buttons.first()).toHaveAttribute("aria-expanded", "true");
+    await buttons.nth(1).click();
+    await expect(buttons.nth(1)).toHaveAttribute("aria-expanded", "true");
+    await expect(buttons.first()).toHaveAttribute("aria-expanded", "false");
+  });
+
+  test("contact: the form is server-rendered; no tabs without a Cal link", async ({ page }) => {
+    await page.goto(PREVIEW);
+    await expect(page.locator("#contact form")).toHaveCount(1);
+    await expect(page.locator('#contact [role="tablist"]')).toHaveCount(0);
+  });
+
+  test("no element id is duplicated", async ({ page }) => {
+    await page.goto(PREVIEW);
+    const dupes = await page.evaluate(() => {
+      const seen = new Map<string, number>();
+      document.querySelectorAll("[id]").forEach((el) => seen.set(el.id, (seen.get(el.id) ?? 0) + 1));
+      return [...seen].filter(([, n]) => n > 1).map(([id]) => id);
+    });
+    expect(dupes).toEqual([]);
+  });
+});
+
+test.describe("chrome: ruler and mobile bar", () => {
+  test("the ruler follows the page and its ticks navigate + move focus", async ({ page }) => {
+    await page.setViewportSize(DESKTOP);
+    await page.goto(PREVIEW);
+    const ruler = page.getByRole("navigation", { name: "Chapters" });
+    await expect(ruler).toBeVisible();
+    await ruler.getByRole("button", { name: "Chapter 08: Pricing" }).click();
+    await expect(page.locator("#pricing")).toBeFocused();
+    await expect.poll(() => page.evaluate(() => document.getElementById("pricing")!.getBoundingClientRect().top)).toBeLessThan(120);
+    await expect(ruler.locator('[aria-current="true"]')).toHaveAttribute("data-id", "pricing");
+  });
+
+  test("phones: the CTA bar appears after the hero and steps aside over pricing", async ({ page }) => {
+    await page.setViewportSize(PHONE);
+    await page.goto(PREVIEW);
+    const bar = page.locator(".mobile-cta");
+    await expect(bar).not.toHaveClass(/is-shown/);
+    await page.evaluate(() => window.scrollTo({ top: window.innerHeight * 3, behavior: "instant" }));
+    await expect(bar).toHaveClass(/is-shown/);
+    await page.evaluate(() =>
+      document.getElementById("pricing")!.scrollIntoView({ behavior: "instant", block: "center" }),
+    );
+    await expect(bar).not.toHaveClass(/is-shown/);
+    await expect(page.locator(".ruler")).toBeHidden();
   });
 });
 

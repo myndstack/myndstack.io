@@ -1,0 +1,126 @@
+/* §06 — Tools: the spectrum rack, on paper. */
+@reference "../../../app/globals.css";
+
+.tools {
+  position: relative;
+  z-index: 2;
+  background: var(--color-paper);
+  color: var(--color-ink);
+}
+.tools-run {
+  padding-block: 140px;
+}
+.tools-head {
+  display: grid;
+  gap: 24px;
+  margin-bottom: 72px;
+
+  @media (width >= 62.5rem) {
+    grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
+    align-items: end;
+  }
+}
+.tools-title {
+  font-size: var(--text-title);
+  line-height: 1.02;
+}
+.tools-lede {
+  margin: 0;
+}
+.rack {
+  position: relative;
+}
+.rack-ruler {
+  display: block;
+  height: 14px;
+  margin-bottom: 28px;
+  transform-origin: left center;
+  background:
+    repeating-linear-gradient(90deg, var(--color-ink) 0 1px, transparent 1px 12px) bottom / 100% 6px no-repeat,
+    repeating-linear-gradient(90deg, var(--color-ink) 0 1px, transparent 1px 120px) bottom / 100% 14px no-repeat;
+  border-bottom: 1px solid var(--color-ink);
+  opacity: 0.55;
+}
+.rack-groups {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 48px 24px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+
+  @media (width >= 35rem) {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  @media (width >= 62.5rem) {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+.rack-group {
+  transition: opacity var(--dur-base) var(--ease-brand);
+}
+@media (hover: hover) {
+  .rack-groups:hover .rack-group:not(:hover) {
+    opacity: 0.4;
+  }
+}
+.rack-bar {
+  display: block;
+  height: 3px;
+  margin-bottom: 18px;
+  transform-origin: left center;
+  background: var(--hue);
+}
+.rack-title {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: var(--text-22);
+  font-weight: 600;
+}
+.rack-n {
+  font-family: var(--font-mono);
+  font-size: var(--text-11);
+  color: var(--hue);
+}
+.rack-blurb {
+  margin: 8px 0 22px;
+  font-size: var(--text-15);
+  color: var(--color-paper-t2);
+}
+.rack-items {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 18px 10px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.rack-item {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+}
+.rack-item svg,
+.rack-chip {
+  width: 26px;
+  height: 26px;
+  color: var(--color-ink);
+}
+.rack-chip {
+  display: grid;
+  place-items: center;
+  border: 1.5px solid var(--color-ink);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 700;
+}
+.rack-name {
+  font-family: var(--font-mono);
+  font-size: var(--text-11);
+  letter-spacing: 0.04em;
+  color: var(--color-paper-t2);
+}

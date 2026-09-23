@@ -26,10 +26,40 @@ export const FINALE = {
   line: "Four disciplines, one accountable team — from first sketch to production.",
 } as const;
 
-/** DRAFT — the closing CTA band. */
+/** Section heads carried over from the live homepage (approved copy). */
+export const CASES_COPY = { kicker: "Selected work", title: "Cognitive infrastructure, built end to end." } as const;
+export const PROCESS_COPY = { kicker: "How we work", title: "From first call to production — in four moves." } as const;
+export const TOOLS_COPY = {
+  kicker: "Integrations",
+  title: "Runs the stack you already have.",
+  lede: "We build on the models, cloud, data, and delivery tools you already run — instead of demanding a rebuild.",
+} as const;
+
+export const FOUNDER_COPY = {
+  kicker: "The studio",
+  title: "Founder-led. Hands on the code.",
+  lede: "No account managers between you and the person building your stack.",
+} as const;
+export const PRICING_COPY = {
+  kicker: "Pricing",
+  title: "Start small. Scale when it’s working.",
+  lede: "Begin with a fixed-price Discovery Sprint — no long proposal, no risk. Move into a full build, or an embedded team, when you’re ready.",
+} as const;
+export const FAQ_COPY = { kicker: "Questions", title: "Before you get in touch." } as const;
+export const CONTACT_COPY = {
+  kicker: "Get in touch",
+  title: "Tell us what you’re building.",
+  lede: "Send the shape of the problem. We’ll reply within one business day with the fastest path to production.",
+} as const;
+
+/** The paper-safe hue each integration group lights in (in INTEGRATIONS order). */
+export const TOOL_HUES: readonly Hue[] = ["ai", "arch", "product", "design"];
+
+/** DRAFT — the closing CTA band (the sub-line is the live homepage's). */
 export const CLOSING = {
   kicker: "Start here",
   title: "Let’s build the whole thing.",
+  line: "Tell us what you’re building. We’ll show you the fastest path to production AI.",
 } as const;
 
 /** The scroll ruler's chapters, in page order. `id` is the anchor. */

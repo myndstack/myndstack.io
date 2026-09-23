@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState, type ReactNode } from "react";
 
-import { useMediaQuery, useReducedMotion, useScrollFrame } from "@/lib/hooks";
+import { useReducedMotion, useScrollFrame } from "@/lib/hooks";
 import { createScope } from "@/lib/motion/anime/core";
 import { createTimer, type Timer } from "@/lib/motion/anime/timer";
 import type { ChapterBuilder, ChapterMotion, ChapterState } from "@/lib/motion/chapter";
@@ -27,6 +27,26 @@ const TOOLBAR_JITTER_PX = 120;
 const MAX_LAG = 300;
 /** Within this many timeline units the glide snaps and stops. */
 const SETTLE_EPS = 0.5;
+
+/**
+ * A media query's live value, correct from the FIRST client render. The shared
+ * useMediaQuery reports its server snapshot (false) through hydration — right
+ * for anything rendered, but here the value only drives effects, and building
+ * a run in the wrong mode for a frame (then rebuilding) restarts its intro.
+ * Nothing is rendered from this, so reading the real value at once is safe.
+ */
+function useLiveMediaQuery(query: string): boolean {
+  const [matches, setMatches] = useState(() =>
+    typeof window === "undefined" ? false : window.matchMedia(query).matches,
+  );
+  useEffect(() => {
+    const mq = window.matchMedia(query);
+    const onChange = () => setMatches(mq.matches);
+    mq.addEventListener("change", onChange);
+    return () => mq.removeEventListener("change", onChange);
+  }, [query]);
+  return matches;
+}
 
 /** True when html[data-anim="on"] — see lib/landing/motion-flag.ts. */
 const motionAllowed = () => document.documentElement.dataset.anim === "on";
@@ -63,8 +83,8 @@ type Props = {
 export default function MotionChapter({ id, kind, eager = false, className, children }: Props) {
   const rootRef = useRef<HTMLDivElement>(null);
   const reduced = useReducedMotion();
-  const desktop = useMediaQuery(PIN_QUERY);
-  const coarse = useMediaQuery("(pointer: coarse)");
+  const desktop = useLiveMediaQuery(PIN_QUERY);
+  const coarse = useLiveMediaQuery("(pointer: coarse)");
   const [builder, setBuilder] = useState<ChapterBuilder | null>(null);
 
   const motionRef = useRef<ChapterMotion | null>(null);
