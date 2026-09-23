@@ -3,7 +3,7 @@ import Link from "next/link";
 
 import EmptyState from "@/components/EmptyState";
 import PageHeader from "@/components/PageHeader";
-import Reveal from "@/components/Reveal";
+import Reveal, { STAGGER_S } from "@/components/Reveal";
 import { getCases } from "@/lib/sanity/queries";
 import { pageMetadata } from "@/lib/metadata";
 
@@ -39,7 +39,7 @@ export default async function WorkPage() {
 
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           {cases.map((c, i) => (
-            <Reveal key={c.slug} delay={i * 0.06}>
+            <Reveal key={c.slug} delay={i * STAGGER_S}>
               <Link href={`/work/${c.slug}`} className="block h-full text-t1">
                 <div className="card card-lift flex h-full flex-col justify-between p-7">
                   <div>

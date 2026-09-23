@@ -107,7 +107,7 @@ export default function MobileDrawer({ open, onClose, contactEmail }: Props) {
         aria-modal={open}
         aria-label="Menu"
         inert={!open}
-        className="ease-brand fixed inset-y-0 right-0 z-120 flex w-80 max-w-[84vw] flex-col border-l border-line bg-ink px-6 pt-6 pb-7 transition-transform duration-[320ms]"
+        className="ease-brand fixed inset-y-0 right-0 z-120 flex w-80 max-w-[84vw] flex-col border-l border-line bg-ink px-6 pt-6 pb-7 transition-transform duration-300"
         style={{ transform: open ? "translateX(0)" : "translateX(100%)" }}
       >
         <div className="mb-7 flex items-center justify-between">

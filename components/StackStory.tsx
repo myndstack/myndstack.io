@@ -233,7 +233,7 @@ export default function StackStory() {
                 }}
                 className="story-layer absolute inset-x-0 flex h-[98px] items-center gap-5 overflow-hidden border border-line bg-surface px-6"
               >
-                <span className="ease-brand absolute inset-y-0 left-0 w-[3px] origin-top scale-y-0 bg-lime transition-transform duration-350 [.is-locked_&]:scale-y-100" />
+                <span className="ease-brand absolute inset-y-0 left-0 w-[3px] origin-top scale-y-0 bg-lime transition-transform duration-300 [.is-locked_&]:scale-y-100" />
                 <span className="ease-brand flex-none font-mono text-12 font-bold text-t5 transition-colors [.is-locked_&]:text-lime">
                   {layer.n}
                 </span>

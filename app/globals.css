@@ -194,6 +194,13 @@
        the capsule, the content column and the wordmark stay in lockstep.
        Slower than the 300ms it replaced: the morph now runs on the compositor,
        so there is room to let it read as deliberate rather than snap. */
+    /* Motion durations — three, used everywhere a transition isn't tied to a
+       specific geometry (the nav's own morph/fade values above are).
+       fast: hover, press, colour · base: small reveals, panels, drawer ·
+       slow: section entrances. Keyframe animations keep their own timing. */
+    --dur-fast: 160ms;
+    --dur-base: 300ms;
+    --dur-slow: 600ms;
     --nav-morph: 450ms;
     /* The cross-fade is deliberately shorter than the morph and staggered.
        Run flat against each other, both layers sit near 50% in the middle and
@@ -333,7 +340,7 @@
     /* t5, not t6: t6 on ink is ~3.7:1 at 12px, under AA. */
     color: var(--color-t5);
     font-variant-numeric: tabular-nums;
-    transition: color 0.45s var(--ease-brand);
+    transition: color var(--dur-base) var(--ease-brand);
   }
   .ms-index-tick {
     width: 34px;
@@ -341,9 +348,9 @@
     flex: none;
     background: var(--color-line-3);
     transition:
-      width 0.45s var(--ease-brand),
-      background 0.45s var(--ease-brand),
-      box-shadow 0.45s var(--ease-brand);
+      width var(--dur-base) var(--ease-brand),
+      background var(--dur-base) var(--ease-brand),
+      box-shadow var(--dur-base) var(--ease-brand);
   }
   .ms-index.is-current::before {
     color: var(--color-lime);
@@ -366,10 +373,10 @@
     background: var(--color-surface-3);
     border: 1px solid var(--color-line);
     transition:
-      border-color 0.16s var(--ease-brand),
-      box-shadow 0.16s var(--ease-brand),
-      opacity 0.16s var(--ease-brand),
-      transform 0.16s var(--ease-brand);
+      border-color var(--dur-fast) var(--ease-brand),
+      box-shadow var(--dur-fast) var(--ease-brand),
+      opacity var(--dur-fast) var(--ease-brand),
+      transform var(--dur-fast) var(--ease-brand);
   }
   .card-lift:hover {
     border-color: var(--color-lime-edge);
@@ -404,10 +411,10 @@
     border: 1px solid var(--color-line);
     box-shadow: var(--card-lip);
     transition:
-      transform 0.18s var(--ease-brand),
-      border-color 0.16s var(--ease-brand),
-      box-shadow 0.16s var(--ease-brand),
-      background-color 0.16s var(--ease-brand);
+      transform var(--dur-fast) var(--ease-brand),
+      border-color var(--dur-fast) var(--ease-brand),
+      box-shadow var(--dur-fast) var(--ease-brand),
+      background-color var(--dur-fast) var(--ease-brand);
   }
   .pricing-card--featured {
     border-color: var(--color-lime);
@@ -428,10 +435,10 @@
     color: var(--color-t1);
     border: 1px solid var(--color-lime);
     transition:
-      transform 0.14s var(--ease-brand),
-      background 0.16s var(--ease-brand),
-      border-color 0.16s var(--ease-brand),
-      color 0.16s var(--ease-brand);
+      transform var(--dur-fast) var(--ease-brand),
+      background var(--dur-fast) var(--ease-brand),
+      border-color var(--dur-fast) var(--ease-brand),
+      color var(--dur-fast) var(--ease-brand);
   }
   .pricing-card--featured .pricing-cta {
     background: var(--color-lime);
@@ -498,14 +505,14 @@
     grid-template-rows: 0fr;
     visibility: hidden;
     transition:
-      grid-template-rows 0.26s var(--ease-brand),
+      grid-template-rows var(--dur-base) var(--ease-brand),
       visibility 0s linear 0.26s;
   }
   .compare-reveal[data-open="true"] {
     grid-template-rows: 1fr;
     visibility: visible;
     transition:
-      grid-template-rows 0.26s var(--ease-brand),
+      grid-template-rows var(--dur-base) var(--ease-brand),
       visibility 0s linear 0s;
   }
   .compare-reveal__inner {
@@ -514,9 +521,9 @@
     opacity: 0;
     transform: translateY(-4px);
     transition:
-      opacity 0.26s var(--ease-brand),
-      transform 0.26s var(--ease-brand),
-      padding-top 0.26s var(--ease-brand);
+      opacity var(--dur-base) var(--ease-brand),
+      transform var(--dur-base) var(--ease-brand),
+      padding-top var(--dur-base) var(--ease-brand);
   }
   /* The trigger→table gap is applied ONLY when open (and animates in with the
      height) so the closed clipper has zero intrinsic size. A static padding
@@ -627,10 +634,10 @@
     line-height: 1.2;
     padding: 0 24px;
     transition:
-      transform 0.14s var(--ease-brand),
-      background 0.16s var(--ease-brand),
-      border-color 0.16s var(--ease-brand),
-      color 0.16s var(--ease-brand);
+      transform var(--dur-fast) var(--ease-brand),
+      background var(--dur-fast) var(--ease-brand),
+      border-color var(--dur-fast) var(--ease-brand),
+      color var(--dur-fast) var(--ease-brand);
   }
   .btn-lime {
     background: var(--color-lime);
@@ -661,10 +668,10 @@
     border: 1px solid var(--color-lime);
     cursor: pointer;
     transition:
-      transform 0.14s var(--ease-brand),
-      background 0.16s var(--ease-brand),
-      border-color 0.16s var(--ease-brand),
-      color 0.16s var(--ease-brand);
+      transform var(--dur-fast) var(--ease-brand),
+      background var(--dur-fast) var(--ease-brand),
+      border-color var(--dur-fast) var(--ease-brand),
+      color var(--dur-fast) var(--ease-brand);
   }
   .btn-outline:hover,
   .btn-icon:hover {
@@ -711,8 +718,8 @@
     letter-spacing: 0.1em;
     text-transform: uppercase;
     transition:
-      border-color 0.16s var(--ease-brand),
-      color 0.16s var(--ease-brand);
+      border-color var(--dur-fast) var(--ease-brand),
+      color var(--dur-fast) var(--ease-brand);
   }
   .btn-ghost-sm:hover:not(:disabled):not([aria-disabled="true"]) {
     border-color: var(--color-lime);
@@ -840,7 +847,7 @@
     color: var(--color-t1);
     /* The label sits above the trail, so it has to survive the lime sweeping
        under it — hence the flip to ink once the fill passes half way. */
-    transition: color 0.16s var(--ease-brand);
+    transition: color var(--dur-fast) var(--ease-brand);
     pointer-events: none;
   }
   .slide[data-past-half="true"] .slide-label {
@@ -875,7 +882,7 @@
      itself is however slow the user wants (the user deciding). */
   .slide:not(.is-dragging) .slide-knob,
   .slide:not(.is-dragging) .slide-fill {
-    transition: transform 0.22s var(--ease-brand);
+    transition: transform var(--dur-base) var(--ease-brand);
   }
 
   /* Mid-flight. Between the release and Razorpay's modal there is an order
@@ -930,7 +937,7 @@
     gap: 5px;
     pointer-events: none;
     transform: translateY(-50%);
-    transition: opacity 0.18s var(--ease-brand);
+    transition: opacity var(--dur-fast) var(--ease-brand);
   }
   /* A real chevron, not a bar — bars read as texture and say nothing about
      direction. Drawn as one polygon so it stays a crisp single shape at 15px
@@ -987,8 +994,8 @@
     padding: 14px 16px;
     width: 100%;
     transition:
-      border-color 0.16s var(--ease-brand),
-      box-shadow 0.16s var(--ease-brand);
+      border-color var(--dur-fast) var(--ease-brand),
+      box-shadow var(--dur-fast) var(--ease-brand);
   }
   .ms-field:focus {
     /* Transparent, not none: forced-colors mode drops the box-shadow ring
@@ -1029,8 +1036,8 @@
     opacity: 0;
     transform: translateY(24px);
     transition:
-      opacity 0.7s var(--ease-brand),
-      transform 0.7s var(--ease-brand);
+      opacity var(--dur-slow) var(--ease-brand),
+      transform var(--dur-slow) var(--ease-brand);
   }
   .reveal.is-in {
     opacity: 1;
@@ -1261,9 +1268,9 @@
     font-size: var(--text-13);
     font-weight: 500;
     transition:
-      transform 0.14s var(--ease-brand),
-      color 0.16s var(--ease-brand),
-      background 0.16s var(--ease-brand);
+      transform var(--dur-fast) var(--ease-brand),
+      color var(--dur-fast) var(--ease-brand),
+      background var(--dur-fast) var(--ease-brand);
   }
   .navlink:hover {
     color: var(--color-t1);
@@ -1328,9 +1335,9 @@
     background: var(--color-lime);
     color: var(--color-lime-ink);
     transition:
-      transform 0.14s var(--ease-brand),
-      background 0.16s var(--ease-brand),
-      color 0.16s var(--ease-brand);
+      transform var(--dur-fast) var(--ease-brand),
+      background var(--dur-fast) var(--ease-brand),
+      color var(--dur-fast) var(--ease-brand);
   }
   .nav-cta:hover {
     background: var(--color-lime-hover);
@@ -1353,7 +1360,7 @@
     font-weight: 600;
     padding: 12px 0;
     border-bottom: 1px solid var(--color-line);
-    transition: color 0.16s var(--ease-brand);
+    transition: color var(--dur-fast) var(--ease-brand);
   }
   .drawer-link:hover {
     color: var(--color-lime);
@@ -1372,7 +1379,7 @@
     justify-content: center;
     min-width: 24px;
     min-height: 24px;
-    transition: color 0.16s var(--ease-brand);
+    transition: color var(--dur-fast) var(--ease-brand);
   }
   .spine-social:hover {
     color: var(--color-lime);
@@ -1381,8 +1388,8 @@
   /* --- Hero headline words --- */
   .hero-word {
     transition:
-      color 0.18s var(--ease-brand),
-      text-shadow 0.18s var(--ease-brand);
+      color var(--dur-fast) var(--ease-brand),
+      text-shadow var(--dur-fast) var(--ease-brand);
     cursor: default;
   }
   .hero-word:hover,
@@ -1394,8 +1401,8 @@
   /* --- Pinned stack story --- */
   .story-layer {
     transition:
-      border-color 0.25s var(--ease-brand),
-      box-shadow 0.25s var(--ease-brand);
+      border-color var(--dur-base) var(--ease-brand),
+      box-shadow var(--dur-base) var(--ease-brand);
     will-change: transform, opacity;
   }
   .story-layer.is-locked {
@@ -1423,8 +1430,8 @@
     padding: 6px 20px;
     cursor: pointer;
     transition:
-      color 0.16s var(--ease-brand),
-      background 0.16s var(--ease-brand);
+      color var(--dur-fast) var(--ease-brand),
+      background var(--dur-fast) var(--ease-brand);
   }
   .bill-btn.is-on {
     color: var(--color-lime-ink);
@@ -1454,7 +1461,7 @@
        as a brighten — it starts from a legible floor instead of an invisible
        one. This also means the words are readable if the reveal never fires. */
     color: var(--color-t5);
-    transition: color 0.55s var(--ease-brand);
+    transition: color var(--dur-slow) var(--ease-brand);
   }
   .manifesto-word.is-lit {
     color: var(--color-t1);
@@ -1484,9 +1491,9 @@
     transform: translateY(12px);
     pointer-events: none;
     transition:
-      opacity 0.3s var(--ease-brand),
-      transform 0.3s var(--ease-brand),
-      background-color 0.16s var(--ease-brand);
+      opacity var(--dur-base) var(--ease-brand),
+      transform var(--dur-base) var(--ease-brand),
+      background-color var(--dur-fast) var(--ease-brand);
   }
   .totop.is-visible {
     opacity: 1;
@@ -1646,7 +1653,7 @@
     letter-spacing: 0.06em;
     text-transform: uppercase;
     padding: 11px 16px;
-    transition: top 0.2s var(--ease-brand);
+    transition: top var(--dur-fast) var(--ease-brand);
   }
   .skip:focus {
     top: 12px;
@@ -1710,7 +1717,7 @@
       transparent 68%
     );
     opacity: 0;
-    transition: opacity 260ms var(--ease-brand);
+    transition: opacity var(--dur-base) var(--ease-brand);
   }
   .field.is-hot .field-grid-hot {
     opacity: 1;
@@ -1744,7 +1751,7 @@
   --cut-final: calc(--value(integer) * 1px);
   --cut: var(--cut-final);
   clip-path: polygon(0 0, calc(100% - var(--cut)) 0, 100% var(--cut), 100% 100%, 0 100%);
-  transition: --cut 0.55s var(--ease-brand) 0.12s;
+  transition: --cut var(--dur-slow) var(--ease-brand) 0.12s;
 }
 
 @keyframes scan {

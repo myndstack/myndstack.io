@@ -5,10 +5,10 @@ import { useReducedMotion } from "@/lib/hooks";
 import { LOADER_SEEN_KEY } from "@/lib/loader-seen";
 import Wordmark from "./Wordmark";
 
-/** 0.8s hold + 0.4s fade = 1.2s. It was 2.5s, all of it with the site inert —
+/** 0.8s hold + 0.3s fade = 1.1s. It was 2.5s, all of it with the site inert —
  *  long enough to read as a wait rather than an entrance. */
 const FADE_AT_MS = 800;
-const FADE_DURATION_MS = 400;
+const FADE_DURATION_MS = 300;
 const SPARK_COUNT = 90;
 /** ~0.8s at 60fps, so the burst finishes as the fade begins. */
 const SPARK_FRAMES = 48;
@@ -164,7 +164,7 @@ export default function Loader() {
 
   return (
     <div
-      className="loader ease-brand fixed inset-0 z-200 flex flex-col items-center justify-center gap-6 bg-ink transition-opacity duration-[400ms]"
+      className="loader ease-brand fixed inset-0 z-200 flex flex-col items-center justify-center gap-6 bg-ink transition-opacity duration-300"
       style={{ opacity: fading ? 0 : 1 }}
       aria-hidden="true"
     >

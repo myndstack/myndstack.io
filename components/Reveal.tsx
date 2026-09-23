@@ -21,6 +21,9 @@ type Props = {
   scrub?: boolean;
 };
 
+/** The one stagger step between items revealing in sequence (seconds). */
+export const STAGGER_S = 0.06;
+
 /** Fades + rises its children in the first time they enter the viewport. */
 export default function Reveal({
   children,

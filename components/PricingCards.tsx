@@ -7,7 +7,7 @@ import type { RegionCode } from "@/lib/content";
 import { isPurchasable } from "@/lib/pricing-amount";
 import { DEFAULT_REGION, type ResolvedTier } from "@/lib/region";
 import CurrencyPicker from "./CurrencyPicker";
-import Reveal from "./Reveal";
+import Reveal, { STAGGER_S } from "./Reveal";
 
 type Props = {
   /** Server-resolved to DEFAULT_REGION, so SSR and the first paint agree. */
@@ -103,7 +103,7 @@ export default function PricingCards({ initialTiers }: Props) {
       </div>
       <div className="pricing-grid grid grid-cols-1 gap-4 md:grid-cols-3">
         {tiers.map((tier, i) => (
-          <Reveal key={tier.name} delay={i * 0.08} className="h-full">
+          <Reveal key={tier.name} delay={i * STAGGER_S} className="h-full">
             <PricingCard tier={tier} />
           </Reveal>
         ))}

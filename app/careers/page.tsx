@@ -3,7 +3,7 @@ import Link from "next/link";
 
 import EmptyState from "@/components/EmptyState";
 import PageHeader from "@/components/PageHeader";
-import Reveal from "@/components/Reveal";
+import Reveal, { STAGGER_S } from "@/components/Reveal";
 import { numberWord } from "@/lib/format";
 import { getRoles } from "@/lib/sanity/queries";
 import { pageMetadata } from "@/lib/metadata";
@@ -80,7 +80,7 @@ export default async function CareersPage() {
         <ul className="m-0 flex list-none flex-col gap-2.5 p-0">
           {roles.map((role, i) => (
             <li key={role.slug}>
-              <Reveal delay={i * 0.05}>
+              <Reveal delay={i * STAGGER_S}>
                 <Link
                   href={`/careers/${role.slug}`}
                   className="ease-brand group flex flex-wrap items-center justify-between gap-4 border border-line bg-surface-3 px-6 py-5 text-t1 transition-[border-color,transform] duration-160 hover:translate-x-1 hover:border-lime-edge hover:text-t1"

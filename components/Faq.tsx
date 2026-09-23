@@ -61,7 +61,7 @@ export default function Faq({ faqs }: { faqs: FaqItem[] }) {
                   </span>
                   <span
                     aria-hidden="true"
-                    className="ease-brand flex-none font-mono text-22 text-lime transition-transform duration-200"
+                    className="ease-brand flex-none font-mono text-22 text-lime transition-transform duration-160"
                     style={{ transform: open ? "rotate(45deg)" : "rotate(0deg)" }}
                   >
                     +
