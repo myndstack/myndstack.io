@@ -53,7 +53,7 @@ test.describe("every route renders with metadata", () => {
     "/work",
     "/privacy",
     "/careers/staff-platform-engineer",
-    "/work/aperture-health",
+    "/work/pharmalaunch",
   ];
 
   for (const route of ROUTES) {
@@ -70,6 +70,19 @@ test.describe("every route renders with metadata", () => {
 
       // Canonical proves the metadata pipeline ran, not just that a title exists.
       await expect(page.locator('link[rel="canonical"]')).toHaveCount(1);
+    });
+  }
+
+  // An unknown slug is a real 404, not a "soft 404". While loading.tsx wrapped
+  // these pages, the 200 was sent with the skeleton before notFound() ran — so
+  // retired case studies still answered 200 (this list once held one).
+  // An unknown slug renders on demand, which asks Sanity — so a transient CMS
+  // timeout surfaces as a 5xx; poll through those. A soft 404 is a steady 200.
+  for (const route of ["/work/does-not-exist", "/careers/does-not-exist", "/pricing/does-not-exist"]) {
+    test(`${route} answers 404`, async ({ request }) => {
+      await expect
+        .poll(async () => (await request.get(route)).status(), { timeout: 45_000, intervals: [1000, 3000, 5000] })
+        .toBe(404);
     });
   }
 });
@@ -116,6 +129,49 @@ test.describe("page is actually usable", () => {
 
     expect(response.status()).toBe(200);
     expect(await response.json()).toMatchObject({ ok: true });
+  });
+});
+
+/**
+ * No JavaScript — and any crawler or reader that doesn't run it. The static
+ * HTML must carry the page itself, in place. Route-level loading.tsx files
+ * used to wrap every page in a Suspense boundary, so the prerendered HTML
+ * shipped the skeleton with the real page tucked into a `<div hidden
+ * id="S:0">` that only React's inline `$RC` script reveals: with JS off the
+ * skeleton stayed forever, and before the reveal the document was too short
+ * for a restored or anchored scroll to land.
+ */
+const NO_JS_ROUTES = ["/", "/preview", "/work", "/careers", "/work/pharmalaunch", "/pricing/discovery-sprint"];
+
+test.describe("works without JavaScript", () => {
+  for (const path of NO_JS_ROUTES) {
+    test(`${path} shows its content with JavaScript off`, async ({ browser }) => {
+      const context = await browser.newContext({ javaScriptEnabled: false });
+      const page = await context.newPage();
+      await page.goto(path);
+      await expect(page.locator("h1").first()).toBeVisible();
+      await expect(page.locator("main").getByRole("status").filter({ hasText: "Loading" })).toHaveCount(0);
+      await context.close();
+    });
+  }
+
+  test("a role listing shows its content with JavaScript off", async ({ browser, request }) => {
+    const listing = await (await request.get("/careers")).text();
+    const slug = /href="\/careers\/([^"#?]+)"/.exec(listing)?.[1];
+    expect(slug, "no role linked from /careers").toBeTruthy();
+    const context = await browser.newContext({ javaScriptEnabled: false });
+    const page = await context.newPage();
+    await page.goto(`/careers/${slug}`);
+    await expect(page.locator("h1").first()).toBeVisible();
+    await context.close();
+  });
+
+  test("the prerendered HTML carries each page in place, not in a hidden segment", async ({ request }) => {
+    for (const path of NO_JS_ROUTES) {
+      const html = await (await request.get(path)).text();
+      expect(html, path).not.toMatch(/<div hidden id="S:\d+"/);
+      expect(html, path).not.toContain("<!--$?-->");
+    }
   });
 });
 

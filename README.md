@@ -46,6 +46,16 @@ for the full hosting runbook (env matrix, the Preview mail-transport trap, DNS).
 Legal pages are three real segments rather than `/[slug]`, which would otherwise
 swallow every unknown path and stop `/careers` resolving cleanly.
 
+**No `loading.tsx` on these routes, on purpose.** A route-level `loading.tsx` wraps
+the page in a Suspense boundary, and Next then prerenders the *fallback* into
+the static HTML with the real page in a `<div hidden id="S:0">` that only React's
+inline script reveals. With JavaScript off (and for any non-JS crawler or
+reader) the skeleton stayed forever. Before the reveal, the document was also
+too short for a restored or anchored scroll to land. Every page here is
+static or SSG and is prefetched on navigation, so those boundaries bought
+almost nothing. `e2e/smoke.spec.ts` ("works without JavaScript") fails if a
+hidden segment comes back.
+
 ## Layout
 
 ```
@@ -507,9 +517,7 @@ Code: `components/landing/` (chapters, core, motion, styles),
 - **Test hooks:** `motion:finish-all` on `document` (or `beforeprint`) finishes
   every chapter; runs expose `data-built`, `data-glide`, `data-intro`,
   `data-cap-active`; `window.__MS_FIELD_TEST = true` opts a test into the
-  canvas. Helpers in `e2e/helpers.ts`. Note: the root `loading.tsx` streams the
-  page into a hidden Suspense segment revealed shortly after DOMContentLoaded —
-  helpers wait for real layout before scrolling.
+  canvas. Helpers in `e2e/helpers.ts`.
 
 ### Accessibility guard
 

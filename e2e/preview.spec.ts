@@ -505,10 +505,6 @@ test.describe("without motion", () => {
     expect(position).not.toBe("sticky");
   });
 
-  // Note: site-wide, the root loading.tsx streams page content into a hidden
-  // Suspense segment that only JS reveals (a pre-existing issue, tracked
-  // separately) — so this checks the content and the BUILT, UNPINNED styles
-  // the static HTML carries, not on-screen visibility.
   test("JavaScript disabled: no draft state, arcs drawn, unpinned, text present", async ({ browser }) => {
     const context = await browser.newContext({ javaScriptEnabled: false, viewport: DESKTOP });
     const page = await context.newPage();
@@ -528,6 +524,8 @@ test.describe("without motion", () => {
     expect(position).not.toBe("sticky");
     expect(opacity).toBe("1");
     await expect(page.locator("h1")).toContainText("Architected and built");
+    await expect(page.locator("h1")).toBeVisible();
+    await expect(page.locator(".hero-lede")).toBeVisible();
     await context.close();
   });
 });
