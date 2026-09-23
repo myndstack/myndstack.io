@@ -1,14 +1,15 @@
 import type { Metadata } from "next";
 import LegalDocPage from "@/components/LegalDocPage";
 import { LEGAL_DOCS } from "@/lib/legal";
+import { pageMetadata } from "@/lib/metadata";
 
 const doc = LEGAL_DOCS["responsible-ai"];
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMetadata({
+  path: "/responsible-ai",
   title: `${doc.title} — Myndstack`,
   description: doc.lede,
-  alternates: { canonical: "/responsible-ai" },
-};
+});
 
 export default function Page() {
   return <LegalDocPage slug="responsible-ai" />;

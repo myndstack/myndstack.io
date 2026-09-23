@@ -6,9 +6,13 @@ import type { Social } from "@/lib/content";
 import Magnetic from "./Magnetic";
 import SocialIcon from "./SocialIcon";
 
-/** Where the hairline starts and how much room the socials need at the bottom. */
+/**
+ * Where the hairline starts and how much room the socials need at the bottom.
+ * The social stack is 34 (offset) + 4×24 (targets) + 3×20 (gaps) = 190px tall;
+ * the gap leaves ~30px of air above it once the 8px end dot overhangs by 4px.
+ */
 const TRACK_TOP = 170;
-const TRACK_BOTTOM_GAP = 188;
+const TRACK_BOTTOM_GAP = 224;
 
 /** Fixed left rail: page-scroll progress plus social links. Hidden under 1100px. */
 export default function ProgressSpine({ socials }: { socials: Social[] }) {

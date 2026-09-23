@@ -3,16 +3,17 @@ import Link from "next/link";
 
 import PageHeader from "@/components/PageHeader";
 import { LAST_UPDATED, LEGAL_DOCS, LEGAL_SLUGS } from "@/lib/legal";
+import { pageMetadata } from "@/lib/metadata";
 
 const TITLE = "Policies";
 const LEDE =
   "Every policy that governs this site and the engagements we run. Grouped by audience so you can find the one that matters to you.";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMetadata({
+  path: "/legal",
   title: `${TITLE} — Myndstack`,
   description: LEDE,
-  alternates: { canonical: "/legal" },
-};
+});
 
 /**
  * Manually grouped so the audience (visitor / customer / enterprise buyer) is

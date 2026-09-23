@@ -4,17 +4,13 @@ import Link from "next/link";
 import PageHeader from "@/components/PageHeader";
 import Reveal from "@/components/Reveal";
 import { getCases } from "@/lib/sanity/queries";
+import { pageMetadata } from "@/lib/metadata";
 
 const title = "Selected work — Myndstack";
 const description =
   "PharmaLaunch — cognitive infrastructure for pharma manufacturing feasibility: generated, quality-gated GMP documents, designed and built by Myndstack. In private validation.";
 
-export const metadata: Metadata = {
-  title,
-  description,
-  alternates: { canonical: "/work" },
-  openGraph: { title, description },
-};
+export const metadata: Metadata = pageMetadata({ path: "/work", title, description });
 
 export default async function WorkPage() {
   const cases = await getCases();

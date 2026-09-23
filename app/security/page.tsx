@@ -1,14 +1,15 @@
 import type { Metadata } from "next";
 import LegalDocPage from "@/components/LegalDocPage";
 import { LEGAL_DOCS } from "@/lib/legal";
+import { pageMetadata } from "@/lib/metadata";
 
 const doc = LEGAL_DOCS.security;
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMetadata({
+  path: "/security",
   title: `${doc.title} — Myndstack`,
   description: doc.lede,
-  alternates: { canonical: "/security" },
-};
+});
 
 export default function Page() {
   return <LegalDocPage slug="security" />;

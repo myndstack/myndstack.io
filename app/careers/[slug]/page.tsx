@@ -8,6 +8,7 @@ import Reveal from "@/components/Reveal";
 import { SITE_URL } from "@/lib/content";
 import { jsonLd, numberWord } from "@/lib/format";
 import { getRole, getRoles, getRoleSlugs, getSiteSettings } from "@/lib/sanity/queries";
+import { pageMetadata } from "@/lib/metadata";
 
 type Params = { slug: string };
 
@@ -24,12 +25,7 @@ export async function generateMetadata({
   if (!role) return {};
 
   const title = `${role.title} — Careers at Myndstack`;
-  return {
-    title,
-    description: role.lede,
-    alternates: { canonical: `/careers/${role.slug}` },
-    openGraph: { title, description: role.lede },
-  };
+  return pageMetadata({ path: `/careers/${role.slug}`, title, description: role.lede });
 }
 
 export default async function RolePage({ params }: { params: Promise<Params> }) {

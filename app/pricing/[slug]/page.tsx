@@ -8,6 +8,7 @@ import Reveal from "@/components/Reveal";
 import { isPurchasable, purchasableTierBySlug } from "@/lib/pricing-amount";
 import { DEFAULT_REGION } from "@/lib/region";
 import { getPricingTiers } from "@/lib/sanity/queries";
+import { pageMetadata } from "@/lib/metadata";
 
 type Params = { slug: string };
 
@@ -28,10 +29,7 @@ export async function generateMetadata({
   const oneTime = tier.checkout.amountMinor === tier.checkout.annualAmountMinor;
   const title = `${oneTime ? "Book the" : "Subscribe to"} ${tier.name} — Myndstack`;
   return {
-    title,
-    description: tier.blurb,
-    alternates: { canonical: `/pricing/${tier.checkout.slug}` },
-    openGraph: { title, description: tier.blurb },
+    ...pageMetadata({ path: `/pricing/${tier.checkout.slug}`, title, description: tier.blurb }),
     // A transactional page — keep it out of the index; /#pricing is the landing.
     robots: { index: false, follow: true },
   };

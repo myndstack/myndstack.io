@@ -1769,7 +1769,7 @@
    per-frame JS (ProgressSpine skips its useScrollFrame writes when this is
    supported). Everywhere else the JS transform path stays. `--spine-span` is
    the track's rendered length: 100vh minus TRACK_TOP (170) + TRACK_BOTTOM_GAP
-   (188) from ProgressSpine.tsx — keep the two in sync.
+   (224) from ProgressSpine.tsx — keep the two in sync.
    ============================================================ */
 @supports (animation-timeline: scroll(root)) {
   @media (prefers-reduced-motion: no-preference) {
@@ -1778,7 +1778,7 @@
       animation-timeline: scroll(root block);
     }
     .spine-dot {
-      --spine-span: calc(100vh - 358px);
+      --spine-span: calc(100vh - 394px);
       animation: spine-dot linear both;
       animation-timeline: scroll(root block);
     }

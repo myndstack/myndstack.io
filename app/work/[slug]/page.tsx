@@ -7,6 +7,7 @@ import Reveal from "@/components/Reveal";
 import { SITE_URL } from "@/lib/content";
 import { jsonLd } from "@/lib/format";
 import { getCase, getCaseSlugs } from "@/lib/sanity/queries";
+import { pageMetadata } from "@/lib/metadata";
 
 type Params = { slug: string };
 
@@ -23,12 +24,7 @@ export async function generateMetadata({
   if (!study) return {};
 
   const title = `${study.client} — Myndstack`;
-  return {
-    title,
-    description: study.lede,
-    alternates: { canonical: `/work/${study.slug}` },
-    openGraph: { title, description: study.lede },
-  };
+  return pageMetadata({ path: `/work/${study.slug}`, title, description: study.lede });
 }
 
 export default async function CasePage({ params }: { params: Promise<Params> }) {

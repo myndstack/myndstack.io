@@ -5,17 +5,13 @@ import PageHeader from "@/components/PageHeader";
 import Reveal from "@/components/Reveal";
 import { numberWord } from "@/lib/format";
 import { getRoles } from "@/lib/sanity/queries";
+import { pageMetadata } from "@/lib/metadata";
 
 const title = "Careers — Myndstack";
 const description =
   "Build the stack behind everything. Open engineering and design roles at Myndstack — small team, real ownership, mission-critical work.";
 
-export const metadata: Metadata = {
-  title,
-  description,
-  alternates: { canonical: "/careers" },
-  openGraph: { title, description },
-};
+export const metadata: Metadata = pageMetadata({ path: "/careers", title, description });
 
 const PRINCIPLES = [
   {
