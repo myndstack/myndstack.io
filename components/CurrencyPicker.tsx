@@ -10,6 +10,7 @@ import {
   REGION_META,
   isRegionCode,
 } from "@/lib/region";
+import Icon from "./Icon";
 
 type Props = {
   /**
@@ -35,6 +36,8 @@ type Props = {
    * sits alone in open space with nothing else to identify it.
    */
   compact?: boolean;
+  /** Locked while a payment or promo check is in flight. */
+  disabled?: boolean;
 };
 
 /**
@@ -52,7 +55,7 @@ type Props = {
  * = user). This matches how Vercel and Stripe do it — clearing site data
  * "resets to auto".
  */
-export default function CurrencyPicker({ region, onChange, compact }: Props) {
+export default function CurrencyPicker({ region, onChange, compact, disabled = false }: Props) {
   // The select simply reflects the parent's `region`. Hydration is safe with no
   // local state: the parent seeds `region` with the same default the server
   // rendered, and only moves it after its own post-mount /api/pricing fetch.
@@ -64,7 +67,7 @@ export default function CurrencyPicker({ region, onChange, compact }: Props) {
   };
 
   return (
-    <div className="flex items-center gap-2.5 print:hidden">
+    <div className="flex items-center gap-2 print:hidden">
       {compact ? null : (
         <label
           htmlFor="currency-picker"
@@ -82,7 +85,8 @@ export default function CurrencyPicker({ region, onChange, compact }: Props) {
           // which says what it is but not what it does.
           aria-label={compact ? "Currency" : undefined}
           onChange={(e) => handleChange(e.target.value)}
-          className="ease-brand cursor-pointer appearance-none border border-line-3 bg-surface h-11 py-0 pr-8 pl-3 font-mono text-12 tracking-[0.04em] text-t2 uppercase transition-colors duration-160 hover:border-lime-edge focus:border-lime focus:shadow-[0_0_0_1px_var(--color-lime)] focus:outline-2 focus:outline-transparent"
+          disabled={disabled}
+          className="ease-brand cursor-pointer appearance-none disabled:cursor-not-allowed disabled:opacity-60 border border-line-3 bg-surface h-11 py-0 pr-8 pl-3 font-mono text-12 tracking-[0.04em] text-t2 uppercase transition-colors duration-(--dur-fast) hover:border-lime-edge focus:border-lime focus:shadow-[var(--edge-ring)] focus:outline-2 focus:outline-transparent"
         >
           {REGION_CODES.map((code) => (
             <option key={code} value={code}>
@@ -91,14 +95,9 @@ export default function CurrencyPicker({ region, onChange, compact }: Props) {
           ))}
         </select>
         {/* Custom chevron since we suppressed the native one with appearance-none. */}
-        <svg
-          aria-hidden="true"
-          className="pointer-events-none absolute top-1/2 right-2.5 size-3 -translate-y-1/2 text-t5"
-          viewBox="0 0 12 12"
-          fill="none"
-        >
-          <path d="M2.5 4.5 6 8l3.5-3.5" stroke="currentColor" strokeWidth="1.4" />
-        </svg>
+        <span className="pointer-events-none absolute top-1/2 right-2.5 -translate-y-1/2 text-t5">
+          <Icon name="chevron-down" className="size-3" />
+        </span>
       </div>
     </div>
   );

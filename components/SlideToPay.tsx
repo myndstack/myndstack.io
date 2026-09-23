@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef } from "react";
+import Icon from "./Icon";
 
 /**
  * Slide-to-pay: a real <button> that can ALSO be dragged.
@@ -58,6 +59,7 @@ export default function SlideToPay({
   const trackRef = useRef<HTMLButtonElement>(null);
   const knobRef = useRef<HTMLSpanElement>(null);
   const fillRef = useRef<HTMLSpanElement>(null);
+  const fillLabelRef = useRef<HTMLSpanElement>(null);
 
   // Drag bookkeeping. Refs, not state — none of it should render.
   const pointerId = useRef<number | null>(null);
@@ -69,7 +71,6 @@ export default function SlideToPay({
   /** Paint a 0..1 position. The only thing the drag ever writes. */
   const paint = useCallback((p: number) => {
     progress.current = p;
-    const track = trackRef.current;
     if (knobRef.current) {
       knobRef.current.style.transform = `translateX(${p * travel.current}px)`;
     }
@@ -85,12 +86,18 @@ export default function SlideToPay({
       // would drift away from the nose it is supposed to be attached to.
       fillRef.current.style.transform = `translateX(${(p - 1) * travel.current}px)`;
     }
-    // An attribute, not a class list, so the label flip is one declarative rule.
-    // Written only when it changes: setAttribute queues a mutation record even
-    // when the value is identical.
-    if (track) {
-      const past = p > 0.5 ? "true" : "false";
-      if (track.dataset.pastHalf !== past) track.dataset.pastHalf = past;
+    // The ink copy of the label rides inside the fill, counter-translated so it
+    // stays put over the white one. The fill's clip-path then reveals ink text
+    // exactly where lime sits under it — a per-glyph flip. (A whole-label flip
+    // at 50% left white text on lime, ~1.3:1, for the first half of the drag.)
+    if (fillLabelRef.current) {
+      fillLabelRef.current.style.transform = `translateX(${(1 - p) * travel.current}px)`;
+      // Only rendered while there is fill to show it: at rest it sits clipped
+      // over the dark track, where a contrast audit (rightly) can't see the clip.
+      const shown = p > 0 ? "visible" : "hidden";
+      if (fillLabelRef.current.style.visibility !== shown) {
+        fillLabelRef.current.style.visibility = shown;
+      }
     }
   }, []);
 
@@ -242,7 +249,11 @@ export default function SlideToPay({
       onPointerUp={endDrag}
       onPointerCancel={endDrag}
     >
-      <span ref={fillRef} aria-hidden="true" className="slide-fill" />
+      <span ref={fillRef} aria-hidden="true" className="slide-fill">
+        <span ref={fillLabelRef} className="slide-fill-label">
+          {busy ? busyLabel : label}
+        </span>
+      </span>
       {/* Parked at the far end rather than just ahead of the knob: beside the
           knob they crowded the centred label, and at the destination they say
           the more useful thing — drag to HERE. The knob covers them as it
@@ -254,14 +265,7 @@ export default function SlideToPay({
       </span>
       <span className="slide-label">{busy ? busyLabel : label}</span>
       <span ref={knobRef} aria-hidden="true" className="slide-knob">
-        <svg viewBox="0 0 16 16" fill="none" className="size-4">
-          <path
-            d="M2.5 8h10M9 4.5 12.5 8 9 11.5"
-            stroke="currentColor"
-            strokeWidth="1.6"
-            strokeLinecap="square"
-          />
-        </svg>
+        <Icon name="arrow-right" className="size-4" />
       </span>
     </button>
   );

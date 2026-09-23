@@ -55,7 +55,7 @@ export async function POST(request: Request) {
     body = await request.json();
   } catch {
     return NextResponse.json(
-      { ok: false, error: "That request wasn't readable." },
+      { ok: false, error: "We couldn't read that request. Reload the page and try again." },
       { status: 400 },
     );
   }
@@ -194,7 +194,16 @@ export async function POST(request: Request) {
   });
 
   if (!result.ok) {
-    return NextResponse.json({ ok: false, error: result.error }, { status: 502 });
+    // The processor's reason ("not configured", "invalid amount") is for us,
+    // not the buyer — log it and say what matters to them.
+    console.error("[checkout/order] order creation failed:", result.error);
+    return NextResponse.json(
+      {
+        ok: false,
+        error: "We couldn't start the payment, and nothing was charged. Try again in a moment.",
+      },
+      { status: 502 },
+    );
   }
 
   // The public key id goes to the browser to open Checkout; the secret stays here.

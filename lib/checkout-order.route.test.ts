@@ -270,4 +270,25 @@ describe("POST /api/checkout/order", () => {
     expect(res.status).toBe(400);
     expect(createOrderMock).not.toHaveBeenCalled();
   });
+
+  it("tells the buyer nothing was charged when Razorpay refuses the order — never its internal reason", async () => {
+    createOrderMock.mockResolvedValueOnce({
+      ok: false,
+      error: "Payments are not configured.",
+    } as never);
+    const res = await post({ tierSlug: "scale", billing: "monthly" });
+    const json = (await res.json()) as { error?: string };
+    expect(res.status).toBe(502);
+    expect(json.error).toMatch(/nothing was charged/);
+    expect(json.error).not.toMatch(/configured/);
+  });
+
+  it("answers an unreadable body in plain language", async () => {
+    const res = await POST(
+      new Request("http://localhost/api/checkout/order", { method: "POST", body: "{not json" }),
+    );
+    const json = (await res.json()) as { error?: string };
+    expect(res.status).toBe(400);
+    expect(json.error).not.toMatch(/readable/);
+  });
 });

@@ -18,11 +18,11 @@ const honeypot = z
   .transform(() => undefined);
 
 export const contactSchema = z.object({
-  name: z.string().trim().min(2, "Tell us your name").max(120, "That name is too long"),
-  email: z.email("Enter a valid email address").max(200),
-  company: z.string().trim().max(160, "That's too long").optional().or(z.literal("")),
-  budget: z.string().max(40).optional().or(z.literal("")),
-  source: z.string().max(40).optional().or(z.literal("")),
+  name: z.string().trim().min(2, "Tell us your name").max(120, "Keep your name under 120 characters"),
+  email: z.email("Enter a valid email address").max(200, "Keep the email under 200 characters"),
+  company: z.string().trim().max(160, "Keep the company name under 160 characters").optional().or(z.literal("")),
+  budget: z.string().max(40, "Pick one of the listed budgets").optional().or(z.literal("")),
+  source: z.string().max(40, "Pick one of the listed options").optional().or(z.literal("")),
   message: z
     .string()
     .trim()
@@ -32,19 +32,19 @@ export const contactSchema = z.object({
 });
 
 export const newsletterSchema = z.object({
-  email: z.email("Enter a valid email address").max(200),
+  email: z.email("Enter a valid email address").max(200, "Keep the email under 200 characters"),
   [HONEYPOT_FIELD]: honeypot,
 });
 
 export const applicationSchema = z.object({
-  role: z.string().trim().min(1).max(160),
-  name: z.string().trim().min(2, "Tell us your name").max(120),
-  email: z.email("Enter a valid email address").max(200),
+  role: z.string().trim().min(1, "Choose a role").max(160, "Choose a role from the list"),
+  name: z.string().trim().min(2, "Tell us your name").max(120, "Keep your name under 120 characters"),
+  email: z.email("Enter a valid email address").max(200, "Keep the email under 200 characters"),
   links: z
     .string()
     .trim()
     .min(4, "A link to your work, GitHub, or LinkedIn")
-    .max(600, "That's too long"),
+    .max(600, "Keep links under 600 characters"),
   note: z
     .string()
     .trim()

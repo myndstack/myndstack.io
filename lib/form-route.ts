@@ -54,7 +54,7 @@ export async function handleFormSubmission<S extends z.ZodType>(
     body = await request.json();
   } catch {
     return NextResponse.json(
-      { ok: false, error: "That request wasn't readable." },
+      { ok: false, error: "We couldn't read that request. Reload the page and try again." },
       { status: 400 },
     );
   }
@@ -137,7 +137,9 @@ export async function handleFormSubmission<S extends z.ZodType>(
   // no one received their message, and a route to a person that does work.
   if (!mailed.ok) {
     return NextResponse.json(
-      { ok: false, error: `${mailed.error} Email us directly at ${SITE.email}.` },
+      // The transport's reason is logged by mail.ts; the visitor gets the one
+      // thing they need — a route to a person that works.
+      { ok: false, error: `We couldn't send that just now. Email us directly at ${SITE.email}.` },
       { status: 502 },
     );
   }

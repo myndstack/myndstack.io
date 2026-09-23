@@ -250,6 +250,13 @@ export default function CheckoutPanel({
   const annual = billing === "annual";
   const amountMinor = annual ? amountMinorAnnual : amountMinorMonthly;
   const busy = status === "starting" || status === "verifying";
+  /**
+   * Everything that changes the charge is frozen while it's being computed or
+   * paid: currency, billing, the promo field. And paying waits for a promo
+   * check — sliding mid-check used to charge full price for a code the buyer
+   * could see was still being applied.
+   */
+  const locked = busy || promoBusy;
   const settled = status === "success" || status === "paid_unverified";
 
   // Single source of truth for money — the SAME breakdownFor the order route
@@ -366,9 +373,14 @@ export default function CheckoutPanel({
    * and the two events that can invalidate a code are both right here.
    */
   const dropPromo = useCallback(() => {
+    // Say so when a code is removed — a discount vanishing without a word looks
+    // like a bug, or a bait and switch.
+    if (applied) {
+      setNotice(`Code ${applied.code} was removed because the price changed. Apply it again to recheck.`);
+    }
     setApplied(null);
     setPromoError(null);
-  }, []);
+  }, [applied]);
 
   const pay = useCallback(async () => {
     setError(null);
@@ -448,9 +460,9 @@ export default function CheckoutPanel({
     return (
       <div
         role="status"
-        className="clip-angular-26 border border-lime bg-surface-3 p-6 shadow-[var(--edge-ring)]"
+        className="clip-angular-26 border border-lime bg-surface-3 p-6 shadow-[var(--edge-lip)]"
       >
-        <div className="eyebrow mb-2.5 text-lime">Payment received</div>
+        <div className="eyebrow mb-2 text-lime">Payment received</div>
         <h2
           ref={headingRef}
           tabIndex={-1}
@@ -458,7 +470,7 @@ export default function CheckoutPanel({
         >
           You&apos;re in.
         </h2>
-        <p className="m-0 text-15 leading-[1.6] text-t4">
+        <p className="m-0 text-15 leading-body text-t4">
           {oneTime
             ? `Thanks for booking the ${tierName}. We'll email you within one business day to schedule the kickoff.`
             : `Thanks for subscribing to ${tierName}. We'll email you shortly to get your workspace set up.`}{" "}
@@ -474,7 +486,7 @@ export default function CheckoutPanel({
   if (status === "paid_unverified") {
     return (
       <div role="status" className="clip-angular-26 border border-line bg-surface p-6">
-        <div className="eyebrow mb-2.5">Payment received</div>
+        <div className="eyebrow mb-2">Payment received</div>
         <h2
           ref={headingRef}
           tabIndex={-1}
@@ -482,7 +494,7 @@ export default function CheckoutPanel({
         >
           Thanks — we&apos;ve got your payment.
         </h2>
-        <p className="m-0 text-15 leading-[1.6] text-t4">
+        <p className="m-0 text-15 leading-body text-t4">
           Your payment went through. We had a brief hiccup confirming it here, but
           there&apos;s no need to pay again — we&apos;ll email you shortly to finish
           setup, and your receipt is on its way from Razorpay.
@@ -527,6 +539,7 @@ export default function CheckoutPanel({
             host without geo. */}
         <CurrencyPicker
           compact
+          disabled={locked}
           region={region}
           onChange={(next) => {
             if (next) setRegion(next);
@@ -543,10 +556,10 @@ export default function CheckoutPanel({
           reason that it answers "am I buying the right thing" in one glance. */}
       <div className="flex items-start justify-between gap-4 border-t border-line pt-4">
         <div className="min-w-0">
-          <h2 className="m-0 font-display text-17 leading-[1.25] font-semibold tracking-[-0.01em]">
+          <h2 className="m-0 font-display text-17 leading-tight font-semibold tracking-[-0.01em]">
             {tierName}
           </h2>
-          <p className="mt-1 mb-0 text-13 leading-[1.45] text-t4">
+          <p className="mt-1 mb-0 text-13 leading-body text-t4">
             {description ??
               (oneTime
                 ? "Book online — we'll email within one business day to schedule."
@@ -571,7 +584,7 @@ export default function CheckoutPanel({
               dropPromo();
             }}
             aria-pressed={!annual}
-            disabled={busy}
+            disabled={locked}
             className={`bill-btn${!annual ? " is-on" : ""}`}
           >
             Monthly
@@ -583,7 +596,7 @@ export default function CheckoutPanel({
               dropPromo();
             }}
             aria-pressed={annual}
-            disabled={busy}
+            disabled={locked}
             className={`bill-btn${annual ? " is-on" : ""}`}
           >
             Annual · save 2 mo
@@ -622,7 +635,8 @@ export default function CheckoutPanel({
                 <button
                   type="button"
                   onClick={() => setApplied(null)}
-                  className="ease-brand shrink-0 font-mono text-11 tracking-[0.08em] text-t5 uppercase transition-colors duration-160 hover:text-danger"
+                  disabled={busy}
+                  className="ease-brand shrink-0 disabled:opacity-60 font-mono text-11 tracking-[0.08em] text-t5 uppercase transition-colors duration-(--dur-fast) hover:text-danger"
                 >
                   Remove
                 </button>
@@ -675,20 +689,22 @@ export default function CheckoutPanel({
                     autoComplete="off"
                     autoCapitalize="characters"
                     spellCheck={false}
-                    disabled={promoBusy}
-                    className="ease-brand min-w-0 flex-1 border border-line-3 bg-surface h-11 px-3 py-0 font-mono text-12 tracking-[0.06em] text-t2 uppercase transition-colors duration-160 placeholder:text-t5 placeholder:normal-case focus:border-lime focus:shadow-[0_0_0_1px_var(--color-lime)] focus:outline-2 focus:outline-transparent"
+                    disabled={locked}
+                    aria-invalid={promoError ? true : undefined}
+                    aria-describedby={promoError ? "promo-error" : undefined}
+                    className={`ease-brand min-w-0 flex-1 border ${promoError ? "border-danger" : "border-line-3"} bg-surface h-11 px-3 py-0 font-mono text-12 tracking-[0.06em] text-t2 uppercase transition-colors duration-(--dur-fast) placeholder:text-t5 placeholder:normal-case focus:border-lime focus:shadow-[var(--edge-ring)] focus:outline-2 focus:outline-transparent`}
                   />
                   <button
                     type="button"
                     onClick={() => void applyPromo()}
-                    disabled={promoBusy || !promoInput.trim()}
+                    disabled={locked || !promoInput.trim()}
                     className="btn-ghost-sm shrink-0"
                   >
                     {promoBusy ? "Checking…" : "Apply"}
                   </button>
                 </div>
                 {promoError ? (
-                  <p role="alert" className="m-0 text-12 leading-[1.4] text-danger">
+                  <p id="promo-error" role="alert" className="m-0 font-mono text-11 leading-body text-danger">
                     {promoError}
                   </p>
                 ) : null}
@@ -697,7 +713,7 @@ export default function CheckoutPanel({
               <button
                 type="button"
                 onClick={() => setPromoOpen(true)}
-                className="ease-brand -my-1 py-1 font-mono text-11 tracking-[0.08em] text-t5 uppercase transition-colors duration-160 hover:text-lime"
+                className="ease-brand -my-1 py-1 font-mono text-11 tracking-[0.08em] text-t5 uppercase transition-colors duration-(--dur-fast) hover:text-lime"
               >
                 Have a promo code?
               </button>
@@ -714,7 +730,7 @@ export default function CheckoutPanel({
           </span>
           {/* Clamped: gross with paise ("₹58,998.82") is four glyphs longer than
               a listed price and has to clear the label on a 335px mobile panel. */}
-          <span className="font-display text-[clamp(22px,5vw,30px)] leading-none font-bold tracking-[-0.02em] tabular-nums">
+          <span className="font-display text-22 sm:text-30 leading-none font-bold tracking-[-0.02em] tabular-nums">
             {headline}
           </span>
         </div>
@@ -723,7 +739,7 @@ export default function CheckoutPanel({
             never show a note, so reserving for it is just dead space under the
             price. */}
         {!oneTime ? (
-          <div className="mt-1.5 h-3.5 text-right font-mono text-11 tracking-[0.04em] text-lime">
+          <div className="mt-2 h-3.5 text-right font-mono text-11 tracking-[0.04em] text-lime">
             {annual && annualNote ? annualNote : ""}
           </div>
         ) : null}
@@ -741,19 +757,21 @@ export default function CheckoutPanel({
         // (Label in Name) holds, and `describedBy` carries the amount to anyone
         // who tabs straight here without reading the summary.
         label="Slide to pay"
-        busyLabel={status === "verifying" ? "Confirming…" : "Starting…"}
-        busy={busy}
+        busyLabel={
+          status === "verifying" ? "Confirming…" : busy ? "Starting…" : "Checking code…"
+        }
+        busy={locked}
         describedBy="checkout-total"
         onConfirm={() => void pay()}
       />
 
       {status === "error" && error ? (
-        <p role="alert" className="mt-3 mb-0 text-13 leading-[1.5] text-danger">
+        <p role="alert" className="mt-3 mb-0 font-mono text-11 leading-body text-danger">
           {error}
         </p>
       ) : null}
       {notice && status === "idle" ? (
-        <p role="status" className="mt-3 mb-0 text-13 leading-[1.5] text-t4">
+        <p role="status" className="mt-3 mb-0 text-13 leading-body text-t4">
           {notice}
         </p>
       ) : null}
@@ -768,9 +786,9 @@ export default function CheckoutPanel({
           The credit is the real wordmark now, not typeset caps: it sits beside
           four genuine brand marks, and the one lockup that was faked was the
           one naming who actually holds the card. */}
-      <div className="mt-4 flex flex-wrap items-center justify-center gap-x-3 gap-y-2.5 border-t border-line pt-3.5 xs:justify-between">
+      <div className="mt-4 flex flex-wrap items-center justify-center gap-x-3 gap-y-2 border-t border-line pt-4 xs:justify-between">
         <PaymentMarks region={region} />
-        <span className="inline-flex items-center gap-1.5">
+        <span className="inline-flex items-center gap-2">
           {/* Sentence case, body font. The mono + 0.12em tracking this replaces
               is the site's label voice, and it exists to hold uppercase apart —
               set in sentence case it just looks loose, and it fought the
@@ -805,7 +823,7 @@ export default function CheckoutPanel({
           card reads as a paragraph that got away rather than a seal. "We never
           see your card details" rather than "never touch Myndstack" — shorter,
           and it avoids "us" reading as the US region three rows above. */}
-      <p className="mt-3.5 mb-0 text-center font-mono text-11 leading-[1.5] tracking-[0.08em] text-t5 uppercase xs:text-left">
+      <p className="mt-4 mb-0 text-center font-mono text-11 leading-body tracking-[0.08em] text-t5 uppercase xs:text-left">
         PCI-DSS Level&nbsp;1 · we never see your card details
       </p>
     </>

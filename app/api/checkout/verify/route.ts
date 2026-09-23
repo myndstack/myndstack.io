@@ -37,7 +37,7 @@ export async function POST(request: Request) {
     body = await request.json();
   } catch {
     return NextResponse.json(
-      { ok: false, error: "That request wasn't readable." },
+      { ok: false, error: "We couldn't read that request. Reload the page and try again." },
       { status: 400 },
     );
   }
