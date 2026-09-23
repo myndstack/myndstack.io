@@ -443,6 +443,40 @@ zeroing only the duration leaves a staggered transition still waiting before it 
 which is exactly what the nav morph's cross-fade lag would do. Reveal animations are
 also forced open under `<noscript>`.
 
+### Landing redesign — motion (`/preview`)
+
+The "Blueprint → Build" redesign is built at `/preview` (noindex: meta + an
+`X-Robots-Tag` header, not in the sitemap) until it is swapped in as `/`. Plan:
+sections start as lime line drawings and build into finished UI.
+
+- **anime.js 4.5.0, one entry point.** Only `lib/motion/anime/*` imports
+  `animejs`, one file per subpath so each chunk carries only what it uses.
+  ESLint enforces it, and bans `animejs/events` (`onScroll`): it adds its own
+  scroll listener and reads layout per frame, and this site has exactly one
+  scroll loop (`lib/scroll.ts`). An e2e test counts window scroll listeners.
+- **Scrubbed chapters** (Stack, Work pipeline) are paused timelines seeked from
+  that loop via `useScrollFrame`, with geometry cached outside the frame
+  (ResizeObserver + `fonts.ready`) and progress quantised, so a steady scroll
+  writes nothing. Timelines are `pause()`d explicitly after build — in 4.5 the
+  first `seek()` on a never-started timeline *resumes* it.
+- **Play-once chapters** (the hero) run on anime's own rAF, which idles when no
+  animation is active (checked in `engine.js`: the tick stops when `_head` is
+  empty).
+- **Lines draw without measuring.** Every `.bp-line` has `pathLength="1"`, so
+  `stroke-dashoffset` 1 → 0 draws it; the pipeline glyph moves along a path
+  computed by `lib/motion/pipeline-geometry.ts`. No `getTotalLength`, no
+  `createDrawable`/`createMotionPath` (both measure the DOM).
+- **Server HTML is the built page.** The blueprint "draft" state is CSS only,
+  under `html[data-anim="on"]` (set pre-paint when motion is allowed), so no JS,
+  reduced motion, print and a failed chunk all show it built. React never owns
+  a node the motion rewrites: scramble overlays are empty `aria-hidden` spans,
+  counters render from `data-count` via CSS `attr()`.
+- **Test hook:** dispatching `motion:finish-all` on `document` (or `beforeprint`)
+  finishes every chapter; `e2e/helpers.ts` → `finishAllMotion()`.
+- Checked in the anime source: `splitText` inserts a visually-hidden accessible
+  copy by default; `Draggable` adds no scroll listener (document pointer/touch
+  listeners during a drag only).
+
 ### Accessibility guard
 
 A standing axe-core scan (`@axe-core/playwright`) runs in the browser suite over
