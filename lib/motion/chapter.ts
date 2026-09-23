@@ -36,7 +36,15 @@ export type ChapterMotion = {
    * where it sits in the page, each gets SEGMENT_UNIT of timeline. `enter`
    * adds a leading segment for the screen before the run reaches the top.
    */
-  readonly segmented?: { readonly enter?: boolean };
+  readonly segmented?: {
+    readonly enter?: boolean;
+    /**
+     * Start each segment this many viewports BEFORE its element reaches the
+     * top — 0.5 makes a chapter current while its copy is mid-screen rather
+     * than scrolling out of the top.
+     */
+    readonly lead?: number;
+  };
   /** Glide toward the scroll position instead of snapping (lib/motion/smooth.ts). */
   readonly smooth?: { readonly tauMs: number };
   /** Plays once on load if the run starts in view; otherwise completes at once. */

@@ -1,0 +1,208 @@
+/* ============================================================
+   LANDING — "Full Spectrum" (the redesign at /preview)
+
+   Separate stylesheets (this folder), loaded only by the landing. Tokens come from the
+   `@theme static` block in app/globals.css; `@reference` gives this file the
+   `pin:` custom variant (as nested `@variant pin`) without emitting any
+   Tailwind output of its own.
+
+   Rules of the layer model (see components/landing/core/CoreStage.tsx):
+   - `.core-flow` carries every word and link and sits above the stage.
+   - `[data-stage]` is decoration only; pinned (sticky) under `pin`, else an
+     absolutely positioned hero backdrop. Pinning is decided here, before
+     paint — JS state never changes layout.
+   - Server HTML is the BUILT state. Draft states (undrawn arcs, copy about to
+     rise) apply only with html[data-anim="on"], motion allowed, and until the
+     chapter's intro is done — so no JS, reduced motion, print and a failed
+     chunk all show the finished page.
+   ============================================================ */
+@reference "../../../app/globals.css";
+
+
+.landing {
+  position: relative;
+  background: var(--color-ink);
+}
+
+/* One page column for the whole landing: 12-col, 1440 max, fluid margins. */
+.page-col {
+  width: 100%;
+  max-width: 1440px;
+  margin-inline: auto;
+  padding-inline: clamp(20px, 5vw, 80px);
+}
+
+/* Static film grain over everything but the nav. Rendered once, tiled. */
+.landing-grain {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  pointer-events: none;
+  opacity: 0.05;
+  background-size: 128px 128px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='128' height='128'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .5 0 0 0 0 .5 0 0 0 0 .5 0 0 0 1.6 -.45'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+/* Mono chapter stamp: §01, §02… */
+.stamp {
+  display: inline-block;
+  padding: 3px 6px 2px;
+  border: 1px solid var(--color-line-3);
+  font-family: var(--font-mono);
+  font-size: var(--text-11);
+  letter-spacing: 0.12em;
+  line-height: 1;
+  color: var(--color-t4);
+}
+
+/* HUD: small, true readouts only (coordinates, studio clock, build). */
+.hud {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 28px;
+  font-family: var(--font-mono);
+  font-size: var(--text-11);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--color-t2);
+}
+.hud-k {
+  color: var(--color-t5);
+}
+.hud-colon {
+  animation: hud-blink 2s steps(1) infinite;
+}
+@keyframes hud-blink {
+  50% {
+    opacity: 0.25;
+  }
+}
+
+/* Press feedback on every landing button. */
+.landing .btn:active {
+  transform: scale(0.97);
+  transition-duration: var(--dur-press);
+}
+
+/* Chapter type: kicker (stamp + label), display title, lede. */
+.chapter-kicker {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 0 0 24px;
+  font-family: var(--font-mono);
+  font-size: var(--text-12);
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--color-lime);
+}
+.chapter-title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: var(--text-chapter);
+  font-weight: 500;
+  line-height: 0.95;
+  letter-spacing: var(--tracking-chapter);
+  color: var(--color-t1);
+  text-wrap: balance;
+}
+.chapter-lede {
+  max-width: 42ch;
+  margin: 28px 0 0;
+  font-size: var(--text-lede);
+  line-height: 1.45;
+  color: var(--color-t3);
+}
+
+/* A status LED: a small square that lights in its hue. */
+.led {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  background: currentColor;
+  opacity: 0.25;
+  transition:
+    opacity var(--dur-base) var(--ease-brand),
+    box-shadow var(--dur-base) var(--ease-brand);
+}
+
+/* Paper surfaces: ink type, deep hues, ink focus ring (lime is 1.1:1 here). */
+[data-surface="paper"] {
+  color: var(--color-ink);
+}
+[data-surface="paper"] :focus-visible {
+  outline-color: var(--color-ink);
+}
+[data-surface="paper"] .chapter-kicker {
+  color: var(--color-lime-deep);
+}
+[data-surface="paper"] .chapter-title {
+  color: var(--color-ink);
+}
+[data-surface="paper"] .chapter-lede {
+  color: var(--color-paper-t2);
+}
+[data-surface="paper"] .stamp {
+  border-color: var(--color-paper-line);
+  color: var(--color-paper-t4);
+}
+[data-surface="paper"] .hud {
+  color: var(--color-ink);
+}
+[data-surface="paper"] .hud-k {
+  color: var(--color-paper-t4);
+}
+
+/* ---------------- Paper curtain ----------------
+   Platform rises over the diving Core: its own opaque paper, above the
+   stage, pulled up one screen over the end of the dive when pinned. */
+.curtain {
+  position: relative;
+  z-index: 2;
+  background: var(--color-paper);
+  color: var(--color-ink);
+  box-shadow: 0 -48px 96px -24px rgb(0 0 0 / 0.65);
+
+  @variant pin {
+    margin-top: -100svh;
+  }
+}
+.curtain :focus-visible {
+  outline-color: var(--color-ink);
+}
+
+/* ---------------- Print and forced colours ---------------- */
+@media print {
+  .landing-grain,
+  .core-canvas,
+  .core-glows {
+    display: none !important;
+  }
+  .core-stage {
+    position: absolute !important;
+  }
+  .landing .core-arc,
+  .landing .core-sweep {
+    stroke-dashoffset: 0 !important;
+  }
+  .landing [data-rise] {
+    opacity: 1 !important;
+    transform: none !important;
+  }
+}
+@media (forced-colors: active) {
+  .landing-grain,
+  .core-glows,
+  .core-canvas {
+    display: none;
+  }
+  .core-ring path,
+  .core-ring circle {
+    stroke: CanvasText;
+  }
+  .core-dot,
+  .core-playhead path:first-child {
+    fill: CanvasText;
+  }
+}

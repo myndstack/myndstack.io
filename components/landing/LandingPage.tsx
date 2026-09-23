@@ -1,4 +1,8 @@
-import "./landing.css";
+import "./styles/base.css";
+import "./styles/core.css";
+import "./styles/hero.css";
+import "./styles/platform.css";
+import "./styles/capabilities.css";
 
 import ContactForm from "@/components/ContactForm";
 import CtaBand from "@/components/CtaBand";
@@ -13,7 +17,8 @@ import type { PricingTier } from "@/lib/content";
 import type { Faq as FaqItem, Homepage, SiteSettings } from "@/lib/sanity/queries";
 
 import Hero from "./chapters/Hero";
-import Interim from "./chapters/Interim";
+import Capabilities from "./chapters/Capabilities";
+import Platform from "./chapters/Platform";
 
 type Props = {
   readonly home: Homepage;
@@ -60,8 +65,8 @@ export default function LandingPage({ home, faqs, tiers, site, turnstileSiteKey 
         version={site.version}
       />
 
-      <Interim id="platform" title="The stack" anchor="platform-anchor" surface="paper" />
-      <Interim id="capabilities" title="Capabilities" />
+      <Platform />
+      <Capabilities capabilities={home.capabilities} cta={home.hero.ctaPrimary} />
       <SelectedWork />
       <Process />
       <div id="integrations">

@@ -80,17 +80,18 @@ export function tanglePolyline(seed: number, n: number): Point[] {
  * "Modernized": a clean orthogonal circuit trace across the same box, with the
  * same point count as the tangle so the two morph exactly.
  */
+export const CIRCUIT_CORNERS: readonly Point[] = [
+  { x: 120, y: 300 },
+  { x: 300, y: 300 },
+  { x: 340, y: 200 },
+  { x: 560, y: 200 },
+  { x: 600, y: 300 },
+  { x: 700, y: 300 },
+  { x: 740, y: 400 },
+  { x: 820, y: 400 },
+  { x: 880, y: 300 },
+];
+
 export function circuitPolyline(n: number): Point[] {
-  const raw: Point[] = [
-    { x: 120, y: 300 },
-    { x: 300, y: 300 },
-    { x: 340, y: 200 },
-    { x: 560, y: 200 },
-    { x: 600, y: 300 },
-    { x: 700, y: 300 },
-    { x: 740, y: 400 },
-    { x: 820, y: 400 },
-    { x: 880, y: 300 },
-  ];
-  return resample(raw, n);
+  return resample(CIRCUIT_CORNERS, n);
 }

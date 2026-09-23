@@ -60,6 +60,16 @@ export const PLATFORM_LAYERS = [
   { n: "04", title: "Data", meta: "Ingest · vector · governance" },
 ] as const;
 
+/** DRAFT — the Platform chapter's copy. */
+export const PLATFORM_COPY = {
+  kicker: "The stack",
+  title: ["Four layers.", "One team."],
+  lede: "We architect and build every layer your product runs on — interface, models, compute and data — so nothing is glue code someone else owns.",
+} as const;
+
+/** Which hue each plate lights in when it locks (paper: the -deep variants). */
+export const PLATFORM_HUES: readonly Hue[] = ["product", "ai", "arch", "lime"];
+
 /** DRAFT — disciplines that feed each plate (leader lines draw into it). */
 export const DISCIPLINES: readonly { readonly label: string; readonly layer: 0 | 1 | 2 | 3 }[] = [
   { label: "Web apps", layer: 0 },

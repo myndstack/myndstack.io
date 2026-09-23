@@ -1,10 +1,18 @@
+import type { ReactNode } from "react";
+
 import CoreRing, { CoreGlow } from "./CoreRing";
 
 type Props = {
   /** Unique per stage on the page (SVG ids). */
   readonly prefix: string;
-  /** Positions the Core inside the stage (landing.css `.core-scene--*`). */
-  readonly placement: "hero" | "center";
+  /** Positions the Core inside the stage (core.css `.core-scene--*`). */
+  readonly placement: "hero" | "caps";
+  /** Extra layers inside the Core (they tilt and lean with it). */
+  readonly inner?: ReactNode;
+  /** Extra layers under the 3D scene (washes). */
+  readonly underlay?: ReactNode;
+  /** Extra layers over the 3D scene (panels). */
+  readonly overlay?: ReactNode;
   readonly className?: string;
 };
 
@@ -17,19 +25,22 @@ type Props = {
  * aria-hidden + inert, with nothing focusable inside: every word and link of a
  * run lives in the flow layer above it (an e2e test enforces this).
  */
-export default function CoreStage({ prefix, placement, className }: Props) {
+export default function CoreStage({ prefix, placement, inner, underlay, overlay, className }: Props) {
   return (
     <div data-stage aria-hidden="true" inert className={`core-stage${className ? ` ${className}` : ""}`}>
       <div className="core-wash" data-core-wash />
+      {underlay}
       <div className={`core-scene core-scene--${placement}`}>
         <div className="core-3d" data-core-3d>
           <div className="core-lean" data-core-lean>
             <CoreGlow />
             <div className="core-field" data-core-field />
             <CoreRing prefix={prefix} />
+            {inner}
           </div>
         </div>
       </div>
+      {overlay}
     </div>
   );
 }

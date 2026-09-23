@@ -63,19 +63,18 @@ export async function scrollChapterTo(page: Page, target: string, fraction: numb
 }
 
 /**
- * Wait until a scrubbed chapter is built, its intro (if any) has finished,
- * and its glide has caught up with the scroll.
+ * Wait until a scrubbed chapter's motion is actually built (`data-built`),
+ * its intro (if any) has finished, and its glide has caught up with the scroll.
  */
 export async function settled(page: Page, chapter: string) {
   await page.waitForFunction(
     (id) => {
       const root = document.querySelector(`[data-chapter="${id}"]`) as HTMLElement | null;
-      if (!root) return false;
-      const built = root.dataset.motion === "scrub" || root.dataset.motion === "done";
-      return built && root.dataset.intro !== "playing" && root.dataset.glide !== "moving";
+      if (!root || root.dataset.built !== "true") return false;
+      return root.dataset.intro !== "playing" && root.dataset.glide !== "moving";
     },
     chapter,
-    { polling: 50, timeout: 8000 },
+    { polling: 50, timeout: 12_000 },
   );
   // Two frames for the last seek to land in style.
   await page.evaluate(() => new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r))));

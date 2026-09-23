@@ -32,6 +32,8 @@ type Options = {
   /** Draw the breathing waveform in the centre. */
   readonly wave: boolean;
   readonly coarse: boolean;
+  /** Fraction of the device budget to use (a run with demos wants fewer). */
+  readonly density?: number;
 };
 
 /** Hue of each ring sector, by whole degree (clockwise from 12 o'clock). */
@@ -70,7 +72,10 @@ function makeSprite(hex: string): HTMLCanvasElement {
   return c;
 }
 
-export function mountField(container: HTMLElement, { seed, wave, coarse }: Options): FieldHandle | null {
+export function mountField(
+  container: HTMLElement,
+  { seed, wave, coarse, density = 1 }: Options,
+): FieldHandle | null {
   const connection = (navigator as unknown as { connection?: { saveData?: boolean } }).connection;
   const budget = budgetFor({
     width: window.innerWidth,
@@ -80,7 +85,8 @@ export function mountField(container: HTMLElement, { seed, wave, coarse }: Optio
     reducedMotion: window.matchMedia("(prefers-reduced-motion: reduce)").matches,
     automated: isAutomated(),
   });
-  if (budget === 0) return null;
+  const count = Math.round(budget * density);
+  if (count === 0) return null;
 
   const canvas = document.createElement("canvas");
   canvas.className = "core-canvas";
@@ -91,7 +97,7 @@ export function mountField(container: HTMLElement, { seed, wave, coarse }: Optio
   const stage = container.closest<HTMLElement>("[data-stage]");
   stage?.setAttribute("data-field", "on");
 
-  const field: Field = createField(budget, seed);
+  const field: Field = createField(count, seed);
   let sprites = HUES.map((h) => makeSprite(SPECTRUM[h]));
   let waveGrad: CanvasGradient | null = null;
   let width = 0;

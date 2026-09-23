@@ -228,7 +228,8 @@ export default function MotionChapter({ id, kind, eager = false, className, chil
     const motion = motionRef.current;
     if (motion?.segmented) {
       const segments = Array.from(root.querySelectorAll<HTMLElement>("[data-segment]"));
-      const stops = segments.map((el) => documentTop(el) - top);
+      const lead = (motion.segmented.lead ?? 0) * vh;
+      const stops = segments.map((el, i) => documentTop(el) - top - (i === 0 ? 0 : lead));
       runRef.current = {
         top,
         stops: motion.segmented.enter ? [-vh, ...stops] : stops,
@@ -256,9 +257,15 @@ export default function MotionChapter({ id, kind, eager = false, className, chil
     let cancelled = false;
     let timeout = 0;
     const start = () => {
-      timeout = window.setTimeout(() => {
-        if (!cancelled && !motionRef.current) finish();
-      }, BUILD_TIMEOUT_MS);
+      // Once-chapters hold a draft state until they play, so a slow chunk must
+      // not strand them: after the timeout they land built. Scrubbed runs need
+      // no watchdog — their server HTML is already built and pinning is CSS —
+      // and finishing one would switch its glide off for the whole session.
+      if (kind === "once") {
+        timeout = window.setTimeout(() => {
+          if (!cancelled && !motionRef.current) finish();
+        }, BUILD_TIMEOUT_MS);
+      }
       CHAPTER_LOADERS[id]().then(
         (mod) => {
           if (!cancelled) setBuilder(() => mod.default);
@@ -291,7 +298,7 @@ export default function MotionChapter({ id, kind, eager = false, className, chil
       window.clearTimeout(timeout);
       io.disconnect();
     };
-  }, [reduced, eager, id]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [reduced, eager, id, kind]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Build (and rebuild across the pin breakpoint) inside an anime scope.
   useEffect(() => {
@@ -325,6 +332,7 @@ export default function MotionChapter({ id, kind, eager = false, className, chil
     appliedRef.current = -1;
     targetRef.current = -1;
     glideStateRef.current = "idle";
+    root.dataset.built = "true";
     let io: IntersectionObserver | null = null;
     let ambientIo: IntersectionObserver | null = null;
     let onVisibility: (() => void) | null = null;
@@ -413,6 +421,7 @@ export default function MotionChapter({ id, kind, eager = false, className, chil
       glideRef.current = null;
       runRef.current = null;
       delete root.dataset.intro;
+      delete root.dataset.built;
     };
   }, [builder, desktop, coarse, reduced, kind]); // eslint-disable-line react-hooks/exhaustive-deps
 

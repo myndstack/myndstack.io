@@ -1,0 +1,223 @@
+/* §02 — Platform: the paper curtain with the isometric stack. */
+@reference "../../../app/globals.css";
+
+.platform-run {
+  position: relative;
+
+  @variant pin {
+    height: 250svh;
+  }
+}
+/* The nav's "Stack" link lands here. Pinned, that's 110svh into the run —
+   mid-build — instead of the run's top (a still-exploded stack). */
+.platform-anchor {
+  display: block;
+  height: 0;
+
+  @variant pin {
+    scroll-margin-top: -110svh;
+  }
+}
+.platform-frame {
+  padding-block: 112px 120px;
+
+  @variant pin {
+    position: sticky;
+    top: 0;
+    display: flex;
+    align-items: center;
+    height: 100svh;
+    padding-block: 72px 24px;
+  }
+}
+.platform-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 48px;
+
+  @media (width >= 62.5rem) {
+    grid-template-columns: minmax(0, 4fr) minmax(0, 8fr);
+    align-items: center;
+    gap: 32px;
+  }
+}
+
+/* Layer legend — real text, lights with its plate. */
+.platform-layers {
+  margin: 36px 0 0;
+  padding: 0;
+  list-style: none;
+  border-top: 1px solid var(--color-paper-line);
+}
+.platform-layer {
+  display: grid;
+  grid-template-columns: 28px auto 1fr 10px;
+  align-items: center;
+  gap: 12px;
+  padding: 11px 0;
+  border-bottom: 1px solid var(--color-paper-line);
+}
+.platform-layer-n {
+  font-family: var(--font-mono);
+  font-size: var(--text-11);
+  color: var(--color-paper-t4);
+  transition: color var(--dur-base) var(--ease-brand);
+}
+.platform-layer-t {
+  font-family: var(--font-display);
+  font-size: var(--text-17);
+  font-weight: 600;
+}
+.platform-layer-m {
+  justify-self: end;
+  font-family: var(--font-mono);
+  font-size: var(--text-11);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-paper-t4);
+}
+.platform-layer .led {
+  color: var(--plate-hue);
+}
+.platform-layer.is-locked .platform-layer-n {
+  color: var(--plate-hue);
+}
+.platform-layer.is-locked .led {
+  opacity: 1;
+  box-shadow: 0 0 0 3px color-mix(in oklch, var(--plate-hue) 20%, transparent);
+}
+.platform-count {
+  margin: 18px 0 0;
+  justify-content: space-between;
+}
+
+/* The figure: an SVG stack with HTML labels laid over it (same geometry). */
+.platform-figure {
+  position: relative;
+}
+.platform-figure svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  overflow: visible;
+
+  @variant pin {
+    max-height: calc(100svh - 120px);
+  }
+}
+.plate-top,
+.plate-left,
+.plate-right {
+  stroke: var(--color-ink);
+  stroke-width: 1.5;
+  stroke-linejoin: round;
+}
+.plate-top {
+  fill: var(--color-paper-2);
+  transition: fill var(--dur-slow) var(--ease-brand);
+}
+.plate-left {
+  fill: #b7b4ab;
+}
+.plate-right {
+  fill: #c5c2b9;
+}
+.plate-inset {
+  fill: none;
+  stroke: var(--color-paper-line);
+  stroke-width: 1.4;
+  stroke-dasharray: 3 6;
+  transition: stroke var(--dur-slow) var(--ease-brand);
+}
+.plate.is-locked .plate-top {
+  fill: color-mix(in oklch, var(--plate-hue) 14%, var(--color-paper-2));
+}
+.plate.is-locked .plate-inset {
+  stroke: var(--plate-hue);
+  stroke-dasharray: none;
+}
+.leader,
+.platform-bus {
+  fill: none;
+  stroke-width: 1.5;
+  stroke-dasharray: 1;
+  stroke-dashoffset: 0;
+}
+.platform-bus {
+  stroke: var(--color-ink);
+}
+
+/* Discipline labels. Phones: a chip list under the stack (lines hidden). */
+.platform-disciplines {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 24px 0 0;
+  padding: 0;
+  list-style: none;
+}
+.discipline {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 10px;
+  border: 1px solid var(--color-paper-line);
+  font-family: var(--font-mono);
+  font-size: var(--text-11);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  color: var(--color-paper-t4);
+  transition: color var(--dur-base) var(--ease-brand);
+}
+.discipline::before {
+  content: "";
+  width: 6px;
+  height: 6px;
+  background: var(--plate-hue);
+  opacity: 0.3;
+  transition: opacity var(--dur-base) var(--ease-brand);
+}
+.discipline.is-lit {
+  color: var(--color-ink);
+}
+.discipline.is-lit::before {
+  opacity: 1;
+}
+.leader {
+  display: none;
+}
+
+@media (width >= 62.5rem) {
+  .leader {
+    display: inline;
+  }
+  .platform-disciplines {
+    position: absolute;
+    inset: 0;
+    margin: 0;
+  }
+  .discipline {
+    position: absolute;
+    top: var(--y);
+    translate: 0 -50%;
+    padding: 0;
+    border: 0;
+  }
+  .discipline[data-side="left"] {
+    right: calc(100% - var(--x));
+    flex-direction: row-reverse;
+    padding-right: 10px;
+  }
+  .discipline[data-side="right"] {
+    left: var(--x);
+    padding-left: 10px;
+  }
+}
+
+@media (forced-colors: active) {
+  .leader,
+  .platform-bus {
+    stroke: CanvasText !important;
+  }
+}

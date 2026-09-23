@@ -65,6 +65,8 @@ test.describe("preview is hidden and self-contained", () => {
     await page.goto(PREVIEW);
     await page.locator('.navlink[data-section="pricing"]').click();
     await expect(page).toHaveURL(/\/preview#pricing$/);
+    // Fresh load for the CTA: after scrolling down the nav tucks away.
+    await page.goto(PREVIEW);
     await page.locator(".nav-cta").click();
     await expect(page).toHaveURL(/\/preview#contact$/);
   });
@@ -211,6 +213,105 @@ test.describe("the dive (pinned, scrubbed)", () => {
   });
 });
 
+test.describe("the platform (paper, pinned, scrubbed)", () => {
+  const locked = (page: Page) => page.locator("#platform .plate.is-locked").count();
+
+  test("plates lock one by one as the stack compresses", async ({ page }) => {
+    await page.setViewportSize(DESKTOP);
+    await page.goto(PREVIEW);
+    await scrollChapterTo(page, `[data-chapter="platform"]`, 0);
+    await settled(page, "platform");
+    await expect.poll(() => locked(page)).toBe(0);
+    await scrollChapterTo(page, `[data-chapter="platform"]`, 0.6);
+    await settled(page, "platform");
+    await expect.poll(() => locked(page)).toBe(2);
+    await scrollChapterTo(page, `[data-chapter="platform"]`, 1);
+    await settled(page, "platform");
+    await expect.poll(() => locked(page)).toBe(4);
+    await expect(page.locator("#platform [data-count]")).toHaveText("04");
+    const drawn = await page
+      .locator("#platform .leader")
+      .evaluateAll((els) => els.every((el) => parseFloat(getComputedStyle(el).strokeDashoffset) < 0.01));
+    expect(drawn).toBe(true);
+  });
+
+  test("the nav's Stack link lands mid-build, not on an exploded stack", async ({ page }) => {
+    await page.setViewportSize(DESKTOP);
+    await page.goto(PREVIEW);
+    await page.evaluate(() => document.getElementById("platform-anchor")!.scrollIntoView({ behavior: "instant" }));
+    await settled(page, "platform");
+    await expect.poll(() => locked(page)).toBeGreaterThanOrEqual(2);
+  });
+
+  test("paper passes axe while pinned mid-build", async ({ page }) => {
+    await page.setViewportSize(DESKTOP);
+    await page.goto(PREVIEW);
+    await scrollChapterTo(page, `[data-chapter="platform"]`, 0.6);
+    await settled(page, "platform");
+    const found = await seriousViolations(page, "#platform");
+    expect(found, `serious/critical violations:\n${found.join("\n")}`).toEqual([]);
+  });
+});
+
+test.describe("capabilities (run B)", () => {
+  const CAPS = "core-caps";
+  /** Scroll so capability article `i` sits mid-screen (its chapter is current). */
+  async function toCap(page: Page, i: number) {
+    await page.evaluate((n) => {
+      const el = document.querySelector(`[data-cap="${n}"]`) as HTMLElement;
+      const top = el.getBoundingClientRect().top + window.scrollY;
+      window.scrollTo({ top: top + el.offsetHeight * 0.3, behavior: "instant" });
+    }, i);
+    await settled(page, CAPS);
+  }
+
+  test("each chapter lights its own hue, and the finale completes the spectrum", async ({ page }) => {
+    await page.setViewportSize(DESKTOP);
+    await page.goto(PREVIEW);
+    const run = page.locator(`[data-chapter="${CAPS}"]`);
+    const hues = ["ai", "product", "design", "arch"];
+    for (let i = 0; i < hues.length; i++) {
+      await toCap(page, i);
+      await expect(run).toHaveAttribute("data-cap-active", String(i));
+      await expect(run).toHaveAttribute("data-hue", hues[i]);
+      const lit = await page
+        .locator(`[data-chapter="${CAPS}"] [data-stage] .core-arc[data-arc="${hues[i]}"]`)
+        .evaluate((el) => parseFloat(getComputedStyle(el).opacity));
+      expect(lit).toBeGreaterThan(0.9);
+      const panel = await page
+        .locator(`[data-chapter="${CAPS}"] [data-panel="${i}"]`)
+        .evaluate((el) => parseFloat(getComputedStyle(el).opacity));
+      expect(panel).toBeGreaterThan(0.9);
+    }
+    await scrollChapterTo(page, ".cap-finale", 0.5);
+    await settled(page, CAPS);
+    await expect(run).toHaveAttribute("data-complete", "true");
+  });
+
+  test("the stage never carries the words: every capability is in the flow", async ({ page }) => {
+    await page.setViewportSize(DESKTOP);
+    await page.goto(PREVIEW);
+    await expect(page.locator("#capabilities h3")).toHaveCount(4);
+    await expect(page.locator("#capabilities [data-stage] h3, #capabilities [data-stage] li")).toHaveCount(0);
+  });
+
+  test("axe passes mid-chapter on graphite", async ({ page }) => {
+    await page.setViewportSize(DESKTOP);
+    await page.goto(PREVIEW);
+    await toCap(page, 1);
+    const found = await seriousViolations(page, "#capabilities");
+    expect(found, `serious/critical violations:\n${found.join("\n")}`).toEqual([]);
+  });
+
+  test("phones: no stage, each capability shows its own ring", async ({ page }) => {
+    await page.setViewportSize(PHONE);
+    await page.goto(PREVIEW);
+    await expect(page.locator(`[data-chapter="${CAPS}"] > [data-stage]`)).toBeHidden();
+    await expect(page.locator(".cap-mini")).toHaveCount(4);
+    await expect(page.locator(".cap-mini").first()).toBeVisible();
+  });
+});
+
 test.describe("phones: adapted, not pinned", () => {
   test("no sticky stage, a short dive, and the hero intro plays once", async ({ page }) => {
     await page.setViewportSize(PHONE);
@@ -223,6 +324,9 @@ test.describe("phones: adapted, not pinned", () => {
       .locator(".dive")
       .evaluate((el) => (el as HTMLElement).offsetHeight / window.innerHeight);
     expect(dive).toBeLessThan(0.8);
+    const frame = await page.locator(".platform-frame").evaluate((el) => getComputedStyle(el).position);
+    expect(frame).not.toBe("sticky");
+    await expect(page.locator("#platform .plate")).toHaveCount(4);
     await expect(page.locator(`[data-chapter="${HERO}"]`)).toHaveAttribute("data-motion", "done", {
       timeout: 8000,
     });

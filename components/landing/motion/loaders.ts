@@ -7,6 +7,8 @@ import type { ChapterModule } from "@/lib/motion/chapter";
  */
 export const CHAPTER_LOADERS = {
   "core-hero": () => import("../chapters/hero.motion"),
+  platform: () => import("../chapters/platform.motion"),
+  "core-caps": () => import("../chapters/capabilities.motion"),
 } satisfies Record<string, () => Promise<ChapterModule>>;
 
 export type ChapterId = keyof typeof CHAPTER_LOADERS;

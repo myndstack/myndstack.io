@@ -1,0 +1,214 @@
+/* The Core: a run's stage, 3D scene, ring, glow and particle canvas. */
+@reference "../../../app/globals.css";
+
+/* ---------------- Core run (stage + flow in one grid cell) --------------- */
+.core-run {
+  position: relative;
+  display: grid;
+  isolation: isolate;
+}
+.core-run > [data-stage],
+.core-run > .core-flow {
+  grid-area: 1 / 1;
+}
+.core-flow {
+  position: relative;
+  z-index: 1;
+  min-width: 0;
+}
+.core-stage {
+  position: absolute;
+  inset: 0 0 auto 0;
+  z-index: 0;
+  height: 100svh;
+  overflow: hidden;
+  pointer-events: none;
+
+  @variant pin {
+    position: sticky;
+    top: 0;
+    align-self: start;
+  }
+}
+.core-wash {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(46% 52% at 50% 86%, color-mix(in oklch, var(--color-spec-ai) 16%, transparent), transparent 72%),
+    radial-gradient(34% 36% at 62% 92%, color-mix(in oklch, var(--color-spec-product) 9%, transparent), transparent 70%);
+
+  @media (width >= 62.5rem) {
+    background:
+      radial-gradient(40% 58% at 70% 50%, color-mix(in oklch, var(--color-spec-ai) 15%, transparent), transparent 72%),
+      radial-gradient(28% 34% at 80% 64%, color-mix(in oklch, var(--color-spec-product) 8%, transparent), transparent 70%),
+      radial-gradient(24% 30% at 60% 30%, color-mix(in oklch, var(--color-spec-design) 6%, transparent), transparent 70%);
+  }
+}
+
+/* The 3D scene. Perspective lives on this non-sticky wrapper; the scrubbed
+   camera is [data-core-3d], the pointer lean [data-core-lean]. */
+.core-scene {
+  position: absolute;
+  aspect-ratio: 1;
+  perspective: 1400px;
+  perspective-origin: 50% 40%;
+}
+/* Phones: the Core is a horizon behind the hero copy. */
+.core-scene--hero {
+  width: 120vw;
+  left: 50%;
+  bottom: 0;
+  translate: -50% 40%;
+
+  @media (width >= 62.5rem) {
+    width: min(94svh, 60vw);
+    top: 50%;
+    bottom: auto;
+    translate: calc(-50% + 17vw) -50%;
+  }
+  @variant pin {
+    width: min(94svh, 60vw);
+    top: 50%;
+    bottom: auto;
+    translate: calc(-50% + 17vw) -50%;
+  }
+}
+.core-scene--center {
+  width: min(84svh, 56vw);
+  left: 50%;
+  top: 50%;
+  translate: -50% -50%;
+}
+.core-3d,
+.core-lean {
+  position: absolute;
+  inset: 0;
+}
+.core-3d {
+  transform-style: preserve-3d;
+  will-change: transform;
+}
+
+/* The ring itself (CoreRing.tsx). Units are the 1000×1000 viewBox. */
+.core-ring {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+.core-inner {
+  fill: none;
+  stroke: var(--color-t7);
+  stroke-width: 1.5;
+  stroke-dasharray: 2 9;
+}
+.core-cross path {
+  stroke: var(--color-t7);
+  stroke-width: 1.5;
+}
+.core-sweep {
+  fill: none;
+  stroke: #fff;
+  stroke-width: 80;
+  stroke-dasharray: 1;
+  stroke-dashoffset: 0;
+}
+.core-tick {
+  stroke: var(--color-t6);
+  stroke-width: 2;
+}
+.core-tick-major {
+  stroke: var(--color-t3);
+  stroke-width: 2.5;
+}
+.core-track {
+  fill: none;
+  stroke: var(--color-line-3);
+  stroke-width: 7;
+}
+.core-arc {
+  fill: none;
+  stroke-width: 7;
+  stroke-dasharray: 1;
+  stroke-dashoffset: 0;
+}
+.core-playhead {
+  transform-box: view-box;
+  transform-origin: 50% 50%;
+}
+.core-playhead path:first-child {
+  fill: var(--color-t1);
+}
+.core-playhead-line {
+  stroke: var(--color-t1);
+  stroke-width: 2;
+}
+.core-wave-static path {
+  fill: none;
+  stroke-width: 5;
+  stroke-linecap: round;
+}
+.core-dot {
+  fill: var(--color-lime);
+}
+[data-field="on"] .core-wave-static {
+  opacity: 0;
+}
+
+/* Glow: static blurred arcs on their own layers; motion only fades them. */
+.core-glows,
+.core-glow,
+.core-glow-inner {
+  position: absolute;
+  inset: 0;
+}
+.core-glow {
+  will-change: opacity;
+}
+.core-glow-inner {
+  filter: blur(clamp(10px, 1.8vmin, 22px));
+  opacity: 0.85;
+}
+.core-glow svg {
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+.core-glow path {
+  fill: none;
+  stroke-width: 26;
+  stroke-linecap: round;
+}
+[data-quality="low"] .core-glows {
+  display: none;
+}
+
+/* The particle canvas box is 1.5× the ring (FIELD_SCALE in field-canvas.ts). */
+.core-field {
+  position: absolute;
+  inset: -25%;
+}
+.core-canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+/* ---------------- Draft states (the intro) ---------------- */
+@media screen and (prefers-reduced-motion: no-preference) {
+  /* Only the hero run has an intro (the ring drawing itself on load). */
+  html[data-anim="on"] .landing [data-chapter="core-hero"]:not([data-motion="done"]):not([data-intro="done"]) .core-arc,
+  html[data-anim="on"] .landing [data-chapter="core-hero"]:not([data-motion="done"]):not([data-intro="done"]) .core-sweep {
+    stroke-dashoffset: 1;
+  }
+  html[data-anim="on"] .landing [data-chapter="core-hero"]:not([data-motion="done"]):not([data-intro="done"]) .core-glow-inner {
+    opacity: 0;
+  }
+}
+.landing [data-chapter="core-hero"]:not([data-motion="done"]):not([data-intro="done"]) [data-rise] {
+  @variant pin {
+    opacity: 0;
+  }
+}

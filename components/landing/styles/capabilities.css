@@ -1,0 +1,366 @@
+/* §03 — Capabilities: run B on graphite, its demos and spec panels. */
+@reference "../../../app/globals.css";
+
+.caps {
+  position: relative;
+  z-index: 2;
+  background: var(--color-graphite);
+}
+.core-run--caps {
+  background: var(--color-graphite);
+}
+/* The stage exists only on the pinned layout; static layouts get inline rings. */
+.core-run--caps > [data-stage] {
+  display: none;
+
+  @variant pin {
+    display: block;
+  }
+}
+.core-run--caps .core-wash {
+  background: radial-gradient(50% 60% at 64% 50%, rgb(255 255 255 / 0.03), transparent 70%);
+}
+.caps-wash {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  background: radial-gradient(42% 56% at 64% 50%, color-mix(in oklch, var(--wash) 20%, transparent), transparent 72%);
+}
+.core-scene--caps {
+  width: min(84svh, 50vw);
+  left: 50%;
+  top: 50%;
+  translate: calc(-50% + 14vw) -50%;
+}
+.core-run--caps .core-wave-static {
+  display: none;
+}
+
+/* The finale's spectral bar (the ring, turned edge-on, becomes this). */
+.caps-bar {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 50%;
+  display: flex;
+  gap: 2.4%;
+  height: 4px;
+  translate: 0 -50%;
+  opacity: 0;
+}
+.caps-bar i {
+  flex: 1;
+  background: var(--bar);
+  box-shadow: 0 0 18px color-mix(in oklch, var(--bar) 60%, transparent);
+}
+.caps-bar [data-hue="lime"] {
+  --bar: var(--color-lime);
+}
+.caps-bar [data-hue="ai"] {
+  --bar: var(--color-spec-ai);
+}
+.caps-bar [data-hue="product"] {
+  --bar: var(--color-spec-product);
+}
+.caps-bar [data-hue="design"] {
+  --bar: var(--color-spec-design);
+}
+.caps-bar [data-hue="arch"] {
+  --bar: var(--color-spec-arch);
+}
+
+/* ---------------- Demos inside the ring ---------------- */
+.cap-demos {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+.demo {
+  opacity: 0;
+}
+.demo-edge {
+  fill: none;
+  stroke: var(--color-t7);
+  stroke-width: 1.4;
+  stroke-dasharray: 1;
+  stroke-dashoffset: 0;
+}
+.demo-signal,
+.demo-trace,
+.demo-rail,
+.demo-check {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 4;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-dasharray: 1;
+  stroke-dashoffset: 0;
+}
+.demo-rail {
+  stroke: var(--color-t6);
+  stroke-width: 2;
+}
+.demo-node {
+  fill: var(--color-graphite);
+  stroke: currentColor;
+  stroke-width: 3;
+  transform-box: fill-box;
+  transform-origin: center;
+}
+.demo-gate,
+.demo-station rect {
+  fill: color-mix(in oklch, currentColor 14%, var(--color-graphite));
+  stroke: currentColor;
+  stroke-width: 2.5;
+}
+.demo-frame {
+  fill: color-mix(in oklch, currentColor 6%, var(--color-graphite));
+  stroke: currentColor;
+  stroke-width: 3;
+}
+.demo-notch {
+  fill: currentColor;
+}
+.demo-block {
+  fill: color-mix(in oklch, currentColor 26%, var(--color-graphite));
+  stroke: color-mix(in oklch, currentColor 60%, transparent);
+  stroke-width: 1.5;
+}
+.demo-pad {
+  fill: currentColor;
+  transform-box: fill-box;
+  transform-origin: center;
+}
+.demo-packet {
+  fill: currentColor;
+}
+.demo-pulse {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  opacity: 0;
+}
+.demo-label {
+  fill: var(--color-t4);
+  font-family: var(--font-mono);
+  font-size: 15px;
+  letter-spacing: 0.14em;
+  text-anchor: middle;
+}
+.demo-label--after {
+  fill: currentColor;
+  opacity: 0;
+}
+
+/* ---------------- Spec panels ---------------- */
+.spec-panels {
+  position: absolute;
+  right: clamp(20px, 5vw, 80px);
+  bottom: 7svh;
+  width: min(400px, 30vw);
+  height: 220px;
+}
+.spec-panels .spec-panel {
+  position: absolute;
+  inset: auto 0 0 0;
+  opacity: 0;
+}
+.spec-panel {
+  border: 1px solid var(--color-graphite-line);
+  border-top: 2px solid var(--hue);
+  background: color-mix(in oklch, var(--color-ink) 88%, transparent);
+  box-shadow: var(--shadow-panel);
+  font-family: var(--font-mono);
+  font-size: var(--text-12);
+}
+.spec-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 12px;
+  border-bottom: 1px solid var(--color-graphite-line);
+  color: var(--color-t4);
+}
+.spec-dots {
+  display: inline-flex;
+  gap: 5px;
+}
+.spec-dots i {
+  width: 6px;
+  height: 6px;
+  background: var(--color-t7);
+}
+.spec-file {
+  color: var(--color-t2);
+}
+.spec-n {
+  margin-left: auto;
+  color: var(--hue);
+}
+.spec-code {
+  margin: 0;
+  padding: 12px 12px 14px;
+  overflow: hidden;
+  line-height: 1.7;
+  color: var(--color-t4);
+  white-space: pre;
+}
+.spec-ln {
+  display: inline-block;
+  width: 22px;
+  color: var(--color-t7);
+  user-select: none;
+}
+.tok-kw {
+  color: var(--color-t1);
+}
+.tok-str {
+  color: var(--hue);
+}
+
+/* ---------------- Articles (the flow) ---------------- */
+.cap {
+  position: relative;
+  padding-block: 96px;
+  border-top: 1px solid var(--color-graphite-line);
+
+  @variant pin {
+    display: flex;
+    align-items: center;
+    min-height: 110svh;
+    padding-block: 0;
+    border-top: 0;
+  }
+}
+.cap-inner {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 40px;
+
+  @media (width >= 62.5rem) {
+    grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+    align-items: center;
+  }
+}
+.cap-copy {
+  @variant pin {
+    max-width: min(34vw, 520px);
+  }
+}
+.cap-kicker {
+  color: var(--hue);
+}
+.cap-title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: var(--text-chapter);
+  font-weight: 500;
+  line-height: 0.95;
+  letter-spacing: var(--tracking-chapter);
+  color: var(--hue);
+  text-wrap: balance;
+}
+.cap-points {
+  margin: 32px 0 0;
+  padding: 0;
+  list-style: none;
+  border-top: 1px solid var(--color-graphite-line);
+}
+.cap-points li {
+  position: relative;
+  padding: 12px 0 12px 28px;
+  border-bottom: 1px solid var(--color-graphite-line);
+  font-size: var(--text-17);
+  color: var(--color-t2);
+}
+.cap-points li::before {
+  content: "→";
+  position: absolute;
+  left: 0;
+  font-family: var(--font-mono);
+  color: var(--hue);
+}
+.cap-metric {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 6px 14px;
+  margin: 28px 0 0;
+}
+.cap-metric-v {
+  font-family: var(--font-display);
+  font-size: var(--text-30);
+  font-weight: 500;
+  letter-spacing: -0.02em;
+  color: var(--color-t1);
+}
+.cap-metric-l {
+  font-family: var(--font-mono);
+  font-size: var(--text-11);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--color-t4);
+}
+
+/* Static layout: a small ring with this chapter's arc lit, and its spec. */
+.cap-inline {
+  display: grid;
+  gap: 24px;
+  align-items: center;
+
+  @media (width >= 35rem) {
+    grid-template-columns: minmax(0, 220px) minmax(0, 1fr);
+  }
+  @variant pin {
+    display: none;
+  }
+}
+.cap-mini {
+  position: relative;
+  width: min(220px, 60vw);
+  aspect-ratio: 1;
+}
+.cap-mini .core-wave-static,
+.cap-mini .core-playhead {
+  display: none;
+}
+.cap-mini .core-arc {
+  opacity: 0.2;
+}
+.cap-mini[data-hue="ai"] .core-arc[data-arc="ai"],
+.cap-mini[data-hue="product"] .core-arc[data-arc="product"],
+.cap-mini[data-hue="design"] .core-arc[data-arc="design"],
+.cap-mini[data-hue="arch"] .core-arc[data-arc="arch"] {
+  opacity: 1;
+  stroke-width: 10;
+}
+
+/* Finale. */
+.cap-finale {
+  position: relative;
+  padding-block: 96px 120px;
+  border-top: 1px solid var(--color-graphite-line);
+
+  @variant pin {
+    min-height: 200svh;
+    padding-block: 26svh 0;
+    border-top: 0;
+  }
+}
+.cap-finale-line {
+  max-width: 20ch;
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: var(--text-title);
+  font-weight: 500;
+  line-height: 1.02;
+  letter-spacing: -0.03em;
+  color: var(--color-t1);
+  text-wrap: balance;
+}
+.cap-finale-cta {
+  margin-top: 36px;
+}
