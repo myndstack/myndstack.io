@@ -15,6 +15,8 @@ import { INITIAL_SCROLL_INTENT, nextScrollIntent } from "@/lib/scroll-intent";
 export default function BackToTop() {
   const buttonRef = useRef<HTMLButtonElement>(null);
   const intentRef = useRef(INITIAL_SCROLL_INTENT);
+  /** What the DOM currently shows — writes happen only on a change (AGENTS.md). */
+  const shownRef = useRef<boolean | null>(null);
 
   useScrollFrame(({ y }) => {
     const button = buttonRef.current;
@@ -23,6 +25,8 @@ export default function BackToTop() {
     const intent = nextScrollIntent(intentRef.current, y);
     intentRef.current = intent;
 
+    if (shownRef.current === intent.visible) return;
+    shownRef.current = intent.visible;
     button.classList.toggle("is-visible", intent.visible);
     // `opacity: 0` alone still leaves the button in the tab order.
     button.inert = !intent.visible;
@@ -33,7 +37,15 @@ export default function BackToTop() {
       ref={buttonRef}
       type="button"
       aria-label="Back to top"
-      onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+      onClick={() =>
+        // The CSS reduced-motion override doesn't reach JS scrolls; honour it here.
+        window.scrollTo({
+          top: 0,
+          behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches
+            ? "auto"
+            : "smooth",
+        })
+      }
       className="totop fixed right-[26px] bottom-[26px] z-59 flex size-11 cursor-pointer items-center justify-center border-none bg-lime text-lime-ink hover:bg-lime-hover"
     >
       <span aria-hidden="true" className="font-mono text-[15px] leading-none">

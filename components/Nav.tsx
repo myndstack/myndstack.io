@@ -11,7 +11,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { NAV_LINKS, SPY_IDS } from "@/lib/content";
 import { useScrollFrame } from "@/lib/hooks";
 import { INITIAL_NAV_STATE, nextNavState } from "@/lib/nav-state";
-import { activeSection, type SectionOffset } from "@/lib/scroll-spy";
+import { activeSection, documentTop, type SectionOffset } from "@/lib/scroll-spy";
 import MobileDrawer from "./MobileDrawer";
 import Wordmark from "./Wordmark";
 
@@ -73,7 +73,9 @@ export default function Nav({ contactEmail }: { contactEmail: string }) {
 
       offsetsRef.current = SPY_IDS.flatMap((id) => {
         const el = document.getElementById(id);
-        return el ? [{ id, top: el.offsetTop }] : [];
+        // Summed up the offsetParent chain: a raw `offsetTop` silently rebases
+        // if a section is ever wrapped in a positioned element.
+        return el ? [{ id, top: documentTop(el) }] : [];
       });
     };
 

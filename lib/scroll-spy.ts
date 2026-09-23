@@ -48,3 +48,23 @@ export function activeSection(
 
   return active;
 }
+
+/**
+ * Absolute document top of an element, summed up the `offsetParent` chain.
+ *
+ * `offsetTop` is a *layout* position, so — unlike `getBoundingClientRect()` — it
+ * ignores the `translateY` a `.reveal` puts on a not-yet-entered header. That
+ * means the offsets are correct from first measure, before anything has revealed,
+ * and a reveal landing (a transform, no reflow) never needs re-measuring. Summed
+ * because an element inside a positioned wrapper has an `offsetTop` relative to
+ * that wrapper, not the document.
+ */
+export function documentTop(el: HTMLElement): number {
+  let top = 0;
+  let node: HTMLElement | null = el;
+  while (node) {
+    top += node.offsetTop;
+    node = node.offsetParent as HTMLElement | null;
+  }
+  return top;
+}

@@ -2,30 +2,10 @@
 
 import { useEffect, useRef } from "react";
 import { useScrollFrame } from "@/lib/hooks";
-import { activeSection, type SectionOffset } from "@/lib/scroll-spy";
+import { activeSection, documentTop, type SectionOffset } from "@/lib/scroll-spy";
 
 /** Fallback spy line if `--nav-offset` can't be read; overridden each measure. */
 const SPY_LINE_FALLBACK = 96;
-
-/**
- * Absolute document top of a header, summed up the `offsetParent` chain.
- *
- * `offsetTop` is a *layout* position, so — unlike `getBoundingClientRect()` — it
- * ignores the `translateY` a `.reveal` puts on a not-yet-entered header. That
- * means the offsets are correct from first measure, before anything has revealed,
- * and a reveal landing (a transform, no reflow) never needs re-measuring. Summed
- * because the marker sits inside positioned section wrappers, so its own
- * `offsetTop` is relative to those, not the document.
- */
-function documentTop(el: HTMLElement): number {
-  let top = 0;
-  let node: HTMLElement | null = el;
-  while (node) {
-    top += node.offsetTop;
-    node = node.offsetParent as HTMLElement | null;
-  }
-  return top;
-}
 
 /**
  * Lights the current section's ordinal in the editorial index rail (the mono

@@ -41,6 +41,14 @@ export default function StackStory() {
    */
   const geometryRef = useRef({ top: 0, total: 0 });
 
+  /**
+   * Last values written per tile, plus the counter. The frame runs on every
+   * scroll anywhere on the page; outside the pinned range every value is
+   * clamped and identical, so diffing means those frames write nothing.
+   */
+  const appliedRef = useRef<{ transform: string; opacity: string; locked: boolean }[]>([]);
+  const appliedCounterRef = useRef("");
+
   useEffect(() => {
     let pending = 0;
 
@@ -79,6 +87,9 @@ export default function StackStory() {
    * finished stack.
    */
   useEffect(() => {
+    // Anything cached was written under the other motion mode; start fresh.
+    appliedRef.current = [];
+    appliedCounterRef.current = "";
     if (!reduced) return;
     layerRefs.current.forEach((el, k) => {
       if (!el) return;
@@ -115,23 +126,33 @@ export default function StackStory() {
       const restY = BASE_Y + k * GAP;
       const scale = 0.955 + 0.045 * eased;
 
-      el.style.transform =
+      const transform =
         `translate(${(scatterX * (1 - eased)).toFixed(1)}px, ` +
         `${(restY + scatterY * (1 - eased)).toFixed(1)}px) ` +
         `scale(${scale.toFixed(3)})`;
+      const opacity = eased.toFixed(2);
+      const locked = raw > LOCK_AT;
+      if (raw > 0.5) active = k;
+
+      const prev = appliedRef.current[k];
+      if (prev && prev.transform === transform && prev.opacity === opacity && prev.locked === locked) {
+        return;
+      }
+      appliedRef.current[k] = { transform, opacity, locked };
+
+      if (prev?.transform !== transform) el.style.transform = transform;
       // Start fully transparent, not at a 0.1 floor: the old floor left every
       // un-assembled tile as faint ghost text scattered across the panel before
       // its turn came — which the brighter field behind only made louder. Each
       // tile now fades up from nothing as it assembles.
-      el.style.opacity = eased.toFixed(2);
-
-      const locked = raw > LOCK_AT;
-      el.classList.toggle("is-locked", locked);
-      if (raw > 0.5) active = k;
+      if (prev?.opacity !== opacity) el.style.opacity = opacity;
+      if (prev?.locked !== locked) el.classList.toggle("is-locked", locked);
     });
 
-    if (counterRef.current) {
-      counterRef.current.textContent = `0${active + 1} / 0${STACK_LAYERS.length}`;
+    const counter = `0${active + 1} / 0${STACK_LAYERS.length}`;
+    if (counterRef.current && appliedCounterRef.current !== counter) {
+      appliedCounterRef.current = counter;
+      counterRef.current.textContent = counter;
     }
   });
 
