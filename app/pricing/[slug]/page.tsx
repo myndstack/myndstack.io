@@ -72,7 +72,7 @@ export default async function CheckoutPage({
         <div className="grid grid-cols-1 gap-14 md:grid-cols-[1.15fr_1fr]">
           <Reveal className="md:col-start-1 md:row-start-1">
             <section>
-              <h2 className="m-0 mb-4 font-display text-22 font-semibold tracking-[-0.02em]">
+              <h2 className="m-0 mb-4 font-display text-22 font-semibold tracking-heading">
                 What&apos;s included
               </h2>
               <ul className="m-0 flex list-none flex-col gap-3 p-0">
@@ -104,32 +104,32 @@ export default async function CheckoutPage({
               width a checkout card wants; the slack goes to the reading column
               instead of stretching the card. */}
           <aside className="md:col-start-2 md:row-start-1 md:row-span-2 md:sticky md:top-28 md:w-full md:max-w-[400px] md:justify-self-end md:self-start">
-            <Reveal>
-              <CheckoutPanel
-                slug={tier.checkout.slug}
-                tierName={tier.name}
-                description={tier.blurb}
-                amountMinorMonthly={tier.checkout.amountMinor}
-                amountMinorAnnual={tier.checkout.annualAmountMinor}
-                annualNote={tier.annualNote}
-                oneTime={oneTime}
-                initialRegion={DEFAULT_REGION}
-                regionalCharges={tier.checkout.regionalCharges}
-              />
-            </Reveal>
+            {/* Not in a Reveal: the thing you came here to use is visible at once,
+                not after it scrolls into view (or a 1.5s fallback). */}
+            <CheckoutPanel
+              slug={tier.checkout.slug}
+              tierName={tier.name}
+              description={tier.blurb}
+              amountMinorMonthly={tier.checkout.amountMinor}
+              amountMinorAnnual={tier.checkout.annualAmountMinor}
+              annualNote={tier.annualNote}
+              oneTime={oneTime}
+              initialRegion={DEFAULT_REGION}
+              regionalCharges={tier.checkout.regionalCharges}
+            />
           </aside>
 
           <div className="md:col-start-1 md:row-start-2">
             {tier.checkout.howItWorks?.length ? (
               <Reveal>
                 <section>
-                  <h2 className="m-0 mb-5 font-display text-22 font-semibold tracking-[-0.02em]">
+                  <h2 className="m-0 mb-5 font-display text-22 font-semibold tracking-heading">
                     How it works
                   </h2>
                   <ol className="m-0 flex list-none flex-col gap-5 p-0">
                     {tier.checkout.howItWorks.map((step, i) => (
                       <li key={step.title} className="flex gap-4">
-                        <span className="mt-0.5 flex-none font-mono text-12 font-bold tracking-[0.12em] text-lime tabular-nums">
+                        <span className="mt-0.5 flex-none font-mono text-12 font-bold tracking-label text-lime tabular-nums">
                           {String(i + 1).padStart(2, "0")}
                         </span>
                         <div>
@@ -167,7 +167,7 @@ export default async function CheckoutPage({
         {tier.checkout.faqs?.length ? (
           <Reveal>
             <section className="mt-16 border-t border-line pt-12">
-              <h2 className="m-0 mb-6 font-display text-22 font-semibold tracking-[-0.02em]">
+              <h2 className="m-0 mb-6 font-display text-22 font-semibold tracking-heading">
                 Common questions
               </h2>
               <dl className="m-0 grid grid-cols-1 gap-x-14 md:grid-cols-2">

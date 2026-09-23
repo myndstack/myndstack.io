@@ -115,14 +115,19 @@ function loadRazorpay(): Promise<boolean> {
   });
 }
 
+/** How long the post-payment confirmation may take before we stop waiting. */
+const VERIFY_TIMEOUT_MS = 20_000;
+
 /**
- * idle → starting → (Razorpay modal) → verifying → success
+ * idle → starting → paying (Razorpay modal open) → verifying → success
+ *                              ↘ idle (modal closed without paying, with a notice)
  *                 ↘ error            (pre-payment: order/script failed — Pay stays retryable)
  *                                      ↘ paid_unverified (money moved, verify hiccup — NOT retryable)
  */
 type Status =
   | "idle"
   | "starting"
+  | "paying"
   | "verifying"
   | "success"
   | "error"
@@ -249,7 +254,7 @@ export default function CheckoutPanel({
 
   const annual = billing === "annual";
   const amountMinor = annual ? amountMinorAnnual : amountMinorMonthly;
-  const busy = status === "starting" || status === "verifying";
+  const busy = status === "starting" || status === "paying" || status === "verifying";
   /**
    * Everything that changes the charge is frozen while it's being computed or
    * paid: currency, billing, the promo field. And paying waits for a promo
@@ -301,8 +306,14 @@ export default function CheckoutPanel({
 
   const verify = useCallback(async (resp: RazorpayHandlerResponse) => {
     setStatus("verifying");
+    // A hung confirmation must not leave "Confirming…" up forever. Money has
+    // already moved at this point, so a timeout lands in paid_unverified (the
+    // signed webhook still reaches us), never back on an armed Pay control.
+    const controller = new AbortController();
+    const timeout = window.setTimeout(() => controller.abort(), VERIFY_TIMEOUT_MS);
     try {
       const res = await fetch("/api/checkout/verify", {
+        signal: controller.signal,
         method: "POST",
         headers: { "content-type": "application/json" },
         credentials: "same-origin",
@@ -321,6 +332,8 @@ export default function CheckoutPanel({
     } catch {
       if (!alive.current) return;
       setStatus("paid_unverified");
+    } finally {
+      window.clearTimeout(timeout);
     }
   }, []);
 
@@ -446,7 +459,8 @@ export default function CheckoutPanel({
         },
       });
       // Hand control to Razorpay's modal; the handler drives verify → success.
-      setStatus("idle");
+      // "paying", not idle: the panel stays locked while the sheet is open.
+      setStatus("paying");
       rzp.open();
     } catch {
       if (!alive.current) return;
@@ -466,7 +480,7 @@ export default function CheckoutPanel({
         <h2
           ref={headingRef}
           tabIndex={-1}
-          className="m-0 mb-2 font-display text-22 font-semibold tracking-[-0.02em] focus:outline-none"
+          className="m-0 mb-2 font-display text-22 font-semibold tracking-heading focus:outline-none"
         >
           You&apos;re in.
         </h2>
@@ -490,7 +504,7 @@ export default function CheckoutPanel({
         <h2
           ref={headingRef}
           tabIndex={-1}
-          className="m-0 mb-2 font-display text-22 font-semibold tracking-[-0.02em] focus:outline-none"
+          className="m-0 mb-2 font-display text-22 font-semibold tracking-heading focus:outline-none"
         >
           Thanks — we&apos;ve got your payment.
         </h2>
@@ -556,7 +570,7 @@ export default function CheckoutPanel({
           reason that it answers "am I buying the right thing" in one glance. */}
       <div className="flex items-start justify-between gap-4 border-t border-line pt-4">
         <div className="min-w-0">
-          <h2 className="m-0 font-display text-17 leading-tight font-semibold tracking-[-0.01em]">
+          <h2 className="m-0 font-display text-17 leading-tight font-semibold tracking-heading">
             {tierName}
           </h2>
           <p className="mt-1 mb-0 text-13 leading-body text-t4">
@@ -636,7 +650,7 @@ export default function CheckoutPanel({
                   type="button"
                   onClick={() => setApplied(null)}
                   disabled={busy}
-                  className="ease-brand shrink-0 disabled:opacity-60 font-mono text-11 tracking-[0.08em] text-t5 uppercase transition-colors duration-(--dur-fast) hover:text-danger"
+                  className="ease-brand shrink-0 disabled:opacity-60 font-mono text-11 tracking-label text-t5 uppercase transition-colors duration-(--dur-fast) hover:text-danger"
                 >
                   Remove
                 </button>
@@ -692,7 +706,7 @@ export default function CheckoutPanel({
                     disabled={locked}
                     aria-invalid={promoError ? true : undefined}
                     aria-describedby={promoError ? "promo-error" : undefined}
-                    className={`ease-brand min-w-0 flex-1 border ${promoError ? "border-danger" : "border-line-3"} bg-surface h-11 px-3 py-0 font-mono text-12 tracking-[0.06em] text-t2 uppercase transition-colors duration-(--dur-fast) placeholder:text-t5 placeholder:normal-case focus:border-lime focus:shadow-[var(--edge-ring)] focus:outline-2 focus:outline-transparent`}
+                    className={`ease-brand min-w-0 flex-1 border ${promoError ? "border-danger" : "border-line-3"} bg-surface h-11 px-3 py-0 font-mono text-12 tracking-mono text-t2 uppercase transition-colors duration-(--dur-fast) placeholder:text-t5 placeholder:normal-case focus:border-lime focus:shadow-[var(--edge-ring)] focus:outline-2 focus:outline-transparent`}
                   />
                   <button
                     type="button"
@@ -713,7 +727,7 @@ export default function CheckoutPanel({
               <button
                 type="button"
                 onClick={() => setPromoOpen(true)}
-                className="ease-brand -my-1 py-1 font-mono text-11 tracking-[0.08em] text-t5 uppercase transition-colors duration-(--dur-fast) hover:text-lime"
+                className="ease-brand -my-1 py-1 font-mono text-11 tracking-label text-t5 uppercase transition-colors duration-(--dur-fast) hover:text-lime"
               >
                 Have a promo code?
               </button>
@@ -725,12 +739,12 @@ export default function CheckoutPanel({
           id="checkout-total"
           className="mt-3 flex items-baseline justify-between gap-3 border-t border-line pt-3"
         >
-          <span className="font-mono text-11 font-bold tracking-[0.12em] text-t5 uppercase">
+          <span className="font-mono text-11 font-bold tracking-label text-t5 uppercase">
             {`Total${period || " due"}`}
           </span>
           {/* Clamped: gross with paise ("₹58,998.82") is four glyphs longer than
               a listed price and has to clear the label on a 335px mobile panel. */}
-          <span className="font-display text-22 sm:text-30 leading-none font-bold tracking-[-0.02em] tabular-nums">
+          <span className="font-display text-22 sm:text-30 leading-none font-bold tracking-heading tabular-nums">
             {headline}
           </span>
         </div>
@@ -739,7 +753,7 @@ export default function CheckoutPanel({
             never show a note, so reserving for it is just dead space under the
             price. */}
         {!oneTime ? (
-          <div className="mt-2 h-3.5 text-right font-mono text-11 tracking-[0.04em] text-lime">
+          <div className="mt-2 h-3.5 text-right font-mono text-11 tracking-mono text-lime">
             {annual && annualNote ? annualNote : ""}
           </div>
         ) : null}
@@ -758,7 +772,13 @@ export default function CheckoutPanel({
         // who tabs straight here without reading the summary.
         label="Slide to pay"
         busyLabel={
-          status === "verifying" ? "Confirming…" : busy ? "Starting…" : "Checking code…"
+          status === "verifying"
+            ? "Confirming…"
+            : status === "paying"
+              ? "Payment window open…"
+              : busy
+                ? "Starting…"
+                : "Checking code…"
         }
         busy={locked}
         describedBy="checkout-total"
@@ -766,11 +786,11 @@ export default function CheckoutPanel({
       />
 
       {status === "error" && error ? (
-        <p role="alert" className="mt-3 mb-0 font-mono text-11 leading-body text-danger">
+        <p role="alert" className="form-alert mt-3">
           {error}
         </p>
       ) : null}
-      {notice && status === "idle" ? (
+      {notice ? (
         <p role="status" className="mt-3 mb-0 text-13 leading-body text-t4">
           {notice}
         </p>
@@ -823,7 +843,7 @@ export default function CheckoutPanel({
           card reads as a paragraph that got away rather than a seal. "We never
           see your card details" rather than "never touch Myndstack" — shorter,
           and it avoids "us" reading as the US region three rows above. */}
-      <p className="mt-4 mb-0 text-center font-mono text-11 leading-body tracking-[0.08em] text-t5 uppercase xs:text-left">
+      <p className="mt-4 mb-0 text-center font-mono text-11 leading-body tracking-label text-t5 uppercase xs:text-left">
         PCI-DSS Level&nbsp;1 · we never see your card details
       </p>
     </>
