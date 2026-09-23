@@ -210,10 +210,10 @@ export default function StackStory() {
 
         <div className="relative z-1 mx-auto grid w-full max-w-[1200px] grid-cols-1 items-center gap-16 px-5 sm:px-14 md:grid-cols-[1.05fr_1fr]">
           <div>
-            <div className="eyebrow mb-5 tracking-[0.16em]">
+            <div className="eyebrow mb-5">
               The stack · <span ref={counterRef}>01 / 04</span>
             </div>
-            <h2 className="m-0 mb-6 font-display text-42 leading-display font-bold tracking-[-0.03em] text-balance sm:text-76">
+            <h2 className="m-0 mb-6 font-display text-42 leading-display font-bold tracking-display text-balance sm:text-76">
               One stack.
               <br />
               Every layer.
@@ -234,7 +234,7 @@ export default function StackStory() {
                 className="story-layer absolute inset-x-0 flex h-[98px] items-center gap-5 overflow-hidden border border-line bg-surface px-6"
               >
                 <span className="ease-brand absolute inset-y-0 left-0 w-[3px] origin-top scale-y-0 bg-lime transition-transform duration-(--dur-base) [.is-locked_&]:scale-y-100" />
-                <span className="ease-brand flex-none font-mono text-12 font-bold text-t5 transition-colors [.is-locked_&]:text-lime">
+                <span className="ease-brand flex-none font-mono text-12 font-bold text-t5 transition-colors duration-(--dur-base) [.is-locked_&]:text-lime">
                   {layer.n}
                 </span>
                 <span className="flex-1 font-display text-22 font-semibold">

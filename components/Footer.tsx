@@ -9,7 +9,7 @@ import SocialIcon from "./SocialIcon";
 import Wordmark from "./Wordmark";
 
 const colHeadClass =
-  "m-0 mb-4 font-mono text-11 font-normal tracking-[0.14em] text-t5 uppercase";
+  "m-0 mb-4 font-mono text-11 font-normal tracking-wide text-t5 uppercase";
 const linkClass =
   "ease-brand text-13 text-t3 transition-colors duration-(--dur-fast) hover:text-lime";
 

@@ -58,7 +58,7 @@ export default function GlobalError({
           Something in the stack gave way.
         </h1>
         <p style={{ margin: 0, maxWidth: 460, lineHeight: 1.55, color: "#9A9AA2" }}>
-          This one is on us. Reload and try again.
+          This one is on us. Try again, or reload the page if it keeps happening.
         </p>
         <button
           type="button"

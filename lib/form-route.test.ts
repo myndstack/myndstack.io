@@ -89,7 +89,7 @@ describe("handleFormSubmission — Turnstile gating", () => {
 
     expect(res.status).toBe(400);
     const json = await res.json();
-    expect(json.error).toBe("The anti-spam check didn't go through. Try sending again.");
+    expect(json.error).toBe("The verification didn't go through. Try sending again.");
     expect(json.fieldErrors).toBeUndefined();
     expect(sendFormMail).not.toHaveBeenCalled();
   });

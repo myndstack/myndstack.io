@@ -95,7 +95,7 @@ export default async function CareersPage() {
                   </span>
 
                   <span className="flex shrink-0 items-center gap-5">
-                    <span className="font-mono text-11 tracking-[0.1em] text-t5 uppercase">
+                    <span className="font-mono text-11 tracking-label text-t5 uppercase">
                       {role.meta}
                     </span>
                     <span

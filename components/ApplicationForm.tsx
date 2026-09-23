@@ -28,7 +28,7 @@ export default function ApplicationForm({
         role="status"
         className="clip-angular-26 flex min-h-[220px] flex-col items-start justify-center gap-3 border border-lime bg-surface px-8 py-10"
       >
-        <div className="font-mono text-12 font-bold tracking-[0.12em] text-lime">
+        <div className="font-mono text-12 font-bold tracking-label text-lime">
           ▸ APPLICATION RECEIVED
         </div>
         <div className="font-display text-22 leading-tight font-semibold">
@@ -101,7 +101,7 @@ export default function ApplicationForm({
       {error ? (
         <p
           role="alert"
-          className="m-0 border border-danger/40 bg-danger/8 px-4 py-3 font-mono text-11 text-danger"
+          className="form-alert"
         >
           {error}
         </p>

@@ -18,7 +18,7 @@ export default async function Contrast() {
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <Reveal scrub className="border border-line bg-surface px-9 py-8">
-          <div className="mb-6 font-mono text-11 font-bold tracking-[0.12em] text-t5 uppercase">
+          <div className="mb-6 font-mono text-11 font-bold tracking-label text-t5 uppercase">
             Without a unified stack
           </div>
           <ul className="m-0 flex list-none flex-col gap-4 p-0">
@@ -39,7 +39,7 @@ export default async function Contrast() {
           delay={0.08}
           className="clip-angular-28 relative overflow-hidden border border-lime bg-surface-3 px-9 py-8 shadow-float"
         >
-          <div className="mb-6 font-mono text-11 font-bold tracking-[0.12em] text-lime uppercase">
+          <div className="mb-6 font-mono text-11 font-bold tracking-label text-lime uppercase">
             With Myndstack
           </div>
           <ul className="m-0 flex list-none flex-col gap-4 p-0">

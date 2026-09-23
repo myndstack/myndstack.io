@@ -71,7 +71,7 @@ export default function CurrencyPicker({ region, onChange, compact, disabled = f
       {compact ? null : (
         <label
           htmlFor="currency-picker"
-          className="font-mono text-11 tracking-[0.14em] text-t5 uppercase"
+          className="font-mono text-11 tracking-wide text-t5 uppercase"
         >
           Currency
         </label>
@@ -86,7 +86,7 @@ export default function CurrencyPicker({ region, onChange, compact, disabled = f
           aria-label={compact ? "Currency" : undefined}
           onChange={(e) => handleChange(e.target.value)}
           disabled={disabled}
-          className="ease-brand cursor-pointer appearance-none disabled:cursor-not-allowed disabled:opacity-60 border border-line-3 bg-surface h-11 py-0 pr-8 pl-3 font-mono text-12 tracking-[0.04em] text-t2 uppercase transition-colors duration-(--dur-fast) hover:border-lime-edge focus:border-lime focus:shadow-[var(--edge-ring)] focus:outline-2 focus:outline-transparent"
+          className="ease-brand cursor-pointer appearance-none disabled:cursor-not-allowed disabled:opacity-60 border border-line-3 bg-surface h-11 py-0 pr-8 pl-3 font-mono text-12 tracking-mono text-t2 uppercase transition-colors duration-(--dur-fast) hover:border-lime-edge focus:border-lime focus:shadow-[var(--edge-ring)] focus:outline-2 focus:outline-transparent"
         >
           {REGION_CODES.map((code) => (
             <option key={code} value={code}>

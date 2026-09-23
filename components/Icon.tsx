@@ -4,6 +4,7 @@
  * label ("Start a project →") stay typographic — they are part of the words.
  */
 const PATHS = {
+  menu: "M2.5 4h11M2.5 8h11M2.5 12h11",
   close: "M4 4l8 8M12 4l-8 8",
   plus: "M8 3v10M3 8h10",
   "arrow-up": "M8 13V3M3.5 7.5 8 3l4.5 4.5",

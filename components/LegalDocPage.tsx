@@ -96,7 +96,7 @@ export default function LegalDocPage({ slug }: { slug: LegalDoc["slug"] }) {
                     href={`/${prev.slug}`}
                     className="group ease-brand flex flex-col gap-2 py-4 pr-4 transition-colors duration-(--dur-fast) sm:pr-8"
                   >
-                    <span className="font-mono text-11 tracking-[0.14em] text-t5 uppercase">
+                    <span className="font-mono text-11 tracking-wide text-t5 uppercase">
                       ← Previous
                     </span>
                     <span className="font-display text-17 font-semibold text-t2 group-hover:text-lime">
@@ -111,7 +111,7 @@ export default function LegalDocPage({ slug }: { slug: LegalDoc["slug"] }) {
                     href={`/${next.slug}`}
                     className="group ease-brand flex flex-col items-start gap-2 py-4 pl-0 transition-colors duration-(--dur-fast) sm:items-end sm:pl-8"
                   >
-                    <span className="font-mono text-11 tracking-[0.14em] text-t5 uppercase">
+                    <span className="font-mono text-11 tracking-wide text-t5 uppercase">
                       Next →
                     </span>
                     <span className="font-display text-17 font-semibold text-t2 group-hover:text-lime">

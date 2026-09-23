@@ -12,6 +12,7 @@ import { NAV_LINKS, SPY_IDS } from "@/lib/content";
 import { useScrollFrame } from "@/lib/hooks";
 import { INITIAL_NAV_STATE, nextNavState } from "@/lib/nav-state";
 import { activeSection, documentTop, type SectionOffset } from "@/lib/scroll-spy";
+import Icon from "./Icon";
 import MobileDrawer from "./MobileDrawer";
 import Wordmark from "./Wordmark";
 
@@ -117,9 +118,9 @@ export default function Nav({ contactEmail }: { contactEmail: string }) {
     );
 
     for (const link of linksRef.current) {
-      // A link that is current-by-URL (e.g. Customers on /work) owns the active
+      // A link that is current-by-URL (e.g. Work on /work) owns the active
       // state on this route. SET it here rather than leaning on the render: if the
-      // spy toggled this link's class imperatively on the previous route (Customers
+      // spy toggled this link's class imperatively on the previous route (Work
       // also spies the homepage work-cases section), React's className tracking is
       // out of sync, and a bare re-render can leave it un-highlighted. Writing it
       // explicitly keeps route-active reliable regardless of the prior spy state.
@@ -174,7 +175,7 @@ export default function Nav({ contactEmail }: { contactEmail: string }) {
 
     for (const link of linksRef.current) {
       // A link that is current-by-URL owns its own active state; the spy must not
-      // fight it (matters where a route and a spy section coexist — Customers).
+      // fight it (matters where a route and a spy section coexist — Work).
       if (link.getAttribute("href") === pathname) continue;
       const isActive = link.dataset.section === active;
       link.classList.toggle("is-active", isActive);
@@ -197,10 +198,10 @@ export default function Nav({ contactEmail }: { contactEmail: string }) {
             <Wordmark variant="black" className="wm-black" decorative />
           </span>
 
-          <ul ref={listRef} className="m-0 hidden list-none gap-[26px] p-0 sm:flex">
+          <ul ref={listRef} className="m-0 hidden list-none gap-6 p-0 sm:flex">
             {NAV_LINKS.map((link) => {
               // Same-doc hash → native <a>; a real path → <Link>. A link can be a
-              // route AND carry a spy section (Customers → /work + work-cases): it
+              // route AND carry a spy section (Work → /work + work-cases): it
               // routes on click yet the frame lights it while its homepage chapter
               // is in view.
               const isAnchor = link.href.startsWith("/#");
@@ -227,8 +228,8 @@ export default function Nav({ contactEmail }: { contactEmail: string }) {
           </ul>
 
           {/* Unified to the site's one conversion verb, matching the drawer and
-              CTA band. The shorter 5-item row (Platform · Work · Pricing ·
-              Company · Careers) freed the width budget that previously forced
+              CTA band. The shorter 5-item row (Stack · Work · Pricing ·
+              Studio · Careers) freed the width budget that previously forced
               the terse "Contact"; the capsule-fit e2e test guards the tucked
               state. */}
           <a className="nav-cta hidden sm:inline-block" href="/#contact">
@@ -242,11 +243,9 @@ export default function Nav({ contactEmail }: { contactEmail: string }) {
             aria-label="Open menu"
             aria-expanded={drawerOpen}
             aria-controls="mobile-drawer"
-            className="btn-icon flex size-11 flex-col items-center justify-center gap-[5px] sm:hidden"
+            className="btn-icon flex size-11 items-center justify-center sm:hidden"
           >
-            <span className="block h-0.5 w-[18px] bg-t1" />
-            <span className="block h-0.5 w-[18px] bg-t1" />
-            <span className="block h-0.5 w-[18px] bg-t1" />
+            <Icon name="menu" className="size-5" />
           </button>
         </div>
       </nav>

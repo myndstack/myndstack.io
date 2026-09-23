@@ -59,10 +59,10 @@ export default function PricingCompare({ tierNames, onOpen }: Props) {
         // display swap, which read as broken. The CSS flips `visibility` at the
         // ends so the closed table leaves the tab order + a11y tree; @media
         // print forces it open so procurement can PDF the full sheet.
-        className="compare-reveal"
+        className="disclosure disclosure--gap"
         data-open={open ? "true" : "false"}
       >
-        <div className="compare-reveal__inner">
+        <div className="disclosure__inner">
           {/*
             The scroll container wants a visible right-edge affordance below the
             720px min-table-width, where content is hidden off-screen and a
@@ -90,7 +90,7 @@ export default function PricingCompare({ tierNames, onOpen }: Props) {
                 <tr className="border-b border-line bg-surface-3">
                   <th
                     scope="col"
-                    className="p-4 text-12 font-normal tracking-[0.12em] text-t5 uppercase shadow-[var(--edge-lip)]"
+                    className="p-4 text-12 font-normal tracking-label text-t5 uppercase shadow-[var(--edge-lip)]"
                   >
                     Feature
                   </th>
@@ -138,7 +138,7 @@ function CompareSectionRows({
         <th
           scope="colgroup"
           colSpan={tierNames.length + 1}
-          className="p-4 font-mono text-11 tracking-[0.14em] text-t5 uppercase"
+          className="p-4 font-mono text-11 tracking-wide text-t5 uppercase"
         >
           {title}
         </th>
@@ -146,7 +146,7 @@ function CompareSectionRows({
       {rows.map((row) => (
         <tr
           key={row.label}
-          className="border-t border-line transition-colors hover:bg-surface"
+          className="ease-brand border-t border-line transition-colors duration-(--dur-fast) hover:bg-surface"
         >
           <th
             scope="row"

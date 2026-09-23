@@ -117,7 +117,7 @@ export default async function RolePage({ params }: { params: Promise<Params> }) 
             {lists.map((list) => (
               <Reveal key={list.heading}>
                 <section className="mb-11">
-                  <h2 className="m-0 mb-4 font-display text-22 font-semibold tracking-[-0.02em]">
+                  <h2 className="m-0 mb-4 font-display text-22 font-semibold tracking-heading">
                     {list.heading}
                   </h2>
                   <ul className="m-0 flex list-none flex-col gap-3 p-0">
@@ -159,7 +159,7 @@ export default async function RolePage({ params }: { params: Promise<Params> }) 
                 and light is what carries elevation on a dark plane). */}
             <div className="clip-angular-26 border border-line bg-surface p-7 shadow-[var(--edge-lip)]">
               <div className="eyebrow mb-4">Apply</div>
-              <h2 className="m-0 mb-2 font-display text-22 font-semibold tracking-[-0.02em]">
+              <h2 className="m-0 mb-2 font-display text-22 font-semibold tracking-heading">
                 {role.title}
               </h2>
               <p className="mt-0 mb-6 text-15 leading-body text-t4">

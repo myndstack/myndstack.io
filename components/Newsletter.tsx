@@ -26,7 +26,7 @@ export default function Newsletter({ turnstileSiteKey = "" }: Props) {
     return (
       <div
         role="status"
-        className="mt-2 font-mono text-11 tracking-[0.04em] text-lime"
+        className="mt-2 font-mono text-11 tracking-mono text-lime"
       >
         ▸ Subscribed. Watch your inbox.
       </div>
@@ -36,7 +36,7 @@ export default function Newsletter({ turnstileSiteKey = "" }: Props) {
   const message =
     fieldErrors.email ??
     (gate.needsVerify ? "Complete the verification just above, then subscribe." : null) ??
-    (gate.widgetFailed ? "Verification couldn't load. Refresh the page, or email us directly." : null) ??
+    (gate.widgetFailed ? "Verification couldn't load. Turn off any blockers and refresh, or email us directly." : null) ??
     error;
 
   return (

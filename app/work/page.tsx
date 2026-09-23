@@ -54,7 +54,7 @@ export default async function WorkPage() {
                         </span>
                       ))}
                     </div>
-                    <div className="mb-2 font-display text-22 sm:text-30 font-bold tracking-[-0.02em]">
+                    <div className="mb-2 font-display text-22 sm:text-30 font-bold tracking-heading">
                       {c.client}
                     </div>
                     <p className="m-0 max-w-[460px] text-15 leading-body text-t4">
@@ -66,11 +66,11 @@ export default async function WorkPage() {
                     {c.metrics.slice(0, 3).map((m) => (
                       <div key={m.l}>
                         <div
-                          className={`font-display text-22 font-bold tracking-[-0.02em] ${m.lime ? "text-lime" : ""}`}
+                          className={`font-display text-22 font-bold tracking-heading ${m.lime ? "text-lime" : ""}`}
                         >
                           {m.v}
                         </div>
-                        <div className="mt-1 font-mono text-11 tracking-[0.08em] text-t5 uppercase">
+                        <div className="mt-1 font-mono text-11 tracking-label text-t5 uppercase">
                           {m.l}
                         </div>
                       </div>

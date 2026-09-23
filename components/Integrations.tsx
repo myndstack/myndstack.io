@@ -77,7 +77,7 @@ export default function Integrations() {
                           <path d={path} />
                         </svg>
                       ) : (
-                        <span className="font-mono text-12 tracking-[0.01em]">
+                        <span className="font-mono text-12">
                           {item}
                         </span>
                       )}

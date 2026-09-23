@@ -21,7 +21,7 @@ export default function Error({
   return (
     <section className="page-column flex min-h-[70vh] flex-col items-start justify-center pt-[calc(72px+var(--nav-height))] pb-22">
       <div className="eyebrow mb-4">Error</div>
-      <h1 className="m-0 mb-4 font-display text-30 sm:text-56 leading-none font-bold tracking-[-0.03em] text-balance">
+      <h1 className="m-0 mb-4 font-display text-30 sm:text-56 leading-none font-bold tracking-display text-balance">
         Something in the stack
         <br />
         <span className="text-lime">gave way.</span>
@@ -32,7 +32,7 @@ export default function Error({
       </p>
 
       {error.digest ? (
-        <p className="mb-9 font-mono text-11 tracking-[0.1em] text-t5 uppercase">
+        <p className="mb-9 font-mono text-11 tracking-label text-t5 uppercase">
           Reference {error.digest}
         </p>
       ) : null}
@@ -42,7 +42,7 @@ export default function Error({
           Try again
         </button>
         <Link href="/" className="btn btn-outline">
-          Back to home
+          Back to home →
         </Link>
       </div>
     </section>

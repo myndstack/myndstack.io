@@ -165,7 +165,7 @@ export default function MobileDrawer({ open, onClose, contactEmail }: Props) {
             area (WCAG 2.5.8); this is the mobile nav, where it matters most. */}
         <a
           href={`mailto:${contactEmail}`}
-          className="mt-2 py-2 font-mono text-12 tracking-[0.04em] text-t5"
+          className="mt-2 py-2 font-mono text-12 tracking-mono text-t5"
         >
           {contactEmail}
         </a>

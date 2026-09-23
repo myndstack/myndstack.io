@@ -5,10 +5,10 @@ export default function CtaBand() {
   return (
     <section id="cta" className="mx-auto mt-15 max-w-[1200px] px-5 sm:px-14">
       <Reveal className="clip-angular-40 relative overflow-hidden bg-lime px-6 py-18 text-center sm:px-14">
-        <div className="mb-4 font-mono text-12 font-bold tracking-[0.16em] text-lime-ink-2 uppercase">
+        <div className="mb-4 font-mono text-12 font-bold tracking-wide text-lime-ink-2 uppercase">
           Start building
         </div>
-        <h2 className="m-0 mb-4 font-display text-30 leading-none font-bold tracking-[-0.03em] text-lime-ink text-balance sm:text-56">
+        <h2 className="m-0 mb-4 font-display text-30 leading-none font-bold tracking-display text-lime-ink text-balance sm:text-56">
           Ship the thing.
           <br />
           We handle the stack.

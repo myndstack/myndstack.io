@@ -7,6 +7,7 @@ export default async function Team() {
   // Sanity keeps "Adding soon" rows as slots for future hires; they aren't
   // people, so they don't render.
   const people = (await getTeam()).filter((member) => member.n !== "Adding soon");
+  if (people.length === 0) return null;
 
   return (
     <Section id="team">
@@ -21,7 +22,7 @@ export default async function Team() {
           grid, and two identical grids back to back read as one repeated block.
           Placeholder tiles ("Adding soon") are skipped — an empty chair isn't a
           teammate. Each person is a square portrait tile beside their name. */}
-      <ul className="m-0 flex list-none flex-col gap-5 p-0 sm:flex-row sm:flex-wrap sm:gap-8">
+      <ul className="m-0 flex list-none flex-col gap-8 p-0 sm:flex-row sm:flex-wrap">
         {people.map((member) => (
           <li key={member.n}>
             <Reveal className="flex items-center gap-5">

@@ -122,11 +122,11 @@ function Price({ price, period }: { price: string; period?: string }) {
   return (
     <div className="flex flex-wrap items-baseline gap-x-2">
       {from ? (
-        <span className="font-mono text-11 font-medium tracking-[0.12em] text-t5 uppercase">
+        <span className="font-mono text-11 font-medium tracking-label text-t5 uppercase">
           from
         </span>
       ) : null}
-      <span className="font-display text-30 lg:text-42 font-bold leading-none tracking-[-0.02em]">
+      <span className="font-display text-30 lg:text-42 font-bold leading-none tracking-heading">
         {main}
       </span>
       {period ? <span className="text-13 text-t5">{period}</span> : null}
@@ -138,7 +138,7 @@ function PricingCard({ tier }: { tier: ResolvedTier }) {
   return (
     <div className={`pricing-card${tier.highlighted ? " pricing-card--featured" : ""}`}>
       {tier.badge ? (
-        <div className="absolute top-5 right-5 bg-lime px-2 py-1 font-mono text-11 font-bold tracking-[0.12em] text-lime-ink uppercase">
+        <div className="absolute top-5 right-5 bg-lime px-2 py-1 font-mono text-11 font-bold tracking-label text-lime-ink uppercase">
           {tier.badge}
         </div>
       ) : null}
@@ -157,7 +157,7 @@ function PricingCard({ tier }: { tier: ResolvedTier }) {
             t5, not t6: t5 is the AA-safe floor for small text on these surfaces
             (the axe e2e guards exactly this). */}
         {tier.taxNote ? (
-          <div className="mt-2 font-mono text-11 tracking-[0.04em] text-t5">
+          <div className="mt-2 font-mono text-11 tracking-mono text-t5">
             {tier.taxNote}
           </div>
         ) : null}

@@ -58,11 +58,11 @@ export default function Hero({ eyebrow, subhead, ctaPrimary, ctaSecondary }: Pro
       <HeroNetwork />
 
       <div className="relative z-2 flex flex-1 flex-col items-center justify-center px-5 pt-[calc(60px+var(--nav-height))] pb-15 text-center sm:px-16">
-        <div className="animate-rise-in mb-6 font-mono text-12 font-bold tracking-[0.16em] text-lime uppercase">
+        <div className="entrance mb-6 font-mono text-12 font-bold tracking-wide text-lime uppercase">
           {eyebrow}
         </div>
 
-        <h1 className="animate-rise-in m-0 max-w-[1000px] font-display text-display leading-none font-normal tracking-[-0.03em] text-balance [animation-delay:60ms]">
+        <h1 className="entrance m-0 max-w-[1000px] font-display text-display leading-none font-normal tracking-display text-balance [--entrance-step:60ms]">
           {WORDS.map((word, i) => (
             // Index key: "end" appears twice, and the array is static.
             <span key={i}>
@@ -72,11 +72,11 @@ export default function Hero({ eyebrow, subhead, ctaPrimary, ctaSecondary }: Pro
           ))}
         </h1>
 
-        <p className="animate-rise-in mx-0 mt-8 mb-10 max-w-[580px] text-17 leading-body sm:text-22 text-t3 [animation-delay:120ms]">
+        <p className="entrance mx-0 mt-8 mb-10 max-w-[580px] text-17 leading-body sm:text-22 text-t3 [--entrance-step:120ms]">
           {subhead}
         </p>
 
-        <div className="animate-rise-in flex flex-wrap justify-center gap-4 [animation-delay:180ms]">
+        <div className="entrance flex flex-wrap justify-center gap-4 [--entrance-step:180ms]">
           <Magnetic>
             <a href="#contact" className="btn btn-lime" onMouseEnter={burst}>
               {ctaPrimary}
@@ -92,7 +92,7 @@ export default function Hero({ eyebrow, subhead, ctaPrimary, ctaSecondary }: Pro
 
       <div
         aria-hidden="true"
-        className="animate-rise-in relative z-2 flex justify-center pb-8 font-mono text-11 tracking-[0.14em] text-t5 [animation-delay:240ms]"
+        className="entrance relative z-2 flex justify-center pb-8 font-mono text-11 tracking-wide text-t5 [--entrance-step:240ms]"
       >
         SCROLL ↓
       </div>

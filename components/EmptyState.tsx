@@ -14,7 +14,7 @@ type Props = {
 export default function EmptyState({ label, body, action }: Props) {
   return (
     <div className="border border-dashed border-line-3 bg-surface px-6 py-8">
-      <div className="mb-3 font-mono text-11 tracking-[0.1em] text-t5 uppercase">
+      <div className="mb-3 font-mono text-11 tracking-label text-t5 uppercase">
         {label}
       </div>
       <p className="m-0 mb-5 max-w-[520px] text-15 leading-body text-t3">{body}</p>

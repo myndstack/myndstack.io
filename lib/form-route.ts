@@ -83,7 +83,7 @@ export async function handleFormSubmission<S extends z.ZodType>(
     const verdict = await verifyTurnstile(token, ip);
     if (!verdict.success) {
       return NextResponse.json(
-        { ok: false, error: "The anti-spam check didn't go through. Try sending again." },
+        { ok: false, error: "The verification didn't go through. Try sending again." },
         { status: 400 },
       );
     }

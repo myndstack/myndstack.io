@@ -103,7 +103,7 @@ export default function ProgressSpine({ socials }: { socials: Social[] }) {
           not the old t7. */}
       <div
         aria-hidden="true"
-        className="absolute top-[100px] left-1/2 -translate-x-1/2 font-mono text-11 font-bold tracking-[0.22em] text-t5 uppercase"
+        className="absolute top-[100px] left-1/2 -translate-x-1/2 font-mono text-11 font-bold tracking-wide text-t5 uppercase"
         style={{ writingMode: "vertical-rl" }}
       >
         Follow

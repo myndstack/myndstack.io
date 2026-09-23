@@ -40,7 +40,7 @@ export default function ContactForm({
     <section id="contact" className="mx-auto max-w-[1200px] px-5 pt-22 sm:px-14">
       <div className="grid grid-cols-1 items-start gap-14 md:grid-cols-[1fr_1.1fr]">
         <Reveal>
-          <div className="eyebrow mb-4 tracking-[0.16em]">Get in touch</div>
+          <div className="eyebrow mb-4">Get in touch</div>
           <h2 className="h2-section mb-4">Tell us what you&rsquo;re building.</h2>
           <p className="m-0 mb-8 max-w-[400px] text-17 leading-body text-t4">
             Send the shape of the problem. We&rsquo;ll reply within one business day with
@@ -83,14 +83,14 @@ export default function ContactForm({
               role="status"
               className="clip-angular-26 flex min-h-[220px] flex-col items-start justify-center gap-3 border border-lime bg-surface px-10 py-11"
             >
-              <div className="font-mono text-12 font-bold tracking-[0.12em] text-lime">
+              <div className="font-mono text-12 font-bold tracking-label text-lime">
                 ▸ MESSAGE RECEIVED
               </div>
               <div className="font-display text-22 leading-tight font-semibold">
                 Thanks — we&rsquo;ll be in touch within one business day.
               </div>
               <p className="m-0 text-15 text-t4">
-                In the meantime, reach us directly at{" "}
+                In the meantime, email us directly at{" "}
                 <a href={`mailto:${email}`}>{email}</a>.
               </p>
             </div>
@@ -196,7 +196,7 @@ export default function ContactForm({
               {error ? (
                 <p
                   role="alert"
-                  className="m-0 border border-danger/40 bg-danger/8 px-4 py-3 font-mono text-11 text-danger xs:col-span-2"
+                  className="form-alert xs:col-span-2"
                 >
                   {error}
                 </p>

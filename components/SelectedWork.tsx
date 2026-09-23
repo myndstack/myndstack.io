@@ -46,13 +46,13 @@ export default async function SelectedWork() {
                   </span>
                 ))}
               </div>
-              <div className="mb-3 font-display text-22 sm:text-30 font-bold tracking-[-0.02em]">
+              <div className="mb-3 font-display text-22 sm:text-30 font-bold tracking-heading">
                 {featured.client}
               </div>
               <p className="m-0 max-w-[440px] text-17 leading-body text-t4">
                 {featured.summary}
               </p>
-              <span className="mt-5 inline-block font-mono text-11 tracking-[0.14em] text-lime uppercase">
+              <span className="mt-5 inline-block font-mono text-11 tracking-wide text-lime uppercase">
                 Read the case →
               </span>
             </div>
@@ -62,11 +62,11 @@ export default async function SelectedWork() {
               {featured.metrics.map((m) => (
                 <div key={m.l} className="bg-surface-3 px-6 py-5">
                   <div
-                    className={`font-display text-30 font-bold tracking-[-0.02em] ${m.lime ? "text-lime" : ""}`}
+                    className={`font-display text-30 font-bold tracking-heading ${m.lime ? "text-lime" : ""}`}
                   >
                     {m.v}
                   </div>
-                  <div className="mt-1 font-mono text-11 tracking-[0.08em] text-t5 uppercase">
+                  <div className="mt-1 font-mono text-11 tracking-label text-t5 uppercase">
                     {m.l}
                   </div>
                 </div>
@@ -100,10 +100,10 @@ export default async function SelectedWork() {
                   <div className="mt-6 flex gap-6 border-t border-line pt-4">
                     {c.metrics.slice(0, CARD_METRICS).map((m) => (
                       <div key={m.l}>
-                        <div className="font-display text-22 font-bold tracking-[-0.02em]">
+                        <div className="font-display text-22 font-bold tracking-heading">
                           {m.v}
                         </div>
-                        <div className="mt-1 font-mono text-11 tracking-[0.08em] text-t5 uppercase">
+                        <div className="mt-1 font-mono text-11 tracking-label text-t5 uppercase">
                           {m.l}
                         </div>
                       </div>

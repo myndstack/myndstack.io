@@ -31,9 +31,9 @@ export default function TurnstileField({ siteKey, gate, email, className = "" }:
       {gate.widgetFailed ? (
         <p
           role="alert"
-          className="m-0 mt-3 border border-danger/40 bg-danger/8 px-4 py-3 font-mono text-11 text-danger"
+          className="form-alert mt-3"
         >
-          Verification couldn&rsquo;t load. Disable any blockers and refresh, or email
+          Verification couldn&rsquo;t load. Turn off any blockers and refresh, or email
           us directly at <a href={`mailto:${email}`}>{email}</a>.
         </p>
       ) : gate.needsVerify && !gate.token ? (

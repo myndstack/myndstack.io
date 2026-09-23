@@ -10,6 +10,8 @@ import Wordmark from "./Wordmark";
 const FADE_AT_MS = 500;
 const FADE_DURATION_MS = 300;
 const SPARK_COUNT = 90;
+/** Intro hold (500) + longest entrance step (240) + the 600ms rise, rounded up. */
+const ENTRANCE_DONE_MS = 1500;
 /** ~0.5s at 60fps, so the burst finishes as the fade begins. */
 const SPARK_FRAMES = 30;
 
@@ -52,6 +54,16 @@ export default function Loader() {
    */
   const skip = reduced || seen;
   const gone = skip || finished;
+
+  // After the first page's entrance has played (intro hold + the longest
+  // stagger + the rise itself), mark it so later client navigations don't
+  // replay header entrances on top of the view transition.
+  useEffect(() => {
+    const t = window.setTimeout(() => {
+      document.documentElement.dataset.entered = "1";
+    }, ENTRANCE_DONE_MS);
+    return () => window.clearTimeout(t);
+  }, []);
 
   useEffect(() => {
     if (skip) return;
@@ -171,7 +183,7 @@ export default function Loader() {
       <canvas ref={canvasRef} className="absolute inset-0 h-full w-full opacity-60" />
       <Wordmark height={44} className="relative z-2 animate-load-mark" />
       <div className="animate-load-line relative z-2 h-0.5 bg-lime shadow-glow" />
-      <div className="animate-load-fade relative z-2 font-mono text-11 font-bold tracking-[0.22em] text-t5 uppercase">
+      <div className="animate-load-fade relative z-2 font-mono text-11 font-bold tracking-wide text-t5 uppercase">
         Founder-led studio
       </div>
     </div>

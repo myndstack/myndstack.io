@@ -12,6 +12,9 @@ export default function Faq({ faqs }: { faqs: FaqItem[] }) {
   const baseId = useId();
   const [openIndex, setOpenIndex] = useState<number | null>(null);
 
+  // No questions in the CMS → no section, rather than a header over nothing.
+  if (faqs.length === 0) return null;
+
   return (
     <section
       id="faq"
@@ -22,7 +25,7 @@ export default function Faq({ faqs }: { faqs: FaqItem[] }) {
         className="mb-11"
         align="center"
         eyebrow="Questions"
-        title="Frequently asked."
+        title="Before you get in touch."
       />
 
       {/*
@@ -74,12 +77,13 @@ export default function Faq({ faqs }: { faqs: FaqItem[] }) {
                 id={panelId}
                 role="region"
                 aria-labelledby={buttonId}
-                // grid-rows 0fr→1fr animates to the panel's natural height without
-                // measuring scrollHeight by hand.
-                className="ease-brand grid transition-[grid-template-rows] duration-(--dur-base)"
-                style={{ gridTemplateRows: open ? "1fr" : "0fr" }}
+                // The shared .disclosure: height animates via grid rows, and a
+                // closed answer is visibility:hidden — out of the a11y tree, not
+                // merely clipped (screen readers used to read every answer).
+                className="disclosure"
+                data-open={open ? "true" : "false"}
               >
-                <div className="overflow-hidden">
+                <div className="disclosure__inner">
                   <p className="m-0 max-w-[640px] px-6 pb-6 text-15 leading-body text-t4">
                     {faq.a}
                   </p>

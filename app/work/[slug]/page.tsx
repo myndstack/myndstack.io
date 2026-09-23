@@ -83,11 +83,11 @@ export default async function CasePage({ params }: { params: Promise<Params> }) 
           {study.metrics.map((m) => (
             <div key={m.l} className="bg-surface-3 px-6 py-7">
               <div
-                className={`font-display text-22 sm:text-30 font-bold tracking-[-0.02em] ${m.lime ? "text-lime" : ""}`}
+                className={`font-display text-22 sm:text-30 font-bold tracking-heading ${m.lime ? "text-lime" : ""}`}
               >
                 {m.v}
               </div>
-              <div className="mt-2 font-mono text-11 tracking-[0.08em] text-t5 uppercase">
+              <div className="mt-2 font-mono text-11 tracking-label text-t5 uppercase">
                 {m.l}
               </div>
             </div>

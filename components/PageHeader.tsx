@@ -22,8 +22,8 @@ export default function PageHeader({
     <header className="masthead border-b border-line">
       <div className="page-column relative z-[1] pt-[calc(72px+var(--nav-height))] pb-14">
         {breadcrumbs?.length ? (
-          <nav aria-label="Breadcrumb" className="animate-rise-in mb-8">
-            <ol className="m-0 flex list-none flex-wrap items-center gap-2 p-0 font-mono text-11 tracking-[0.1em] text-t5 uppercase">
+          <nav aria-label="Breadcrumb" className="entrance mb-8">
+            <ol className="m-0 flex list-none flex-wrap items-center gap-2 p-0 font-mono text-11 tracking-label text-t5 uppercase">
               {breadcrumbs.map((crumb) => (
                 <li key={crumb.href} className="flex items-center gap-2">
                   <Link
@@ -41,19 +41,19 @@ export default function PageHeader({
           </nav>
         ) : null}
 
-        <div className="eyebrow animate-rise-in mb-4 [animation-delay:60ms]">
+        <div className="eyebrow entrance mb-4 [--entrance-step:60ms]">
           {eyebrow}
         </div>
-        <h1 className="animate-rise-in m-0 max-w-[880px] font-display text-30 leading-display font-bold tracking-[-0.03em] text-balance sm:text-56 [animation-delay:120ms]">
+        <h1 className="entrance m-0 max-w-[880px] font-display text-30 leading-display font-bold tracking-display text-balance sm:text-56 [--entrance-step:120ms]">
           {title}
         </h1>
         {lede ? (
-          <p className="animate-rise-in mt-5 mb-0 max-w-[620px] text-17 leading-body text-t4 [animation-delay:180ms]">
+          <p className="entrance mt-5 mb-0 max-w-[620px] text-17 leading-body text-t4 [--entrance-step:180ms]">
             {lede}
           </p>
         ) : null}
         {meta ? (
-          <p className="animate-rise-in mt-6 mb-0 font-mono text-11 tracking-[0.1em] text-t5 uppercase [animation-delay:240ms]">
+          <p className="entrance mt-6 mb-0 font-mono text-11 tracking-label text-t5 uppercase [--entrance-step:240ms]">
             {meta}
           </p>
         ) : null}
