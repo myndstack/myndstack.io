@@ -62,7 +62,7 @@ export default function Hero({ eyebrow, subhead, ctaPrimary, ctaSecondary }: Pro
           {eyebrow}
         </div>
 
-        <h1 className="animate-rise-in m-0 max-w-[1000px] font-display text-display leading-none font-normal tracking-[-0.03em] text-balance [animation-duration:0.7s]">
+        <h1 className="animate-rise-in m-0 max-w-[1000px] font-display text-display leading-none font-normal tracking-[-0.03em] text-balance [animation-delay:60ms]">
           {WORDS.map((word, i) => (
             // Index key: "end" appears twice, and the array is static.
             <span key={i}>
@@ -72,11 +72,11 @@ export default function Hero({ eyebrow, subhead, ctaPrimary, ctaSecondary }: Pro
           ))}
         </h1>
 
-        <p className="animate-rise-in mx-0 mt-8 mb-10 max-w-[580px] text-17 leading-[1.5] sm:text-22 text-t3 [animation-duration:0.8s]">
+        <p className="animate-rise-in mx-0 mt-8 mb-10 max-w-[580px] text-17 leading-body sm:text-22 text-t3 [animation-delay:120ms]">
           {subhead}
         </p>
 
-        <div className="animate-rise-in flex flex-wrap justify-center gap-3.5 [animation-duration:0.9s]">
+        <div className="animate-rise-in flex flex-wrap justify-center gap-4 [animation-delay:180ms]">
           <Magnetic>
             <a href="#contact" className="btn btn-lime" onMouseEnter={burst}>
               {ctaPrimary}
@@ -92,7 +92,7 @@ export default function Hero({ eyebrow, subhead, ctaPrimary, ctaSecondary }: Pro
 
       <div
         aria-hidden="true"
-        className="animate-rise-in relative z-2 flex justify-center pb-8 font-mono text-11 tracking-[0.14em] text-t5 [animation-duration:1s]"
+        className="animate-rise-in relative z-2 flex justify-center pb-8 font-mono text-11 tracking-[0.14em] text-t5 [animation-delay:240ms]"
       >
         SCROLL ↓
       </div>

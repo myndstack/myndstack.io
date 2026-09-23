@@ -3,6 +3,7 @@
 import { useRef } from "react";
 import { useScrollFrame } from "@/lib/hooks";
 import { INITIAL_SCROLL_INTENT, nextScrollIntent } from "@/lib/scroll-intent";
+import Icon from "./Icon";
 
 /**
  * Back-to-top button: a solid lime square that appears when you start heading
@@ -46,11 +47,9 @@ export default function BackToTop() {
             : "smooth",
         })
       }
-      className="totop fixed right-[26px] bottom-[26px] z-59 flex size-11 cursor-pointer items-center justify-center border-none bg-lime text-lime-ink hover:bg-lime-hover"
+      className="totop fixed right-6 bottom-6 z-59 flex size-11 cursor-pointer items-center justify-center border-none bg-lime text-lime-ink hover:bg-lime-hover"
     >
-      <span aria-hidden="true" className="font-mono text-15 leading-none">
-        ↑
-      </span>
+      <Icon name="arrow-up" className="size-4" />
     </button>
   );
 }

@@ -13,11 +13,11 @@ export default function CtaBand() {
           <br />
           We handle the stack.
         </h2>
-        <p className="mx-auto mt-0 mb-8 max-w-[520px] text-17 leading-[1.5] text-lime-ink-3">
+        <p className="mx-auto mt-0 mb-8 max-w-[520px] text-17 leading-body text-lime-ink-3">
           Tell us what you&rsquo;re building. We&rsquo;ll show you the fastest path to
           production AI.
         </p>
-        <div className="flex flex-wrap justify-center gap-3.5">
+        <div className="flex flex-wrap justify-center gap-4">
           <Magnetic>
             <a
               href="#contact"

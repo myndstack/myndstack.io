@@ -49,14 +49,14 @@ export default function SectionHeader({
         >
           <span className="ms-index-tick" />
         </div>
-        <div className="eyebrow mb-3.5">{eyebrow}</div>
+        <div className="eyebrow mb-4">{eyebrow}</div>
         <h2 className="h2-section">{title}</h2>
         {lede ? (
-          <p className="mt-3.5 mb-0 text-17 leading-[1.55] text-t4">{lede}</p>
+          <p className="mt-4 mb-0 text-17 leading-body text-t4">{lede}</p>
         ) : null}
       </div>
       {aside ? (
-        <p className="m-0 max-w-[320px] text-15 leading-[1.55] text-t4">{aside}</p>
+        <p className="m-0 max-w-[320px] text-15 leading-body text-t4">{aside}</p>
       ) : null}
     </Reveal>
   );

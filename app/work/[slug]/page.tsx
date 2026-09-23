@@ -79,15 +79,15 @@ export default async function CasePage({ params }: { params: Promise<Params> }) 
 
       <div className="page-column pt-14 pb-22">
         {/* Headline metrics — gap-px hairlines, same device as the homepage card. */}
-        <div className="mb-14 grid grid-cols-2 gap-px overflow-hidden border border-line bg-line md:grid-cols-4">
+        <div className="mb-14 grid grid-cols-2 gap-px overflow-hidden border border-line bg-line sm:grid-cols-4">
           {study.metrics.map((m) => (
             <div key={m.l} className="bg-surface-3 px-6 py-7">
               <div
-                className={`font-display text-[clamp(22px,4vw,30px)] font-bold tracking-[-0.02em] ${m.lime ? "text-lime" : ""}`}
+                className={`font-display text-22 sm:text-30 font-bold tracking-[-0.02em] ${m.lime ? "text-lime" : ""}`}
               >
                 {m.v}
               </div>
-              <div className="mt-1.5 font-mono text-11 tracking-[0.08em] text-t5 uppercase">
+              <div className="mt-2 font-mono text-11 tracking-[0.08em] text-t5 uppercase">
                 {m.l}
               </div>
             </div>
@@ -112,7 +112,7 @@ export default async function CasePage({ params }: { params: Promise<Params> }) 
             <Reveal>
               <p className="legal-note">
                 Something similar on your side?{" "}
-                <Link href="/#contact">Tell us the shape of it</Link>.
+                <Link href="/#contact">Start a project</Link>.
               </p>
             </Reveal>
           </article>
@@ -128,7 +128,7 @@ export default async function CasePage({ params }: { params: Promise<Params> }) 
                     key={fact.label}
                     className={i > 0 ? "mt-4 border-t border-line pt-4" : undefined}
                   >
-                    <dt className="label-mono mb-1.5 text-t4">{fact.label}</dt>
+                    <dt className="label-mono mb-2 text-t4">{fact.label}</dt>
                     <dd className="m-0 font-display text-15 font-semibold">
                       {fact.value}
                     </dd>
@@ -138,11 +138,11 @@ export default async function CasePage({ params }: { params: Promise<Params> }) 
 
               <div className="mt-6 border-t border-line pt-5">
                 <div className="label-mono mb-3 text-t4">Layers</div>
-                <ul className="m-0 flex list-none flex-col gap-2.5 p-0">
+                <ul className="m-0 flex list-none flex-col gap-2 p-0">
                   {study.stack.map((layer) => (
                     <li
                       key={layer}
-                      className="flex gap-2.5 text-13 leading-snug text-t3"
+                      className="flex gap-2 text-13 leading-snug text-t3"
                     >
                       <span aria-hidden="true" className="flex-none text-lime">
                         ▸

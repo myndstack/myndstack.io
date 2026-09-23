@@ -126,7 +126,7 @@ function Price({ price, period }: { price: string; period?: string }) {
           from
         </span>
       ) : null}
-      <span className="font-display text-[clamp(30px,4vw,42px)] font-bold leading-none tracking-[-0.02em]">
+      <span className="font-display text-30 lg:text-42 font-bold leading-none tracking-[-0.02em]">
         {main}
       </span>
       {period ? <span className="text-13 text-t5">{period}</span> : null}
@@ -138,14 +138,14 @@ function PricingCard({ tier }: { tier: ResolvedTier }) {
   return (
     <div className={`pricing-card${tier.highlighted ? " pricing-card--featured" : ""}`}>
       {tier.badge ? (
-        <div className="absolute top-5 right-5 bg-lime px-2.5 py-1 font-mono text-11 font-bold tracking-[0.12em] text-lime-ink uppercase">
+        <div className="absolute top-5 right-5 bg-lime px-2 py-1 font-mono text-11 font-bold tracking-[0.12em] text-lime-ink uppercase">
           {tier.badge}
         </div>
       ) : null}
 
-      <div className="mb-1.5 font-display text-17 font-semibold">{tier.name}</div>
+      <div className="mb-2 font-display text-17 font-semibold">{tier.name}</div>
       {/* Reserve two lines so a one-line blurb doesn't misalign the price row. */}
-      <div className="mb-6 min-h-[42px] text-13 leading-[1.5] text-t4">
+      <div className="mb-6 min-h-[42px] text-13 leading-body text-t4">
         {tier.blurb}
       </div>
 
@@ -168,7 +168,7 @@ function PricingCard({ tier }: { tier: ResolvedTier }) {
         {tier.features.map((feature) => (
           <li
             key={feature}
-            className={`flex gap-2.5 text-15 leading-[1.45] ${
+            className={`flex gap-2 text-15 leading-body ${
               tier.highlighted ? "text-t2" : "text-t3"
             }`}
           >

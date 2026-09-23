@@ -42,7 +42,7 @@ export default function ContactForm({
         <Reveal>
           <div className="eyebrow mb-4 tracking-[0.16em]">Get in touch</div>
           <h2 className="h2-section mb-4">Tell us what you&rsquo;re building.</h2>
-          <p className="m-0 mb-8 max-w-[400px] text-17 leading-[1.55] text-t4">
+          <p className="m-0 mb-8 max-w-[400px] text-17 leading-body text-t4">
             Send the shape of the problem. We&rsquo;ll reply within one business day with
             the fastest path to production.
           </p>
@@ -205,6 +205,7 @@ export default function ContactForm({
               <button
                 type="submit"
                 disabled={pending || (gate.enabled && gate.widgetFailed)}
+                aria-busy={pending || undefined}
                 className="btn btn-lime w-full border-none text-center xs:col-span-2"
               >
                 {pending ? "Sending…" : "Send message →"}

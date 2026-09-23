@@ -46,10 +46,10 @@ export default async function SelectedWork() {
                   </span>
                 ))}
               </div>
-              <div className="mb-3 font-display text-[clamp(22px,4vw,30px)] font-bold tracking-[-0.02em]">
+              <div className="mb-3 font-display text-22 sm:text-30 font-bold tracking-[-0.02em]">
                 {featured.client}
               </div>
-              <p className="m-0 max-w-[440px] text-17 leading-[1.55] text-t4">
+              <p className="m-0 max-w-[440px] text-17 leading-body text-t4">
                 {featured.summary}
               </p>
               <span className="mt-5 inline-block font-mono text-11 tracking-[0.14em] text-lime uppercase">
@@ -94,7 +94,7 @@ export default async function SelectedWork() {
                     <div className="mb-2 font-display text-22 font-semibold">
                       {c.client}
                     </div>
-                    <p className="m-0 text-13 leading-[1.55] text-t4">{c.summary}</p>
+                    <p className="m-0 text-13 leading-body text-t4">{c.summary}</p>
                   </div>
 
                   <div className="mt-6 flex gap-6 border-t border-line pt-4">

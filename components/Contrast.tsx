@@ -25,9 +25,9 @@ export default async function Contrast() {
             {contrastWithout.map((item) => (
               <li
                 key={item}
-                className="flex gap-3.5 text-15 leading-[1.4] text-t4"
+                className="flex gap-4 text-15 leading-snug text-t4"
               >
-                <span className="flex-none text-t7">—</span>
+                <span aria-hidden="true" className="flex-none text-t7">—</span>
                 {item}
               </li>
             ))}
@@ -46,7 +46,7 @@ export default async function Contrast() {
             {contrastWith.map((item) => (
               <li
                 key={item}
-                className="flex gap-3.5 text-15 leading-[1.4] text-t2"
+                className="flex gap-4 text-15 leading-snug text-t2"
               >
                 <span className="flex-none text-lime">▸</span>
                 {item}

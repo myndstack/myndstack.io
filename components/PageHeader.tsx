@@ -28,7 +28,7 @@ export default function PageHeader({
                 <li key={crumb.href} className="flex items-center gap-2">
                   <Link
                     href={crumb.href}
-                    className="ease-brand text-t5 transition-colors duration-160 hover:text-t2"
+                    className="ease-brand text-t5 transition-colors duration-(--dur-fast) hover:text-t2"
                   >
                     {crumb.label}
                   </Link>
@@ -41,19 +41,19 @@ export default function PageHeader({
           </nav>
         ) : null}
 
-        <div className="eyebrow animate-rise-in mb-3.5 [animation-duration:0.7s]">
+        <div className="eyebrow animate-rise-in mb-4 [animation-delay:60ms]">
           {eyebrow}
         </div>
-        <h1 className="animate-rise-in m-0 max-w-[880px] font-display text-30 leading-[1.02] font-bold tracking-[-0.03em] text-balance sm:text-56 [animation-duration:0.8s]">
+        <h1 className="animate-rise-in m-0 max-w-[880px] font-display text-30 leading-display font-bold tracking-[-0.03em] text-balance sm:text-56 [animation-delay:120ms]">
           {title}
         </h1>
         {lede ? (
-          <p className="animate-rise-in mt-5 mb-0 max-w-[620px] text-17 leading-[1.55] text-t4 [animation-duration:0.9s]">
+          <p className="animate-rise-in mt-5 mb-0 max-w-[620px] text-17 leading-body text-t4 [animation-delay:180ms]">
             {lede}
           </p>
         ) : null}
         {meta ? (
-          <p className="animate-rise-in mt-6 mb-0 font-mono text-11 tracking-[0.1em] text-t5 uppercase [animation-duration:1s]">
+          <p className="animate-rise-in mt-6 mb-0 font-mono text-11 tracking-[0.1em] text-t5 uppercase [animation-delay:240ms]">
             {meta}
           </p>
         ) : null}

@@ -137,7 +137,7 @@ export default function ProgressSpine({ socials }: { socials: Social[] }) {
 
       <nav
         aria-label="Social"
-        className="pointer-events-auto absolute inset-x-0 bottom-[34px] flex flex-col items-center gap-5"
+        className="pointer-events-auto absolute inset-x-0 bottom-8 flex flex-col items-center gap-5"
       >
         {socials.filter((s) => s.href).map((s) => (
           <Magnetic key={s.label}>

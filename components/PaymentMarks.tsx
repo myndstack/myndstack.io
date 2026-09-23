@@ -47,7 +47,7 @@ export default function PaymentMarks({ region }: { region: RegionCode }) {
       aria-label="Accepted payment methods"
       // Centred while the panel is full-page-width (below xs), so a row that
       // wraps stays balanced instead of leaving a ragged last line.
-      className="m-0 flex list-none flex-wrap items-center justify-center gap-1.5 p-0 xs:justify-start"
+      className="m-0 flex list-none flex-wrap items-center justify-center gap-2 p-0 xs:justify-start"
     >
       {marks.map((mark) => (
         <li key={mark.label} className="flex">

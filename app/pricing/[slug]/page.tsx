@@ -69,7 +69,7 @@ export default async function CheckoutPage({
 
             Before this, the panel came after all four sections: on a phone the
             only call to action sat roughly three screens below the fold. */}
-        <div className="grid grid-cols-1 gap-11 md:grid-cols-[1.15fr_1fr] md:gap-x-14">
+        <div className="grid grid-cols-1 gap-14 md:grid-cols-[1.15fr_1fr]">
           <Reveal className="md:col-start-1 md:row-start-1">
             <section>
               <h2 className="m-0 mb-4 font-display text-22 font-semibold tracking-[-0.02em]">
@@ -79,7 +79,7 @@ export default async function CheckoutPage({
                 {tier.features.map((feature) => (
                   <li
                     key={feature}
-                    className="flex gap-3.5 text-15 leading-[1.55] text-t3"
+                    className="flex gap-4 text-15 leading-body text-t3"
                   >
                     <span aria-hidden="true" className="flex-none text-lime">
                       ▸
@@ -136,7 +136,7 @@ export default async function CheckoutPage({
                           <div className="mb-1 font-display text-15 font-semibold text-t1">
                             {step.title}
                           </div>
-                          <p className="m-0 text-15 leading-[1.55] text-t4">
+                          <p className="m-0 text-15 leading-body text-t4">
                             {step.body}
                           </p>
                         </div>
@@ -173,10 +173,10 @@ export default async function CheckoutPage({
               <dl className="m-0 grid grid-cols-1 gap-x-14 md:grid-cols-2">
                 {tier.checkout.faqs.map((faq) => (
                   <div key={faq.q} className="border-t border-line py-5">
-                    <dt className="mb-1.5 font-display text-15 font-semibold text-t2">
+                    <dt className="mb-2 font-display text-15 font-semibold text-t2">
                       {faq.q}
                     </dt>
-                    <dd className="m-0 text-15 leading-[1.55] text-t4">
+                    <dd className="m-0 text-15 leading-body text-t4">
                       {faq.a}
                     </dd>
                   </div>
@@ -188,8 +188,8 @@ export default async function CheckoutPage({
 
         <Reveal>
           <p className="legal-note">
-            Prefer to talk first? <Link href="/#contact">Contact sales</Link> — or
-            compare every plan on the <Link href="/#pricing">pricing page</Link>.
+            Prefer to talk first? <Link href="/#contact">Start a project</Link> and
+            we&rsquo;ll set up a call — or compare every plan on the <Link href="/#pricing">pricing page</Link>.
           </p>
         </Reveal>
       </div>

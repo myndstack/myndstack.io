@@ -49,7 +49,7 @@ export default function Integrations() {
                 <div className="font-display text-17 font-semibold">
                   {group.title}
                 </div>
-                <p className="m-0 mt-1 text-13 leading-[1.45] text-t5">
+                <p className="m-0 mt-1 text-13 leading-body text-t5">
                   {group.blurb}
                 </p>
               </div>
@@ -65,7 +65,7 @@ export default function Integrations() {
                   return (
                     <li
                       key={item}
-                      className="ease-brand inline-flex h-9 items-center border border-line-3 px-3 text-t3 transition-colors duration-160 hover:border-lime-edge hover:text-t1"
+                      className="inline-flex h-9 items-center border border-line-3 px-3 text-t3"
                     >
                       {path ? (
                         <svg

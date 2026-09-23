@@ -3,6 +3,7 @@
 import { useRef, useState } from "react";
 import type { CompareValue, PricingTier } from "@/lib/content";
 import { PRICING_COMPARISON } from "@/lib/content";
+import Icon from "./Icon";
 
 type Props = {
   /** Tier names to show as columns, in display order. */
@@ -46,7 +47,7 @@ export default function PricingCompare({ tierNames, onOpen }: Props) {
           onClick={toggle}
           aria-expanded={open}
           aria-controls="pricing-compare-table"
-          className="btn-outline inline-flex min-h-11 items-center px-6 text-13 font-semibold"
+          className="btn-outline inline-flex min-h-13 items-center px-6 text-13 font-semibold"
         >
           {open ? "Hide comparison" : "Compare all plans →"}
         </button>
@@ -178,14 +179,7 @@ function CellValue({ value }: { value: CompareValue | undefined }) {
         <span className="sr-only">Included</span>
         {/* Small check-in-a-square glyph. SVG stays inline so print's
             forced-black text style doesn't strip the accent. */}
-        <svg viewBox="0 0 16 16" className="size-4" aria-hidden="true">
-          <path
-            d="M4 8.5 7 11.5 12.5 5"
-            stroke="currentColor"
-            strokeWidth="2"
-            fill="none"
-          />
-        </svg>
+        <Icon name="check" className="size-4" />
       </span>
     );
   }

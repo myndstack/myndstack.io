@@ -77,8 +77,10 @@ export default async function Home() {
       <Team />
       {/* Brand crescendo just before the close. */}
       <Manifesto lead={home.manifestoLead} keep={home.manifestoKeep} />
-      <Faq faqs={faqs} />
+      {/* The band sits before the FAQ, not directly on top of the contact form
+          it links to — a CTA pointing at the very next section is a repeat. */}
       <CtaBand />
+      <Faq faqs={faqs} />
       <ContactForm
         email={site.email}
         phone={site.phone}

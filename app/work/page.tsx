@@ -21,7 +21,11 @@ export default async function WorkPage() {
       <PageHeader
         eyebrow="Selected work"
         title="Cognitive infrastructure, built end to end."
-        lede="PharmaLaunch is the stack we designed and built: AI generation paired with deterministic rule engines and automated quality gates. In private validation."
+        lede={
+          cases.length > 0
+            ? "PharmaLaunch is the stack we designed and built: AI generation paired with deterministic rule engines and automated quality gates. In private validation."
+            : "Write-ups of recent builds are on their way."
+        }
         meta={`${cases.length} case stud${cases.length === 1 ? "y" : "ies"}`}
         breadcrumbs={[{ label: "Home", href: "/" }]}
       />
@@ -50,10 +54,10 @@ export default async function WorkPage() {
                         </span>
                       ))}
                     </div>
-                    <div className="mb-2.5 font-display text-[clamp(22px,3vw,30px)] font-bold tracking-[-0.02em]">
+                    <div className="mb-2 font-display text-22 sm:text-30 font-bold tracking-[-0.02em]">
                       {c.client}
                     </div>
-                    <p className="m-0 max-w-[460px] text-15 leading-[1.55] text-t4">
+                    <p className="m-0 max-w-[460px] text-15 leading-body text-t4">
                       {c.lede}
                     </p>
                   </div>
@@ -78,13 +82,16 @@ export default async function WorkPage() {
           ))}
         </div>
 
-        <p className="mt-9 mb-0 text-15 text-t4">
-          Working on something like this?{" "}
-          <Link href="/#contact" className="underline underline-offset-2">
-            Tell us the shape of it
-          </Link>
-          .
-        </p>
+        {/* The empty state already carries the call to action. */}
+        {cases.length > 0 ? (
+          <p className="mt-9 mb-0 text-15 text-t4">
+            Working on something like this?{" "}
+            <Link href="/#contact" className="underline underline-offset-2">
+              Start a project
+            </Link>
+            .
+          </p>
+        ) : null}
       </section>
     </>
   );

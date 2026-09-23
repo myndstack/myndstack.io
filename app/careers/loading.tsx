@@ -5,19 +5,23 @@ export default function Loading() {
   return (
     <>
       <SkeletonStatus label="Loading roles" />
-      {/* Eyebrow / title / lede match app/careers/page.tsx exactly so the header
-          doesn't flash a different headline and reflow on hydration. */}
-      <PageHeader
-        eyebrow="Join the studio"
-        title="Build the stack behind everything."
-        lede="We work with engineers and designers who care about the layer beneath the product. A small studio, real ownership, work that ships to production."
-        meta="Loading…"
-        breadcrumbs={[{ label: "Home", href: "/" }]}
-      />
+      {/* Same copy as the real page, so the same height. Invisible, not absent:
+          it holds the header's exact space so nothing reflows, and leaves the
+          entrance animation to the real page — shown here, it rose in twice. */}
+      <div className="invisible" aria-hidden="true">
+        <PageHeader
+          eyebrow="Join the studio"
+          title="Build the stack behind everything."
+          lede="We work with engineers and designers who care about the layer beneath the product. A small studio, real ownership, work that ships to production."
+          meta="Loading…"
+          breadcrumbs={[{ label: "Home", href: "/" }]}
+        />
+      </div>
       <div className="page-column pt-14 pb-22">
-        <div className="flex flex-col gap-4">
+        {/* Same rhythm as the real list: 8px gaps, ~96px rows. */}
+        <div className="flex flex-col gap-2">
           {Array.from({ length: 4 }, (_, i) => (
-            <SkeletonCard key={i} className="h-[132px]" />
+            <SkeletonCard key={i} className="h-24" />
           ))}
         </div>
       </div>

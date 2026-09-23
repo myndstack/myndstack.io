@@ -64,7 +64,7 @@ export default function CursorSpotlight() {
     <div
       ref={ref}
       aria-hidden="true"
-      className="ease-brand pointer-events-none fixed top-0 left-0 z-55 opacity-0 transition-opacity duration-600 will-change-transform"
+      className="ease-brand pointer-events-none fixed top-0 left-0 z-55 opacity-0 transition-opacity duration-(--dur-slow) will-change-transform"
       style={{
         width: SIZE,
         height: SIZE,

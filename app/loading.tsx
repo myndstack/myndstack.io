@@ -23,7 +23,7 @@ export default function Loading() {
         <SkeletonBlock className="h-16 w-full max-w-[720px]" />
         <SkeletonBlock className="mt-4 h-5 w-full max-w-[540px]" />
         <SkeletonBlock className="h-5 w-full max-w-[420px]" />
-        <div className="mt-6 flex gap-3.5">
+        <div className="mt-6 flex gap-4">
           <SkeletonBlock className="h-12 w-40" />
           <SkeletonBlock className="h-12 w-40" />
         </div>

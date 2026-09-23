@@ -5,6 +5,7 @@ import type { Faq as FaqItem } from "@/lib/sanity/queries";
 import Reveal from "./Reveal";
 import Scanline from "./Scanline";
 import SectionHeader from "./SectionHeader";
+import Icon from "./Icon";
 
 /** Accordion with one panel open at a time. */
 export default function Faq({ faqs }: { faqs: FaqItem[] }) {
@@ -45,7 +46,7 @@ export default function Faq({ faqs }: { faqs: FaqItem[] }) {
               // (--edge-lip) reads it as a raised plane, same language as the
               // masthead/footer seams. box-shadow joins the transition so the
               // lip fades with the fill — no new motion, just the existing toggle.
-              className={`ease-brand border border-line transition-[background-color,box-shadow] duration-160 ${open ? "bg-surface-3 shadow-[var(--edge-lip)]" : "bg-transparent"}`}
+              className={`ease-brand border border-line transition-[background-color,box-shadow] duration-(--dur-fast) ${open ? "bg-surface-3 shadow-[var(--edge-lip)]" : "bg-transparent"}`}
             >
               <h3 className="m-0">
                 <button
@@ -61,10 +62,10 @@ export default function Faq({ faqs }: { faqs: FaqItem[] }) {
                   </span>
                   <span
                     aria-hidden="true"
-                    className="ease-brand flex-none font-mono text-22 text-lime transition-transform duration-160"
+                    className="ease-brand flex-none text-lime transition-transform duration-(--dur-fast)"
                     style={{ transform: open ? "rotate(45deg)" : "rotate(0deg)" }}
                   >
-                    +
+                    <Icon name="plus" className="size-5" />
                   </span>
                 </button>
               </h3>
@@ -75,11 +76,11 @@ export default function Faq({ faqs }: { faqs: FaqItem[] }) {
                 aria-labelledby={buttonId}
                 // grid-rows 0fr→1fr animates to the panel's natural height without
                 // measuring scrollHeight by hand.
-                className="ease-brand grid transition-[grid-template-rows] duration-300"
+                className="ease-brand grid transition-[grid-template-rows] duration-(--dur-base)"
                 style={{ gridTemplateRows: open ? "1fr" : "0fr" }}
               >
                 <div className="overflow-hidden">
-                  <p className="m-0 max-w-[640px] px-6 pb-6 text-15 leading-[1.6] text-t4">
+                  <p className="m-0 max-w-[640px] px-6 pb-6 text-15 leading-body text-t4">
                     {faq.a}
                   </p>
                 </div>

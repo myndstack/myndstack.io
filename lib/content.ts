@@ -94,7 +94,7 @@ export const NAV_LINKS: readonly NavLink[] = [
   { label: "Stack", href: "/#platform-anchor", section: "platform" },
   { label: "Work", href: "/work", section: "work-cases" },
   { label: "Pricing", href: "/#pricing", section: "pricing" },
-  { label: "Company", href: "/#team", section: "team" },
+  { label: "Studio", href: "/#team", section: "team" },
   { label: "Careers", href: "/careers" },
 ];
 

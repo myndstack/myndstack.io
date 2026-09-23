@@ -90,12 +90,12 @@ function EnterpriseBand() {
           </span>
           <span className="font-mono text-12 text-t5">{ENTERPRISE.tag}</span>
         </div>
-        <p className="m-0 text-13 leading-[1.5] text-t4">{ENTERPRISE.blurb}</p>
+        <p className="m-0 text-13 leading-body text-t4">{ENTERPRISE.blurb}</p>
         <ul className="mt-4 flex list-none flex-col flex-wrap gap-x-7 gap-y-2 p-0 sm:flex-row">
           {ENTERPRISE.points.map((pt) => (
             <li
               key={pt}
-              className="flex gap-2.5 text-13 leading-[1.4] text-t3"
+              className="flex gap-2 text-13 leading-snug text-t3"
             >
               <span aria-hidden="true" className="mt-0.5 flex-none text-lime">
                 ▸

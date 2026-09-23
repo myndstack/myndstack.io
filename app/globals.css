@@ -65,6 +65,14 @@
      default scale is reset so an off-scale size can't sneak back in. Steps from
      22 up carry their own line-height; smaller steps inherit the body's. */
   --text-*: initial;
+  /* Line heights, same idea: body copy, snug (lists, small print), tight
+     (card titles), display (large headings), statement (the manifesto — large
+     type that still reads as a paragraph). */
+  --leading-body: 1.55;
+  --leading-snug: 1.4;
+  --leading-tight: 1.25;
+  --leading-statement: 1.16;
+  --leading-display: 1.02;
   --text-11: 11px;
   --text-12: 12px;
   --text-13: 13px;
@@ -106,6 +114,11 @@
   --edge-lip: inset 0 1px 0 rgba(255, 255, 255, 0.05);
   --edge-ring-faint: 0 0 0 1px rgba(201, 242, 77, 0.08);
   --edge-ring: 0 0 0 1px var(--color-lime);
+  --edge-ring-danger: 0 0 0 1px var(--color-danger);
+  /* The lip's mirror: a lit hairline on a band's bottom edge. */
+  --edge-base: inset 0 -1px 0 rgba(255, 255, 255, 0.05);
+  /* A hairline of ink around light artwork (payment marks) on dark panels. */
+  --edge-ink: 0 0 0 1px rgba(0, 0, 0, 0.35);
   /* Accent glow — the one lit-signal language. `glow` is the solid point of light
      (spine dot, locked-layer and process markers); `glow-soft` is the halo on
      larger lit surfaces. Also emit shadow-glow / shadow-glow-soft utilities. */
@@ -115,9 +128,9 @@
   /* Keyframes */
   --animate-marq: marq 26s linear infinite;
   --animate-sweep: sweep 3.6s ease-in-out infinite;
-  --animate-rise-in: riseIn 0.6s var(--ease-brand) both;
-  --animate-load-mark: loadmark 0.6s var(--ease-brand) both;
-  --animate-load-line: loadline 0.8s var(--ease-brand) both;
+  --animate-rise-in: riseIn var(--dur-slow) var(--ease-brand) both;
+  --animate-load-mark: loadmark 0.4s var(--ease-brand) both;
+  --animate-load-line: loadline 0.5s var(--ease-brand) both;
   --animate-load-fade: loadfade 1.6s ease-in-out infinite;
 }
 
@@ -579,7 +592,7 @@
      staggered entrance rides animate-rise-in, which it also collapses. */
   .masthead {
     position: relative;
-    box-shadow: inset 0 -1px 0 rgba(255, 255, 255, 0.04);
+    box-shadow: var(--edge-base);
   }
   .masthead::before {
     content: "";
@@ -650,9 +663,14 @@
   /* Shared disabled state so consolidated buttons read as inactive without each
      one re-inventing it. The only .btn that disables today is a submit mid-send,
      so the cursor reads as "working", not "forbidden". */
+  /* Disabled reads as "not now"; only a button that is actually working
+     (aria-busy, set while a submit is in flight) shows the progress cursor. */
   .btn:disabled,
   .btn[aria-disabled="true"] {
     opacity: 0.6;
+    cursor: not-allowed;
+  }
+  .btn[aria-busy="true"] {
     cursor: progress;
   }
   /* Secondary action: opaque ink so nothing shows through it, lime border to
@@ -730,7 +748,7 @@
        and paints the outline instead. */
     outline: 2px solid transparent;
     border-color: var(--color-lime);
-    box-shadow: 0 0 0 1px var(--color-lime);
+    box-shadow: var(--edge-ring);
   }
   .btn-ghost-sm:disabled,
   .btn-ghost-sm[aria-disabled="true"] {
@@ -837,6 +855,8 @@
     /* 10/44 — the knob's slope, since this is now the knob's height. */
     clip-path: polygon(10px 0, 100% 0, calc(100% - 10px) 100%, 0 100%);
     pointer-events: none;
+    /* Above the white label, so the ink copy inside it is what shows on lime. */
+    z-index: 1;
   }
 
   .slide-label {
@@ -845,17 +865,29 @@
     font-size: var(--text-15);
     font-weight: 600;
     color: var(--color-t1);
-    /* The label sits above the trail, so it has to survive the lime sweeping
-       under it — hence the flip to ink once the fill passes half way. */
-    transition: color var(--dur-fast) var(--ease-brand);
     pointer-events: none;
   }
-  .slide[data-past-half="true"] .slide-label {
+  /* The same label in ink, inside the fill: the fill's clip-path shows it only
+     where lime is underneath, so each glyph reads on whichever colour it's on.
+     Inset -4px to span the whole track (the fill is inset 4px); SlideToPay
+     counter-translates it so it never moves relative to the white copy. */
+  .slide-fill-label {
+    position: absolute;
+    inset: -4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--font-body);
+    font-size: var(--text-15);
+    font-weight: 600;
     color: var(--color-lime-ink);
+    white-space: nowrap;
+    visibility: hidden;
   }
 
   .slide-knob {
     position: absolute;
+    z-index: 2;
     top: 4px;
     left: 4px;
     display: flex;
@@ -881,7 +913,8 @@
      back below applies. Release is fast (the system responding); the drag
      itself is however slow the user wants (the user deciding). */
   .slide:not(.is-dragging) .slide-knob,
-  .slide:not(.is-dragging) .slide-fill {
+  .slide:not(.is-dragging) .slide-fill,
+  .slide:not(.is-dragging) .slide-fill-label {
     transition: transform var(--dur-base) var(--ease-brand);
   }
 
@@ -1002,7 +1035,7 @@
        and paints the outline instead. */
     outline: 2px solid transparent;
     border-color: var(--color-lime);
-    box-shadow: 0 0 0 1px var(--color-lime);
+    box-shadow: var(--edge-ring);
   }
   .ms-field::placeholder {
     color: var(--color-t5);
@@ -1012,7 +1045,7 @@
   }
   .ms-field.is-invalid:focus {
     border-color: var(--color-danger);
-    box-shadow: 0 0 0 1px var(--color-danger);
+    box-shadow: var(--edge-ring-danger);
   }
   .ms-field:disabled {
     opacity: 0.55;
@@ -1026,7 +1059,7 @@
        selects looking like plain text inputs. Draw our own lime chevron and
        reserve room for it so the affordance is unmistakable. */
     padding-right: 44px;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8' fill='none'%3E%3Cpath d='M1 1.5L6 6.5L11 1.5' stroke='%23C9F24D' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8' fill='none'%3E%3Cpath d='M1 1.5L6 6.5L11 1.5' stroke='%23C9F24D' stroke-width='2' stroke-linecap='square'/%3E%3C/svg%3E");
     background-repeat: no-repeat;
     background-position: right 18px center;
   }
@@ -1132,7 +1165,7 @@
     opacity: 0;
     background-color: var(--color-lime);
     border: 1px solid var(--color-lime-hover);
-    box-shadow: 0 14px 40px rgba(0, 0, 0, 0.42);
+    box-shadow: var(--shadow-lift);
     /* The geometry runs the full morph in both directions so the contraction
        reads as one continuous move; only the fade is staggered. Leaving the
        capsule the pill is the one departing, so it is the one held back. */
@@ -1407,9 +1440,7 @@
   }
   .story-layer.is-locked {
     border-color: var(--color-lime);
-    box-shadow:
-      0 0 0 1px var(--color-lime),
-      0 16px 44px rgba(0, 0, 0, 0.5);
+    box-shadow: var(--edge-ring), var(--shadow-float);
   }
 
   /* --- Pricing billing toggle --- */
@@ -1450,7 +1481,7 @@
     width: auto;
     /* The tiles are light and saturated against a #101012 panel. A hairline of
        the panel's own ink keeps them from vibrating at the edges. */
-    box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.35);
+    box-shadow: var(--edge-ink);
   }
 
   /* --- Manifesto word-by-word brighten --- */
@@ -1703,8 +1734,8 @@
     position: absolute;
     inset: 0;
     background-image:
-      linear-gradient(rgba(201, 242, 77, 0.55) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(201, 242, 77, 0.55) 1px, transparent 1px);
+      linear-gradient(color-mix(in srgb, var(--color-lime) 55%, transparent) 1px, transparent 1px),
+      linear-gradient(90deg, color-mix(in srgb, var(--color-lime) 55%, transparent) 1px, transparent 1px);
     background-size: var(--field-grid) var(--field-grid);
     -webkit-mask-image: radial-gradient(
       circle 150px at var(--fx, 50%) var(--fy, 50%),

@@ -213,12 +213,12 @@ export default function StackStory() {
             <div className="eyebrow mb-5 tracking-[0.16em]">
               The stack · <span ref={counterRef}>01 / 04</span>
             </div>
-            <h2 className="m-0 mb-6 font-display text-42 leading-[0.98] font-bold tracking-[-0.03em] text-balance sm:text-76">
+            <h2 className="m-0 mb-6 font-display text-42 leading-display font-bold tracking-[-0.03em] text-balance sm:text-76">
               One stack.
               <br />
               Every layer.
             </h2>
-            <p className="m-0 max-w-[420px] text-17 leading-[1.55] text-t4">
+            <p className="m-0 max-w-[420px] text-17 leading-body text-t4">
               Scroll to assemble the cognitive stack — data, compute, models, and
               interface, unified behind one API.
             </p>
@@ -233,7 +233,7 @@ export default function StackStory() {
                 }}
                 className="story-layer absolute inset-x-0 flex h-[98px] items-center gap-5 overflow-hidden border border-line bg-surface px-6"
               >
-                <span className="ease-brand absolute inset-y-0 left-0 w-[3px] origin-top scale-y-0 bg-lime transition-transform duration-300 [.is-locked_&]:scale-y-100" />
+                <span className="ease-brand absolute inset-y-0 left-0 w-[3px] origin-top scale-y-0 bg-lime transition-transform duration-(--dur-base) [.is-locked_&]:scale-y-100" />
                 <span className="ease-brand flex-none font-mono text-12 font-bold text-t5 transition-colors [.is-locked_&]:text-lime">
                   {layer.n}
                 </span>
@@ -241,7 +241,7 @@ export default function StackStory() {
                   {layer.title}
                 </span>
                 <span className="font-mono text-12 text-t5">{layer.meta}</span>
-                <span className="ease-brand size-2 flex-none bg-line-3 transition-[background-color,box-shadow] duration-300 [.is-locked_&]:bg-lime [.is-locked_&]:shadow-glow" />
+                <span className="ease-brand size-2 flex-none bg-line-3 transition-[background-color,box-shadow] duration-(--dur-base) [.is-locked_&]:bg-lime [.is-locked_&]:shadow-glow" />
               </div>
             ))}
           </div>

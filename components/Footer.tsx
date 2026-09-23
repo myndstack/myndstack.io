@@ -9,9 +9,9 @@ import SocialIcon from "./SocialIcon";
 import Wordmark from "./Wordmark";
 
 const colHeadClass =
-  "m-0 mb-3.5 font-mono text-11 font-normal tracking-[0.14em] text-t5 uppercase";
+  "m-0 mb-4 font-mono text-11 font-normal tracking-[0.14em] text-t5 uppercase";
 const linkClass =
-  "ease-brand text-13 text-t3 transition-colors duration-160 hover:text-lime";
+  "ease-brand text-13 text-t3 transition-colors duration-(--dur-fast) hover:text-lime";
 
 export default function Footer({ site }: { site: SiteSettings }) {
   const { socials } = site;
@@ -26,7 +26,7 @@ export default function Footer({ site }: { site: SiteSettings }) {
         <div className="flex flex-col gap-6">
           <div>
             <Wordmark height={24} className="mb-4" />
-            <p className="m-0 max-w-[320px] text-13 leading-[1.55] text-t4">
+            <p className="m-0 max-w-[320px] text-13 leading-body text-t4">
               A founder-led studio for AI systems and the software around
               them. Architected and built, end to end.
             </p>
@@ -45,10 +45,10 @@ export default function Footer({ site }: { site: SiteSettings }) {
               live on the /#contact block and in the mobile nav; footer stays
               lean. Above lg the desktop spine already carries these profiles,
               so the row is hidden to avoid duplication. Each button is a 44×44
-              hit area (WCAG 2.5.8); -ml-2.5 aligns the first icon with the
+              hit area (WCAG 2.5.8); -ml-2 aligns the first icon with the
               text above. */}
           {activeSocials.length > 0 && (
-            <div className="-ml-2.5 flex items-center lg:hidden">
+            <div className="-ml-2 flex items-center lg:hidden">
               {activeSocials.map((s) => (
                 <Magnetic key={s.label}>
                   <a
@@ -56,7 +56,7 @@ export default function Footer({ site }: { site: SiteSettings }) {
                     target="_blank"
                     rel="noopener noreferrer"
                     aria-label={s.label}
-                    className="ease-brand inline-flex size-11 items-center justify-center text-t4 transition-colors duration-160 hover:text-lime"
+                    className="ease-brand inline-flex size-11 items-center justify-center text-t4 transition-colors duration-(--dur-fast) hover:text-lime"
                   >
                     <SocialIcon name={s.label} />
                   </a>
@@ -69,7 +69,7 @@ export default function Footer({ site }: { site: SiteSettings }) {
         {FOOTER_COLUMNS.map((column) => (
           <div key={column.title}>
             <h2 className={colHeadClass}>{column.title}</h2>
-            <ul className="m-0 flex list-none flex-col gap-2.5 p-0">
+            <ul className="m-0 flex list-none flex-col gap-2 p-0">
               {column.links.map((link) => (
                 <li key={link.label}>
                   <Link href={link.href} className={linkClass}>
@@ -97,7 +97,7 @@ export default function Footer({ site }: { site: SiteSettings }) {
               <Link
                 key={item.href}
                 href={item.href}
-                className="-my-1.5 py-1.5 text-13 text-t5 transition-colors duration-160 hover:text-lime"
+                className="-my-2 py-2 text-13 text-t5 transition-colors duration-(--dur-fast) hover:text-lime"
               >
                 {item.label}
               </Link>

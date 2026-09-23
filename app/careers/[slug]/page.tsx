@@ -92,10 +92,10 @@ export default async function RolePage({ params }: { params: Promise<Params> }) 
       <div className="page-column pt-14 pb-22">
         <div className="grid grid-cols-1 gap-14 md:grid-cols-[1.15fr_1fr]">
           <article>
-            <dl className="mb-11 grid grid-cols-2 gap-px overflow-hidden border border-line bg-line xs:grid-cols-4">
+            <dl className="mb-11 grid grid-cols-2 gap-px overflow-hidden border border-line bg-line sm:grid-cols-4">
               {facts.map((fact) => (
                 <div key={fact.label} className="bg-surface-3 px-5 py-4">
-                  <dt className="label-mono mb-1.5 text-t4">{fact.label}</dt>
+                  <dt className="label-mono mb-2 text-t4">{fact.label}</dt>
                   <dd className="m-0 font-display text-15 font-semibold">
                     {fact.value}
                   </dd>
@@ -124,7 +124,7 @@ export default async function RolePage({ params }: { params: Promise<Params> }) 
                     {list.items.map((item) => (
                       <li
                         key={item}
-                        className="flex gap-3.5 text-15 leading-[1.55] text-t3"
+                        className="flex gap-4 text-15 leading-body text-t3"
                       >
                         <span
                           aria-hidden="true"
@@ -158,11 +158,11 @@ export default async function RolePage({ params }: { params: Promise<Params> }) 
             {/* Lit sheet: --edge-lip (inset — clip-angular clips OUTSET shadows,
                 and light is what carries elevation on a dark plane). */}
             <div className="clip-angular-26 border border-line bg-surface p-7 shadow-[var(--edge-lip)]">
-              <div className="eyebrow mb-3.5">Apply</div>
+              <div className="eyebrow mb-4">Apply</div>
               <h2 className="m-0 mb-2 font-display text-22 font-semibold tracking-[-0.02em]">
                 {role.title}
               </h2>
-              <p className="mt-0 mb-6 text-15 leading-[1.55] text-t4">
+              <p className="mt-0 mb-6 text-15 leading-body text-t4">
                 No cover letter needed. Links and a few honest lines beat a formatted CV.
               </p>
               <ApplicationForm

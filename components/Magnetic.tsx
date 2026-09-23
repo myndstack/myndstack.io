@@ -47,7 +47,7 @@ export default function Magnetic({
       ref={ref}
       onMouseMove={enabled ? onMouseMove : undefined}
       onMouseLeave={enabled ? reset : undefined}
-      className={`ease-brand inline-block transition-transform duration-300 will-change-transform ${className}`}
+      className={`ease-brand inline-block transition-transform duration-(--dur-base) will-change-transform ${className}`}
     >
       {children}
     </span>

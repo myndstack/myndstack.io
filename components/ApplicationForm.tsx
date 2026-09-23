@@ -110,6 +110,7 @@ export default function ApplicationForm({
       <button
         type="submit"
         disabled={pending || (gate.enabled && gate.widgetFailed)}
+        aria-busy={pending || undefined}
         className="btn btn-lime border-none text-center"
       >
         {pending ? "Sending…" : "Send application →"}

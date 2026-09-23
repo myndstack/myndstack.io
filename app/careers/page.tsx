@@ -52,7 +52,7 @@ export default async function CareersPage() {
             <Reveal key={p.n} className="bg-ink xs:last:odd:col-span-2 md:last:odd:col-span-1 px-6 pt-7 pb-8">
               <div className="mb-8 font-mono text-13 text-lime">{p.n}</div>
               <h3 className="m-0 mb-2 font-display text-22 font-semibold">{p.t}</h3>
-              <p className="m-0 text-15 leading-[1.55] text-t4">{p.d}</p>
+              <p className="m-0 text-15 leading-body text-t4">{p.d}</p>
             </Reveal>
           ))}
         </div>
@@ -62,7 +62,7 @@ export default async function CareersPage() {
         id="open-roles"
         className="page-column scroll-mt-28 pt-12 pb-22"
       >
-        <div className="eyebrow mb-3.5">Open roles</div>
+        <div className="eyebrow mb-4">Open roles</div>
         <h2 className="h2-section mb-9">
           {roles.length === 0
             ? "No open roles right now."
@@ -73,23 +73,23 @@ export default async function CareersPage() {
           <EmptyState
             label="Hiring paused"
             body="We aren't hiring for a specific role at the moment. If you'd be a strong fit for the work we do, we'd still like to hear from you."
-            action={{ href: "/#contact", text: "Introduce yourself →" }}
+            action={{ href: "/#contact", text: "Get in touch →" }}
           />
         ) : null}
 
-        <ul className="m-0 flex list-none flex-col gap-2.5 p-0">
+        <ul className="m-0 flex list-none flex-col gap-2 p-0">
           {roles.map((role, i) => (
             <li key={role.slug}>
               <Reveal delay={i * STAGGER_S}>
                 <Link
                   href={`/careers/${role.slug}`}
-                  className="ease-brand group flex flex-wrap items-center justify-between gap-4 border border-line bg-surface-3 px-6 py-5 text-t1 transition-[border-color,transform] duration-160 hover:translate-x-1 hover:border-lime-edge hover:text-t1"
+                  className="ease-brand group flex flex-wrap items-center justify-between gap-4 border border-line bg-surface-3 px-6 py-5 text-t1 transition-[border-color,transform] duration-(--dur-fast) hover:translate-x-1 hover:border-lime-edge hover:text-t1"
                 >
                   <span className="min-w-0">
                     <span className="block font-display text-17 font-semibold">
                       {role.title}
                     </span>
-                    <span className="mt-1 block max-w-[560px] text-13 leading-[1.5] text-t4">
+                    <span className="mt-1 block max-w-[560px] text-13 leading-body text-t4">
                       {role.lede}
                     </span>
                   </span>
@@ -100,7 +100,7 @@ export default async function CareersPage() {
                     </span>
                     <span
                       aria-hidden="true"
-                      className="ease-brand font-mono text-lime transition-transform duration-160 group-hover:translate-x-1"
+                      className="ease-brand font-mono text-lime transition-transform duration-(--dur-fast) group-hover:translate-x-1"
                     >
                       →
                     </span>
@@ -111,13 +111,16 @@ export default async function CareersPage() {
           ))}
         </ul>
 
-        <p className="mt-9 mb-0 text-15 text-t4">
-          Nothing that fits?{" "}
-          <Link href="/#contact" className="underline underline-offset-2">
-            Tell us what you&rsquo;d want to work on
-          </Link>{" "}
-          — we read every one.
-        </p>
+        {/* The empty state already carries the call to action. */}
+        {roles.length > 0 ? (
+          <p className="mt-9 mb-0 text-15 text-t4">
+            Nothing that fits?{" "}
+            <Link href="/#contact" className="underline underline-offset-2">
+              Get in touch
+            </Link>{" "}
+            and tell us what you&rsquo;d want to work on — we read every one.
+          </p>
+        ) : null}
       </section>
     </>
   );

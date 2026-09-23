@@ -9,6 +9,7 @@ import Link from "next/link";
 import { useEffect, useRef } from "react";
 import { NAV_LINKS } from "@/lib/content";
 import Wordmark from "./Wordmark";
+import Icon from "./Icon";
 
 const FOCUSABLE = "a[href], button:not([disabled])";
 
@@ -93,7 +94,7 @@ export default function MobileDrawer({ open, onClose, contactEmail }: Props) {
       <div
         onClick={onClose}
         aria-hidden="true"
-        className="ease-brand fixed inset-0 z-119 bg-black/55 transition-opacity duration-300"
+        className="ease-brand fixed inset-0 z-119 bg-black/55 transition-opacity duration-(--dur-base)"
         style={{
           opacity: open ? 1 : 0,
           pointerEvents: open ? "auto" : "none",
@@ -107,7 +108,7 @@ export default function MobileDrawer({ open, onClose, contactEmail }: Props) {
         aria-modal={open}
         aria-label="Menu"
         inert={!open}
-        className="ease-brand fixed inset-y-0 right-0 z-120 flex w-80 max-w-[84vw] flex-col border-l border-line bg-ink px-6 pt-6 pb-7 transition-transform duration-300"
+        className="ease-brand fixed inset-y-0 right-0 z-120 flex w-80 max-w-[84vw] flex-col border-l border-line bg-ink px-6 pt-6 pb-7 transition-transform duration-(--dur-base)"
         style={{ transform: open ? "translateX(0)" : "translateX(100%)" }}
       >
         <div className="mb-7 flex items-center justify-between">
@@ -117,9 +118,9 @@ export default function MobileDrawer({ open, onClose, contactEmail }: Props) {
             type="button"
             onClick={onClose}
             aria-label="Close menu"
-            className="btn-icon size-11 font-mono text-17"
+            className="btn-icon flex size-11 items-center justify-center"
           >
-            ✕
+            <Icon name="close" className="size-4" />
           </button>
         </div>
 

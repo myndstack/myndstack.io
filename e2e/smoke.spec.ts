@@ -11,7 +11,7 @@ import { expect, test, type Page } from "@playwright/test";
  * this file covers the things that only exist in a real browser.
  */
 
-/** The loader covers the page for ~0.8s then fades over ~0.4s; 3s is slack. */
+/** The loader covers the page for ~0.5s then fades over ~0.3s; 3s is slack. */
 const LOADER_MS = 3000;
 
 async function landOnHome(page: Page) {

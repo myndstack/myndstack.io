@@ -24,12 +24,12 @@ export default async function Team() {
       <ul className="m-0 flex list-none flex-col gap-5 p-0 sm:flex-row sm:flex-wrap sm:gap-8">
         {people.map((member) => (
           <li key={member.n}>
-            <Reveal className="group flex items-center gap-5">
-              <div className="ease-brand relative flex size-32 flex-none items-center justify-center overflow-hidden border border-line bg-[linear-gradient(150deg,var(--color-line),var(--color-ink))] transition-[border-color,box-shadow] duration-160 group-hover:border-lime-edge group-hover:shadow-[var(--edge-ring-faint),var(--shadow-lift)]">
+            <Reveal className="flex items-center gap-5">
+              <div className="relative flex size-32 flex-none items-center justify-center overflow-hidden border border-line bg-[linear-gradient(150deg,var(--color-line),var(--color-ink))]">
                 {/* Decorative initials — the name is repeated beside the tile. */}
                 <span
                   aria-hidden="true"
-                  className="ease-brand font-display text-30 font-bold text-line-3 transition-colors duration-300 group-hover:text-t7"
+                  className="font-display text-30 font-bold text-line-3"
                 >
                   {member.i}
                 </span>

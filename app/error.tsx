@@ -19,14 +19,14 @@ export default function Error({
   }, [error]);
 
   return (
-    <section className="page-column flex min-h-[70vh] flex-col items-start justify-center pt-[calc(88px+var(--nav-height))] pb-22">
-      <div className="eyebrow mb-3.5">Error</div>
+    <section className="page-column flex min-h-[70vh] flex-col items-start justify-center pt-[calc(72px+var(--nav-height))] pb-22">
+      <div className="eyebrow mb-4">Error</div>
       <h1 className="m-0 mb-4 font-display text-30 sm:text-56 leading-none font-bold tracking-[-0.03em] text-balance">
         Something in the stack
         <br />
         <span className="text-lime">gave way.</span>
       </h1>
-      <p className="m-0 mb-9 max-w-[460px] text-17 leading-[1.55] text-t4">
+      <p className="m-0 mb-9 max-w-[460px] text-17 leading-body text-t4">
         This one is on us, not you. Try again — and if it keeps happening, tell us
         what you were doing and we&rsquo;ll fix it.
       </p>
@@ -37,7 +37,7 @@ export default function Error({
         </p>
       ) : null}
 
-      <div className="flex flex-wrap gap-3.5">
+      <div className="flex flex-wrap gap-4">
         <button type="button" onClick={reset} className="btn btn-lime cursor-pointer">
           Try again
         </button>
