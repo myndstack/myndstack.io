@@ -14,7 +14,6 @@
 
   /* Ink / surfaces */
   --color-ink: #0a0a0b;
-  --color-true-black: #000000;
   --color-surface: #101012;
   /* No --color-surface-2: it was #111113, one value/channel off --surface
      (imperceptible) and used exactly once. Folded into --surface. */
@@ -22,7 +21,6 @@
 
   /* Hairlines */
   --color-line: #1f1f23;
-  --color-line-2: #26262b;
   --color-line-3: #2e2e34;
 
   /* Text ramp (t1 brightest → t8 dimmest).
@@ -50,7 +48,6 @@
   --color-lime-ink: #18230a; /* ink on lime */
   --color-lime-ink-2: #3d5010; /* muted on lime */
   --color-lime-ink-3: #2e3d08; /* body on lime */
-  --color-lime-aa: #6e8e12; /* AA-safe lime for text on light */
 
   /* Hover edge: lime at 45% so an interactive card reads as "you're on it"
      without borrowing the solid-lime border the design reserves for locked and
@@ -85,7 +82,6 @@
 
   /* Keyframes */
   --animate-marq: marq 26s linear infinite;
-  --animate-marq-slow: marq 30s linear infinite;
   --animate-sweep: sweep 3.6s ease-in-out infinite;
   --animate-rise-in: riseIn 0.6s var(--ease-brand) both;
   --animate-load-mark: loadmark 0.9s var(--ease-brand) both;
@@ -612,29 +608,26 @@
   /* Secondary action: opaque ink so nothing shows through it, lime border to
      pair with the filled lime primary. `.btn-icon` is the square variant used
      for the burger and drawer close — same skin, different shape. */
+  /* Also carries its own transition: `.btn-outline` is used standalone (e.g. the
+     Enterprise band) as well as alongside `.btn`, so without one its hover and
+     press would snap with no ease. */
   .btn-outline,
   .btn-icon {
     background: var(--color-ink);
     color: #fff;
     border: 1px solid var(--color-lime);
-  }
-  .btn-outline:hover,
-  .btn-icon:hover {
-    background: var(--color-surface-3);
-    border-color: var(--color-lime-hover);
-    color: var(--color-lime);
-  }
-  /* `.btn-outline` is used standalone (e.g. the Enterprise band) as well as
-     alongside `.btn`, so give it the transition here too — otherwise its hover
-     and press would snap with no ease. */
-  .btn-outline,
-  .btn-icon {
     cursor: pointer;
     transition:
       transform 0.14s var(--ease-brand),
       background 0.16s var(--ease-brand),
       border-color 0.16s var(--ease-brand),
       color 0.16s var(--ease-brand);
+  }
+  .btn-outline:hover,
+  .btn-icon:hover {
+    background: var(--color-surface-3);
+    border-color: var(--color-lime-hover);
+    color: var(--color-lime);
   }
   /* Standard sub-page content column: 1200px max, 20px inline gutter,
      56px at sm+. Vertical padding stays per-page because the leading section

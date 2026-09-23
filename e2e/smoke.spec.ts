@@ -541,7 +541,15 @@ test.describe("touch targets and error affordances", () => {
  * coupling this to it would make it flake the first time a new decorative element
  * appears. Serious+critical is the meaningful, stable line.
  */
-const A11Y_ROUTES = ["/", "/careers", "/work", "/privacy"];
+const A11Y_ROUTES = [
+  "/",
+  "/careers",
+  "/work",
+  "/privacy",
+  "/refunds",
+  // The checkout page — the one route that takes money.
+  "/pricing/discovery-sprint",
+];
 const A11Y_VIEWPORTS = [
   { name: "desktop", width: 1280, height: 900 },
   { name: "mobile", width: 390, height: 844 },
@@ -599,6 +607,17 @@ test.describe("no serious accessibility violations", () => {
       });
     }
   }
+});
+
+test("a role listing (application form) has no serious violations", async ({ page }) => {
+  // Role slugs come from Sanity, so resolve one rather than hardcoding it.
+  await page.goto("/careers");
+  const href = await page.locator('a[href^="/careers/"]').first().getAttribute("href");
+  expect(href).toBeTruthy();
+  await page.goto(href!);
+  await page.waitForTimeout(LOADER_MS);
+  const found = await seriousViolations(page);
+  expect(found, `serious/critical violations:\n${found.join("\n")}`).toEqual([]);
 });
 
 test.describe("navigation reaches everything", () => {
@@ -798,5 +817,55 @@ test.describe("the intro plays once per session", () => {
     await expect(page.locator(".loader")).toBeVisible();
 
     await context.close();
+  });
+});
+
+test.describe("keyboard and assistive-tech plumbing", () => {
+  test("the skip link lands on the main content on a non-home route", async ({ page }) => {
+    // It used to point at #work, which only exists on the homepage.
+    await page.goto("/privacy");
+    await page.waitForTimeout(LOADER_MS);
+    const skip = page.locator("a.skip");
+    await skip.focus();
+    await page.keyboard.press("Enter");
+    await expect(page.locator("main#main")).toBeFocused();
+  });
+
+  test("no element id is duplicated on pages with two forms", async ({ page }) => {
+    // The footer newsletter's honeypot shared a fixed id with the contact
+    // form's, pointing the second label at the wrong input.
+    await landOnHome(page);
+    const duplicates = await page.evaluate(() => {
+      const seen = new Map<string, number>();
+      document.querySelectorAll("[id]").forEach((el) => {
+        seen.set(el.id, (seen.get(el.id) ?? 0) + 1);
+      });
+      return [...seen].filter(([, n]) => n > 1).map(([id]) => id);
+    });
+    expect(duplicates).toEqual([]);
+  });
+
+  test("the mobile drawer is a modal: Esc closes it and focus returns", async ({ page }) => {
+    await page.setViewportSize({ width: 375, height: 812 });
+    await landOnHome(page);
+
+    const burger = page.locator('[aria-controls="mobile-drawer"]');
+    await burger.click();
+    await expect(burger).toHaveAttribute("aria-expanded", "true");
+
+    const drawer = page.locator("#mobile-drawer");
+    await expect(drawer).toHaveAttribute("role", "dialog");
+    await expect(drawer).toHaveAttribute("aria-modal", "true");
+    // The page behind is out of reach for assistive tech while it's open.
+    expect(await page.locator("main#main").evaluate((el) => (el as HTMLElement).inert)).toBe(
+      true,
+    );
+
+    await page.keyboard.press("Escape");
+    await expect(burger).toHaveAttribute("aria-expanded", "false");
+    await expect(burger).toBeFocused();
+    expect(await page.locator("main#main").evaluate((el) => (el as HTMLElement).inert)).toBe(
+      false,
+    );
   });
 });
