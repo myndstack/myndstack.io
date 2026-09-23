@@ -27,8 +27,8 @@ export default function Footer({ site }: { site: SiteSettings }) {
           <div>
             <Wordmark height={24} className="mb-4" />
             <p className="m-0 max-w-[320px] text-[14px] leading-[1.55] text-t4">
-              Enterprise AI &amp; cognitive infrastructure for mission-critical
-              software. One stack. Every layer.
+              A founder-led studio for AI systems and the software around
+              them. Architected and built, end to end.
             </p>
           </div>
 
@@ -84,7 +84,7 @@ export default function Footer({ site }: { site: SiteSettings }) {
 
       <div className="mx-auto mt-14 max-w-[1200px] border-t border-surface-3 pt-6">
         <div className="flex flex-col-reverse items-start gap-4 text-[13px] text-t5 md:flex-row md:items-center md:justify-between md:gap-6">
-          <span className="whitespace-nowrap">© 2026 {SITE.legalName}</span>
+          <span className="whitespace-nowrap">© {new Date().getFullYear()} {SITE.legalName}</span>
           <nav
             aria-label="Legal"
             className="flex flex-wrap items-center gap-x-5 gap-y-2"

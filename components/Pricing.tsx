@@ -72,9 +72,9 @@ const ENTERPRISE = {
   blurb:
     "For large or regulated programs — custom scope, delivered under your terms.",
   points: [
-    "A dedicated, ring-fenced team",
-    "Security review, SLAs & terms in your SOW",
-    "Procurement, compliance & MSA-ready",
+    "Founder-led, with senior specialists added as the scope needs",
+    "Security review, SLAs & terms written into your SOW",
+    "Works within your procurement & MSA process",
   ],
   cta: "Let's talk →",
 } as const;

@@ -28,7 +28,7 @@ export default function Integrations() {
         className="mb-11"
         eyebrow="Integrations"
         title="Runs the stack you already have."
-        aside="Cognitive infrastructure that plugs into your models, cloud, data, and delivery — instead of demanding a rebuild."
+        aside="We build on the models, cloud, data, and delivery tools you already run — instead of demanding a rebuild."
       />
 
       <Reveal>

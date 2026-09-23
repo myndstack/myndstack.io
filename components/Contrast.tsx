@@ -13,7 +13,7 @@ export default async function Contrast() {
         className="mb-9 max-w-[620px]"
         eyebrow="Why one stack"
         title="Stop maintaining the glue."
-        lede="Most enterprise AI runs on code nobody owns, stitched between vendors. We replace it with one engineered layer."
+        lede="Most AI projects run on code nobody owns, stitched between vendors. We architect and build the whole thing as one."
       />
 
       <div className="grid grid-cols-1 gap-[18px] sm:grid-cols-2">

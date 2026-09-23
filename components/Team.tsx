@@ -11,8 +11,8 @@ export default async function Team() {
       <SectionHeader
         className="mb-11"
         eyebrow="The studio"
-        title="A small team of engineers who ship."
-        aside="No account managers between you and the people building your stack."
+        title="Founder-led. Hands on the code."
+        aside="No account managers between you and the person building your stack."
       />
 
       <div className="grid grid-cols-1 gap-[18px] xs:grid-cols-2 md:grid-cols-4">

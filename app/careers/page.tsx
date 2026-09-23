@@ -9,14 +9,14 @@ import { pageMetadata } from "@/lib/metadata";
 
 const title = "Careers — Myndstack";
 const description =
-  "Build the stack behind everything. Open engineering and design roles at Myndstack — small team, real ownership, mission-critical work.";
+  "Build the stack behind everything. Engineering and design roles at Myndstack — a small studio, real ownership, work that ships to production.";
 
 export const metadata: Metadata = pageMetadata({ path: "/careers", title, description });
 
 const PRINCIPLES = [
   {
     n: "01",
-    t: "Small team, real ownership",
+    t: "Small studio, real ownership",
     d: "No account managers, no ticket queues. You own a layer and the decisions that shape it.",
   },
   {
@@ -26,8 +26,8 @@ const PRINCIPLES = [
   },
   {
     n: "03",
-    t: "Mission-critical by default",
-    d: "The systems we build carry real load with contractual uptime. That raises the bar and the interest.",
+    t: "Production, not prototypes",
+    d: "What we build goes live and gets used. That raises the bar and the interest.",
   },
 ];
 
@@ -39,7 +39,7 @@ export default async function CareersPage() {
       <PageHeader
         eyebrow="Join the studio"
         title="Build the stack behind everything."
-        lede="We hire engineers and designers who care about the layer beneath the product. Small team, real ownership, mission-critical work."
+        lede="We work with engineers and designers who care about the layer beneath the product. A small studio, real ownership, work that ships to production."
         meta={`${roles.length} open role${roles.length === 1 ? "" : "s"} · Remote`}
         breadcrumbs={[{ label: "Home", href: "/" }]}
       />

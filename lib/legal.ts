@@ -199,70 +199,55 @@ export const LEGAL_DOCS: Record<LegalDoc["slug"], LegalDoc> = {
     slug: "refunds",
     title: "Refunds & cancellation",
     eyebrow: "Legal · Refunds",
-    lede: `How subscriptions start, stop, and get refunded — and how one-off project engagements are billed and cancelled. Anything covered by a signed statement of work or order form is governed by that document instead.`,
+    lede: `How the Discovery Sprint and our other engagements are paid for, cancelled, and refunded. Anything covered by a signed statement of work or order form is governed by that document instead.`,
     sections: [
       {
         heading: "What this covers",
         body: [
-          "Two things get paid for on this site. The first is a recurring subscription to the platform — Platform or Scale — billed monthly or annually. The second is a one-time project engagement — a website, an application, a bespoke AI build, a discovery sprint — quoted per piece of work and billed against milestones. The sections below are grouped that way.",
+          "Two kinds of payment reach us. The first is the Discovery Sprint — a fixed-fee, one-time engagement you can pay for online through this site. The second is a quoted engagement — a Build, or an ongoing Studio arrangement — scoped in a statement of work and invoiced against milestones or monthly. There are no subscriptions, automatic renewals, or self-serve accounts on this site.",
         ],
       },
       {
         heading: "Service delivery",
         body: [
-          "Subscriptions are a digital service; there is nothing to ship. Your subscription is provisioned automatically as soon as our payment processor confirms a successful charge — typically within minutes. If you have paid and the account has not activated within an hour, contact us and we will fix it or refund the charge in full.",
-          "Project engagements are delivered under the milestones set out in the statement of work — designs, builds, and handovers ship on the dates recorded there. Where there is a discrepancy between the SOW and this page, the SOW wins.",
+          "The Discovery Sprint is a professional service; there is nothing to ship. When our payment processor confirms your payment we are notified, and we email you within one business day to schedule the kickoff. If you have paid and have not heard from us within two business days, contact us and we will fix it or refund the charge in full.",
+          "Build and Studio engagements are delivered under the milestones set out in the statement of work — designs, builds, and handovers ship on the dates recorded there. Where there is a discrepancy between the SOW and this page, the SOW wins.",
         ],
       },
       {
-        heading: "Free tier",
+        heading: "Discovery Sprint",
         body: [
-          "The free Platform tier has no charge and no refund to make. You can stop using it at any time; ask us to delete your account and we will do so within 30 days.",
+          "If you cancel before the kickoff session, we refund the fee in full. If we cannot schedule the kickoff within 30 days of your payment, you may ask for a full refund at any point until it happens.",
+          "Once the sprint has started the fee is non-refundable, because the time is already committed. If you stop part-way, we hand over everything produced up to that point.",
+          "If you go on to a Build with us within 30 days of the sprint ending, the sprint fee is credited against the Build.",
         ],
       },
       {
-        heading: "Monthly plans",
+        heading: "Build and Studio engagements",
         body: [
-          "You can cancel a monthly plan at any time from your account or by writing to us. Cancellation stops the next renewal; the current month runs to the end of its cycle and is not pro-rated on cancellation. If you cancel because the service materially failed to work as described, and we cannot resolve it within a reasonable window, we will refund the unused portion of the month.",
-        ],
-      },
-      {
-        heading: "Annual plans",
-        body: [
-          "Annual plans are billed once for twelve months and include the two-months-free discount shown on the pricing page. You can cancel a renewal at any time. Mid-term refunds are calculated at the equivalent monthly rate (i.e. the annual discount is unwound) for the unused whole months, less any months already consumed.",
-        ],
-      },
-      {
-        heading: "Downgrades and upgrades",
-        body: [
-          "Upgrades take effect immediately and are pro-rated for the remainder of the cycle. Downgrades take effect at the start of the next cycle so that features you have already paid for remain available for the period you paid for them.",
-        ],
-      },
-      {
-        heading: "Project engagements",
-        body: [
-          "One-off engagements — a website build, a mobile app, a bespoke AI system, a discovery sprint — are governed by the statement of work we sign for that piece of work, which sets out milestones, fees, and payment terms. This section is the default position where the SOW is silent.",
-          "Deposits and mobilisation fees are non-refundable once work has started, because the engineers, designers, and infrastructure they need are already committed. Payments against a delivered milestone are non-refundable once you have accepted the milestone, or thirty days have passed without you raising an objection.",
-          "If you cancel a project part-way through, you are billed for hours worked and expenses incurred up to the date of cancellation, credited against any advance already paid. Unspent advance is refunded within fifteen business days, and we hand over the work-in-progress in the state it is in — designs, source, and documentation for what has been completed.",
+          "Build and Studio engagements are governed by the statement of work we sign for that piece of work, which sets out milestones, fees, and payment terms. This section is the default position where the SOW is silent.",
+          "Deposits and mobilisation fees are non-refundable once work has started, because the time and infrastructure they pay for are already committed. Payments against a delivered milestone are non-refundable once you have accepted the milestone, or thirty days have passed without you raising an objection.",
+          "If you cancel a Build part-way through, you are billed for hours worked and expenses incurred up to the date of cancellation, credited against any advance already paid. Unspent advance is refunded within fifteen business days, and we hand over the work-in-progress in the state it is in — designs, source, and documentation for what has been completed.",
+          "A monthly Studio engagement can be ended with 30 days' written notice from either side. The month in progress is billed in full and is not pro-rated.",
           "If we cancel — which we would only do for a material breach on your side, or an event that makes lawful completion impossible — the same reconciliation applies in the other direction.",
         ],
       },
       {
         heading: "Failed and duplicate charges",
         body: [
-          "If you were charged twice, or charged after a cancellation confirmation, contact us with the transaction reference and we will reverse the charge. Reversals normally reach the source instrument within 5–7 business days, subject to the payment processor's own timelines.",
+          "If you were charged twice for the same thing, contact us with the transaction reference and we will reverse the charge. Reversals normally reach the source instrument within 5–7 business days, subject to the payment processor's own timelines.",
         ],
       },
       {
         heading: "Chargebacks and disputes",
         body: [
-          "Please talk to us before raising a chargeback with your bank — nine times in ten it is a billing question we can resolve the same day. If a chargeback is raised, the account may be suspended until the dispute is closed to avoid further charges accruing during the review.",
+          "Please talk to us before raising a chargeback with your bank — nine times in ten it is a billing question we can resolve the same day. If a chargeback is raised, work on the engagement may be paused until the dispute is closed.",
         ],
       },
       {
         heading: "How to request a refund",
         body: [
-          `Email ${SITE.supportEmail} with the subject line "Refund", the account email or project reference, and the transaction reference. We acknowledge within one business day and confirm the outcome within seven. Unresolved refund requests can be escalated to our Grievance Officer through the process set out on the privacy page, and after that to the payment processor named on the subprocessors page.`,
+          `Email ${SITE.supportEmail} with the subject line "Refund", the email you paid with or your project reference, and the transaction reference. We acknowledge within one business day and confirm the outcome within seven. Unresolved refund requests can be escalated to our Grievance Officer through the process set out on the privacy page, and after that to the payment processor named on the subprocessors page.`,
         ],
       },
       {
@@ -289,7 +274,7 @@ export const LEGAL_DOCS: Record<LegalDoc["slug"], LegalDoc> = {
       {
         heading: "Strictly necessary storage",
         body: [
-          "If you sign in to a product account or submit a form, we may set a short-lived, first-party cookie or use browser storage for security reasons — for example a CSRF token or a session identifier. These are not used for tracking. They expire when you close the tab, or shortly after.",
+          "If you submit a form, we may set a short-lived, first-party cookie or use browser storage for security reasons — for example a CSRF token or a session identifier. These are not used for tracking. They expire when you close the tab, or shortly after.",
           'The pricing section also sets two functional first-party cookies — "pref_region" (which currency and tax notes to show) and "pref_source" (whether the region was picked by you or auto-detected). Both last 60 days and are used only to keep the price you see consistent between visits.',
         ],
       },
@@ -318,7 +303,7 @@ export const LEGAL_DOCS: Record<LegalDoc["slug"], LegalDoc> = {
     slug: "dpa",
     title: "Data Processing Addendum",
     eyebrow: "Legal · DPA",
-    lede: `A template Data Processing Addendum that attaches to Scale and Studio agreements. Reproduced here for transparency; the executed version in your order form is the binding one.`,
+    lede: `A template Data Processing Addendum that attaches to Build and Studio agreements. Reproduced here for transparency; the executed version in your order form is the binding one.`,
     sections: [
       {
         heading: "Definitions",
@@ -416,7 +401,7 @@ export const LEGAL_DOCS: Record<LegalDoc["slug"], LegalDoc> = {
       {
         heading: "Payments",
         body: [
-          "Razorpay Software Private Limited — collection of card, UPI, netbanking, and wallet payments for paid subscriptions. Data hosted in India. Card data never touches Myndstack systems; Razorpay is PCI-DSS Level 1 certified and is the party in PCI scope. We are actively evaluating additional processors — Stripe (international cards), Google Pay, and PhonePe (UPI) — and will list any that go live here at least 30 days before they process customer traffic.",
+          "Razorpay Software Private Limited — collection of card, UPI, netbanking, and wallet payments made through this site. Data hosted in India. Card data never touches Myndstack systems; Razorpay is PCI-DSS Level 1 certified and is the party in PCI scope. We are actively evaluating additional processors — Stripe (international cards), Google Pay, and PhonePe (UPI) — and will list any that go live here at least 30 days before they process customer traffic.",
         ],
       },
       {

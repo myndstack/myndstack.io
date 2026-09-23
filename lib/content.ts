@@ -85,13 +85,13 @@ export const SITE = {
 export type NavLink = { label: string; href: string; section?: string };
 
 export const NAV_LINKS: readonly NavLink[] = [
-  // Platform's href targets `#platform-anchor` (a hidden span 120vh into the
+  // Stack's href targets `#platform-anchor` (a hidden span 120vh into the
   // StackStory section), NOT the section's own `#platform`. Landing flush at
   // the section top puts the reveal formula at `progress = 0`, which paints
   // every tile at opacity 0 — see StackStory.tsx for the anchor span itself
   // and the reasoning. `section: "platform"` stays because scroll-spy watches
   // the section, not the anchor.
-  { label: "Platform", href: "/#platform-anchor", section: "platform" },
+  { label: "Stack", href: "/#platform-anchor", section: "platform" },
   { label: "Work", href: "/work", section: "work-cases" },
   { label: "Pricing", href: "/#pricing", section: "pricing" },
   { label: "Company", href: "/#team", section: "team" },
@@ -761,12 +761,12 @@ export const LEGAL_LINKS = [
 
 export const FOOTER_COLUMNS = [
   {
-    title: "Platform",
+    title: "Explore",
     links: [
       // Was two labels ("AI platforms" / "Consulting") pointing at the same
       // #work-grid anchor — a padded menu that reads as a dark pattern. Now
       // three distinct, honest destinations mirroring the nav.
-      { label: "Platform", href: "/#platform-anchor" },
+      { label: "Stack", href: "/#platform-anchor" },
       { label: "Work", href: "/work" },
       { label: "Pricing", href: "/#pricing" },
     ],

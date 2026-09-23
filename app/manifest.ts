@@ -9,10 +9,10 @@ import type { MetadataRoute } from "next";
  */
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: "Myndstack — Enterprise AI & Cognitive Infrastructure",
+    name: "Myndstack — Founder-led AI & software engineering studio",
     short_name: "Myndstack",
     description:
-      "Mission-critical systems, SaaS platforms, digital transformation, and technology consulting at scale — one engineered stack from data plane to model.",
+      "A founder-led studio that architects and builds the whole stack — AI systems, the web and mobile products around them, and the cloud underneath.",
     start_url: "/",
     display: "standalone",
     background_color: "#0A0A0B",

@@ -10,7 +10,7 @@ export default function Loading() {
       <PageHeader
         eyebrow="Join the studio"
         title="Build the stack behind everything."
-        lede="We hire engineers and designers who care about the layer beneath the product. Small team, real ownership, mission-critical work."
+        lede="We work with engineers and designers who care about the layer beneath the product. A small studio, real ownership, work that ships to production."
         meta="Loading…"
         breadcrumbs={[{ label: "Home", href: "/" }]}
       />

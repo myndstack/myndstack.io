@@ -54,11 +54,11 @@ const spaceMono = Space_Mono({
   display: "swap",
 });
 
-const title = "Myndstack — Enterprise AI & Cognitive Infrastructure";
+const title = "Myndstack — Founder-led AI & software engineering studio";
 const description =
-  "Mission-critical systems, SaaS platforms, digital transformation, and technology consulting at scale — one engineered stack from data plane to model.";
+  "A founder-led studio that architects and builds the whole stack — AI systems, the web and mobile products around them, and the cloud underneath. From first sketch to production.";
 const social =
-  "Mission-critical systems | SaaS platforms | Digital transformation | Technology consulting at scale";
+  "AI systems | Web & mobile products | Cloud & data | Architecture, built end to end";
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
