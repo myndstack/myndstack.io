@@ -63,6 +63,16 @@ const nextConfig: NextConfig = {
         },
       ],
     },
+    {
+      /**
+       * The landing redesign is built at /preview until it's swapped in as "/".
+       * noindex in the header as well as the page meta, so no crawler indexes a
+       * half-built page. Deliberately NOT a robots.txt Disallow — a disallowed
+       * URL is never fetched, so the noindex would never be seen. Remove at swap.
+       */
+      source: "/preview",
+      headers: [{ key: "X-Robots-Tag", value: "noindex, nofollow" }],
+    },
   ],
 };
 

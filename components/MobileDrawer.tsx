@@ -1,13 +1,16 @@
-/* eslint-disable @next/next/no-html-link-for-pages --
-   Root-relative fragments like "/#contact" are same-document scrolls on the
+"use client";
+
+/* Same-document section links are native anchors:
+   fragments like "#contact" (see homeHash in lib/landing/route.ts) scroll the
    homepage. A native anchor is the right primitive for that; next/link would
    route through the App Router just to move the scroll position. Real route
    changes below still use <Link>. */
-"use client";
 
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { useEffect, useRef } from "react";
 import { NAV_LINKS } from "@/lib/content";
+import { homeHash } from "@/lib/landing/route";
 import Wordmark from "./Wordmark";
 import Icon from "./Icon";
 
@@ -23,6 +26,7 @@ type Props = {
 /** Right slide-in menu for ≤760px. Traps focus while open and closes on Esc. */
 export default function MobileDrawer({ open, onClose, contactEmail }: Props) {
   const drawerRef = useRef<HTMLElement>(null);
+  const pathname = usePathname();
   const closeButtonRef = useRef<HTMLButtonElement>(null);
 
   // Move focus into the drawer once it has slid in.
@@ -135,7 +139,7 @@ export default function MobileDrawer({ open, onClose, contactEmail }: Props) {
               <a
                 key={link.href}
                 className="drawer-link"
-                href={link.href}
+                href={homeHash(link.href, pathname)}
                 onClick={onClose}
               >
                 {link.label}
@@ -154,7 +158,7 @@ export default function MobileDrawer({ open, onClose, contactEmail }: Props) {
         </nav>
 
         <a
-          href="/#contact"
+          href={homeHash("/#contact", pathname)}
           onClick={onClose}
           className="btn btn-lime mt-6 w-full text-center"
         >

@@ -1,7 +1,9 @@
 "use client";
 
+import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { useReducedMotion } from "@/lib/hooks";
+import { LANDING_PREVIEW_PATH } from "@/lib/landing/route";
 import { LOADER_SEEN_KEY } from "@/lib/loader-seen";
 import Wordmark from "./Wordmark";
 
@@ -10,8 +12,6 @@ import Wordmark from "./Wordmark";
 const FADE_AT_MS = 500;
 const FADE_DURATION_MS = 300;
 const SPARK_COUNT = 90;
-/** Intro hold (500) + longest entrance step (240) + the 600ms rise, rounded up. */
-const ENTRANCE_DONE_MS = 1500;
 /** ~0.5s at 60fps, so the burst finishes as the fade begins. */
 const SPARK_FRAMES = 30;
 
@@ -52,18 +52,23 @@ export default function Loader() {
    * visit is `gone` on its very first client render — it never touches `inert`
    * or starts the canvas and then undoes it a render later.
    */
-  const skip = reduced || seen;
+  // The redesigned landing (/preview) has no intro overlay — its hero draw is
+  // the intro. usePathname works during SSR, so the overlay is never even in
+  // /preview's server HTML (and #site is never made inert there).
+  const onPreview = usePathname() === LANDING_PREVIEW_PATH;
+  const skip = reduced || seen || onPreview;
   const gone = skip || finished;
 
-  // After the first page's entrance has played (intro hold + the longest
-  // stagger + the rise itself), mark it so later client navigations don't
-  // replay header entrances on top of the view transition.
+  // Count a /preview visit as "seen", so soft-navigating from it to the live
+  // homepage doesn't drop a full-screen overlay mid-session.
   useEffect(() => {
-    const t = window.setTimeout(() => {
-      document.documentElement.dataset.entered = "1";
-    }, ENTRANCE_DONE_MS);
-    return () => window.clearTimeout(t);
-  }, []);
+    if (!onPreview) return;
+    try {
+      window.sessionStorage.setItem(LOADER_SEEN_KEY, "1");
+    } catch {
+      // Storage blocked — nothing to remember.
+    }
+  }, [onPreview]);
 
   useEffect(() => {
     if (skip) return;

@@ -1,6 +1,8 @@
 "use client";
 
+import { usePathname } from "next/navigation";
 import { useEffect, useRef } from "react";
+import { LANDING_PREVIEW_PATH } from "@/lib/landing/route";
 
 const SIZE = 640;
 /** Fraction of the remaining distance covered per frame. */
@@ -9,10 +11,13 @@ const EASE = 0.14;
 /** A soft lime glow that trails the pointer. Desktop pointers only. */
 export default function CursorSpotlight() {
   const ref = useRef<HTMLDivElement>(null);
+  // The redesigned landing (/preview) replaces every glow/canvas effect with
+  // SVG motion; the spotlight sits in the layout, so it opts out there.
+  const off = usePathname() === LANDING_PREVIEW_PATH;
 
   useEffect(() => {
     const el = ref.current;
-    if (!el) return;
+    if (!el || off) return;
 
     const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     const coarse = !window.matchMedia("(pointer: fine)").matches;
@@ -58,7 +63,9 @@ export default function CursorSpotlight() {
       window.removeEventListener("mousemove", onMove);
       if (raf) cancelAnimationFrame(raf);
     };
-  }, []);
+  }, [off]);
+
+  if (off) return null;
 
   return (
     <div

@@ -108,6 +108,9 @@ export const NAV_LINKS: readonly NavLink[] = [
 export const SPY_IDS = [
   ...NAV_LINKS.flatMap((l) => (l.section ? [l.section] : [])),
   "manifesto",
+  // Tail sentinel for the redesigned landing (/preview), which has no
+  // manifesto: past the live demo, no nav item stays lit. Absent on /.
+  "demo",
 ];
 
 /**

@@ -62,5 +62,7 @@ export function middleware(req: NextRequest) {
 // skip middleware entirely — the cookie set here persists across the whole
 // site so they don't need a re-check on every hit.
 export const config = {
-  matcher: ["/"],
+  // + the redesigned landing while it's built at /preview (so its pricing is
+  // geo-resolved too). Remove when it's swapped in as "/".
+  matcher: ["/", "/preview"],
 };

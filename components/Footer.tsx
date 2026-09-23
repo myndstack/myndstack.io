@@ -2,6 +2,7 @@ import Link from "next/link";
 
 import { FOOTER_COLUMNS, LEGAL_LINKS, SITE } from "@/lib/content";
 import type { SiteSettings } from "@/lib/sanity/queries";
+import HomeLink from "./HomeLink";
 import Magnetic from "./Magnetic";
 import Newsletter from "./Newsletter";
 import Reveal from "./Reveal";
@@ -72,9 +73,9 @@ export default function Footer({ site }: { site: SiteSettings }) {
             <ul className="m-0 flex list-none flex-col gap-2 p-0">
               {column.links.map((link) => (
                 <li key={link.label}>
-                  <Link href={link.href} className={linkClass}>
+                  <HomeLink href={link.href} className={linkClass}>
                     {link.label}
-                  </Link>
+                  </HomeLink>
                 </li>
               ))}
             </ul>

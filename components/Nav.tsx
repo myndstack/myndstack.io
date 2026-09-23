@@ -1,15 +1,17 @@
-/* eslint-disable @next/next/no-html-link-for-pages --
-   Root-relative fragments like "/#contact" are same-document scrolls on the
+"use client";
+
+/* Same-document section links are native anchors:
+   fragments like "#contact" (see homeHash in lib/landing/route.ts) scroll the
    homepage. A native anchor is the right primitive for that; next/link would
    route through the App Router just to move the scroll position. Links that
    change route use <Link>. */
-"use client";
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { NAV_LINKS, SPY_IDS } from "@/lib/content";
 import { useScrollFrame } from "@/lib/hooks";
+import { homeHash } from "@/lib/landing/route";
 import { INITIAL_NAV_STATE, nextNavState } from "@/lib/nav-state";
 import { activeSection, documentTop, type SectionOffset } from "@/lib/scroll-spy";
 import Icon from "./Icon";
@@ -209,7 +211,11 @@ export default function Nav({ contactEmail }: { contactEmail: string }) {
               return (
                 <li key={link.href}>
                   {isAnchor ? (
-                    <a className="navlink" href={link.href} data-section={link.section}>
+                    <a
+                      className="navlink"
+                      href={homeHash(link.href, pathname)}
+                      data-section={link.section}
+                    >
                       {link.label}
                     </a>
                   ) : (
@@ -232,7 +238,7 @@ export default function Nav({ contactEmail }: { contactEmail: string }) {
               Studio · Careers) freed the width budget that previously forced
               the terse "Contact"; the capsule-fit e2e test guards the tucked
               state. */}
-          <a className="nav-cta hidden sm:inline-block" href="/#contact">
+          <a className="nav-cta hidden sm:inline-block" href={homeHash("/#contact", pathname)}>
             Start a project
           </a>
 

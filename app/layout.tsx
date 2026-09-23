@@ -5,6 +5,7 @@ import Analytics from "@/components/Analytics";
 import BackToTop from "@/components/BackToTop";
 import CursorSpotlight from "@/components/CursorSpotlight";
 import Footer from "@/components/Footer";
+import EntranceMark from "@/components/EntranceMark";
 import Loader from "@/components/Loader";
 import Nav from "@/components/Nav";
 import ProgressSpine from "@/components/ProgressSpine";
@@ -12,6 +13,7 @@ import SpeculationRules from "@/components/SpeculationRules";
 import { SITE_URL } from "@/lib/content";
 import { jsonLd } from "@/lib/format";
 import { LOADER_SEEN_SCRIPT } from "@/lib/loader-seen";
+import { MOTION_FLAG_SCRIPT } from "@/lib/landing/motion-flag";
 import { getSiteSettings } from "@/lib/sanity/queries";
 
 import "./globals.css";
@@ -114,6 +116,9 @@ export default async function RootLayout({
       <body>
         {/* Must stay above <Loader />; see lib/loader-seen.ts. */}
         <script dangerouslySetInnerHTML={{ __html: LOADER_SEEN_SCRIPT }} />
+        {/* Before first paint: lets the landing's blueprint draft state apply
+            only when motion is allowed (lib/landing/motion-flag.ts). */}
+        <script dangerouslySetInnerHTML={{ __html: MOTION_FLAG_SCRIPT }} />
 
         <script
           type="application/ld+json"
@@ -126,6 +131,7 @@ export default async function RootLayout({
         </noscript>
 
         <Loader />
+        <EntranceMark />
         <CursorSpotlight />
         <ProgressSpine socials={site.socials} />
         <BackToTop />

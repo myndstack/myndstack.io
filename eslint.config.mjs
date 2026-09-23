@@ -27,6 +27,49 @@ const eslintConfig = [
       "dist/**",
     ],
   },
+  // anime.js enters the codebase through lib/motion/anime/* only (per-subpath
+  // files, so chunks stay small), and its scroll module never enters at all:
+  // onScroll adds a scroll listener + per-frame layout reads, and AGENTS.md
+  // allows exactly one scroll loop (lib/scroll.ts).
+  {
+    files: ["**/*.{ts,tsx}"],
+    ignores: ["lib/motion/anime/**"],
+    rules: {
+      "no-restricted-imports": [
+        "error",
+        {
+          patterns: [
+            {
+              group: ["animejs", "animejs/*"],
+              message: "Import anime.js via @/lib/motion/anime/* (see lib/motion/anime/core.ts).",
+            },
+          ],
+        },
+      ],
+    },
+  },
+  {
+    files: ["lib/motion/anime/**"],
+    rules: {
+      "no-restricted-imports": [
+        "error",
+        {
+          paths: [
+            {
+              name: "animejs",
+              message: "Import a subpath (animejs/animation, …), never the root bundle.",
+            },
+          ],
+          patterns: [
+            {
+              group: ["animejs/events", "animejs/events/*"],
+              message: "Never animejs/events (onScroll): one scroll loop only (AGENTS.md).",
+            },
+          ],
+        },
+      ],
+    },
+  },
 ];
 
 export default eslintConfig;
