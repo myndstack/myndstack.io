@@ -136,13 +136,16 @@ export default async function RootLayout({
               region (axe `region`). The link stays position:fixed — this wrapper
               isn't transformed, so its placement is unchanged. */}
           <nav aria-label="Skip to content">
-            <a className="skip" href="#work">
+            <a className="skip" href="#main">
               Skip to content
             </a>
           </nav>
 
           <Nav contactEmail={site.email} />
-          <main>{children}</main>
+          {/* Skip-link target on every route; -1 so the jump moves focus here. */}
+          <main id="main" tabIndex={-1} className="outline-none">
+            {children}
+          </main>
           <Footer site={site} />
         </div>
 

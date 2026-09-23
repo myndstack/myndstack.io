@@ -302,7 +302,8 @@
     font-size: 12px;
     font-weight: 700;
     letter-spacing: 0.16em;
-    color: var(--color-t6);
+    /* t5, not t6: t6 on ink is ~3.7:1 at 12px, under AA. */
+    color: var(--color-t5);
     font-variant-numeric: tabular-nums;
     transition: color 0.45s var(--ease-brand);
   }
@@ -678,7 +679,9 @@
     color: var(--color-lime);
   }
   .btn-ghost-sm:focus-visible {
-    outline: none;
+    /* Transparent, not none: forced-colors mode drops the box-shadow ring
+       and paints the outline instead. */
+    outline: 2px solid transparent;
     border-color: var(--color-lime);
     box-shadow: 0 0 0 1px var(--color-lime);
   }
@@ -949,7 +952,9 @@
       box-shadow 0.16s var(--ease-brand);
   }
   .ms-field:focus {
-    outline: none;
+    /* Transparent, not none: forced-colors mode drops the box-shadow ring
+       and paints the outline instead. */
+    outline: 2px solid transparent;
     border-color: var(--color-lime);
     box-shadow: 0 0 0 1px var(--color-lime);
   }
@@ -1519,7 +1524,7 @@
        network, scanline, cursor spotlight, particle field, and the on-page
        ToC (its anchors are broken once paginated anyway). */
     nav[aria-label="Primary"],
-    header:has(> a.skip),
+    nav[aria-label="Skip to content"],
     footer,
     aside,
     canvas,

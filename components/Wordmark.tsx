@@ -8,17 +8,25 @@ type Props = {
   /** Rendered height in px; width follows the mark's aspect ratio. */
   height?: number;
   className?: string;
+  /** A visually-swapped duplicate of another wordmark: hide it from AT so the
+   *  name isn't announced twice. */
+  decorative?: boolean;
 };
 
 /**
  * Plain <img> rather than next/image: these are two tiny static SVGs, so the
  * optimizer has nothing to do and would only add a runtime wrapper.
  */
-export default function Wordmark({ variant = "white", height = 22, className }: Props) {
+export default function Wordmark({
+  variant = "white",
+  height = 22,
+  className,
+  decorative = false,
+}: Props) {
   return (
     <img
       src={`/myndstack-wordmark-${variant}.svg`}
-      alt="Myndstack"
+      alt={decorative ? "" : "Myndstack"}
       width={Math.round(height * ASPECT)}
       height={height}
       className={className}

@@ -71,7 +71,13 @@ export default function PricingCompare({ tierNames, onOpen }: Props) {
             mask-image with `mask-composite: intersect` fed by a scroll-driven
             gradient stop, no JS.
           */}
-          <div className="compare-scroll overflow-x-auto border border-line">
+          {/* Focusable region so keyboard users can scroll the wide table. */}
+          <div
+            className="compare-scroll overflow-x-auto border border-line"
+            tabIndex={0}
+            role="region"
+            aria-label="Plan comparison table"
+          >
             <table className="w-full min-w-[720px] border-collapse text-left">
               <thead>
                 {/* Lit header band — --edge-lip (inset, so the overflow-hidden
@@ -167,7 +173,9 @@ function CompareSectionRows({
 function CellValue({ value }: { value: CompareValue | undefined }) {
   if (value === true) {
     return (
-      <span aria-label="Included" className="inline-flex text-lime">
+      <span className="inline-flex text-lime">
+        {/* aria-label on a generic span is ignored; real text is announced. */}
+        <span className="sr-only">Included</span>
         {/* Small check-in-a-square glyph. SVG stays inline so print's
             forced-black text style doesn't strip the accent. */}
         <svg viewBox="0 0 16 16" className="size-4" aria-hidden="true">
@@ -183,8 +191,9 @@ function CellValue({ value }: { value: CompareValue | undefined }) {
   }
   if (value === false || value === undefined) {
     return (
-      <span aria-label="Not included" className="text-t6">
-        —
+      <span className="text-t6">
+        <span aria-hidden="true">—</span>
+        <span className="sr-only">Not included</span>
       </span>
     );
   }

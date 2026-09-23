@@ -22,7 +22,11 @@ export default async function Team() {
           // static ordered list makes the index a stable tiebreaker.
           <Reveal key={`${member.n}-${i}`} className="group">
             <div className="ease-brand relative mb-3.5 flex aspect-square items-center justify-center overflow-hidden border border-line bg-[linear-gradient(150deg,#1F1F23,#0d0d0f)] transition-[border-color,box-shadow] duration-160 group-hover:border-lime-edge group-hover:shadow-[var(--edge-ring-faint),var(--shadow-lift)]">
-              <span className="ease-brand font-display text-[38px] font-bold text-line-3 transition-colors duration-300 group-hover:text-t7">
+              {/* Decorative initials — the name is repeated just below. */}
+              <span
+                aria-hidden="true"
+                className="ease-brand font-display text-[38px] font-bold text-line-3 transition-colors duration-300 group-hover:text-t7"
+              >
                 {member.i}
               </span>
               <span className="absolute bottom-3 left-3 size-2 bg-lime shadow-[0_0_10px_#C9F24D]" />

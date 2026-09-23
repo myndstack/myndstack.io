@@ -194,7 +194,7 @@ export default function Nav({ contactEmail }: { contactEmail: string }) {
         <div className="nav-inner">
           <span className="wm-stack">
             <Wordmark variant="white" className="wm-white" />
-            <Wordmark variant="black" className="wm-black" />
+            <Wordmark variant="black" className="wm-black" decorative />
           </span>
 
           <ul ref={listRef} className="m-0 hidden list-none gap-[26px] p-0 sm:flex">

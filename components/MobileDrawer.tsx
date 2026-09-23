@@ -41,6 +41,24 @@ export default function MobileDrawer({ open, onClose, contactEmail }: Props) {
     };
   }, [open]);
 
+  // The Tab trap only catches keys; a screen reader's virtual cursor can still
+  // browse the page behind. Make the content regions inert while open.
+  useEffect(() => {
+    if (!open) return;
+    const behind = [
+      document.getElementById("main"),
+      document.querySelector<HTMLElement>("#site > footer"),
+    ].filter((el): el is HTMLElement => el !== null && !el.inert);
+    behind.forEach((el) => {
+      el.inert = true;
+    });
+    return () => {
+      behind.forEach((el) => {
+        el.inert = false;
+      });
+    };
+  }, [open]);
+
   useEffect(() => {
     if (!open) return;
 
@@ -85,6 +103,8 @@ export default function MobileDrawer({ open, onClose, contactEmail }: Props) {
       <aside
         ref={drawerRef}
         id="mobile-drawer"
+        role="dialog"
+        aria-modal={open}
         aria-label="Menu"
         inert={!open}
         className="ease-brand fixed inset-y-0 right-0 z-120 flex w-80 max-w-[84vw] flex-col border-l border-line bg-ink px-6 pt-[22px] pb-7 transition-transform duration-[320ms]"

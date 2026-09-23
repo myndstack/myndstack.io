@@ -37,7 +37,7 @@ export default function Hero({ eyebrow, subhead, ctaPrimary, ctaSecondary }: Pro
   return (
     <header
       id="work"
-      className="relative flex min-h-screen flex-col overflow-hidden border-b border-line"
+      className="relative flex min-h-svh flex-col overflow-hidden border-b border-line"
     >
       {/* Mobile-only blueprint texture: a faint dot lattice behind everything,
           fading at the edges so it's densest under the headline. Hidden at ≥760px,

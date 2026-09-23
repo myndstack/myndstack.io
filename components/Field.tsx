@@ -62,11 +62,14 @@ export default function Field({ label, name, error, className = "", children }: 
  * naive bots still find and fill it; `tabIndex={-1}` keeps it out of tab order.
  */
 export function Honeypot() {
+  // Unique id: the footer newsletter renders one on every page, so a fixed id
+  // collided with the contact / application form's copy.
+  const id = useId();
   return (
     <div aria-hidden="true" className="absolute -left-[9999px] h-px w-px overflow-hidden">
-      <label htmlFor={HONEYPOT_FIELD}>Leave this empty</label>
+      <label htmlFor={id}>Leave this empty</label>
       <input
-        id={HONEYPOT_FIELD}
+        id={id}
         name={HONEYPOT_FIELD}
         type="text"
         tabIndex={-1}
