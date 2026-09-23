@@ -6,9 +6,9 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 vi.mock("server-only", () => ({}));
 
-const sendFormMailMock = vi.fn(async (_mail: unknown) => ({ ok: true }));
+const sendFormMailMock = vi.fn(async (): Promise<{ ok: boolean }> => ({ ok: true }));
 vi.mock("@/lib/mail", () => ({
-  sendFormMail: (mail: unknown) => sendFormMailMock(mail),
+  sendFormMail: () => sendFormMailMock(),
 }));
 
 import { POST } from "@/app/api/razorpay/webhook/route";
@@ -81,5 +81,18 @@ describe("POST /api/razorpay/webhook", () => {
     const res = await post(other, sign(WEBHOOK_SECRET, other));
     expect(res.status).toBe(200);
     expect(sendFormMailMock).not.toHaveBeenCalled();
+  });
+
+  it("does not notify on order.paid — Razorpay also fires payment.captured for the same payment", async () => {
+    const paid = JSON.stringify({ event: "order.paid", payload: {} });
+    const res = await post(paid, sign(WEBHOOK_SECRET, paid));
+    expect(res.status).toBe(200);
+    expect(sendFormMailMock).not.toHaveBeenCalled();
+  });
+
+  it("returns 500 when the notification fails so Razorpay retries the delivery", async () => {
+    sendFormMailMock.mockResolvedValueOnce({ ok: false });
+    const res = await post(captured, sign(WEBHOOK_SECRET, captured));
+    expect(res.status).toBe(500);
   });
 });

@@ -14,7 +14,7 @@ import "server-only";
  */
 
 const WINDOW_MS = 60_000;
-const MAX_REQUESTS = 5;
+const DEFAULT_MAX_REQUESTS = 5;
 /** Stop the Map growing without bound on a long-lived instance. */
 const MAX_TRACKED_KEYS = 10_000;
 
@@ -26,13 +26,18 @@ export type RateLimitResult = {
   retryAfter: number;
 };
 
-export function rateLimit(key: string): RateLimitResult {
+/**
+ * `key` should be namespaced by route (`form:${ip}`, `verify:${ip}`…) so one
+ * flow's quota can't be spent by another — a buyer who tried two promo codes
+ * must still be able to verify the payment that already went through.
+ */
+export function rateLimit(key: string, max: number = DEFAULT_MAX_REQUESTS): RateLimitResult {
   const now = Date.now();
   const cutoff = now - WINDOW_MS;
 
   const recent = (hits.get(key) ?? []).filter((t) => t > cutoff);
 
-  if (recent.length >= MAX_REQUESTS) {
+  if (recent.length >= max) {
     hits.set(key, recent);
     const retryAfter = Math.ceil((recent[0] + WINDOW_MS - now) / 1000);
     return { ok: false, retryAfter: Math.max(1, retryAfter) };

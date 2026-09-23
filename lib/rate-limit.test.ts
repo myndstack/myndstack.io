@@ -40,6 +40,12 @@ describe("rateLimit", () => {
     expect(rateLimit(a).ok).toBe(false);
     expect(rateLimit(b).ok).toBe(true);
   });
+
+  it("honours a per-call maximum", () => {
+    const key = freshKey();
+    for (let i = 0; i < 30; i++) expect(rateLimit(key, 30).ok).toBe(true);
+    expect(rateLimit(key, 30).ok).toBe(false);
+  });
 });
 
 describe("clientIp", () => {

@@ -414,7 +414,7 @@ export default function CheckoutPanel({
         amount: order.amount ?? amountMinor,
         currency: order.currency ?? "INR",
         name: "Myndstack",
-        description: `${tierName} · ${annual ? "Annual" : "Monthly"}`,
+        description: `${tierName} · ${oneTime ? "One-time" : annual ? "Annual" : "Monthly"}`,
         theme: { color: "#c9f24d" },
         // Razorpay fires ondismiss only on a manual close WITHOUT payment (the
         // handler fires on success instead), so returning to idle is safe here.
@@ -431,7 +431,7 @@ export default function CheckoutPanel({
       setStatus("error");
       setError("Something went wrong starting the payment. Please try again.");
     }
-  }, [slug, billing, tierName, annual, amountMinor, applied, verify]);
+  }, [slug, billing, tierName, oneTime, annual, amountMinor, applied, verify]);
 
   // Payment succeeded and was verified.
   if (status === "success") {

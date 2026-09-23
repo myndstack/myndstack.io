@@ -34,7 +34,7 @@ const bodySchema = z.object({
 });
 
 export async function POST(request: Request) {
-  const limit = rateLimit(clientIp(request));
+  const limit = rateLimit(`promo:${clientIp(request)}`);
   if (!limit.ok) {
     return NextResponse.json(
       { ok: false, message: "Too many attempts. Try again in a moment." },

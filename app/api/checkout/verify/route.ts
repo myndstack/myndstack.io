@@ -21,7 +21,10 @@ const bodySchema = z.object({
 
 export async function POST(request: Request) {
   const ip = clientIp(request);
-  const limit = rateLimit(ip);
+  // Its own, looser bucket: money has already moved by the time this runs, and
+  // the HMAC check makes it useless to abuse. A shared quota spent on promo
+  // retries used to strand paid buyers on "paid_unverified".
+  const limit = rateLimit(`verify:${ip}`, 30);
   if (!limit.ok) {
     return NextResponse.json(
       { ok: false, error: "Too many attempts. Try again in a moment." },

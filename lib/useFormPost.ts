@@ -56,7 +56,19 @@ export function useFormPost(endpoint: string, schemaName: SchemaName) {
 
       setState({ ...IDLE, pending: true });
 
-      const schema = await loadSchema(schemaName);
+      // The schema is a dynamic import: offline, or a chunk gone after a deploy,
+      // it rejects — and outside a try that left the form stuck on "sending".
+      let schema: z.ZodType;
+      try {
+        schema = await loadSchema(schemaName);
+      } catch {
+        if (!alive.current) return;
+        setState({
+          ...IDLE,
+          error: "Couldn't load the form. Check your connection, then reload the page.",
+        });
+        return;
+      }
       if (!alive.current) return;
       const parsed = schema.safeParse(values);
 

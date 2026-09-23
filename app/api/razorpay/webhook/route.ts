@@ -6,8 +6,12 @@ import { verifyWebhookSignature } from "@/lib/razorpay";
 
 export const runtime = "nodejs";
 
-/** Events we notify on. Anything else with a valid signature is acked and ignored. */
-const HANDLED = new Set(["payment.captured", "order.paid"]);
+/**
+ * Events we notify on. Anything else with a valid signature is acked and ignored.
+ * Only `payment.captured`: Razorpay also fires `order.paid` for the same payment,
+ * and handling both sent two notification emails per purchase.
+ */
+const HANDLED = new Set(["payment.captured"]);
 
 /** The slice of the Razorpay webhook payload we read — typed, no `any`. */
 type WebhookPayment = {
@@ -46,7 +50,7 @@ export async function POST(request: Request) {
     // Phase 1 notifies the team so a human provisions the account; Phase 2/3 add
     // the DB that grants the entitlement automatically and dedupes by payment id.
     // Until then a retried delivery may re-notify — low-harm and intentional.
-    await sendFormMail({
+    const mailed = await sendFormMail({
       subject: `Payment received — ${notes.tier ?? "plan"} (${notes.billing ?? "—"})`,
       fields: [
         ["Event", event.event],
@@ -59,6 +63,12 @@ export async function POST(request: Request) {
         ["Contact", payment.contact ?? "—"],
       ],
     });
+    // Provisioning is manual and hangs off this email. Failing the delivery makes
+    // Razorpay retry it, instead of acking a payment nobody was told about.
+    if (!mailed.ok) {
+      console.error("[razorpay webhook] notification failed", payment.id, mailed.error);
+      return NextResponse.json({ ok: false }, { status: 500 });
+    }
   }
 
   // Ack every validly-signed delivery so Razorpay stops retrying.

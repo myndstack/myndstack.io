@@ -39,7 +39,9 @@ export async function handleFormSubmission<S extends z.ZodType>(
   options: FormOptions = {},
 ): Promise<NextResponse<FormResponse>> {
   const ip = clientIp(request);
-  const limit = rateLimit(ip);
+  // Bucketed per endpoint, so a newsletter signup doesn't spend the contact
+  // form's quota.
+  const limit = rateLimit(`form:${new URL(request.url).pathname}:${ip}`);
   if (!limit.ok) {
     return NextResponse.json(
       { ok: false, error: "Too many attempts. Try again in a moment." },
