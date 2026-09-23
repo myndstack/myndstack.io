@@ -9,22 +9,52 @@ import type { ProgressRange } from "@/lib/motion/progress";
 export type ChapterContext = {
   /** The chapter's root element (MotionChapter's wrapper). */
   readonly root: HTMLElement;
-  /** True at the design's `sm` breakpoint and up (47.5rem). */
+  /** True when the pinned layout is live (PIN_QUERY in lib/motion/pin.ts). */
   readonly desktop: boolean;
+  /** Coarse pointer (touch): no cursor effects, a quicker glide. */
+  readonly coarse: boolean;
+};
+
+export type Ambient = {
+  readonly play: () => void;
+  readonly pause: () => void;
 };
 
 export type ChapterMotion = {
-  /** Built with `autoplay: false`; MotionChapter plays or seeks it. */
+  /**
+   * Built paused. MotionChapter plays it (mode "once") or seeks it (mode
+   * "scrub"). For a segmented scrub its duration must be
+   * segments × SEGMENT_UNIT (lib/motion/segments.ts).
+   */
   readonly timeline: Timeline;
-  /** For scrubbed chapters: how scroll maps to progress (default "pinned"). */
+  /** Overrides the chapter's `kind` — e.g. a run that scrubs on desktop but plays once on phones. */
+  readonly mode?: "once" | "scrub";
+  /** Scrub without segments: how scroll maps to progress (default "pinned"). */
   readonly range?: ProgressRange;
-  /** Scrubbed chapters: cheap class/text updates per progress change. */
-  readonly onProgress?: (p: number) => void;
+  /**
+   * Scrub by `[data-segment]` children: each segment's scroll range comes from
+   * where it sits in the page, each gets SEGMENT_UNIT of timeline. `enter`
+   * adds a leading segment for the screen before the run reaches the top.
+   */
+  readonly segmented?: { readonly enter?: boolean };
+  /** Glide toward the scroll position instead of snapping (lib/motion/smooth.ts). */
+  readonly smooth?: { readonly tauMs: number };
+  /** Plays once on load if the run starts in view; otherwise completes at once. */
+  readonly intro?: Timeline;
+  /** Continuous decoration (the canvas field): runs only while on screen. */
+  readonly ambient?: Ambient;
+  /** Scrubbed chapters: cheap class/text updates when the (quantised) time changes. */
+  readonly onProgress?: (p: number, time: number) => void;
+  /**
+   * Undo everything scope.revert() doesn't: listeners, observers, intervals,
+   * canvas pixels, data-* attributes and text the builder wrote by hand.
+   */
+  readonly dispose?: () => void;
 };
 
 export type ChapterBuilder = (ctx: ChapterContext) => ChapterMotion;
 
 export type ChapterModule = { readonly default: ChapterBuilder };
 
-/** `data-motion` on a chapter root. CSS keys the blueprint draft state off it. */
+/** `data-motion` on a chapter root. */
 export type ChapterState = "idle" | "ready" | "playing" | "scrub" | "done";

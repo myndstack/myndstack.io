@@ -4,29 +4,38 @@ import { useEffect, useRef, useState, type ReactNode } from "react";
 
 import { useMediaQuery, useReducedMotion, useScrollFrame } from "@/lib/hooks";
 import { createScope } from "@/lib/motion/anime/core";
+import { createTimer, type Timer } from "@/lib/motion/anime/timer";
 import type { ChapterBuilder, ChapterMotion, ChapterState } from "@/lib/motion/chapter";
+import { PIN_QUERY } from "@/lib/motion/pin";
 import { chapterProgress, quantize, type ChapterGeometry } from "@/lib/motion/progress";
 import { registerChapter } from "@/lib/motion/registry";
+import { segmentTime, type RunGeometry } from "@/lib/motion/segments";
+import { clampDt, clampLag, glideStep, isJump } from "@/lib/motion/smooth";
+import { documentTop } from "@/lib/scroll-spy";
 
 import { CHAPTER_LOADERS, type ChapterId } from "./loaders";
 
-/** The design's `sm` breakpoint (47.5rem) — where pinned chapters start. */
-const DESKTOP_QUERY = "(min-width: 47.5rem)";
 /** Load a chapter's motion code when it is within ~1.5 screens. */
 const LOAD_MARGIN = "150% 0px 150% 0px";
-/** If the motion chunk hasn't built by then, show the built page instead. */
+/** If the motion chunk hasn't built by then, stay on the built page. */
 const BUILD_TIMEOUT_MS = 3000;
-/** Progress grid: sub-pixel scroll noise inside one step doesn't re-seek. */
-const PROGRESS_STEP = 1 / 2000;
+/** Timeline grid: sub-pixel scroll noise inside one step doesn't re-seek. */
+const TIME_STEP = 0.5;
 /** iOS/Android toolbar show/hide changes innerHeight by ~50–110px; ignore it. */
 const TOOLBAR_JITTER_PX = 120;
+/** The glide never trails the scroll by more than ~a third of a segment. */
+const MAX_LAG = 300;
+/** Within this many timeline units the glide snaps and stops. */
+const SETTLE_EPS = 0.5;
+
+/** True when html[data-anim="on"] — see lib/landing/motion-flag.ts. */
+const motionAllowed = () => document.documentElement.dataset.anim === "on";
 
 type Props = {
-  /** Which chapter — keys its lazy motion module in ./loaders (a server
-   *  component can't hand a client component an `import()` function). Also
-   *  the `data-chapter` value that tests and CSS key off. */
+  /** Which chapter — keys its lazy motion module in ./loaders. Also the
+   *  `data-chapter` value that tests and CSS key off. */
   readonly id: ChapterId;
-  /** Play once on entry, or scrub with scroll. */
+  /** Play once on entry, or scrub with scroll. A builder may override. */
   readonly kind: "once" | "scrub";
   /** Load the builder immediately (the hero) instead of when near. */
   readonly eager?: boolean;
@@ -36,31 +45,50 @@ type Props = {
 };
 
 /**
- * Client island around one landing chapter. The chapter's markup is rendered
- * on the server in its finished state; this only schedules the motion:
+ * Client island around one landing chapter. The markup is rendered on the
+ * server in its finished state; this only schedules motion:
  *
  * - loads the chapter's builder lazily (near the viewport, or at once if eager)
- * - builds it inside an anime scope, reverted on unmount / breakpoint change
+ * - builds it inside an anime scope — every timeline and timer is created in
+ *   `scope.add`, so `revert()` owns them; `dispose()` undoes the rest
  * - "once": plays when the chapter enters view, remembers that it played
- * - "scrub": seeks a paused timeline from the ONE site scroll loop
- *   (lib/scroll.ts via useScrollFrame) using geometry cached outside the frame
- * - reduced motion, a failed chunk, a slow chunk, print, and the e2e
- *   `motion:finish-all` event all land on the built state (`data-motion=done`).
+ * - "scrub": maps scroll to timeline time from the ONE site scroll loop
+ *   (useScrollFrame) using geometry cached outside the frame, optionally by
+ *   `[data-segment]` children, and glides toward it on anime's own clock
+ * - `finish()` (reduced motion, test hook, print, a slow or failed chunk)
+ *   lands a once-chapter on its end state and snaps a scrub to the CURRENT
+ *   scroll position with the glide, intro and ambient off. Layout never
+ *   changes: pinning is CSS-only (the `pin:` variant), decided before paint.
  */
 export default function MotionChapter({ id, kind, eager = false, className, children }: Props) {
   const rootRef = useRef<HTMLDivElement>(null);
   const reduced = useReducedMotion();
-  const desktop = useMediaQuery(DESKTOP_QUERY);
+  const desktop = useMediaQuery(PIN_QUERY);
+  const coarse = useMediaQuery("(pointer: coarse)");
   const [builder, setBuilder] = useState<ChapterBuilder | null>(null);
 
   const motionRef = useRef<ChapterMotion | null>(null);
+  const glideRef = useRef<Timer | null>(null);
   const geomRef = useRef<ChapterGeometry | null>(null);
-  const lastProgressRef = useRef(-1);
+  const runRef = useRef<RunGeometry | null>(null);
+  const stateRef = useRef<ChapterState>("idle");
+
+  /** Scroll-derived target time, the time shown, and the last one seeked. */
+  const targetRef = useRef(-1);
+  const displayRef = useRef(0);
+  const appliedRef = useRef(-1);
+  const lastYRef = useRef(0);
+  const lastTickRef = useRef(0);
+  const glideStateRef = useRef<"idle" | "moving">("idle");
+
   /** Once-chapters that have played stay played across rebuilds. */
   const playedRef = useRef(false);
-  /** Finished (reduced motion, print, test hook, timeout): end state for good. */
+  /** A once-chapter was finished: end state for good. */
   const finishedRef = useRef(false);
-  const stateRef = useRef<ChapterState>("idle");
+  /** A scrub was finished: keep scrubbing, but snap — no glide, intro or ambient. */
+  const settledRef = useRef(false);
+
+  const modeOf = (motion: ChapterMotion | null) => motion?.mode ?? kind;
 
   const setState = (state: ChapterState) => {
     const root = rootRef.current;
@@ -69,29 +97,145 @@ export default function MotionChapter({ id, kind, eager = false, className, chil
     root.dataset.motion = state;
   };
 
-  const seekToEnd = () => {
+  const setGlide = (state: "idle" | "moving") => {
+    const root = rootRef.current;
+    if (!root || glideStateRef.current === state) return;
+    glideStateRef.current = state;
+    root.dataset.glide = state;
+  };
+
+  /** Seek the timeline — only when the time actually changed. */
+  const apply = (time: number) => {
     const motion = motionRef.current;
-    if (!motion) return;
-    motion.timeline.seek(motion.timeline.duration);
-    motion.onProgress?.(1);
+    if (!motion || time === appliedRef.current) return;
+    appliedRef.current = time;
+    motion.timeline.seek(time);
+    const duration = motion.timeline.duration;
+    motion.onProgress?.(duration > 0 ? time / duration : 1, time);
+  };
+
+  const timeForScroll = (y: number): number | null => {
+    const motion = motionRef.current;
+    if (!motion) return null;
+    if (motion.segmented) return runRef.current ? segmentTime(y, runRef.current) : null;
+    const geom = geomRef.current;
+    if (!geom) return null;
+    return chapterProgress(y, geom, motion.range ?? "pinned") * motion.timeline.duration;
+  };
+
+  const stopGlide = () => {
+    glideRef.current?.pause();
+    setGlide("idle");
+  };
+
+  /** Jump straight to the scroll position (build, re-measure, bfcache, finish). */
+  const snap = (y: number) => {
+    const raw = timeForScroll(y);
+    if (raw === null) return;
+    const target = quantize(raw, TIME_STEP);
+    lastYRef.current = y;
+    targetRef.current = target;
+    displayRef.current = target;
+    stopGlide();
+    apply(target);
+  };
+
+  const onScroll = (y: number) => {
+    const motion = motionRef.current;
+    if (!motion || modeOf(motion) !== "scrub") return;
+    const raw = timeForScroll(y);
+    if (raw === null) return;
+    const target = quantize(raw, TIME_STEP);
+    // The early return that keeps a settled page from writing anything.
+    if (target === targetRef.current) return;
+    targetRef.current = target;
+    const vh = geomRef.current?.vh ?? 800;
+    const jumped = isJump(lastYRef.current, y, vh);
+    lastYRef.current = y;
+
+    const glide = glideRef.current;
+    if (!glide || settledRef.current || jumped) {
+      displayRef.current = target;
+      stopGlide();
+      apply(target);
+      return;
+    }
+    displayRef.current = clampLag(displayRef.current, target, MAX_LAG);
+    if (glideStateRef.current === "idle") {
+      lastTickRef.current = performance.now();
+      setGlide("moving");
+      glide.resume();
+    }
+  };
+
+  const tickGlide = () => {
+    const motion = motionRef.current;
+    if (!motion?.smooth) return;
+    const now = performance.now();
+    const dt = clampDt(now - lastTickRef.current);
+    lastTickRef.current = now;
+    const { value, settled } = glideStep(displayRef.current, targetRef.current, dt, {
+      tauMs: motion.smooth.tauMs,
+      eps: SETTLE_EPS,
+      maxLag: MAX_LAG,
+    });
+    displayRef.current = value;
+    apply(value);
+    if (settled) stopGlide();
   };
 
   const finish = () => {
+    const motion = motionRef.current;
+    if (modeOf(motion) === "scrub") {
+      settledRef.current = true;
+      if (motion) {
+        motion.intro?.complete();
+        motion.ambient?.pause();
+        const root = rootRef.current;
+        if (root) root.dataset.intro = "done";
+        snap(window.scrollY);
+      }
+      setState("done");
+      return;
+    }
     finishedRef.current = true;
-    seekToEnd();
+    if (motion) {
+      motion.ambient?.pause();
+      motion.timeline.seek(motion.timeline.duration);
+      motion.onProgress?.(1, motion.timeline.duration);
+    }
     setState("done");
   };
 
-  /** Scrubbed chapters: map a scroll position to a timeline position. */
-  const seekForScroll = (y: number) => {
+  /** Read layout (outside any scroll frame): chapter box and segment stops. */
+  const measure = (force: boolean) => {
+    const root = rootRef.current;
+    if (!root) return;
+    const vh = window.innerHeight;
+    const top = documentTop(root);
+    const next: ChapterGeometry = { top, height: root.offsetHeight, vh };
+    const prev = geomRef.current;
+    const jitterOnly =
+      !force &&
+      prev !== null &&
+      coarse &&
+      prev.top === next.top &&
+      prev.height === next.height &&
+      Math.abs(prev.vh - next.vh) < TOOLBAR_JITTER_PX;
+    if (jitterOnly) return;
+    geomRef.current = next;
+
     const motion = motionRef.current;
-    const geom = geomRef.current;
-    if (!motion || !geom || finishedRef.current) return;
-    const p = quantize(chapterProgress(y, geom, motion.range ?? "pinned"), PROGRESS_STEP);
-    if (p === lastProgressRef.current) return;
-    lastProgressRef.current = p;
-    motion.timeline.seek(p * motion.timeline.duration);
-    motion.onProgress?.(p);
+    if (motion?.segmented) {
+      const segments = Array.from(root.querySelectorAll<HTMLElement>("[data-segment]"));
+      const stops = segments.map((el) => documentTop(el) - top);
+      runRef.current = {
+        top,
+        stops: motion.segmented.enter ? [-vh, ...stops] : stops,
+        end: Math.max(0, next.height - vh),
+      };
+    }
+    if (motion && modeOf(motion) === "scrub") snap(window.scrollY);
   };
 
   // Print and the test hook can finish this chapter at any time.
@@ -101,7 +245,10 @@ export default function MotionChapter({ id, kind, eager = false, className, chil
   useEffect(() => {
     const root = rootRef.current;
     if (!root) return;
-    if (reduced) {
+    // The pre-paint flag (MOTION_FLAG_SCRIPT) is the single switch: reduced
+    // motion and `?motion=off` both leave it unset, and CSS has already laid
+    // the page out static — building a scrub for it would animate nothing.
+    if (reduced || !motionAllowed()) {
       finish();
       return;
     }
@@ -146,77 +293,89 @@ export default function MotionChapter({ id, kind, eager = false, className, chil
     };
   }, [reduced, eager, id]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Scrubbed chapters: cache geometry outside the scroll frame (the StackStory
-  // pattern) — measured on layout changes and font load, never per frame.
-  useEffect(() => {
-    if (kind !== "scrub") return;
-    const root = rootRef.current;
-    if (!root) return;
-
-    const coarse = window.matchMedia("(pointer: coarse)").matches;
-    let pending = 0;
-    const measure = () => {
-      pending = 0;
-      const rect = root.getBoundingClientRect();
-      const next = { top: rect.top + window.scrollY, height: root.offsetHeight, vh: window.innerHeight };
-      const prev = geomRef.current;
-      // A touch toolbar collapsing is a height-only change of <120px: keep
-      // the old geometry so progress doesn't jump under the thumb.
-      if (
-        prev &&
-        coarse &&
-        prev.top === next.top &&
-        prev.height === next.height &&
-        Math.abs(prev.vh - next.vh) < TOOLBAR_JITTER_PX
-      ) {
-        return;
-      }
-      geomRef.current = next;
-      lastProgressRef.current = -1;
-      seekForScroll(window.scrollY);
-    };
-    // Observer callbacks only schedule; the read happens in the next frame.
-    const schedule = () => {
-      if (!pending) pending = requestAnimationFrame(measure);
-    };
-
-    measure();
-    document.fonts?.ready.then(schedule);
-    const ro = new ResizeObserver(schedule);
-    ro.observe(document.body);
-    return () => {
-      ro.disconnect();
-      if (pending) cancelAnimationFrame(pending);
-    };
-  }, [kind]);
-
-  // Build (and rebuild across the breakpoint) inside an anime scope.
+  // Build (and rebuild across the pin breakpoint) inside an anime scope.
   useEffect(() => {
     const root = rootRef.current;
-    if (!builder || reduced || !root || !root.isConnected) return;
+    if (!builder || reduced || !motionAllowed() || !root || !root.isConnected) return;
 
+    let failed = false;
     const scope = createScope({ root }).add(() => {
-      motionRef.current = builder({ root, desktop });
+      try {
+        const motion = builder({ root, desktop, coarse });
+        motionRef.current = motion;
+        // Explicitly paused: in anime 4.5 the first seek() on a timeline that
+        // was never started resumes it, and a scrubbed chapter would then keep
+        // re-rendering on anime's clock. Only scroll and play() move a chapter.
+        motion.timeline.pause();
+        motion.intro?.pause();
+        glideRef.current = motion.smooth ? createTimer({ autoplay: false, onUpdate: tickGlide }) : null;
+      } catch (error) {
+        failed = true;
+        motionRef.current = null;
+        if (process.env.NODE_ENV !== "production") console.error(`[motion:${id}]`, error);
+      }
     });
     const motion = motionRef.current as ChapterMotion | null;
-    if (!motion) return () => scope.revert();
-    // Explicitly paused: in anime 4.5 the first seek() on a timeline that was
-    // never started resumes it, and a scrubbed chapter would then keep
-    // re-rendering on anime's clock (measured: ~4 style writes per frame with
-    // no scrolling). Only scroll and play() may move a chapter.
-    motion.timeline.pause();
+    if (failed || !motion) {
+      scope.revert();
+      finish();
+      return;
+    }
 
+    appliedRef.current = -1;
+    targetRef.current = -1;
+    glideStateRef.current = "idle";
     let io: IntersectionObserver | null = null;
+    let ambientIo: IntersectionObserver | null = null;
+    let onVisibility: (() => void) | null = null;
+    let onPageShow: ((e: PageTransitionEvent) => void) | null = null;
 
-    if (finishedRef.current || (kind === "once" && playedRef.current)) {
-      seekToEnd();
-      setState("done");
-    } else if (kind === "scrub") {
-      setState("scrub");
-      lastProgressRef.current = -1;
+    // Continuous decoration runs only while on screen and the tab is visible.
+    if (motion.ambient && typeof IntersectionObserver !== "undefined") {
+      const ambient = motion.ambient;
+      let visible = false;
+      const update = () => {
+        if (visible && !document.hidden && !settledRef.current && !finishedRef.current) ambient.play();
+        else ambient.pause();
+      };
+      ambientIo = new IntersectionObserver(([entry]) => {
+        visible = entry.isIntersecting;
+        update();
+      });
+      ambientIo.observe(root);
+      onVisibility = update;
+      document.addEventListener("visibilitychange", onVisibility);
+    }
+
+    if (modeOf(motion) === "scrub") {
+      setState(settledRef.current ? "done" : "scrub");
       // Straight to the current position: a restored or anchored scroll must
-      // not sit in the draft state waiting for the first scroll event.
-      seekForScroll(window.scrollY);
+      // not sit in a stale state waiting for the first scroll event.
+      measure(true);
+
+      if (motion.intro) {
+        const atTop = window.scrollY < window.innerHeight * 0.5;
+        if (atTop && !settledRef.current) {
+          root.dataset.intro = "playing";
+          motion.intro.play();
+          motion.intro.then(() => {
+            root.dataset.intro = "done";
+          });
+        } else {
+          motion.intro.complete();
+          root.dataset.intro = "done";
+        }
+      }
+
+      // Back/forward cache: the page comes back mid-scroll with stale time.
+      onPageShow = (e) => {
+        if (e.persisted) measure(true);
+      };
+      window.addEventListener("pageshow", onPageShow);
+    } else if (finishedRef.current || playedRef.current) {
+      motion.timeline.seek(motion.timeline.duration);
+      motion.onProgress?.(1, motion.timeline.duration);
+      setState("done");
     } else {
       setState("ready");
       const play = () => {
@@ -244,13 +403,48 @@ export default function MotionChapter({ id, kind, eager = false, className, chil
 
     return () => {
       io?.disconnect();
+      ambientIo?.disconnect();
+      if (onVisibility) document.removeEventListener("visibilitychange", onVisibility);
+      if (onPageShow) window.removeEventListener("pageshow", onPageShow);
+      motion.ambient?.pause();
+      motion.dispose?.();
       scope.revert();
       motionRef.current = null;
+      glideRef.current = null;
+      runRef.current = null;
+      delete root.dataset.intro;
     };
-  }, [builder, desktop, reduced, kind]);
+  }, [builder, desktop, coarse, reduced, kind]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Scrubbed chapters: cache geometry outside the scroll frame — measured on
+  // layout changes and font load, never per frame.
+  useEffect(() => {
+    if (kind !== "scrub") return;
+    const root = rootRef.current;
+    if (!root) return;
+
+    let pending = 0;
+    const run = () => {
+      pending = 0;
+      measure(false);
+    };
+    // Observer callbacks only schedule; the read happens in the next frame.
+    const schedule = () => {
+      if (!pending) pending = requestAnimationFrame(run);
+    };
+
+    schedule();
+    document.fonts?.ready.then(schedule);
+    const ro = new ResizeObserver(schedule);
+    ro.observe(document.body);
+    return () => {
+      ro.disconnect();
+      if (pending) cancelAnimationFrame(pending);
+    };
+  }, [kind, coarse]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useScrollFrame(({ y }) => {
-    if (kind === "scrub") seekForScroll(y);
+    if (kind === "scrub") onScroll(y);
   });
 
   return (
@@ -258,7 +452,8 @@ export default function MotionChapter({ id, kind, eager = false, className, chil
       ref={rootRef}
       data-chapter={id}
       data-motion="idle"
-      // data-motion is driven imperatively after hydration (like Reveal's is-in).
+      // data-motion / data-glide / data-intro are driven imperatively after
+      // hydration (like Reveal's is-in).
       suppressHydrationWarning
       className={className}
     >

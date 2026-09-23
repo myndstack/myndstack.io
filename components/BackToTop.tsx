@@ -1,8 +1,10 @@
 "use client";
 
+import { usePathname } from "next/navigation";
 import { useRef } from "react";
 import { useScrollFrame } from "@/lib/hooks";
 import { INITIAL_SCROLL_INTENT, nextScrollIntent } from "@/lib/scroll-intent";
+import { LANDING_PREVIEW_PATH } from "@/lib/landing/route";
 import Icon from "./Icon";
 
 /**
@@ -14,6 +16,9 @@ import Icon from "./Icon";
  * this design has no rounded corners anywhere else.
  */
 export default function BackToTop() {
+  // The redesigned landing's scroll ruler has its own top tick. Exact-path
+  // check, so the live "/" is unaffected until the swap.
+  const off = usePathname() === LANDING_PREVIEW_PATH;
   const buttonRef = useRef<HTMLButtonElement>(null);
   const intentRef = useRef(INITIAL_SCROLL_INTENT);
   /** What the DOM currently shows — writes happen only on a change (AGENTS.md). */
@@ -32,6 +37,8 @@ export default function BackToTop() {
     // `opacity: 0` alone still leaves the button in the tab order.
     button.inert = !intent.visible;
   });
+
+  if (off) return null;
 
   return (
     <button

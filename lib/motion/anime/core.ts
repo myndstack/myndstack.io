@@ -7,11 +7,12 @@
  * Deliberately absent: `animejs/events` (onScroll / ScrollObserver). It adds
  * its own scroll listener and reads layout every frame; AGENTS.md allows one
  * scroll listener for the whole site (lib/scroll.ts). Scrubbed chapters are
- * paused timelines seeked from that loop instead (useScrollTimeline).
+ * paused timelines seeked from that loop instead (MotionChapter).
  */
 export { animate } from "animejs/animation";
 export { createTimeline } from "animejs/timeline";
 export type { Timeline } from "animejs/timeline";
+export type { JSAnimation } from "animejs/animation";
 export { createScope } from "animejs/scope";
 export type { Scope } from "animejs/scope";
 export { cubicBezier } from "animejs/easings/cubic-bezier";

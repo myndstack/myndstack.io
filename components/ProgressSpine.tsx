@@ -1,8 +1,10 @@
 "use client";
 
+import { usePathname } from "next/navigation";
 import { useEffect, useRef } from "react";
 import { useCssSupports, useScrollFrame } from "@/lib/hooks";
 import type { Social } from "@/lib/content";
+import { LANDING_PREVIEW_PATH } from "@/lib/landing/route";
 import Magnetic from "./Magnetic";
 import SocialIcon from "./SocialIcon";
 
@@ -16,6 +18,9 @@ const TRACK_BOTTOM_GAP = 224;
 
 /** Fixed left rail: page-scroll progress plus social links. Hidden under 1100px. */
 export default function ProgressSpine({ socials }: { socials: Social[] }) {
+  // The redesigned landing has its own scroll ruler. Exact-path check: the
+  // live "/" keeps its spine (and the socials it carries) until the swap.
+  const off = usePathname() === LANDING_PREVIEW_PATH;
   const fillRef = useRef<HTMLDivElement>(null);
   const dotRef = useRef<HTMLDivElement>(null);
 
@@ -69,6 +74,8 @@ export default function ProgressSpine({ socials }: { socials: Social[] }) {
       dotRef.current.style.transform = `translate(-50%, calc(${offset}px - 50%))`;
     }
   });
+
+  if (off) return null;
 
   return (
     <>

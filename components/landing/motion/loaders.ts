@@ -6,9 +6,7 @@ import type { ChapterModule } from "@/lib/motion/chapter";
  * import() becomes its own chunk, fetched when the chapter nears the viewport.
  */
 export const CHAPTER_LOADERS = {
-  hero: () => import("../sections/hero.motion"),
-  stack: () => import("../sections/stack.motion"),
-  pipeline: () => import("../sections/pipeline.motion"),
+  "core-hero": () => import("../chapters/hero.motion"),
 } satisfies Record<string, () => Promise<ChapterModule>>;
 
 export type ChapterId = keyof typeof CHAPTER_LOADERS;
