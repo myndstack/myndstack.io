@@ -101,7 +101,7 @@ export default function PricingCards({ initialTiers }: Props) {
       <div className="mb-5 flex justify-end">
         <CurrencyPicker region={region} onChange={onPick} />
       </div>
-      <div className="pricing-grid grid grid-cols-1 gap-[18px] md:grid-cols-3">
+      <div className="pricing-grid grid grid-cols-1 gap-4 md:grid-cols-3">
         {tiers.map((tier, i) => (
           <Reveal key={tier.name} delay={i * 0.08} className="h-full">
             <PricingCard tier={tier} />
@@ -145,7 +145,7 @@ function PricingCard({ tier }: { tier: ResolvedTier }) {
 
       <div className="mb-1.5 font-display text-17 font-semibold">{tier.name}</div>
       {/* Reserve two lines so a one-line blurb doesn't misalign the price row. */}
-      <div className="mb-[22px] min-h-[42px] text-13 leading-[1.5] text-t4">
+      <div className="mb-6 min-h-[42px] text-13 leading-[1.5] text-t4">
         {tier.blurb}
       </div>
 

@@ -14,7 +14,7 @@ export default function Loading() {
         meta="Loading…"
         breadcrumbs={[{ label: "Home", href: "/" }]}
       />
-      <div className="page-column pt-14 pb-[88px]">
+      <div className="page-column pt-14 pb-22">
         <div className="flex flex-col gap-4">
           {Array.from({ length: 4 }, (_, i) => (
             <SkeletonCard key={i} className="h-[132px]" />

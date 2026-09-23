@@ -22,7 +22,7 @@ export default function Section({
       // out of the tab order, and the ring is suppressed since the only focus
       // here is programmatic.
       tabIndex={id ? -1 : undefined}
-      className={`relative mx-auto max-w-[1200px] px-5 pt-[88px] pb-12 sm:px-14${
+      className={`relative mx-auto max-w-[1200px] px-5 pt-22 pb-12 sm:px-14${
         id ? " focus:outline-none" : ""
       } ${className}`}
     >

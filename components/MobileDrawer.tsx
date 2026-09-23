@@ -107,7 +107,7 @@ export default function MobileDrawer({ open, onClose, contactEmail }: Props) {
         aria-modal={open}
         aria-label="Menu"
         inert={!open}
-        className="ease-brand fixed inset-y-0 right-0 z-120 flex w-80 max-w-[84vw] flex-col border-l border-line bg-ink px-6 pt-[22px] pb-7 transition-transform duration-[320ms]"
+        className="ease-brand fixed inset-y-0 right-0 z-120 flex w-80 max-w-[84vw] flex-col border-l border-line bg-ink px-6 pt-6 pb-7 transition-transform duration-[320ms]"
         style={{ transform: open ? "translateX(0)" : "translateX(100%)" }}
       >
         <div className="mb-7 flex items-center justify-between">
@@ -155,7 +155,7 @@ export default function MobileDrawer({ open, onClose, contactEmail }: Props) {
         <a
           href="/#contact"
           onClick={onClose}
-          className="btn btn-lime mt-[26px] w-full text-center"
+          className="btn btn-lime mt-6 w-full text-center"
         >
           Start a project →
         </a>
@@ -164,7 +164,7 @@ export default function MobileDrawer({ open, onClose, contactEmail }: Props) {
             area (WCAG 2.5.8); this is the mobile nav, where it matters most. */}
         <a
           href={`mailto:${contactEmail}`}
-          className="mt-[10px] py-2 font-mono text-12 tracking-[0.04em] text-t5"
+          className="mt-2 py-2 font-mono text-12 tracking-[0.04em] text-t5"
         >
           {contactEmail}
         </a>

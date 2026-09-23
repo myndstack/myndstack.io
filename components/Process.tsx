@@ -20,11 +20,11 @@ export default async function Process() {
         {steps.map((step) => (
           <Reveal
             key={step.n}
-            className="relative bg-ink px-[22px] pt-7 pb-[30px] transition-colors hover:bg-surface"
+            className="relative bg-ink px-6 pt-7 pb-8 transition-colors hover:bg-surface"
           >
             {/* The lime rule draws itself across as the step reveals. */}
             <div className="ease-brand absolute top-[-1px] left-0 h-0.5 w-0 bg-lime shadow-glow transition-[width] duration-500 [.is-in>&]:w-full" />
-            <div className="mb-[38px] font-mono text-13 text-lime">{step.n}</div>
+            <div className="mb-10 font-mono text-13 text-lime">{step.n}</div>
             <div className="mb-2 font-display text-22 font-semibold">{step.t}</div>
             <div className="text-15 leading-[1.55] text-t4">{step.d}</div>
           </Reveal>

@@ -18,7 +18,7 @@ export default function Footer({ site }: { site: SiteSettings }) {
   const activeSocials = socials.filter((s) => s.href);
 
   return (
-    <footer className="mt-[88px] border-t border-line px-5 pt-16 pb-10 shadow-[var(--edge-lip)] sm:px-14">
+    <footer className="mt-22 border-t border-line px-5 pt-16 pb-10 shadow-[var(--edge-lip)] sm:px-14">
       <Reveal className="mx-auto grid max-w-[1200px] grid-cols-1 gap-10 xs:grid-cols-2 md:grid-cols-[minmax(0,1.6fr)_repeat(3,minmax(0,1fr))] md:gap-12">
         {/* Brand block — wordmark, tagline, newsletter, contact, socials. Absorbs
             what used to be a separate "Connect" column so the right side stays

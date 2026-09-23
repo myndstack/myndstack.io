@@ -55,7 +55,7 @@ export default function Manifesto({ lead, keep }: { lead: string; keep: string }
       tabIndex={-1}
       className="mx-auto max-w-[1120px] px-5 py-28 focus:outline-none sm:px-14"
     >
-      <div id="manifesto-eyebrow" className="eyebrow mb-[26px] tracking-[0.16em]">Manifesto</div>
+      <div id="manifesto-eyebrow" className="eyebrow mb-6 tracking-[0.16em]">Manifesto</div>
       <p
         ref={ref}
         className="m-0 font-display text-30 leading-[1.16] font-medium tracking-[-0.02em] text-balance sm:text-56"

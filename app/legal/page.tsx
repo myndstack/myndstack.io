@@ -65,7 +65,7 @@ export default function Page() {
         breadcrumbs={[{ label: "Home", href: "/" }]}
       />
 
-      <div className="page-column pt-14 pb-[88px]">
+      <div className="page-column pt-14 pb-22">
         <div className="flex flex-col gap-14">
           {GROUPS.map((group) => (
             <section key={group.title}>

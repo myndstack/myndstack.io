@@ -31,7 +31,7 @@ export default function Field({ label, name, error, className = "", children }: 
     <div className={`block ${className}`}>
       <label
         htmlFor={id}
-        className="label-mono mb-[7px] block"
+        className="label-mono mb-2 block"
       >
         {label}
       </label>

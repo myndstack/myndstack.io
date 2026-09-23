@@ -164,7 +164,7 @@ export default function Loader() {
 
   return (
     <div
-      className="loader ease-brand fixed inset-0 z-200 flex flex-col items-center justify-center gap-[26px] bg-ink transition-opacity duration-[400ms]"
+      className="loader ease-brand fixed inset-0 z-200 flex flex-col items-center justify-center gap-6 bg-ink transition-opacity duration-[400ms]"
       style={{ opacity: fading ? 0 : 1 }}
       aria-hidden="true"
     >

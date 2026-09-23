@@ -51,7 +51,7 @@ export default function LegalDocPage({ slug }: { slug: LegalDoc["slug"] }) {
         ]}
       />
 
-      <div className="page-column pt-14 pb-[88px]">
+      <div className="page-column pt-14 pb-22">
         <div className="grid grid-cols-1 gap-12 md:grid-cols-[220px_1fr]">
           <nav aria-label="On this page" className="md:sticky md:top-28 md:self-start">
             <h2 className="label-mono mb-4 text-t4">On this page</h2>

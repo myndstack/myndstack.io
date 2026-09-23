@@ -14,7 +14,7 @@ export default function Faq({ faqs }: { faqs: FaqItem[] }) {
   return (
     <section
       id="faq"
-      className="relative mx-auto max-w-[900px] px-5 pt-[88px] pb-12 sm:px-14"
+      className="relative mx-auto max-w-[900px] px-5 pt-22 pb-12 sm:px-14"
     >
       <Scanline />
       <SectionHeader
@@ -54,7 +54,7 @@ export default function Faq({ faqs }: { faqs: FaqItem[] }) {
                   aria-expanded={open}
                   aria-controls={panelId}
                   onClick={() => setOpenIndex(open ? null : i)}
-                  className="flex w-full cursor-pointer items-center justify-between gap-5 border-none bg-transparent px-6 py-[22px] text-left"
+                  className="flex w-full cursor-pointer items-center justify-between gap-5 border-none bg-transparent px-6 py-6 text-left"
                 >
                   <span className="font-display text-17 font-semibold text-t1">
                     {faq.q}

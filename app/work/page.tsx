@@ -26,7 +26,7 @@ export default async function WorkPage() {
         breadcrumbs={[{ label: "Home", href: "/" }]}
       />
 
-      <section className="page-column pt-14 pb-[88px]">
+      <section className="page-column pt-14 pb-22">
         <h2 className="sr-only">Case studies</h2>
 
         {cases.length === 0 ? (
@@ -37,13 +37,13 @@ export default async function WorkPage() {
           />
         ) : null}
 
-        <div className="grid grid-cols-1 gap-[18px] sm:grid-cols-2">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           {cases.map((c, i) => (
             <Reveal key={c.slug} delay={i * 0.06}>
               <Link href={`/work/${c.slug}`} className="block h-full text-t1">
                 <div className="card card-lift flex h-full flex-col justify-between p-7">
                   <div>
-                    <div className="mb-[18px] flex flex-wrap gap-2">
+                    <div className="mb-4 flex flex-wrap gap-2">
                       {c.tags.map((tag) => (
                         <span key={tag} className="chip">
                           {tag}
@@ -58,7 +58,7 @@ export default async function WorkPage() {
                     </p>
                   </div>
 
-                  <div className="mt-7 flex flex-wrap gap-[26px] border-t border-line pt-4">
+                  <div className="mt-7 flex flex-wrap gap-6 border-t border-line pt-4">
                     {c.metrics.slice(0, 3).map((m) => (
                       <div key={m.l}>
                         <div
@@ -66,7 +66,7 @@ export default async function WorkPage() {
                         >
                           {m.v}
                         </div>
-                        <div className="mt-[3px] font-mono text-11 tracking-[0.08em] text-t5 uppercase">
+                        <div className="mt-1 font-mono text-11 tracking-[0.08em] text-t5 uppercase">
                           {m.l}
                         </div>
                       </div>

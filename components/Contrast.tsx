@@ -16,12 +16,12 @@ export default async function Contrast() {
         lede="Most AI projects run on code nobody owns, stitched between vendors. We architect and build the whole thing as one."
       />
 
-      <div className="grid grid-cols-1 gap-[18px] sm:grid-cols-2">
-        <Reveal scrub className="border border-line bg-surface px-9 py-[34px]">
-          <div className="mb-[22px] font-mono text-11 font-bold tracking-[0.12em] text-t5 uppercase">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+        <Reveal scrub className="border border-line bg-surface px-9 py-8">
+          <div className="mb-6 font-mono text-11 font-bold tracking-[0.12em] text-t5 uppercase">
             Without a unified stack
           </div>
-          <ul className="m-0 flex list-none flex-col gap-[15px] p-0">
+          <ul className="m-0 flex list-none flex-col gap-4 p-0">
             {contrastWithout.map((item) => (
               <li
                 key={item}
@@ -37,12 +37,12 @@ export default async function Contrast() {
         <Reveal
           scrub
           delay={0.08}
-          className="clip-angular-28 relative overflow-hidden border border-lime bg-surface-3 px-9 py-[34px] shadow-float"
+          className="clip-angular-28 relative overflow-hidden border border-lime bg-surface-3 px-9 py-8 shadow-float"
         >
-          <div className="mb-[22px] font-mono text-11 font-bold tracking-[0.12em] text-lime uppercase">
+          <div className="mb-6 font-mono text-11 font-bold tracking-[0.12em] text-lime uppercase">
             With Myndstack
           </div>
-          <ul className="m-0 flex list-none flex-col gap-[15px] p-0">
+          <ul className="m-0 flex list-none flex-col gap-4 p-0">
             {contrastWith.map((item) => (
               <li
                 key={item}

@@ -82,7 +82,7 @@ const ENTERPRISE = {
 
 function EnterpriseBand() {
   return (
-    <div className="mt-[18px] flex flex-col gap-6 border border-line bg-surface-3 p-[30px] md:flex-row md:items-center md:justify-between md:gap-10">
+    <div className="mt-4 flex flex-col gap-6 border border-line bg-surface-3 p-8 md:flex-row md:items-center md:justify-between md:gap-10">
       <div className="md:max-w-[640px]">
         <div className="mb-2 flex flex-wrap items-baseline gap-x-3 gap-y-1">
           <span className="font-display text-17 font-semibold">

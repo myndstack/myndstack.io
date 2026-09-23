@@ -15,8 +15,8 @@ export default function Loading() {
         meta="Loading…"
         breadcrumbs={[{ label: "Home", href: "/" }]}
       />
-      <div className="page-column pt-14 pb-[88px]">
-        <div className="grid grid-cols-1 gap-[18px] sm:grid-cols-2">
+      <div className="page-column pt-14 pb-22">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           {Array.from({ length: 4 }, (_, i) => (
             <SkeletonCard key={i} />
           ))}

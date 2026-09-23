@@ -59,7 +59,7 @@ export default async function CheckoutPage({
         ]}
       />
 
-      <div className="page-column pt-14 pb-[88px]">
+      <div className="page-column pt-14 pb-22">
         {/* Mobile order is deliberate and differs from desktop: what you get,
             then the buy panel, then the long-form detail. Source order alone
             gets it — the single-column grid stacks these three children as

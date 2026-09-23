@@ -60,7 +60,7 @@ export default function Newsletter({ turnstileSiteKey = "" }: Props) {
             type="submit"
             disabled={pending || (gate.enabled && gate.widgetFailed)}
             aria-label="Subscribe"
-            className="cursor-pointer border-none bg-lime px-[18px] font-mono text-15 font-bold text-lime-ink disabled:opacity-60"
+            className="cursor-pointer border-none bg-lime px-4 font-mono text-15 font-bold text-lime-ink disabled:opacity-60"
           >
             {pending ? "…" : "→"}
           </button>

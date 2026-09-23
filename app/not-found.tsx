@@ -8,7 +8,7 @@ export const metadata: Metadata = {
 
 export default function NotFound() {
   return (
-    <section className="page-column flex min-h-[70vh] flex-col items-start justify-center pt-[calc(88px+var(--nav-height))] pb-[88px]">
+    <section className="page-column flex min-h-[70vh] flex-col items-start justify-center pt-[calc(88px+var(--nav-height))] pb-22">
       <div className="eyebrow mb-3.5">Error · 404</div>
       <h1 className="m-0 mb-4 font-display text-30 leading-none font-bold tracking-[-0.03em] text-balance sm:text-56">
         This layer

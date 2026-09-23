@@ -57,8 +57,8 @@ export default function Hero({ eyebrow, subhead, ctaPrimary, ctaSecondary }: Pro
 
       <HeroNetwork />
 
-      <div className="relative z-2 flex flex-1 flex-col items-center justify-center px-5 pt-[calc(60px+var(--nav-height))] pb-[60px] text-center sm:px-16">
-        <div className="animate-rise-in mb-[26px] font-mono text-12 font-bold tracking-[0.16em] text-lime uppercase">
+      <div className="relative z-2 flex flex-1 flex-col items-center justify-center px-5 pt-[calc(60px+var(--nav-height))] pb-15 text-center sm:px-16">
+        <div className="animate-rise-in mb-6 font-mono text-12 font-bold tracking-[0.16em] text-lime uppercase">
           {eyebrow}
         </div>
 
@@ -72,7 +72,7 @@ export default function Hero({ eyebrow, subhead, ctaPrimary, ctaSecondary }: Pro
           ))}
         </h1>
 
-        <p className="animate-rise-in mx-0 mt-8 mb-[38px] max-w-[580px] text-22 leading-[1.5] text-t3 [animation-duration:0.8s]">
+        <p className="animate-rise-in mx-0 mt-8 mb-10 max-w-[580px] text-22 leading-[1.5] text-t3 [animation-duration:0.8s]">
           {subhead}
         </p>
 
@@ -92,7 +92,7 @@ export default function Hero({ eyebrow, subhead, ctaPrimary, ctaSecondary }: Pro
 
       <div
         aria-hidden="true"
-        className="animate-rise-in relative z-2 flex justify-center pb-[30px] font-mono text-11 tracking-[0.14em] text-t5 [animation-duration:1s]"
+        className="animate-rise-in relative z-2 flex justify-center pb-8 font-mono text-11 tracking-[0.14em] text-t5 [animation-duration:1s]"
       >
         SCROLL ↓
       </div>

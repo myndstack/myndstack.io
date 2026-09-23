@@ -213,7 +213,7 @@ export default function StackStory() {
             <div className="eyebrow mb-5 tracking-[0.16em]">
               The stack · <span ref={counterRef}>01 / 04</span>
             </div>
-            <h2 className="m-0 mb-[22px] font-display text-42 leading-[0.98] font-bold tracking-[-0.03em] text-balance sm:text-76">
+            <h2 className="m-0 mb-6 font-display text-42 leading-[0.98] font-bold tracking-[-0.03em] text-balance sm:text-76">
               One stack.
               <br />
               Every layer.
@@ -231,7 +231,7 @@ export default function StackStory() {
                 ref={(el) => {
                   layerRefs.current[i] = el;
                 }}
-                className="story-layer absolute inset-x-0 flex h-[98px] items-center gap-5 overflow-hidden border border-line bg-surface px-[26px]"
+                className="story-layer absolute inset-x-0 flex h-[98px] items-center gap-5 overflow-hidden border border-line bg-surface px-6"
               >
                 <span className="ease-brand absolute inset-y-0 left-0 w-[3px] origin-top scale-y-0 bg-lime transition-transform duration-350 [.is-locked_&]:scale-y-100" />
                 <span className="ease-brand flex-none font-mono text-12 font-bold text-t5 transition-colors [.is-locked_&]:text-lime">

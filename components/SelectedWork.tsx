@@ -31,12 +31,12 @@ export default async function SelectedWork() {
         aside="PharmaLaunch — a platform that generates GMP facility-feasibility documents, quality-gated by a deterministic rule engine. In private validation."
       />
 
-      <div className="flex flex-col gap-[18px]">
+      <div className="flex flex-col gap-4">
         {/* Featured case */}
         <Reveal scrub>
           <Link
             href={`/work/${featured.slug}`}
-            className="card clip-angular-32 grid grid-cols-1 items-center gap-11 px-10 py-[38px] text-t1 hover:border-lime-edge hover:text-t1 md:grid-cols-[1.25fr_1fr]"
+            className="card clip-angular-32 grid grid-cols-1 items-center gap-11 px-10 py-10 text-t1 hover:border-lime-edge hover:text-t1 md:grid-cols-[1.25fr_1fr]"
           >
             <div>
               <div className="mb-5 flex flex-wrap gap-2">
@@ -60,13 +60,13 @@ export default async function SelectedWork() {
             {/* 1px grid gaps act as the hairlines between metrics */}
             <div className="grid grid-cols-2 gap-px overflow-hidden border border-line bg-line">
               {featured.metrics.map((m) => (
-                <div key={m.l} className="bg-surface-3 px-[22px] py-5">
+                <div key={m.l} className="bg-surface-3 px-6 py-5">
                   <div
                     className={`font-display text-30 font-bold tracking-[-0.02em] ${m.lime ? "text-lime" : ""}`}
                   >
                     {m.v}
                   </div>
-                  <div className="mt-[3px] font-mono text-11 tracking-[0.08em] text-t5 uppercase">
+                  <div className="mt-1 font-mono text-11 tracking-[0.08em] text-t5 uppercase">
                     {m.l}
                   </div>
                 </div>
@@ -76,7 +76,7 @@ export default async function SelectedWork() {
         </Reveal>
 
         {/* Supporting cases */}
-        <div className="card-grid grid grid-cols-1 gap-[18px] sm:grid-cols-3">
+        <div className="card-grid grid grid-cols-1 gap-4 sm:grid-cols-3">
           {supporting.map((c) => (
             <Reveal scrub key={c.slug}>
               {/* The card is inside the link so the hover lift and the reveal
@@ -84,26 +84,26 @@ export default async function SelectedWork() {
               <Link href={`/work/${c.slug}`} className="block h-full text-t1">
                 <div className="card card-lift flex h-full min-h-[248px] flex-col justify-between p-7">
                   <div>
-                    <div className="mb-[18px] flex gap-2">
+                    <div className="mb-4 flex gap-2">
                       {c.tags.map((tag) => (
                         <span key={tag} className="chip">
                           {tag}
                         </span>
                       ))}
                     </div>
-                    <div className="mb-[9px] font-display text-22 font-semibold">
+                    <div className="mb-2 font-display text-22 font-semibold">
                       {c.client}
                     </div>
                     <p className="m-0 text-13 leading-[1.55] text-t4">{c.summary}</p>
                   </div>
 
-                  <div className="mt-6 flex gap-[26px] border-t border-line pt-4">
+                  <div className="mt-6 flex gap-6 border-t border-line pt-4">
                     {c.metrics.slice(0, CARD_METRICS).map((m) => (
                       <div key={m.l}>
                         <div className="font-display text-22 font-bold tracking-[-0.02em]">
                           {m.v}
                         </div>
-                        <div className="mt-[3px] font-mono text-11 tracking-[0.08em] text-t5 uppercase">
+                        <div className="mt-1 font-mono text-11 tracking-[0.08em] text-t5 uppercase">
                           {m.l}
                         </div>
                       </div>
