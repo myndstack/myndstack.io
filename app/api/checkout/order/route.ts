@@ -69,7 +69,7 @@ export async function POST(request: Request) {
 
   const parsed = bodySchema.safeParse(body);
   if (!parsed.success) {
-    return NextResponse.json({ ok: false, error: "Invalid request." }, { status: 400 });
+    return NextResponse.json({ ok: false, error: "We couldn't read that order. Reload the page and try again — nothing was charged." }, { status: 400 });
   }
 
   // Resolve the tier + charge from the CMS, server-side. Only tiers carrying a

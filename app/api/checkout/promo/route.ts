@@ -55,7 +55,7 @@ export async function POST(request: Request) {
   const parsed = bodySchema.safeParse(body);
   if (!parsed.success) {
     return NextResponse.json(
-      { ok: false, message: "Invalid request." },
+      { ok: false, message: "We couldn't check that code. Reload the page and try again." },
       { status: 400 },
     );
   }

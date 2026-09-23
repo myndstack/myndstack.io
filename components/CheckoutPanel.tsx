@@ -159,6 +159,8 @@ export default function CheckoutPanel({
   const [billing, setBilling] = useState<Billing>("monthly");
   const [status, setStatus] = useState<Status>("idle");
   const [error, setError] = useState<string | null>(null);
+  /** Neutral, non-error note — e.g. the buyer closed the payment window. */
+  const [notice, setNotice] = useState<string | null>(null);
   const headingRef = useRef<HTMLHeadingElement>(null);
 
   /**
@@ -370,6 +372,7 @@ export default function CheckoutPanel({
 
   const pay = useCallback(async () => {
     setError(null);
+    setNotice(null);
     setStatus("starting");
     try {
       const orderRes = await fetch("/api/checkout/order", {
@@ -396,7 +399,7 @@ export default function CheckoutPanel({
       if (!orderRes.ok || !order.ok || !order.keyId || !order.orderId) {
         // Pre-payment failure — no money moved, so Pay stays retryable.
         setStatus("error");
-        setError(order.error ?? "Couldn't start the payment. Please try again.");
+        setError(order.error ?? "We couldn't start the payment, and nothing was charged. Try again in a moment.");
         return;
       }
 
@@ -418,7 +421,14 @@ export default function CheckoutPanel({
         theme: { color: "#c9f24d" },
         // Razorpay fires ondismiss only on a manual close WITHOUT payment (the
         // handler fires on success instead), so returning to idle is safe here.
-        modal: { ondismiss: () => setStatus("idle") },
+        // Say so, rather than silently re-arming: a buyer who closed the sheet
+        // wants to know whether anything was charged.
+        modal: {
+          ondismiss: () => {
+            setStatus("idle");
+            setNotice("Payment window closed — nothing was charged. Slide again when you're ready.");
+          },
+        },
         handler: (resp) => {
           void verify(resp);
         },
@@ -429,7 +439,7 @@ export default function CheckoutPanel({
     } catch {
       if (!alive.current) return;
       setStatus("error");
-      setError("Something went wrong starting the payment. Please try again.");
+      setError("We couldn't start the payment, and nothing was charged. Check your connection and try again.");
     }
   }, [slug, billing, tierName, oneTime, annual, amountMinor, applied, verify]);
 
@@ -444,11 +454,11 @@ export default function CheckoutPanel({
         <h2
           ref={headingRef}
           tabIndex={-1}
-          className="m-0 mb-2 font-display text-xl font-semibold tracking-[-0.02em] focus:outline-none"
+          className="m-0 mb-2 font-display text-22 font-semibold tracking-[-0.02em] focus:outline-none"
         >
           You&apos;re in.
         </h2>
-        <p className="m-0 text-sm leading-[1.6] text-t4">
+        <p className="m-0 text-15 leading-[1.6] text-t4">
           {oneTime
             ? `Thanks for booking the ${tierName}. We'll email you within one business day to schedule the kickoff.`
             : `Thanks for subscribing to ${tierName}. We'll email you shortly to get your workspace set up.`}{" "}
@@ -468,11 +478,11 @@ export default function CheckoutPanel({
         <h2
           ref={headingRef}
           tabIndex={-1}
-          className="m-0 mb-2 font-display text-xl font-semibold tracking-[-0.02em] focus:outline-none"
+          className="m-0 mb-2 font-display text-22 font-semibold tracking-[-0.02em] focus:outline-none"
         >
           Thanks — we&apos;ve got your payment.
         </h2>
-        <p className="m-0 text-sm leading-[1.6] text-t4">
+        <p className="m-0 text-15 leading-[1.6] text-t4">
           Your payment went through. We had a brief hiccup confirming it here, but
           there&apos;s no need to pay again — we&apos;ll email you shortly to finish
           setup, and your receipt is on its way from Razorpay.
@@ -533,17 +543,17 @@ export default function CheckoutPanel({
           reason that it answers "am I buying the right thing" in one glance. */}
       <div className="flex items-start justify-between gap-4 border-t border-line pt-4">
         <div className="min-w-0">
-          <h2 className="m-0 font-display text-[17px] leading-[1.25] font-semibold tracking-[-0.01em]">
+          <h2 className="m-0 font-display text-17 leading-[1.25] font-semibold tracking-[-0.01em]">
             {tierName}
           </h2>
-          <p className="mt-1 mb-0 text-[13px] leading-[1.45] text-t4">
+          <p className="mt-1 mb-0 text-13 leading-[1.45] text-t4">
             {description ??
               (oneTime
                 ? "Book online — we'll email within one business day to schedule."
                 : "Subscribe online and start today. Cancel anytime.")}
           </p>
         </div>
-        <span className="shrink-0 pt-0.5 text-[15px] font-semibold text-t2 tabular-nums">
+        <span className="shrink-0 pt-0.5 text-15 font-semibold text-t2 tabular-nums">
           {netLabel}
         </span>
       </div>
@@ -602,22 +612,22 @@ export default function CheckoutPanel({
             not ours to assert. */}
         <dl className="m-0 flex flex-col gap-2">
           <div className="flex items-baseline justify-between gap-3">
-            <dt className="m-0 text-[13px] text-t4">Subtotal</dt>
-            <dd className="m-0 text-[13px] text-t3 tabular-nums">{netLabel}</dd>
+            <dt className="m-0 text-13 text-t4">Subtotal</dt>
+            <dd className="m-0 text-13 text-t3 tabular-nums">{netLabel}</dd>
           </div>
           {charge.discountMinor > 0 && applied ? (
             <div className="flex items-baseline justify-between gap-3">
-              <dt className="m-0 flex min-w-0 items-baseline gap-2 text-[13px] text-lime">
+              <dt className="m-0 flex min-w-0 items-baseline gap-2 text-13 text-lime">
                 <span className="truncate">{applied.code}</span>
                 <button
                   type="button"
                   onClick={() => setApplied(null)}
-                  className="ease-brand shrink-0 font-mono text-[10px] tracking-[0.08em] text-t5 uppercase transition-colors duration-160 hover:text-danger"
+                  className="ease-brand shrink-0 font-mono text-11 tracking-[0.08em] text-t5 uppercase transition-colors duration-160 hover:text-danger"
                 >
                   Remove
                 </button>
               </dt>
-              <dd className="m-0 text-[13px] text-lime tabular-nums">
+              <dd className="m-0 text-13 text-lime tabular-nums">
                 {discountLabel}
               </dd>
             </div>
@@ -626,10 +636,10 @@ export default function CheckoutPanel({
             {/* Named per region, so a zero still says WHICH tax is zero — an
                 EU buyer reads "VAT", matching the "excl. VAT" the pricing card
                 showed them, rather than a generic "Tax". */}
-            <dt className="m-0 text-[13px] text-t4">
+            <dt className="m-0 text-13 text-t4">
               {charge.taxLabel ?? charge.taxName}
             </dt>
-            <dd className="m-0 text-[13px] text-t3 tabular-nums">
+            <dd className="m-0 text-13 text-t3 tabular-nums">
               {charge.taxLabel ? taxLabel : "None added"}
             </dd>
           </div>
@@ -666,7 +676,7 @@ export default function CheckoutPanel({
                     autoCapitalize="characters"
                     spellCheck={false}
                     disabled={promoBusy}
-                    className="ease-brand min-w-0 flex-1 border border-line-3 bg-surface px-3 py-2 font-mono text-[12px] tracking-[0.06em] text-t2 uppercase transition-colors duration-160 placeholder:text-t5 placeholder:normal-case focus:border-lime focus:shadow-[0_0_0_1px_var(--color-lime)] focus:outline-2 focus:outline-transparent"
+                    className="ease-brand min-w-0 flex-1 border border-line-3 bg-surface h-11 px-3 py-0 font-mono text-12 tracking-[0.06em] text-t2 uppercase transition-colors duration-160 placeholder:text-t5 placeholder:normal-case focus:border-lime focus:shadow-[0_0_0_1px_var(--color-lime)] focus:outline-2 focus:outline-transparent"
                   />
                   <button
                     type="button"
@@ -674,11 +684,11 @@ export default function CheckoutPanel({
                     disabled={promoBusy || !promoInput.trim()}
                     className="btn-ghost-sm shrink-0"
                   >
-                    {promoBusy ? "…" : "Apply"}
+                    {promoBusy ? "Checking…" : "Apply"}
                   </button>
                 </div>
                 {promoError ? (
-                  <p role="alert" className="m-0 text-[12px] leading-[1.4] text-danger">
+                  <p role="alert" className="m-0 text-12 leading-[1.4] text-danger">
                     {promoError}
                   </p>
                 ) : null}
@@ -687,7 +697,7 @@ export default function CheckoutPanel({
               <button
                 type="button"
                 onClick={() => setPromoOpen(true)}
-                className="ease-brand -my-1 py-1 font-mono text-[11px] tracking-[0.08em] text-t5 uppercase transition-colors duration-160 hover:text-lime"
+                className="ease-brand -my-1 py-1 font-mono text-11 tracking-[0.08em] text-t5 uppercase transition-colors duration-160 hover:text-lime"
               >
                 Have a promo code?
               </button>
@@ -699,12 +709,12 @@ export default function CheckoutPanel({
           id="checkout-total"
           className="mt-3 flex items-baseline justify-between gap-3 border-t border-line pt-3"
         >
-          <span className="font-mono text-[11px] font-bold tracking-[0.12em] text-t5 uppercase">
+          <span className="font-mono text-11 font-bold tracking-[0.12em] text-t5 uppercase">
             {`Total${period || " due"}`}
           </span>
           {/* Clamped: gross with paise ("₹58,998.82") is four glyphs longer than
               a listed price and has to clear the label on a 335px mobile panel. */}
-          <span className="font-display text-[clamp(24px,5vw,29px)] leading-none font-bold tracking-[-0.02em] tabular-nums">
+          <span className="font-display text-[clamp(22px,5vw,30px)] leading-none font-bold tracking-[-0.02em] tabular-nums">
             {headline}
           </span>
         </div>
@@ -713,7 +723,7 @@ export default function CheckoutPanel({
             never show a note, so reserving for it is just dead space under the
             price. */}
         {!oneTime ? (
-          <div className="mt-1.5 h-3.5 text-right font-mono text-[11px] tracking-[0.04em] text-lime">
+          <div className="mt-1.5 h-3.5 text-right font-mono text-11 tracking-[0.04em] text-lime">
             {annual && annualNote ? annualNote : ""}
           </div>
         ) : null}
@@ -738,8 +748,13 @@ export default function CheckoutPanel({
       />
 
       {status === "error" && error ? (
-        <p role="alert" className="mt-3 mb-0 text-[13px] leading-[1.5] text-danger">
+        <p role="alert" className="mt-3 mb-0 text-13 leading-[1.5] text-danger">
           {error}
+        </p>
+      ) : null}
+      {notice && status === "idle" ? (
+        <p role="status" className="mt-3 mb-0 text-13 leading-[1.5] text-t4">
+          {notice}
         </p>
       ) : null}
 
@@ -760,7 +775,7 @@ export default function CheckoutPanel({
               is the site's label voice, and it exists to hold uppercase apart —
               set in sentence case it just looks loose, and it fought the
               wordmark beside it. 11px t5 matches the trust line above. */}
-          <span className="text-[11px] leading-none text-t5">Powered by</span>
+          <span className="text-11 leading-none text-t5">Powered by</span>
           {/* eslint-disable-next-line @next/next/no-img-element -- see PaymentMarks */}
           <img
             src="/payment/razorpay.svg"
@@ -790,7 +805,7 @@ export default function CheckoutPanel({
           card reads as a paragraph that got away rather than a seal. "We never
           see your card details" rather than "never touch Myndstack" — shorter,
           and it avoids "us" reading as the US region three rows above. */}
-      <p className="mt-3.5 mb-0 text-center font-mono text-[10px] leading-[1.5] tracking-[0.08em] text-t5 uppercase xs:text-left">
+      <p className="mt-3.5 mb-0 text-center font-mono text-11 leading-[1.5] tracking-[0.08em] text-t5 uppercase xs:text-left">
         PCI-DSS Level&nbsp;1 · we never see your card details
       </p>
     </>

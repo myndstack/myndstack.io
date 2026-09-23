@@ -71,7 +71,7 @@ export default function Page() {
             <section key={group.title}>
               <div className="mb-6 border-b border-line pb-3">
                 <h2 className="label-mono m-0 text-t3">{group.title}</h2>
-                <p className="mt-1.5 mb-0 max-w-[560px] text-[13px] text-t5">
+                <p className="mt-1.5 mb-0 max-w-[560px] text-13 text-t5">
                   {group.blurb}
                 </p>
               </div>
@@ -84,10 +84,10 @@ export default function Page() {
                         href={`/${slug}`}
                         className="group ease-brand flex h-full flex-col gap-2 bg-ink p-6 transition-colors duration-160 hover:bg-surface-3"
                       >
-                        <div className="font-display text-[17px] font-semibold text-t2 group-hover:text-lime">
+                        <div className="font-display text-17 font-semibold text-t2 group-hover:text-lime">
                           {doc.title}
                         </div>
-                        <p className="m-0 text-[13px] leading-[1.55] text-t5">
+                        <p className="m-0 text-13 leading-[1.55] text-t5">
                           {doc.lede}
                         </p>
                       </Link>

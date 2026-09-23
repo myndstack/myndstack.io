@@ -5,10 +5,13 @@ import { useReducedMotion } from "@/lib/hooks";
 import { LOADER_SEEN_KEY } from "@/lib/loader-seen";
 import Wordmark from "./Wordmark";
 
-const FADE_AT_MS = 1650;
-const FADE_DURATION_MS = 850;
+/** 0.8s hold + 0.4s fade = 1.2s. It was 2.5s, all of it with the site inert —
+ *  long enough to read as a wait rather than an entrance. */
+const FADE_AT_MS = 800;
+const FADE_DURATION_MS = 400;
 const SPARK_COUNT = 90;
-const SPARK_FRAMES = 80;
+/** ~0.8s at 60fps, so the burst finishes as the fade begins. */
+const SPARK_FRAMES = 48;
 
 /** sessionStorage throws outright in some privacy modes; a throw means unseen. */
 function alreadySeen() {
@@ -161,15 +164,15 @@ export default function Loader() {
 
   return (
     <div
-      className="loader ease-brand fixed inset-0 z-200 flex flex-col items-center justify-center gap-[26px] bg-ink transition-opacity duration-[800ms]"
+      className="loader ease-brand fixed inset-0 z-200 flex flex-col items-center justify-center gap-[26px] bg-ink transition-opacity duration-[400ms]"
       style={{ opacity: fading ? 0 : 1 }}
       aria-hidden="true"
     >
       <canvas ref={canvasRef} className="absolute inset-0 h-full w-full opacity-60" />
       <Wordmark height={44} className="relative z-2 animate-load-mark" />
-      <div className="animate-load-line relative z-2 h-0.5 bg-lime shadow-[0_0_14px_#C9F24D]" />
-      <div className="animate-load-fade relative z-2 font-mono text-[11px] font-bold tracking-[0.22em] text-t5 uppercase">
-        Initializing cognitive stack
+      <div className="animate-load-line relative z-2 h-0.5 bg-lime shadow-glow" />
+      <div className="animate-load-fade relative z-2 font-mono text-11 font-bold tracking-[0.22em] text-t5 uppercase">
+        Founder-led studio
       </div>
     </div>
   );

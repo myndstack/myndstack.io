@@ -58,11 +58,11 @@ export default function Hero({ eyebrow, subhead, ctaPrimary, ctaSecondary }: Pro
       <HeroNetwork />
 
       <div className="relative z-2 flex flex-1 flex-col items-center justify-center px-5 pt-[calc(60px+var(--nav-height))] pb-[60px] text-center sm:px-16">
-        <div className="animate-rise-in mb-[26px] font-mono text-xs font-bold tracking-[0.16em] text-lime uppercase">
+        <div className="animate-rise-in mb-[26px] font-mono text-12 font-bold tracking-[0.16em] text-lime uppercase">
           {eyebrow}
         </div>
 
-        <h1 className="animate-rise-in m-0 max-w-[1000px] font-display text-[clamp(30px,7.2vw,92px)] leading-none font-normal tracking-[-0.03em] text-balance [animation-duration:0.7s]">
+        <h1 className="animate-rise-in m-0 max-w-[1000px] font-display text-display leading-none font-normal tracking-[-0.03em] text-balance [animation-duration:0.7s]">
           {WORDS.map((word, i) => (
             // Index key: "end" appears twice, and the array is static.
             <span key={i}>
@@ -72,7 +72,7 @@ export default function Hero({ eyebrow, subhead, ctaPrimary, ctaSecondary }: Pro
           ))}
         </h1>
 
-        <p className="animate-rise-in mx-0 mt-8 mb-[38px] max-w-[580px] text-[21px] leading-[1.5] text-t3 [animation-duration:0.8s]">
+        <p className="animate-rise-in mx-0 mt-8 mb-[38px] max-w-[580px] text-22 leading-[1.5] text-t3 [animation-duration:0.8s]">
           {subhead}
         </p>
 
@@ -92,7 +92,7 @@ export default function Hero({ eyebrow, subhead, ctaPrimary, ctaSecondary }: Pro
 
       <div
         aria-hidden="true"
-        className="animate-rise-in relative z-2 flex justify-center pb-[30px] font-mono text-[11px] tracking-[0.14em] text-t7 [animation-duration:1s]"
+        className="animate-rise-in relative z-2 flex justify-center pb-[30px] font-mono text-11 tracking-[0.14em] text-t5 [animation-duration:1s]"
       >
         SCROLL ↓
       </div>

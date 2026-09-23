@@ -16,7 +16,7 @@ export default function BookingEmbed() {
   return (
     <div className="mt-9 border-t border-line pt-8">
       <div className="label-mono mb-2">Prefer to talk?</div>
-      <p className="mt-0 mb-5 max-w-[400px] text-[15px] leading-[1.55] text-t4">
+      <p className="mt-0 mb-5 max-w-[400px] text-15 leading-[1.55] text-t4">
         Book 30 minutes with an engineer — not a salesperson.
       </p>
 

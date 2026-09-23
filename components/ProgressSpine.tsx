@@ -103,7 +103,7 @@ export default function ProgressSpine({ socials }: { socials: Social[] }) {
           not the old t7. */}
       <div
         aria-hidden="true"
-        className="absolute top-[100px] left-1/2 -translate-x-1/2 font-mono text-[10px] font-bold tracking-[0.22em] text-t5 uppercase"
+        className="absolute top-[100px] left-1/2 -translate-x-1/2 font-mono text-11 font-bold tracking-[0.22em] text-t5 uppercase"
         style={{ writingMode: "vertical-rl" }}
       >
         Follow
@@ -118,7 +118,7 @@ export default function ProgressSpine({ socials }: { socials: Social[] }) {
       <div
         ref={fillRef}
         aria-hidden="true"
-        className="spine-fill absolute left-1/2 w-0.5 origin-top bg-lime shadow-[0_0_8px_#C9F24D] transition-transform duration-[120ms] ease-linear"
+        className="spine-fill absolute left-1/2 w-0.5 origin-top bg-lime shadow-glow transition-transform duration-[120ms] ease-linear"
         style={{
           top: TRACK_TOP,
           bottom: TRACK_BOTTOM_GAP,
@@ -128,7 +128,7 @@ export default function ProgressSpine({ socials }: { socials: Social[] }) {
       <div
         ref={dotRef}
         aria-hidden="true"
-        className="spine-dot absolute left-1/2 size-2 bg-lime shadow-[0_0_10px_#C9F24D] transition-transform duration-[120ms] ease-linear"
+        className="spine-dot absolute left-1/2 size-2 bg-lime shadow-glow transition-transform duration-[120ms] ease-linear"
         style={{
           top: TRACK_TOP,
           transform: "translate(-50%, -50%)",

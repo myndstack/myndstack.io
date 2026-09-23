@@ -46,10 +46,10 @@ export default function Integrations() {
               }`}
             >
               <div>
-                <div className="font-display text-[17px] font-semibold">
+                <div className="font-display text-17 font-semibold">
                   {group.title}
                 </div>
-                <p className="m-0 mt-1 text-[13px] leading-[1.45] text-t5">
+                <p className="m-0 mt-1 text-13 leading-[1.45] text-t5">
                   {group.blurb}
                 </p>
               </div>
@@ -77,7 +77,7 @@ export default function Integrations() {
                           <path d={path} />
                         </svg>
                       ) : (
-                        <span className="font-mono text-[12px] tracking-[0.01em]">
+                        <span className="font-mono text-12 tracking-[0.01em]">
                           {item}
                         </span>
                       )}

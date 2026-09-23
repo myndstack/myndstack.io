@@ -108,7 +108,7 @@ export function useFormPost(endpoint: string, schemaName: SchemaName) {
 
       if (!result.ok) {
         const fieldErrors = result.fieldErrors ?? {};
-        setState({ ...IDLE, error: result.error ?? "Something went wrong.", fieldErrors });
+        setState({ ...IDLE, error: result.error ?? "We couldn't send that just now. Try again in a moment.", fieldErrors });
         focusFirstInvalid(form, fieldErrors);
         return;
       }

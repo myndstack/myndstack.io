@@ -83,11 +83,11 @@ export default async function CasePage({ params }: { params: Promise<Params> }) 
           {study.metrics.map((m) => (
             <div key={m.l} className="bg-surface-3 px-6 py-7">
               <div
-                className={`font-display text-[clamp(26px,4vw,34px)] font-bold tracking-[-0.02em] ${m.lime ? "text-lime" : ""}`}
+                className={`font-display text-[clamp(22px,4vw,30px)] font-bold tracking-[-0.02em] ${m.lime ? "text-lime" : ""}`}
               >
                 {m.v}
               </div>
-              <div className="mt-1.5 font-mono text-[11px] tracking-[0.08em] text-t5 uppercase">
+              <div className="mt-1.5 font-mono text-11 tracking-[0.08em] text-t5 uppercase">
                 {m.l}
               </div>
             </div>
@@ -129,7 +129,7 @@ export default async function CasePage({ params }: { params: Promise<Params> }) 
                     className={i > 0 ? "mt-4 border-t border-line pt-4" : undefined}
                   >
                     <dt className="label-mono mb-1.5 text-t4">{fact.label}</dt>
-                    <dd className="m-0 font-display text-[15px] font-semibold">
+                    <dd className="m-0 font-display text-15 font-semibold">
                       {fact.value}
                     </dd>
                   </div>
@@ -142,7 +142,7 @@ export default async function CasePage({ params }: { params: Promise<Params> }) 
                   {study.stack.map((layer) => (
                     <li
                       key={layer}
-                      className="flex gap-2.5 text-[14px] leading-snug text-t3"
+                      className="flex gap-2.5 text-13 leading-snug text-t3"
                     >
                       <span aria-hidden="true" className="flex-none text-lime">
                         ▸
@@ -153,7 +153,7 @@ export default async function CasePage({ params }: { params: Promise<Params> }) 
                 </ul>
               </div>
 
-              <Link href="/work" className="btn btn-outline mt-7 block text-center">
+              <Link href="/work" className="btn btn-outline mt-7 flex text-center">
                 All case studies
               </Link>
             </div>

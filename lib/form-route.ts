@@ -83,7 +83,7 @@ export async function handleFormSubmission<S extends z.ZodType>(
     const verdict = await verifyTurnstile(token, ip);
     if (!verdict.success) {
       return NextResponse.json(
-        { ok: false, error: "Verification failed. Please try again." },
+        { ok: false, error: "The anti-spam check didn't go through. Try sending again." },
         { status: 400 },
       );
     }
@@ -113,7 +113,7 @@ export async function handleFormSubmission<S extends z.ZodType>(
   const parsed = schema.safeParse(body);
   if (!parsed.success) {
     return NextResponse.json(
-      { ok: false, error: "Please check the highlighted fields.", fieldErrors: toFieldErrors(parsed.error) },
+      { ok: false, error: "A few fields need another look — see the notes below each one.", fieldErrors: toFieldErrors(parsed.error) },
       { status: 400 },
     );
   }

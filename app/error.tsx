@@ -19,20 +19,20 @@ export default function Error({
   }, [error]);
 
   return (
-    <section className="mx-auto flex min-h-[70vh] max-w-[1200px] flex-col items-start justify-center px-5 pt-[calc(88px+var(--nav-height))] pb-[88px] sm:px-14">
+    <section className="page-column flex min-h-[70vh] flex-col items-start justify-center pt-[calc(88px+var(--nav-height))] pb-[88px]">
       <div className="eyebrow mb-3.5">Error</div>
-      <h1 className="m-0 mb-4 font-display text-[clamp(30px,7vw,64px)] leading-none font-bold tracking-[-0.03em] text-balance">
+      <h1 className="m-0 mb-4 font-display text-30 sm:text-56 leading-none font-bold tracking-[-0.03em] text-balance">
         Something in the stack
         <br />
         <span className="text-lime">gave way.</span>
       </h1>
-      <p className="m-0 mb-9 max-w-[460px] text-[17px] leading-[1.55] text-t4">
+      <p className="m-0 mb-9 max-w-[460px] text-17 leading-[1.55] text-t4">
         This one is on us, not you. Try again — and if it keeps happening, tell us
         what you were doing and we&rsquo;ll fix it.
       </p>
 
       {error.digest ? (
-        <p className="mb-9 font-mono text-[11px] tracking-[0.1em] text-t5 uppercase">
+        <p className="mb-9 font-mono text-11 tracking-[0.1em] text-t5 uppercase">
           Reference {error.digest}
         </p>
       ) : null}

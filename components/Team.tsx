@@ -4,7 +4,9 @@ import Section from "./Section";
 import SectionHeader from "./SectionHeader";
 
 export default async function Team() {
-  const team = await getTeam();
+  // Sanity keeps "Adding soon" rows as slots for future hires; they aren't
+  // people, so they don't render.
+  const people = (await getTeam()).filter((member) => member.n !== "Adding soon");
 
   return (
     <Section id="team">
@@ -15,27 +17,32 @@ export default async function Team() {
         aside="No account managers between you and the person building your stack."
       />
 
-      <div className="grid grid-cols-1 gap-[18px] xs:grid-cols-2 md:grid-cols-4">
-        {team.map((member, i) => (
-          // Key on name + index, not name alone: placeholder tiles share the
-          // same name ("Adding soon") until real teammates are added, and a
-          // static ordered list makes the index a stable tiebreaker.
-          <Reveal key={`${member.n}-${i}`} className="group">
-            <div className="ease-brand relative mb-3.5 flex aspect-square items-center justify-center overflow-hidden border border-line bg-[linear-gradient(150deg,#1F1F23,#0d0d0f)] transition-[border-color,box-shadow] duration-160 group-hover:border-lime-edge group-hover:shadow-[var(--edge-ring-faint),var(--shadow-lift)]">
-              {/* Decorative initials — the name is repeated just below. */}
-              <span
-                aria-hidden="true"
-                className="ease-brand font-display text-[38px] font-bold text-line-3 transition-colors duration-300 group-hover:text-t7"
-              >
-                {member.i}
-              </span>
-              <span className="absolute bottom-3 left-3 size-2 bg-lime shadow-[0_0_10px_#C9F24D]" />
-            </div>
-            <div className="font-display text-[17px] font-semibold">{member.n}</div>
-            <div className="mt-0.5 text-[13px] text-t5">{member.r}</div>
-          </Reveal>
+      {/* A row of people, not a 4-up grid: Process directly above is a 4-column
+          grid, and two identical grids back to back read as one repeated block.
+          Placeholder tiles ("Adding soon") are skipped — an empty chair isn't a
+          teammate. Each person is a square portrait tile beside their name. */}
+      <ul className="m-0 flex list-none flex-col gap-5 p-0 sm:flex-row sm:flex-wrap sm:gap-8">
+        {people.map((member) => (
+          <li key={member.n}>
+            <Reveal className="group flex items-center gap-5">
+              <div className="ease-brand relative flex size-32 flex-none items-center justify-center overflow-hidden border border-line bg-[linear-gradient(150deg,var(--color-line),var(--color-ink))] transition-[border-color,box-shadow] duration-160 group-hover:border-lime-edge group-hover:shadow-[var(--edge-ring-faint),var(--shadow-lift)]">
+                {/* Decorative initials — the name is repeated beside the tile. */}
+                <span
+                  aria-hidden="true"
+                  className="ease-brand font-display text-30 font-bold text-line-3 transition-colors duration-300 group-hover:text-t7"
+                >
+                  {member.i}
+                </span>
+                <span className="absolute bottom-3 left-3 size-2 bg-lime shadow-glow" />
+              </div>
+              <div>
+                <div className="font-display text-22 font-semibold">{member.n}</div>
+                <div className="mt-1 text-13 text-t5">{member.r}</div>
+              </div>
+            </Reveal>
+          </li>
         ))}
-      </div>
+      </ul>
     </Section>
   );
 }

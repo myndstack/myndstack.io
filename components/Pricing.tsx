@@ -48,12 +48,12 @@ export default function Pricing({ tiers }: { tiers: PricingTier[] }) {
 
       {/* Per-currency tax/settlement lives on each card now (taxNote); this stays
           a plain prompt so it reads the same in every region. */}
-      <p className="mt-8 mb-0 text-[13px] text-t5">
+      <p className="mt-8 mb-0 text-13 text-t5">
         <Link
           href="#contact"
           className="text-t3 underline underline-offset-2 hover:text-lime"
         >
-          Not sure where to start? Talk to us.
+          Not sure which fits? Start a project — we’ll scope it with you.
         </Link>
       </p>
     </Section>
@@ -76,7 +76,8 @@ const ENTERPRISE = {
     "Security review, SLAs & terms written into your SOW",
     "Works within your procurement & MSA process",
   ],
-  cta: "Let's talk →",
+  // Same label as every other contact-bound CTA — one action, one name.
+  cta: "Start a project →",
 } as const;
 
 function EnterpriseBand() {
@@ -84,17 +85,17 @@ function EnterpriseBand() {
     <div className="mt-[18px] flex flex-col gap-6 border border-line bg-surface-3 p-[30px] md:flex-row md:items-center md:justify-between md:gap-10">
       <div className="md:max-w-[640px]">
         <div className="mb-2 flex flex-wrap items-baseline gap-x-3 gap-y-1">
-          <span className="font-display text-[19px] font-semibold">
+          <span className="font-display text-17 font-semibold">
             {ENTERPRISE.name}
           </span>
-          <span className="font-mono text-[12px] text-t5">{ENTERPRISE.tag}</span>
+          <span className="font-mono text-12 text-t5">{ENTERPRISE.tag}</span>
         </div>
-        <p className="m-0 text-[13px] leading-[1.5] text-t4">{ENTERPRISE.blurb}</p>
+        <p className="m-0 text-13 leading-[1.5] text-t4">{ENTERPRISE.blurb}</p>
         <ul className="mt-4 flex list-none flex-col flex-wrap gap-x-7 gap-y-2 p-0 sm:flex-row">
           {ENTERPRISE.points.map((pt) => (
             <li
               key={pt}
-              className="flex gap-2.5 text-[13px] leading-[1.4] text-t3"
+              className="flex gap-2.5 text-13 leading-[1.4] text-t3"
             >
               <span aria-hidden="true" className="mt-0.5 flex-none text-lime">
                 ▸
@@ -106,7 +107,7 @@ function EnterpriseBand() {
       </div>
       <a
         href="#contact"
-        className="btn-outline block shrink-0 px-7 py-3 text-center text-[15px] font-semibold"
+        className="btn-outline flex min-h-13 shrink-0 items-center justify-center px-7 text-center text-15 font-semibold"
       >
         {ENTERPRISE.cta}
       </a>

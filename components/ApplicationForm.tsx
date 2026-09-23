@@ -26,15 +26,15 @@ export default function ApplicationForm({
     return (
       <div
         role="status"
-        className="flex min-h-[220px] flex-col items-start justify-center gap-3 border border-lime bg-surface px-8 py-10"
+        className="clip-angular-26 flex min-h-[220px] flex-col items-start justify-center gap-3 border border-lime bg-surface px-8 py-10"
       >
-        <div className="font-mono text-xs font-bold tracking-[0.12em] text-lime">
+        <div className="font-mono text-12 font-bold tracking-[0.12em] text-lime">
           ▸ APPLICATION RECEIVED
         </div>
-        <div className="font-display text-2xl leading-tight font-semibold">
+        <div className="font-display text-22 leading-tight font-semibold">
           Thanks — we read every application.
         </div>
-        <p className="m-0 text-[15px] text-t4">
+        <p className="m-0 text-15 text-t4">
           You&rsquo;ll hear from a person, not an autoresponder, within five business
           days. Questions in the meantime:{" "}
           <a href={`mailto:${contactEmail}`}>{contactEmail}</a>.
@@ -101,7 +101,7 @@ export default function ApplicationForm({
       {error ? (
         <p
           role="alert"
-          className="m-0 border border-danger/40 bg-danger/8 px-4 py-3 font-mono text-[11px] text-danger"
+          className="m-0 border border-danger/40 bg-danger/8 px-4 py-3 font-mono text-11 text-danger"
         >
           {error}
         </p>
@@ -110,7 +110,7 @@ export default function ApplicationForm({
       <button
         type="submit"
         disabled={pending || (gate.enabled && gate.widgetFailed)}
-        className="btn btn-lime cursor-pointer border-none text-center disabled:cursor-not-allowed disabled:opacity-60"
+        className="btn btn-lime border-none text-center"
       >
         {pending ? "Sending…" : "Send application →"}
       </button>

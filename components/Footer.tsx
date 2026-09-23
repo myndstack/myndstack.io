@@ -9,9 +9,9 @@ import SocialIcon from "./SocialIcon";
 import Wordmark from "./Wordmark";
 
 const colHeadClass =
-  "m-0 mb-3.5 font-mono text-[11px] font-normal tracking-[0.14em] text-t5 uppercase";
+  "m-0 mb-3.5 font-mono text-11 font-normal tracking-[0.14em] text-t5 uppercase";
 const linkClass =
-  "ease-brand text-[14px] text-t3 transition-colors duration-160 hover:text-lime";
+  "ease-brand text-13 text-t3 transition-colors duration-160 hover:text-lime";
 
 export default function Footer({ site }: { site: SiteSettings }) {
   const { socials } = site;
@@ -26,7 +26,7 @@ export default function Footer({ site }: { site: SiteSettings }) {
         <div className="flex flex-col gap-6">
           <div>
             <Wordmark height={24} className="mb-4" />
-            <p className="m-0 max-w-[320px] text-[14px] leading-[1.55] text-t4">
+            <p className="m-0 max-w-[320px] text-13 leading-[1.55] text-t4">
               A founder-led studio for AI systems and the software around
               them. Architected and built, end to end.
             </p>
@@ -83,7 +83,7 @@ export default function Footer({ site }: { site: SiteSettings }) {
       </Reveal>
 
       <div className="mx-auto mt-14 max-w-[1200px] border-t border-surface-3 pt-6">
-        <div className="flex flex-col-reverse items-start gap-4 text-[13px] text-t5 md:flex-row md:items-center md:justify-between md:gap-6">
+        <div className="flex flex-col-reverse items-start gap-4 text-13 text-t5 md:flex-row md:items-center md:justify-between md:gap-6">
           <span className="whitespace-nowrap">© {new Date().getFullYear()} {SITE.legalName}</span>
           <nav
             aria-label="Legal"
@@ -97,7 +97,7 @@ export default function Footer({ site }: { site: SiteSettings }) {
               <Link
                 key={item.href}
                 href={item.href}
-                className="-my-1.5 py-1.5 text-[13px] text-t5 transition-colors duration-160 hover:text-lime"
+                className="-my-1.5 py-1.5 text-13 text-t5 transition-colors duration-160 hover:text-lime"
               >
                 {item.label}
               </Link>

@@ -244,9 +244,9 @@ export default function Nav({ contactEmail }: { contactEmail: string }) {
             aria-controls="mobile-drawer"
             className="btn-icon flex size-11 flex-col items-center justify-center gap-[5px] sm:hidden"
           >
-            <span className="block h-0.5 w-[18px] bg-white" />
-            <span className="block h-0.5 w-[18px] bg-white" />
-            <span className="block h-0.5 w-[18px] bg-white" />
+            <span className="block h-0.5 w-[18px] bg-t1" />
+            <span className="block h-0.5 w-[18px] bg-t1" />
+            <span className="block h-0.5 w-[18px] bg-t1" />
           </button>
         </div>
       </nav>

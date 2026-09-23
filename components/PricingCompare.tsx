@@ -46,7 +46,7 @@ export default function PricingCompare({ tierNames, onOpen }: Props) {
           onClick={toggle}
           aria-expanded={open}
           aria-controls="pricing-compare-table"
-          className="btn-outline px-6 py-2.5 text-[13px] font-semibold"
+          className="btn-outline inline-flex min-h-11 items-center px-6 text-13 font-semibold"
         >
           {open ? "Hide comparison" : "Compare all plans →"}
         </button>
@@ -89,7 +89,7 @@ export default function PricingCompare({ tierNames, onOpen }: Props) {
                 <tr className="border-b border-line bg-surface-3">
                   <th
                     scope="col"
-                    className="p-4 text-[12px] font-normal tracking-[0.12em] text-t5 uppercase shadow-[var(--edge-lip)]"
+                    className="p-4 text-12 font-normal tracking-[0.12em] text-t5 uppercase shadow-[var(--edge-lip)]"
                   >
                     Feature
                   </th>
@@ -97,7 +97,7 @@ export default function PricingCompare({ tierNames, onOpen }: Props) {
                     <th
                       key={name}
                       scope="col"
-                      className="p-4 text-center font-display text-[15px] font-semibold text-t2 shadow-[var(--edge-lip)]"
+                      className="p-4 text-center font-display text-15 font-semibold text-t2 shadow-[var(--edge-lip)]"
                     >
                       {name}
                     </th>
@@ -137,7 +137,7 @@ function CompareSectionRows({
         <th
           scope="colgroup"
           colSpan={tierNames.length + 1}
-          className="p-4 font-mono text-[11px] tracking-[0.14em] text-t5 uppercase"
+          className="p-4 font-mono text-11 tracking-[0.14em] text-t5 uppercase"
         >
           {title}
         </th>
@@ -149,17 +149,17 @@ function CompareSectionRows({
         >
           <th
             scope="row"
-            className="p-4 text-left text-[14px] font-normal text-t3"
+            className="p-4 text-left text-13 font-normal text-t3"
           >
             {row.label}
             {row.hint ? (
-              <span className="mt-1 block text-[12px] text-t5">{row.hint}</span>
+              <span className="mt-1 block text-12 text-t5">{row.hint}</span>
             ) : null}
           </th>
           {tierNames.map((name) => (
             <td
               key={name}
-              className="p-4 text-center text-[13px] text-t3 align-middle"
+              className="p-4 text-center text-13 text-t3 align-middle"
             >
               <CellValue value={row.values[name]} />
             </td>

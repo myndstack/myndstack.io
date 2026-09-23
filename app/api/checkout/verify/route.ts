@@ -51,7 +51,7 @@ export async function POST(request: Request) {
 
   const parsed = bodySchema.safeParse(body);
   if (!parsed.success) {
-    return NextResponse.json({ ok: false, error: "Invalid request." }, { status: 400 });
+    return NextResponse.json({ ok: false, error: "We couldn't confirm that payment automatically." }, { status: 400 });
   }
 
   if (!verifyPaymentSignature(parsed.data)) {

@@ -51,7 +51,7 @@ export default function LegalDocPage({ slug }: { slug: LegalDoc["slug"] }) {
         ]}
       />
 
-      <div className="mx-auto max-w-[1200px] px-5 pt-14 pb-[88px] sm:px-14">
+      <div className="page-column pt-14 pb-[88px]">
         <div className="grid grid-cols-1 gap-12 md:grid-cols-[220px_1fr]">
           <nav aria-label="On this page" className="md:sticky md:top-28 md:self-start">
             <h2 className="label-mono mb-4 text-t4">On this page</h2>
@@ -60,9 +60,9 @@ export default function LegalDocPage({ slug }: { slug: LegalDoc["slug"] }) {
                 <li key={section.heading}>
                   <a
                     href={`#${sectionId(section.heading)}`}
-                    className="ease-brand flex gap-2.5 text-[13px] leading-snug text-t4 transition-colors duration-160 hover:text-t2"
+                    className="ease-brand flex gap-2.5 text-13 leading-snug text-t4 transition-colors duration-160 hover:text-t2"
                   >
-                    <span className="font-mono text-[11px] text-t5">
+                    <span className="font-mono text-11 text-t5">
                       {String(i + 1).padStart(2, "0")}
                     </span>
                     {section.heading}
@@ -96,10 +96,10 @@ export default function LegalDocPage({ slug }: { slug: LegalDoc["slug"] }) {
                     href={`/${prev.slug}`}
                     className="group ease-brand flex flex-col gap-1.5 py-4 pr-4 transition-colors duration-160 sm:pr-8"
                   >
-                    <span className="font-mono text-[11px] tracking-[0.14em] text-t5 uppercase">
+                    <span className="font-mono text-11 tracking-[0.14em] text-t5 uppercase">
                       ← Previous
                     </span>
-                    <span className="font-display text-[17px] font-semibold text-t2 group-hover:text-lime">
+                    <span className="font-display text-17 font-semibold text-t2 group-hover:text-lime">
                       {prev.title}
                     </span>
                   </Link>
@@ -111,10 +111,10 @@ export default function LegalDocPage({ slug }: { slug: LegalDoc["slug"] }) {
                     href={`/${next.slug}`}
                     className="group ease-brand flex flex-col items-start gap-1.5 py-4 pl-0 transition-colors duration-160 sm:items-end sm:pl-8"
                   >
-                    <span className="font-mono text-[11px] tracking-[0.14em] text-t5 uppercase">
+                    <span className="font-mono text-11 tracking-[0.14em] text-t5 uppercase">
                       Next →
                     </span>
-                    <span className="font-display text-[17px] font-semibold text-t2 group-hover:text-lime">
+                    <span className="font-display text-17 font-semibold text-t2 group-hover:text-lime">
                       {next.title}
                     </span>
                   </Link>

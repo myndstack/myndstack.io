@@ -48,7 +48,7 @@ export default function BackToTop() {
       }
       className="totop fixed right-[26px] bottom-[26px] z-59 flex size-11 cursor-pointer items-center justify-center border-none bg-lime text-lime-ink hover:bg-lime-hover"
     >
-      <span aria-hidden="true" className="font-mono text-[15px] leading-none">
+      <span aria-hidden="true" className="font-mono text-15 leading-none">
         ↑
       </span>
     </button>

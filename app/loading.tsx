@@ -16,7 +16,7 @@ export default function Loading() {
       <SkeletonStatus label="Loading" />
       <div
         aria-hidden="true"
-        className="flex min-h-screen flex-col items-center justify-center gap-6 px-5 pt-[calc(60px+var(--nav-height))] pb-[60px] sm:px-16"
+        className="flex min-h-svh flex-col items-center justify-center gap-6 px-5 pt-[calc(60px+var(--nav-height))] pb-[60px] sm:px-16"
       >
         <SkeletonBlock className="h-4 w-40" />
         <SkeletonBlock className="h-16 w-full max-w-[880px]" />

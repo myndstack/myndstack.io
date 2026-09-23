@@ -48,7 +48,7 @@ export default function Field({ label, name, error, className = "", children }: 
         <p
           id={errorId}
           role="alert"
-          className="mt-1.5 mb-0 font-mono text-[11px] text-danger"
+          className="mt-1.5 mb-0 font-mono text-11 text-danger"
         >
           {error}
         </p>

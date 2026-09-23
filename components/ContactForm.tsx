@@ -42,7 +42,7 @@ export default function ContactForm({
         <Reveal>
           <div className="eyebrow mb-4 tracking-[0.16em]">Get in touch</div>
           <h2 className="h2-section mb-[18px]">Tell us what you&rsquo;re building.</h2>
-          <p className="m-0 mb-[34px] max-w-[400px] text-base leading-[1.55] text-t4">
+          <p className="m-0 mb-[34px] max-w-[400px] text-17 leading-[1.55] text-t4">
             Send the shape of the problem. We&rsquo;ll reply within one business day with
             the fastest path to production.
           </p>
@@ -54,7 +54,7 @@ export default function ContactForm({
                   — it only grows the hit area from 22px to 30px (WCAG 2.5.8). */}
               <a
                 href={`mailto:${email}`}
-                className="py-1 font-display text-[17px] text-white hover:text-lime"
+                className="py-1 font-display text-17 text-t1 hover:text-lime"
               >
                 {email}
               </a>
@@ -63,14 +63,14 @@ export default function ContactForm({
               <div className="label-mono mb-[5px]">Phone</div>
               <a
                 href={phoneHref}
-                className="py-1 font-display text-[17px] text-white hover:text-lime"
+                className="py-1 font-display text-17 text-t1 hover:text-lime"
               >
                 {phone}
               </a>
             </div>
             <div>
               <div className="label-mono mb-[5px]">Studio</div>
-              <div className="font-display text-[17px] text-t2">{location}</div>
+              <div className="font-display text-17 text-t2">{location}</div>
             </div>
           </div>
 
@@ -81,15 +81,15 @@ export default function ContactForm({
           {done ? (
             <div
               role="status"
-              className="flex min-h-[220px] flex-col items-start justify-center gap-3 border border-lime bg-surface px-10 py-11"
+              className="clip-angular-26 flex min-h-[220px] flex-col items-start justify-center gap-3 border border-lime bg-surface px-10 py-11"
             >
-              <div className="font-mono text-xs font-bold tracking-[0.12em] text-lime">
+              <div className="font-mono text-12 font-bold tracking-[0.12em] text-lime">
                 ▸ MESSAGE RECEIVED
               </div>
-              <div className="font-display text-2xl leading-tight font-semibold">
+              <div className="font-display text-22 leading-tight font-semibold">
                 Thanks — we&rsquo;ll be in touch within one business day.
               </div>
-              <p className="m-0 text-[15px] text-t4">
+              <p className="m-0 text-15 text-t4">
                 In the meantime, reach us directly at{" "}
                 <a href={`mailto:${email}`}>{email}</a>.
               </p>
@@ -196,7 +196,7 @@ export default function ContactForm({
               {error ? (
                 <p
                   role="alert"
-                  className="m-0 border border-danger/40 bg-danger/8 px-4 py-3 font-mono text-[11px] text-danger xs:col-span-2"
+                  className="m-0 border border-danger/40 bg-danger/8 px-4 py-3 font-mono text-11 text-danger xs:col-span-2"
                 >
                   {error}
                 </p>
@@ -205,7 +205,7 @@ export default function ContactForm({
               <button
                 type="submit"
                 disabled={pending || (gate.enabled && gate.widgetFailed)}
-                className="btn btn-lime w-full cursor-pointer border-none text-center disabled:cursor-not-allowed disabled:opacity-60 xs:col-span-2"
+                className="btn btn-lime w-full border-none text-center xs:col-span-2"
               >
                 {pending ? "Sending…" : "Send message →"}
               </button>

@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 
+import EmptyState from "@/components/EmptyState";
 import PageHeader from "@/components/PageHeader";
 import Reveal from "@/components/Reveal";
 import { getCases } from "@/lib/sanity/queries";
@@ -28,10 +29,18 @@ export default async function WorkPage() {
       <section className="page-column pt-14 pb-[88px]">
         <h2 className="sr-only">Case studies</h2>
 
+        {cases.length === 0 ? (
+          <EmptyState
+            label="Case studies in progress"
+            body="We're writing up recent builds now. In the meantime we're happy to walk you through the work on a call."
+            action={{ href: "/#contact", text: "Start a project →" }}
+          />
+        ) : null}
+
         <div className="grid grid-cols-1 gap-[18px] sm:grid-cols-2">
           {cases.map((c, i) => (
             <Reveal key={c.slug} delay={i * 0.06}>
-              <Link href={`/work/${c.slug}`} className="block h-full text-white">
+              <Link href={`/work/${c.slug}`} className="block h-full text-t1">
                 <div className="card card-lift flex h-full flex-col justify-between p-7">
                   <div>
                     <div className="mb-[18px] flex flex-wrap gap-2">
@@ -41,10 +50,10 @@ export default async function WorkPage() {
                         </span>
                       ))}
                     </div>
-                    <div className="mb-2.5 font-display text-[clamp(21px,3vw,26px)] font-bold tracking-[-0.02em]">
+                    <div className="mb-2.5 font-display text-[clamp(22px,3vw,30px)] font-bold tracking-[-0.02em]">
                       {c.client}
                     </div>
-                    <p className="m-0 max-w-[460px] text-[15px] leading-[1.55] text-t4">
+                    <p className="m-0 max-w-[460px] text-15 leading-[1.55] text-t4">
                       {c.lede}
                     </p>
                   </div>
@@ -53,11 +62,11 @@ export default async function WorkPage() {
                     {c.metrics.slice(0, 3).map((m) => (
                       <div key={m.l}>
                         <div
-                          className={`font-display text-[22px] font-bold tracking-[-0.02em] ${m.lime ? "text-lime" : ""}`}
+                          className={`font-display text-22 font-bold tracking-[-0.02em] ${m.lime ? "text-lime" : ""}`}
                         >
                           {m.v}
                         </div>
-                        <div className="mt-[3px] font-mono text-[10px] tracking-[0.08em] text-t5 uppercase">
+                        <div className="mt-[3px] font-mono text-11 tracking-[0.08em] text-t5 uppercase">
                           {m.l}
                         </div>
                       </div>
@@ -69,7 +78,7 @@ export default async function WorkPage() {
           ))}
         </div>
 
-        <p className="mt-9 mb-0 text-[15px] text-t4">
+        <p className="mt-9 mb-0 text-15 text-t4">
           Working on something like this?{" "}
           <Link href="/#contact" className="underline underline-offset-2">
             Tell us the shape of it

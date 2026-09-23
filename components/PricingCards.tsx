@@ -122,14 +122,14 @@ function Price({ price, period }: { price: string; period?: string }) {
   return (
     <div className="flex flex-wrap items-baseline gap-x-2">
       {from ? (
-        <span className="font-mono text-[11px] font-medium tracking-[0.12em] text-t5 uppercase">
+        <span className="font-mono text-11 font-medium tracking-[0.12em] text-t5 uppercase">
           from
         </span>
       ) : null}
-      <span className="font-display text-[clamp(28px,4vw,38px)] font-bold leading-none tracking-[-0.02em]">
+      <span className="font-display text-[clamp(30px,4vw,42px)] font-bold leading-none tracking-[-0.02em]">
         {main}
       </span>
-      {period ? <span className="text-[13px] text-t5">{period}</span> : null}
+      {period ? <span className="text-13 text-t5">{period}</span> : null}
     </div>
   );
 }
@@ -138,14 +138,14 @@ function PricingCard({ tier }: { tier: ResolvedTier }) {
   return (
     <div className={`pricing-card${tier.highlighted ? " pricing-card--featured" : ""}`}>
       {tier.badge ? (
-        <div className="absolute top-5 right-5 bg-lime px-2.5 py-1 font-mono text-[11px] font-bold tracking-[0.12em] text-lime-ink uppercase">
+        <div className="absolute top-5 right-5 bg-lime px-2.5 py-1 font-mono text-11 font-bold tracking-[0.12em] text-lime-ink uppercase">
           {tier.badge}
         </div>
       ) : null}
 
-      <div className="mb-1.5 font-display text-[19px] font-semibold">{tier.name}</div>
+      <div className="mb-1.5 font-display text-17 font-semibold">{tier.name}</div>
       {/* Reserve two lines so a one-line blurb doesn't misalign the price row. */}
-      <div className="mb-[22px] min-h-[42px] text-[13px] leading-[1.5] text-t4">
+      <div className="mb-[22px] min-h-[42px] text-13 leading-[1.5] text-t4">
         {tier.blurb}
       </div>
 
@@ -157,7 +157,7 @@ function PricingCard({ tier }: { tier: ResolvedTier }) {
             t5, not t6: t5 is the AA-safe floor for small text on these surfaces
             (the axe e2e guards exactly this). */}
         {tier.taxNote ? (
-          <div className="mt-2 font-mono text-[11px] tracking-[0.04em] text-t5">
+          <div className="mt-2 font-mono text-11 tracking-[0.04em] text-t5">
             {tier.taxNote}
           </div>
         ) : null}
@@ -168,7 +168,7 @@ function PricingCard({ tier }: { tier: ResolvedTier }) {
         {tier.features.map((feature) => (
           <li
             key={feature}
-            className={`flex gap-2.5 text-[15px] leading-[1.45] ${
+            className={`flex gap-2.5 text-15 leading-[1.45] ${
               tier.highlighted ? "text-t2" : "text-t3"
             }`}
           >

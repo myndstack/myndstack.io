@@ -117,7 +117,7 @@ export default function MobileDrawer({ open, onClose, contactEmail }: Props) {
             type="button"
             onClick={onClose}
             aria-label="Close menu"
-            className="btn-icon size-11 font-mono text-base"
+            className="btn-icon size-11 font-mono text-17"
           >
             ✕
           </button>
@@ -164,7 +164,7 @@ export default function MobileDrawer({ open, onClose, contactEmail }: Props) {
             area (WCAG 2.5.8); this is the mobile nav, where it matters most. */}
         <a
           href={`mailto:${contactEmail}`}
-          className="mt-[10px] py-2 font-mono text-xs tracking-[0.04em] text-t5"
+          className="mt-[10px] py-2 font-mono text-12 tracking-[0.04em] text-t5"
         >
           {contactEmail}
         </a>

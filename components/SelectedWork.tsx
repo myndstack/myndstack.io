@@ -36,7 +36,7 @@ export default async function SelectedWork() {
         <Reveal scrub>
           <Link
             href={`/work/${featured.slug}`}
-            className="card clip-angular-32 grid grid-cols-1 items-center gap-11 px-10 py-[38px] text-white hover:border-lime-edge hover:text-white md:grid-cols-[1.25fr_1fr]"
+            className="card clip-angular-32 grid grid-cols-1 items-center gap-11 px-10 py-[38px] text-t1 hover:border-lime-edge hover:text-t1 md:grid-cols-[1.25fr_1fr]"
           >
             <div>
               <div className="mb-5 flex flex-wrap gap-2">
@@ -46,14 +46,14 @@ export default async function SelectedWork() {
                   </span>
                 ))}
               </div>
-              <div className="mb-3 font-display text-[clamp(24px,4vw,31px)] font-bold tracking-[-0.02em]">
+              <div className="mb-3 font-display text-[clamp(22px,4vw,30px)] font-bold tracking-[-0.02em]">
                 {featured.client}
               </div>
-              <p className="m-0 max-w-[440px] text-base leading-[1.55] text-t4">
+              <p className="m-0 max-w-[440px] text-17 leading-[1.55] text-t4">
                 {featured.summary}
               </p>
-              <span className="mt-5 inline-block font-mono text-[11px] tracking-[0.14em] text-lime uppercase">
-                Read the case ▸
+              <span className="mt-5 inline-block font-mono text-11 tracking-[0.14em] text-lime uppercase">
+                Read the case →
               </span>
             </div>
 
@@ -62,11 +62,11 @@ export default async function SelectedWork() {
               {featured.metrics.map((m) => (
                 <div key={m.l} className="bg-surface-3 px-[22px] py-5">
                   <div
-                    className={`font-display text-[26px] font-bold tracking-[-0.02em] ${m.lime ? "text-lime" : ""}`}
+                    className={`font-display text-30 font-bold tracking-[-0.02em] ${m.lime ? "text-lime" : ""}`}
                   >
                     {m.v}
                   </div>
-                  <div className="mt-[3px] font-mono text-[11px] tracking-[0.08em] text-t5 uppercase">
+                  <div className="mt-[3px] font-mono text-11 tracking-[0.08em] text-t5 uppercase">
                     {m.l}
                   </div>
                 </div>
@@ -81,7 +81,7 @@ export default async function SelectedWork() {
             <Reveal scrub key={c.slug}>
               {/* The card is inside the link so the hover lift and the reveal
                   transform don't both try to own `transform`. */}
-              <Link href={`/work/${c.slug}`} className="block h-full text-white">
+              <Link href={`/work/${c.slug}`} className="block h-full text-t1">
                 <div className="card card-lift flex h-full min-h-[248px] flex-col justify-between p-7">
                   <div>
                     <div className="mb-[18px] flex gap-2">
@@ -91,19 +91,19 @@ export default async function SelectedWork() {
                         </span>
                       ))}
                     </div>
-                    <div className="mb-[9px] font-display text-[21px] font-semibold">
+                    <div className="mb-[9px] font-display text-22 font-semibold">
                       {c.client}
                     </div>
-                    <p className="m-0 text-[13px] leading-[1.55] text-t4">{c.summary}</p>
+                    <p className="m-0 text-13 leading-[1.55] text-t4">{c.summary}</p>
                   </div>
 
                   <div className="mt-6 flex gap-[26px] border-t border-line pt-4">
                     {c.metrics.slice(0, CARD_METRICS).map((m) => (
                       <div key={m.l}>
-                        <div className="font-display text-[22px] font-bold tracking-[-0.02em]">
+                        <div className="font-display text-22 font-bold tracking-[-0.02em]">
                           {m.v}
                         </div>
-                        <div className="mt-[3px] font-mono text-[10px] tracking-[0.08em] text-t5 uppercase">
+                        <div className="mt-[3px] font-mono text-11 tracking-[0.08em] text-t5 uppercase">
                           {m.l}
                         </div>
                       </div>
@@ -116,7 +116,7 @@ export default async function SelectedWork() {
         </div>
       </div>
 
-      <p className="mt-9 mb-0 text-[15px] text-t4">
+      <p className="mt-9 mb-0 text-15 text-t4">
         <Magnetic>
           <Link href="/work">See all work →</Link>
         </Magnetic>

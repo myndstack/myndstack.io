@@ -27,7 +27,7 @@ export const contactSchema = z.object({
     .string()
     .trim()
     .min(20, "A few more words, so we can point you somewhere useful")
-    .max(5000, "Please keep it under 5,000 characters"),
+    .max(5000, "Keep it under 5,000 characters"),
   [HONEYPOT_FIELD]: honeypot,
 });
 
@@ -49,7 +49,7 @@ export const applicationSchema = z.object({
     .string()
     .trim()
     .min(20, "A few lines on why this role")
-    .max(5000, "Please keep it under 5,000 characters"),
+    .max(5000, "Keep it under 5,000 characters"),
   [HONEYPOT_FIELD]: honeypot,
 });
 

@@ -96,7 +96,7 @@ export default async function RolePage({ params }: { params: Promise<Params> }) 
               {facts.map((fact) => (
                 <div key={fact.label} className="bg-surface-3 px-5 py-4">
                   <dt className="label-mono mb-1.5 text-t4">{fact.label}</dt>
-                  <dd className="m-0 font-display text-[15px] font-semibold">
+                  <dd className="m-0 font-display text-15 font-semibold">
                     {fact.value}
                   </dd>
                 </div>
@@ -117,14 +117,14 @@ export default async function RolePage({ params }: { params: Promise<Params> }) 
             {lists.map((list) => (
               <Reveal key={list.heading}>
                 <section className="mb-11">
-                  <h2 className="m-0 mb-4 font-display text-2xl font-semibold tracking-[-0.02em]">
+                  <h2 className="m-0 mb-4 font-display text-22 font-semibold tracking-[-0.02em]">
                     {list.heading}
                   </h2>
                   <ul className="m-0 flex list-none flex-col gap-3 p-0">
                     {list.items.map((item) => (
                       <li
                         key={item}
-                        className="flex gap-3.5 text-[15px] leading-[1.55] text-t3"
+                        className="flex gap-3.5 text-15 leading-[1.55] text-t3"
                       >
                         <span
                           aria-hidden="true"
@@ -159,10 +159,10 @@ export default async function RolePage({ params }: { params: Promise<Params> }) 
                 and light is what carries elevation on a dark plane). */}
             <div className="clip-angular-26 border border-line bg-surface p-7 shadow-[var(--edge-lip)]">
               <div className="eyebrow mb-3.5">Apply</div>
-              <h2 className="m-0 mb-2 font-display text-2xl font-semibold tracking-[-0.02em]">
+              <h2 className="m-0 mb-2 font-display text-22 font-semibold tracking-[-0.02em]">
                 {role.title}
               </h2>
-              <p className="mt-0 mb-6 text-sm leading-[1.55] text-t4">
+              <p className="mt-0 mb-6 text-15 leading-[1.55] text-t4">
                 No cover letter needed. Links and a few honest lines beat a formatted CV.
               </p>
               <ApplicationForm

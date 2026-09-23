@@ -25,7 +25,7 @@ export default function Newsletter({ turnstileSiteKey = "" }: Props) {
     return (
       <div
         role="status"
-        className="mt-2.5 font-mono text-[11px] tracking-[0.04em] text-lime"
+        className="mt-2.5 font-mono text-11 tracking-[0.04em] text-lime"
       >
         ▸ Subscribed. Watch your inbox.
       </div>
@@ -34,7 +34,7 @@ export default function Newsletter({ turnstileSiteKey = "" }: Props) {
 
   const message =
     fieldErrors.email ??
-    (gate.needsVerify ? "Please complete the challenge before subscribing." : null) ??
+    (gate.needsVerify ? "Complete the quick check just above, then subscribe." : null) ??
     (gate.widgetFailed ? "Verification unavailable. Try again in a moment." : null) ??
     error;
 
@@ -54,13 +54,13 @@ export default function Newsletter({ turnstileSiteKey = "" }: Props) {
             aria-invalid={message ? true : undefined}
             aria-describedby={message ? "newsletter-error" : undefined}
             placeholder="you@company.com"
-            className="ms-field flex-1 border-none bg-transparent px-3.5 py-3"
+            className="ms-field min-h-11 flex-1 border-none bg-transparent px-3.5 py-0"
           />
           <button
             type="submit"
             disabled={pending || (gate.enabled && gate.widgetFailed)}
             aria-label="Subscribe"
-            className="cursor-pointer border-none bg-lime px-[18px] font-mono text-[15px] font-bold text-lime-ink disabled:opacity-60"
+            className="cursor-pointer border-none bg-lime px-[18px] font-mono text-15 font-bold text-lime-ink disabled:opacity-60"
           >
             {pending ? "…" : "→"}
           </button>
@@ -79,7 +79,7 @@ export default function Newsletter({ turnstileSiteKey = "" }: Props) {
       </form>
 
       {message ? (
-        <p id="newsletter-error" role="alert" className="mt-2 mb-0 font-mono text-[11px] text-danger">
+        <p id="newsletter-error" role="alert" className="mt-2 mb-0 font-mono text-11 text-danger">
           {message}
         </p>
       ) : null}

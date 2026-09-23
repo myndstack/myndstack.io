@@ -56,12 +56,12 @@ export default function Faq({ faqs }: { faqs: FaqItem[] }) {
                   onClick={() => setOpenIndex(open ? null : i)}
                   className="flex w-full cursor-pointer items-center justify-between gap-5 border-none bg-transparent px-6 py-[22px] text-left"
                 >
-                  <span className="font-display text-lg font-semibold text-white">
+                  <span className="font-display text-17 font-semibold text-t1">
                     {faq.q}
                   </span>
                   <span
                     aria-hidden="true"
-                    className="ease-brand flex-none font-mono text-[22px] text-lime transition-transform duration-200"
+                    className="ease-brand flex-none font-mono text-22 text-lime transition-transform duration-200"
                     style={{ transform: open ? "rotate(45deg)" : "rotate(0deg)" }}
                   >
                     +
@@ -79,7 +79,7 @@ export default function Faq({ faqs }: { faqs: FaqItem[] }) {
                 style={{ gridTemplateRows: open ? "1fr" : "0fr" }}
               >
                 <div className="overflow-hidden">
-                  <p className="m-0 max-w-[640px] px-6 pb-6 text-[15px] leading-[1.6] text-t4">
+                  <p className="m-0 max-w-[640px] px-6 pb-6 text-15 leading-[1.6] text-t4">
                     {faq.a}
                   </p>
                 </div>

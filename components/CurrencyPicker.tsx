@@ -68,7 +68,7 @@ export default function CurrencyPicker({ region, onChange, compact }: Props) {
       {compact ? null : (
         <label
           htmlFor="currency-picker"
-          className="font-mono text-[11px] tracking-[0.14em] text-t5 uppercase"
+          className="font-mono text-11 tracking-[0.14em] text-t5 uppercase"
         >
           Currency
         </label>
@@ -82,7 +82,7 @@ export default function CurrencyPicker({ region, onChange, compact }: Props) {
           // which says what it is but not what it does.
           aria-label={compact ? "Currency" : undefined}
           onChange={(e) => handleChange(e.target.value)}
-          className="ease-brand cursor-pointer appearance-none border border-line-3 bg-surface py-2 pr-8 pl-3 font-mono text-[12px] tracking-[0.04em] text-t2 uppercase transition-colors duration-160 hover:border-lime-edge focus:border-lime focus:shadow-[0_0_0_1px_var(--color-lime)] focus:outline-2 focus:outline-transparent"
+          className="ease-brand cursor-pointer appearance-none border border-line-3 bg-surface h-11 py-0 pr-8 pl-3 font-mono text-12 tracking-[0.04em] text-t2 uppercase transition-colors duration-160 hover:border-lime-edge focus:border-lime focus:shadow-[0_0_0_1px_var(--color-lime)] focus:outline-2 focus:outline-transparent"
         >
           {REGION_CODES.map((code) => (
             <option key={code} value={code}>

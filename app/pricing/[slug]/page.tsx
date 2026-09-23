@@ -72,14 +72,14 @@ export default async function CheckoutPage({
         <div className="grid grid-cols-1 gap-11 md:grid-cols-[1.15fr_1fr] md:gap-x-14">
           <Reveal className="md:col-start-1 md:row-start-1">
             <section>
-              <h2 className="m-0 mb-4 font-display text-2xl font-semibold tracking-[-0.02em]">
+              <h2 className="m-0 mb-4 font-display text-22 font-semibold tracking-[-0.02em]">
                 What&apos;s included
               </h2>
               <ul className="m-0 flex list-none flex-col gap-3 p-0">
                 {tier.features.map((feature) => (
                   <li
                     key={feature}
-                    className="flex gap-3.5 text-[15px] leading-[1.55] text-t3"
+                    className="flex gap-3.5 text-15 leading-[1.55] text-t3"
                   >
                     <span aria-hidden="true" className="flex-none text-lime">
                       ▸
@@ -123,20 +123,20 @@ export default async function CheckoutPage({
             {tier.checkout.howItWorks?.length ? (
               <Reveal>
                 <section>
-                  <h2 className="m-0 mb-5 font-display text-2xl font-semibold tracking-[-0.02em]">
+                  <h2 className="m-0 mb-5 font-display text-22 font-semibold tracking-[-0.02em]">
                     How it works
                   </h2>
                   <ol className="m-0 flex list-none flex-col gap-5 p-0">
                     {tier.checkout.howItWorks.map((step, i) => (
                       <li key={step.title} className="flex gap-4">
-                        <span className="mt-0.5 flex-none font-mono text-[12px] font-bold tracking-[0.12em] text-lime tabular-nums">
+                        <span className="mt-0.5 flex-none font-mono text-12 font-bold tracking-[0.12em] text-lime tabular-nums">
                           {String(i + 1).padStart(2, "0")}
                         </span>
                         <div>
-                          <div className="mb-1 font-display text-[15px] font-semibold text-t1">
+                          <div className="mb-1 font-display text-15 font-semibold text-t1">
                             {step.title}
                           </div>
-                          <p className="m-0 text-[15px] leading-[1.55] text-t4">
+                          <p className="m-0 text-15 leading-[1.55] text-t4">
                             {step.body}
                           </p>
                         </div>
@@ -167,16 +167,16 @@ export default async function CheckoutPage({
         {tier.checkout.faqs?.length ? (
           <Reveal>
             <section className="mt-16 border-t border-line pt-12">
-              <h2 className="m-0 mb-6 font-display text-2xl font-semibold tracking-[-0.02em]">
+              <h2 className="m-0 mb-6 font-display text-22 font-semibold tracking-[-0.02em]">
                 Common questions
               </h2>
               <dl className="m-0 grid grid-cols-1 gap-x-14 md:grid-cols-2">
                 {tier.checkout.faqs.map((faq) => (
                   <div key={faq.q} className="border-t border-line py-5">
-                    <dt className="mb-1.5 font-display text-[15px] font-semibold text-t2">
+                    <dt className="mb-1.5 font-display text-15 font-semibold text-t2">
                       {faq.q}
                     </dt>
-                    <dd className="m-0 text-[15px] leading-[1.55] text-t4">
+                    <dd className="m-0 text-15 leading-[1.55] text-t4">
                       {faq.a}
                     </dd>
                   </div>
