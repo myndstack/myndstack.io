@@ -24,7 +24,12 @@ export async function generateMetadata({
   if (!study) return {};
 
   const title = `${study.client} — Myndstack`;
-  return pageMetadata({ path: `/work/${study.slug}`, title, description: study.lede });
+  return pageMetadata({
+    path: `/work/${study.slug}`,
+    title,
+    description: study.lede,
+    ownImage: true,
+  });
 }
 
 export default async function CasePage({ params }: { params: Promise<Params> }) {

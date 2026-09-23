@@ -25,7 +25,12 @@ export async function generateMetadata({
   if (!role) return {};
 
   const title = `${role.title} — Careers at Myndstack`;
-  return pageMetadata({ path: `/careers/${role.slug}`, title, description: role.lede });
+  return pageMetadata({
+    path: `/careers/${role.slug}`,
+    title,
+    description: role.lede,
+    ownImage: true,
+  });
 }
 
 export default async function RolePage({ params }: { params: Promise<Params> }) {

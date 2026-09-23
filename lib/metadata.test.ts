@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import { SITE_URL } from "@/lib/content";
-import { pageMetadata } from "@/lib/metadata";
+import { OG_IMAGE, pageMetadata } from "@/lib/metadata";
 
 describe("pageMetadata", () => {
   const meta = pageMetadata({ path: "/privacy", title: "Privacy — Myndstack", description: "d" });
@@ -20,6 +20,17 @@ describe("pageMetadata", () => {
       title: "Privacy — Myndstack",
       description: "d",
     });
+  });
+
+  it("restates the site-wide share image, which a page-level openGraph drops", () => {
+    expect(meta.openGraph?.images).toEqual([OG_IMAGE]);
+    expect(meta.twitter?.images).toEqual([OG_IMAGE]);
+  });
+
+  it("leaves a segment's own opengraph-image file in charge", () => {
+    const own = pageMetadata({ path: "/work/x", title: "t", description: "d", ownImage: true });
+    expect(own.openGraph).not.toHaveProperty("images");
+    expect(own.twitter).not.toHaveProperty("images");
   });
 
   it("overrides the inherited twitter card text", () => {
