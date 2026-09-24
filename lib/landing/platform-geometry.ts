@@ -13,7 +13,7 @@ import type { Point } from "@/lib/motion/core-geometry";
 export const PLATFORM_VIEW = { w: 1000, h: 760 } as const;
 
 /** Rhombus half-width / half-height (≈ isometric), and slab thickness. */
-export const PLATE = { cx: 500, w: 220, h: 120, t: 16 } as const;
+export const PLATE = { cx: 500, w: 200, h: 110, t: 16 } as const;
 
 export const LAYERS = 4;
 
@@ -50,8 +50,10 @@ export type LabelSpot = {
 /** Even rows down each side of the stack. */
 const ROW_TOP = 150;
 const ROW_GAP = 98;
-const LABEL_X = { left: 200, right: 800 } as const;
-const ELBOW_X = { left: 252, right: 748 } as const;
+/** Labels get 24% of the figure each side — room for "ACCESS & SECURITY"
+ *  at the narrowest pinned width (1000px). */
+const LABEL_X = { left: 240, right: 760 } as const;
+const ELBOW_X = { left: 268, right: 732 } as const;
 /** Where along the plate's front edge each of a layer's lines lands. */
 const EDGE_T = [0.18, 0.42, 0.66] as const;
 

@@ -8,7 +8,7 @@
   color: var(--color-ink);
 }
 .tools-run {
-  padding-block: 140px;
+  padding-block: var(--section-y);
 }
 .tools-head {
   display: grid;

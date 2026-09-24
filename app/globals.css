@@ -203,7 +203,7 @@
    so JS off, reduced motion, `?motion=off`, print and short or narrow screens
    all get the static, fully built layout. */
 @custom-variant pin {
-  @media screen and (min-width: 47.5rem) and (min-height: 37.5rem) and (prefers-reduced-motion: no-preference) {
+  @media screen and (min-width: 62.5rem) and (min-height: 37.5rem) and (prefers-reduced-motion: no-preference) {
     html[data-anim="on"] & {
       @slot;
     }

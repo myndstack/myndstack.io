@@ -23,16 +23,16 @@ export const DIVE_STATEMENT = "One studio. Every layer. Nothing handed off.";
 /** DRAFT — the capabilities finale, after the ring closes. */
 export const FINALE = {
   kicker: "The full spectrum",
-  line: "Four disciplines, one accountable team — from first sketch to production.",
+  line: "Four disciplines, one accountable team\u00a0— from first sketch to production.",
 } as const;
 
 /** Section heads carried over from the live homepage (approved copy). */
 export const CASES_COPY = { kicker: "Selected work", title: "Cognitive infrastructure, built end to end." } as const;
-export const PROCESS_COPY = { kicker: "How we work", title: "From first call to production — in four moves." } as const;
+export const PROCESS_COPY = { kicker: "How we work", title: "From first call to production\u00a0— in four moves." } as const;
 export const TOOLS_COPY = {
   kicker: "Integrations",
   title: "Runs the stack you already have.",
-  lede: "We build on the models, cloud, data, and delivery tools you already run — instead of demanding a rebuild.",
+  lede: "We build on the models, cloud, data, and delivery tools you already run\u00a0— instead of demanding a rebuild.",
 } as const;
 
 export const FOUNDER_COPY = {
@@ -43,7 +43,7 @@ export const FOUNDER_COPY = {
 export const PRICING_COPY = {
   kicker: "Pricing",
   title: "Start small. Scale when it’s working.",
-  lede: "Begin with a fixed-price Discovery Sprint — no long proposal, no risk. Move into a full build, or an embedded team, when you’re ready.",
+  lede: "Begin with a fixed-price Discovery Sprint\u00a0— no long proposal, no risk. Move into a full build, or an embedded team, when you’re ready.",
 } as const;
 export const FAQ_COPY = { kicker: "Questions", title: "Before you get in touch." } as const;
 export const CONTACT_COPY = {
@@ -94,7 +94,7 @@ export const PLATFORM_LAYERS = [
 export const PLATFORM_COPY = {
   kicker: "The stack",
   title: ["Four layers.", "One team."],
-  lede: "We architect and build every layer your product runs on — interface, models, compute and data — so nothing is glue code someone else owns.",
+  lede: "We architect and build every layer your product runs on\u00a0— interface, models, compute and data\u00a0— so nothing is glue code someone else owns.",
 } as const;
 
 /** Which hue each plate lights in when it locks (paper: the -deep variants). */

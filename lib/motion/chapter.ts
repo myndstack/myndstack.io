@@ -24,7 +24,9 @@ export type ChapterMotion = {
   /**
    * Built paused. MotionChapter plays it (mode "once") or seeks it (mode
    * "scrub"). For a segmented scrub its duration must be
-   * segments × SEGMENT_UNIT (lib/motion/segments.ts).
+   * segments × SEGMENT_UNIT (lib/motion/segments.ts). Don't call `.then()` on
+   * it: anime 4.5 keeps ONE then-callback per timeline and MotionChapter's own
+   * replaces it — use the timeline's `onComplete` instead.
    */
   readonly timeline: Timeline;
   /** Overrides the chapter's `kind` — e.g. a run that scrubs on desktop but plays once on phones. */

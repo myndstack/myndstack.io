@@ -5,7 +5,7 @@
 .faq-ch {
   position: relative;
   z-index: 2;
-  padding-block: 140px;
+  padding-block: var(--section-y);
   background: var(--color-ink);
 }
 .faq-grid {
@@ -182,7 +182,7 @@
 .contact-ch {
   position: relative;
   z-index: 2;
-  padding-block: 120px 140px;
+  padding-block: var(--section-y);
   border-top: 1px solid var(--color-line);
   background: var(--color-graphite);
 }

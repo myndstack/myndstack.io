@@ -90,8 +90,8 @@
 }
 .hud--hero {
   position: absolute;
-  left: clamp(20px, 5vw, 80px);
-  right: clamp(20px, 5vw, 80px);
+  left: var(--col-inset);
+  right: var(--col-inset);
   bottom: 32px;
 
   /* Phones: the horizon Core fills the foot of the hero — the HUD would sit
@@ -161,10 +161,10 @@
 /* ---------------- Dive ---------------- */
 .dive {
   position: relative;
-  padding: 64px clamp(20px, 5vw, 80px) 120px;
-  max-width: 1440px;
-  margin-inline: auto;
   width: 100%;
+  max-width: var(--col-max);
+  margin-inline: auto;
+  padding: 64px var(--gutter) 120px;
 
   @variant pin {
     height: 200svh;

@@ -14,17 +14,20 @@
   }
 }
 .process-frame {
-  padding-block: 120px;
+  display: flex;
+  flex-direction: column;
+  gap: 40px;
+  padding-block: var(--section-y);
 
+  /* Pinned, head + rail + cards must fit one screen down to 1000×600, so
+     the vertical rhythm scales with the viewport height. */
   @variant pin {
     position: sticky;
     top: 0;
-    display: flex;
-    flex-direction: column;
     justify-content: center;
-    gap: 48px;
+    gap: clamp(20px, 4.5svh, 48px);
     height: 100svh;
-    padding-block: 72px 40px;
+    padding-block: 72px 32px;
     overflow: hidden;
   }
 }
@@ -32,6 +35,12 @@
   max-width: 18ch;
   font-size: var(--text-title);
   line-height: 1.02;
+
+  /* Two lines, not three: the pinned frame has no height to spare. */
+  @variant pin {
+    max-width: 28ch;
+    font-size: clamp(30px, min(4.2vw, 6.5svh), 56px);
+  }
 }
 
 /* The rail: the spectral bar, now a timeline. */
@@ -75,11 +84,13 @@
   gap: 8px;
   translate: -50% 0;
 }
-.rail-stop:first-of-type {
+/* The end stops sit inside the rail (the track and fill are spans too, so
+   no :first-of-type here). */
+.rail-stop[data-stop="0"] {
   translate: 0 0;
   align-items: flex-start;
 }
-.rail-stop:last-of-type {
+.rail-stop:last-child {
   translate: -100% 0;
   align-items: flex-end;
 }
@@ -112,31 +123,45 @@
   }
 }
 .process-track {
+  /* Pinned layout: cards are min(40vw, 520px) with a 24px gap, and the whole
+     strip slides by exactly the amount that brings the last card's right edge
+     onto the column's right edge. `--p` (0 → 1) is the only thing the scrub
+     writes; the distance is CSS, from the same column tokens as the nav. */
+  --card: min(40vw, 520px);
+  --gap: 24px;
+  --shift: max(
+    0px,
+    calc(var(--steps) * (var(--card) + var(--gap)) - var(--gap) - (min(100vw, var(--col-max)) - 2 * var(--gutter)))
+  );
   display: grid;
   grid-auto-flow: column;
-  grid-auto-columns: 86vw;
-  gap: 16px;
+  /* Phones and tablets: the next card peeks in, so it reads as a sideways
+     scroll. Capped, or a tablet gets one 600px-wide card at a time. */
+  grid-auto-columns: min(80vw, 400px);
+  gap: 14px;
   margin: 0;
-  padding: 0 clamp(20px, 5vw, 80px) 8px;
+  padding: 0 var(--col-inset) 8px;
   list-style: none;
   overflow-x: auto;
   scroll-snap-type: x mandatory;
-  scroll-padding-inline: clamp(20px, 5vw, 80px);
+  scroll-padding-inline: var(--col-inset);
   scrollbar-width: none;
 
   @media (width >= 62.5rem) {
     grid-auto-flow: row;
     grid-template-columns: repeat(var(--steps), minmax(0, 1fr));
-    max-width: 1440px;
+    max-width: var(--col-max);
     margin-inline: auto;
+    padding-inline: var(--gutter);
     overflow: visible;
   }
   @variant pin {
     display: flex;
-    gap: 2vw;
+    gap: var(--gap);
     max-width: none;
-    padding-inline: clamp(20px, 5vw, 80px);
+    padding-inline: var(--col-inset);
     overflow: visible;
+    transform: translateX(calc(var(--p, 0) * -1 * var(--shift)));
     will-change: transform;
   }
 }
@@ -148,22 +173,36 @@
   display: flex;
   flex-direction: column;
   gap: 14px;
-  min-height: 360px;
   padding: 28px;
   border: 1px solid var(--color-graphite-line);
   background: var(--color-graphite-2);
   scroll-snap-align: start;
 
   @variant pin {
-    flex: 0 0 40vw;
-    min-height: min(52svh, 460px);
-    padding: 36px;
+    flex: 0 0 var(--card);
+    min-height: min(46svh, 460px);
+    padding: clamp(24px, 4svh, 36px);
+
+    @media (height < 50rem) {
+      gap: 10px;
+      min-height: 0;
+    }
   }
 }
 .step-glyph {
   width: 72px;
   height: 72px;
-  margin-bottom: clamp(32px, 12svh, 120px);
+  margin-bottom: 28px;
+
+  @variant pin {
+    margin-bottom: clamp(20px, 9svh, 110px);
+
+    @media (height < 50rem) {
+      width: 52px;
+      height: 52px;
+      margin-bottom: clamp(12px, 3svh, 24px);
+    }
+  }
 }
 .step-glyph path {
   fill: none;

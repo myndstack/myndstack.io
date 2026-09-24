@@ -5,7 +5,7 @@
 .founder {
   position: relative;
   z-index: 2;
-  padding-block: 140px;
+  padding-block: var(--section-y);
   background: var(--color-ink);
 }
 .founder-head {
@@ -36,8 +36,17 @@
 }
 .founder-card {
   display: grid;
-  grid-template-columns: 132px minmax(0, 1fr);
-  gap: 24px;
+  grid-template-columns: 96px minmax(0, 1fr);
+  gap: 20px;
+
+  /* Narrow: the badge sits above the ID instead of squeezing it. */
+  @media (width < 35rem) {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  @media (width >= 75rem) {
+    grid-template-columns: 132px minmax(0, 1fr);
+    gap: 24px;
+  }
   align-items: start;
   padding: 24px;
   border: 1px solid var(--color-line);
@@ -47,6 +56,10 @@
 .founder-badge {
   position: relative;
   aspect-ratio: 1;
+
+  @media (width < 35rem) {
+    width: 96px;
+  }
 }
 .founder-initials {
   position: absolute;
@@ -102,20 +115,27 @@
 
 /* Agency ↔ Myndstack. */
 .contrast {
-  padding: 28px;
+  min-width: 0;
+  padding: clamp(20px, 4vw, 28px);
   border: 1px solid var(--color-line);
   background: var(--color-surface);
 }
 .contrast-head {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
-  gap: 24px;
+  gap: 16px 24px;
   margin-bottom: 24px;
 }
 .contrast-ring {
   flex: none;
-  width: 88px;
-  height: 88px;
+  width: 72px;
+  height: 72px;
+
+  @media (width >= 35rem) {
+    width: 88px;
+    height: 88px;
+  }
 }
 /* Agency: the arcs go grey and break apart — the hand-offs. */
 .contrast[data-state="agency"] .core-mini-arc {
@@ -125,14 +145,16 @@
 }
 .contrast-toggle {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
-  gap: 14px;
+  gap: 10px 14px;
   font-family: var(--font-mono);
   font-size: var(--text-12);
   letter-spacing: 0.12em;
   text-transform: uppercase;
 }
 .contrast-label {
+  white-space: nowrap;
   color: var(--color-t5);
   transition: color var(--dur-base) var(--ease-brand);
 }
@@ -142,6 +164,7 @@
 }
 .contrast-switch {
   position: relative;
+  flex: none;
   width: 56px;
   height: 30px;
   padding: 0;
@@ -215,7 +238,7 @@
 .pricing-ch {
   position: relative;
   z-index: 2;
-  padding-block: 140px 120px;
+  padding-block: var(--section-y);
   background: var(--color-graphite);
 }
 .pricing-head {

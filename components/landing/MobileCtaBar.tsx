@@ -5,12 +5,13 @@ import { useEffect, useRef } from "react";
 import { useScrollFrame } from "@/lib/hooks";
 import { documentTop } from "@/lib/scroll-spy";
 
-/** Sections the bar steps aside for (it would only repeat what's on screen). */
+/** Sections the bar steps aside for (it would only repeat what's on screen),
+ *  plus the site footer. */
 const HIDE_OVER = ["pricing", "contact"] as const;
 
 /**
  * Phones only: a slim sticky CTA at the bottom once the hero is behind you.
- * It hides over pricing and contact, and its top edge is a spectrum line that
+ * It hides over pricing, contact and the footer; its top edge is a spectrum line that
  * fills with page progress (a CSS scroll-driven animation; static elsewhere).
  * Offsets are cached outside the scroll frame; the frame writes one class,
  * only when visibility changes.
@@ -24,9 +25,9 @@ export default function MobileCtaBar({ label, note }: { readonly label: string; 
     let pending = 0;
     const measure = () => {
       pending = 0;
-      rangesRef.current = HIDE_OVER.flatMap((id) => {
-        const el = document.getElementById(id);
-        if (!el) return [];
+      const targets = [...HIDE_OVER.map((id) => document.getElementById(id)), document.querySelector("footer")];
+      rangesRef.current = targets.flatMap((el) => {
+        if (!(el instanceof HTMLElement)) return [];
         const top = documentTop(el);
         return [{ top, bottom: top + el.offsetHeight }];
       });

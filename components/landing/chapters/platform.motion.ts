@@ -25,15 +25,6 @@ export default function buildPlatform({ root, desktop }: ChapterContext): Chapte
   const labels = Array.from(root.querySelectorAll<HTMLElement>(".discipline"));
   const count = root.querySelector<HTMLElement>("[data-count]");
 
-  const timeline = createTimeline({ autoplay: false, defaults: { ease: camera } });
-  for (let i = 0; i < LAYERS; i++) {
-    const plate = plates.find((p) => p.dataset.plate === String(i));
-    if (plate) timeline.add(plate, { translateY: [plateOffset(i), 0], duration: LAND }, start(i));
-    const lines = leaders.filter((l) => l.dataset.layer === String(i));
-    if (lines.length) timeline.add(lines, { strokeDashoffset: [1, 0], duration: LAND, ease: "out(2)" }, start(i));
-  }
-  if (bus) timeline.add(bus, { strokeDashoffset: [1, 0], duration: DURATION - landed(LAYERS - 1) }, landed(LAYERS - 1));
-
   // Locks: written only when the number of landed plates changes.
   let locked = -1;
   const setLocked = (n: number) => {
@@ -48,12 +39,27 @@ export default function buildPlatform({ root, desktop }: ChapterContext): Chapte
     if (count) count.textContent = String(n).padStart(2, "0");
   };
 
+  // Phones play this once; `onComplete`, not `.then()` — anime 4.5 keeps a
+  // single then-callback per timeline, and MotionChapter's own `.then()`
+  // (which marks the chapter done) would silently replace this one.
+  const timeline = createTimeline({
+    autoplay: false,
+    defaults: { ease: camera },
+    onComplete: desktop ? undefined : () => setLocked(LAYERS),
+  });
+  for (let i = 0; i < LAYERS; i++) {
+    const plate = plates.find((p) => p.dataset.plate === String(i));
+    if (plate) timeline.add(plate, { translateY: [plateOffset(i), 0], duration: LAND }, start(i));
+    const lines = leaders.filter((l) => l.dataset.layer === String(i));
+    if (lines.length) timeline.add(lines, { strokeDashoffset: [1, 0], duration: LAND, ease: "out(2)" }, start(i));
+  }
+  if (bus) timeline.add(bus, { strokeDashoffset: [1, 0], duration: DURATION - landed(LAYERS - 1) }, landed(LAYERS - 1));
+
   const reset = () => setLocked(LAYERS);
 
   if (!desktop) {
     // Phones: a short settle as the chapter enters; everything ends locked.
     timeline.seek(0);
-    timeline.then(() => setLocked(LAYERS));
     setLocked(0);
     return { mode: "once", timeline, dispose: reset };
   }

@@ -473,8 +473,16 @@ Code: `components/landing/` (chapters, core, motion, styles),
   `globals.css` applies only with `html[data-anim="on"]` (the pre-paint flag,
   off for reduced motion and `?motion=off`) and `PIN_QUERY` (width *and*
   height; `lib/motion/pin.ts`, kept identical by a unit test). JS state may
-  change paint, never layout. Phones, short screens, reduced motion, no JS and
-  print get the static, fully built layout.
+  change paint, never layout. Phones, tablets, short screens, reduced motion,
+  no JS and print get the static, fully built layout. The floor is 1000×600:
+  narrower, the pinned two-column frames stack and overflow; shorter than
+  800px, the pinned Platform and Process frames scale their spacing with
+  `svh` so the whole frame still fits one screen under the nav.
+- **One column, from tokens.** Every landing section lines up with the nav and
+  footer: `.landing` defines `--gutter` (20px / 56px from 760px), `--col-max`
+  (1200px incl. gutters) and `--col-inset` (the column's edge in a full-bleed
+  box, for strips like the process track). Use `.page-col` or those tokens —
+  not a new `max-width`.
 - **anime.js 4.5.0, one entry point.** Only `lib/motion/anime/*` imports
   `animejs` (ESLint-enforced), never `animejs/events` (`onScroll` would add a
   scroll listener and read layout per frame; the site has one scroll loop,

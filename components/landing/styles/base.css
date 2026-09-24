@@ -19,17 +19,36 @@
 @reference "../../../app/globals.css";
 
 
+/* The site's one content column — the same box as the nav (`.nav-inner`) and
+   the live sections (`Section`): 1200px wide INCLUDING a 20px / 56px gutter.
+   `--col-inset` is where that column's edge falls inside any full-bleed
+   element (percentages resolve against the element that uses it), so
+   full-bleed tracks, HUDs and panels line up with the nav and every heading. */
 .landing {
+  --gutter: 20px;
+  --col-max: 1200px;
+  --col-inset: max(var(--gutter), calc((100% - var(--col-max)) / 2 + var(--gutter)));
+  /* One vertical rhythm for every unpinned chapter. */
+  --section-y: clamp(88px, 9vw, 136px);
   position: relative;
   background: var(--color-ink);
+
+  @media (width >= 47.5rem) {
+    --gutter: 56px;
+  }
 }
 
-/* One page column for the whole landing: 12-col, 1440 max, fluid margins. */
 .page-col {
   width: 100%;
-  max-width: 1440px;
+  max-width: var(--col-max);
   margin-inline: auto;
-  padding-inline: clamp(20px, 5vw, 80px);
+  padding-inline: var(--gutter);
+}
+
+/* The shared footer follows the landing directly: no dead ink band between
+   the last (graphite) chapter and the footer's top rule. */
+main:has(> .landing) + footer {
+  margin-top: 0;
 }
 
 /* Static film grain over everything but the nav. Rendered once, tiled. */

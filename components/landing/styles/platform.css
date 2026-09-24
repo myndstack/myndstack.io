@@ -19,7 +19,7 @@
   }
 }
 .platform-frame {
-  padding-block: 112px 120px;
+  padding-block: var(--section-y);
 
   @variant pin {
     position: sticky;
@@ -28,6 +28,11 @@
     align-items: center;
     height: 100svh;
     padding-block: 72px 24px;
+
+    /* Short laptop windows: the copy column must still fit under the nav. */
+    @media (height < 50rem) {
+      padding-block: 64px 16px;
+    }
   }
 }
 .platform-grid {
@@ -40,10 +45,57 @@
     align-items: center;
     gap: 32px;
   }
+  @media (width >= 75rem) {
+    grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+  }
+}
+/* Two lines ("Four layers. / One team.") in the copy column at every width. */
+.platform-copy .chapter-title {
+  font-size: clamp(40px, 4.4vw, 64px);
+
+  @variant pin {
+    font-size: clamp(40px, min(4.4vw, 7svh), 64px);
+  }
+}
+/* Pinned on a short screen, the copy column tightens its rhythm. */
+.platform-copy {
+  @variant pin {
+    @media (height < 50rem) {
+      .chapter-lede {
+        margin-top: 18px;
+      }
+      .platform-layers {
+        margin-top: 22px;
+      }
+      .platform-layer {
+        padding-block: 6px;
+      }
+      .platform-count {
+        margin-top: 10px;
+      }
+    }
+    /* …and tighter still where the column is also narrow (1000–1199px). */
+    @media (width < 75rem) and (height < 40rem) {
+      .chapter-lede {
+        margin-top: 14px;
+        line-height: 1.38;
+      }
+      .platform-layers {
+        margin-top: 16px;
+      }
+      .platform-layer {
+        padding-block: 4px;
+      }
+      .platform-count {
+        margin-top: 8px;
+      }
+    }
+  }
 }
 
 /* Layer legend — real text, lights with its plate. */
 .platform-layers {
+  container-type: inline-size;
   margin: 36px 0 0;
   padding: 0;
   list-style: none;
@@ -86,6 +138,23 @@
   opacity: 1;
   box-shadow: 0 0 0 3px color-mix(in oklch, var(--plate-hue) 20%, transparent);
 }
+/* A narrow copy column (the 4fr track at 1000–1199px, small phones): the
+   meta drops under the title instead of wrapping into a ragged cell. */
+@container (width < 340px) {
+  .platform-layer {
+    grid-template-columns: 28px minmax(0, 1fr) 10px;
+    row-gap: 2px;
+  }
+  .platform-layer-m {
+    grid-column: 2;
+    grid-row: 2;
+    justify-self: start;
+  }
+  .platform-layer .led {
+    grid-column: 3;
+    grid-row: 1 / span 2;
+  }
+}
 .platform-count {
   margin: 18px 0 0;
   justify-content: space-between;
@@ -95,12 +164,29 @@
 .platform-figure {
   position: relative;
 }
+/* Below 1000px the labels become chips and the leaders are hidden, so the
+   figure crops the 1000×760 view to the built stack (x 250–750, y ≈ 90–670)
+   instead of leaving it a small drawing in a mostly empty box. The SVG stays
+   overflow:visible so the exploded plates of the phone settle aren't clipped
+   vertically; the figure clips only the sideways overhang. Capped at 880px
+   (a 440px-wide crop) so a tablet doesn't get a stack taller than the fold;
+   the chip list below keeps the full column. */
+.platform-figure {
+  @media (width < 62.5rem) {
+    overflow-x: clip;
+  }
+}
 .platform-figure svg {
   display: block;
   width: 100%;
   height: auto;
   overflow: visible;
 
+  @media (width < 62.5rem) {
+    --svg-w: min(200%, 880px);
+    width: var(--svg-w);
+    margin: calc(var(--svg-w) * -0.09) 0 calc(var(--svg-w) * -0.08) calc((100% - var(--svg-w)) / 2);
+  }
   @variant pin {
     max-height: calc(100svh - 120px);
   }
@@ -203,6 +289,8 @@
     translate: 0 -50%;
     padding: 0;
     border: 0;
+    font-size: 10px;
+    letter-spacing: 0.06em;
   }
   .discipline[data-side="left"] {
     right: calc(100% - var(--x));
@@ -212,6 +300,13 @@
   .discipline[data-side="right"] {
     left: var(--x);
     padding-left: 10px;
+  }
+}
+
+@media (width >= 75rem) {
+  .discipline {
+    font-size: var(--text-11);
+    letter-spacing: 0.1em;
   }
 }
 

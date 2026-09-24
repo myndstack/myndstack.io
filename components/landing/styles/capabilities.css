@@ -26,11 +26,12 @@
   opacity: 0;
   background: radial-gradient(42% 56% at 64% 50%, color-mix(in oklch, var(--wash) 20%, transparent), transparent 72%);
 }
+/* Right of centre, so the ring's visible edge clears the copy column. */
 .core-scene--caps {
   width: min(84svh, 50vw);
   left: 50%;
   top: 50%;
-  translate: calc(-50% + 14vw) -50%;
+  translate: calc(-50% + 16vw) -50%;
 }
 .core-run--caps .core-wave-static {
   display: none;
@@ -158,7 +159,7 @@
 /* ---------------- Spec panels ---------------- */
 .spec-panels {
   position: absolute;
-  right: clamp(20px, 5vw, 80px);
+  right: var(--col-inset);
   bottom: 7svh;
   width: min(400px, 30vw);
   height: 220px;
@@ -200,6 +201,10 @@
   margin-left: auto;
   color: var(--hue);
 }
+.spec-panel {
+  min-width: 0;
+  max-width: 100%;
+}
 .spec-code {
   margin: 0;
   padding: 12px 12px 14px;
@@ -207,6 +212,12 @@
   line-height: 1.7;
   color: var(--color-t4);
   white-space: pre;
+
+  /* Narrow screens: wrap long lines rather than push the page wider. */
+  @media (width < 62.5rem) {
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+  }
 }
 .spec-ln {
   display: inline-block;
@@ -224,7 +235,7 @@
 /* ---------------- Articles (the flow) ---------------- */
 .cap {
   position: relative;
-  padding-block: 96px;
+  padding-block: var(--section-y);
   border-top: 1px solid var(--color-graphite-line);
 
   @variant pin {
@@ -246,8 +257,10 @@
   }
 }
 .cap-copy {
+  min-width: 0;
+
   @variant pin {
-    max-width: min(34vw, 520px);
+    max-width: min(32vw, 440px);
   }
 }
 .cap-kicker {
@@ -256,7 +269,9 @@
 .cap-title {
   margin: 0;
   font-family: var(--font-display);
-  font-size: var(--text-chapter);
+  /* Sized so the longest discipline word ("modernization") fits the copy
+     column at every width. */
+  font-size: clamp(36px, 4.6vw, 68px);
   font-weight: 500;
   line-height: 0.95;
   letter-spacing: var(--tracking-chapter);
@@ -310,6 +325,7 @@
   display: grid;
   gap: 24px;
   align-items: center;
+  min-width: 0;
 
   @media (width >= 35rem) {
     grid-template-columns: minmax(0, 220px) minmax(0, 1fr);
@@ -337,7 +353,7 @@
 /* Finale. */
 .cap-finale {
   position: relative;
-  padding-block: 96px 120px;
+  padding-block: var(--section-y);
   border-top: 1px solid var(--color-graphite-line);
 
   @variant pin {

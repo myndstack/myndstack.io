@@ -19,8 +19,11 @@ export default function Footer({ site }: { site: SiteSettings }) {
   const activeSocials = socials.filter((s) => s.href);
 
   return (
+    // Inner width 1088 = the nav's 1200px column minus its two 56px gutters, so
+    // footer content lines up with the nav and every section (it sat 56px
+    // wider on wide screens).
     <footer className="mt-22 border-t border-line px-5 pt-16 pb-10 shadow-[var(--edge-lip)] sm:px-14">
-      <Reveal className="mx-auto grid max-w-[1200px] grid-cols-1 gap-10 xs:grid-cols-2 md:grid-cols-[minmax(0,1.6fr)_repeat(3,minmax(0,1fr))] md:gap-12">
+      <Reveal className="mx-auto grid max-w-[1088px] grid-cols-1 gap-10 xs:grid-cols-2 md:grid-cols-[minmax(0,1.6fr)_repeat(3,minmax(0,1fr))] md:gap-12">
         {/* Brand block — wordmark, tagline, newsletter, contact, socials. Absorbs
             what used to be a separate "Connect" column so the right side stays
             three lean nav columns and the whole footer breathes at md+. */}
@@ -83,7 +86,7 @@ export default function Footer({ site }: { site: SiteSettings }) {
         ))}
       </Reveal>
 
-      <div className="mx-auto mt-14 max-w-[1200px] border-t border-surface-3 pt-6">
+      <div className="mx-auto mt-14 max-w-[1088px] border-t border-surface-3 pt-6">
         <div className="flex flex-col-reverse items-start gap-4 text-13 text-t5 md:flex-row md:items-center md:justify-between md:gap-6">
           <span className="whitespace-nowrap">© {new Date().getFullYear()} {SITE.legalName}</span>
           <nav
