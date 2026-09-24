@@ -55,6 +55,21 @@ test.describe("preview is hidden and self-contained", () => {
     expect(await page.locator("#site").getAttribute("inert")).toBeNull();
   });
 
+  test("the landing's styles never load on the live homepage", async ({ page, request }) => {
+    const LANDING = /\.landing\b|\.ms-grid\b|data-engine-stage|\.layer-card\b/;
+    const styles = async (path: string) => {
+      await page.goto(path);
+      const hrefs = await page.locator('link[rel="stylesheet"]').evaluateAll((links) => links.map((l) => (l as HTMLLinkElement).href));
+      return Promise.all(hrefs.map(async (href) => ({ href, css: await (await request.get(href)).text() })));
+    };
+    // The pattern does find the landing's own styles (so the check below can fail)…
+    expect((await styles(PREVIEW)).some((s) => LANDING.test(s.css))).toBe(true);
+    // …and none of them reach "/".
+    const home = await styles("/");
+    expect(home.length).toBeGreaterThan(0);
+    expect(home.filter((s) => LANDING.test(s.css)).map((s) => s.href)).toEqual([]);
+  });
+
   test("the live homepage keeps its spine", async ({ page }) => {
     await page.setViewportSize(DESKTOP);
     await page.goto("/");
