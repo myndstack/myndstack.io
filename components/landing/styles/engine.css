@@ -1,0 +1,423 @@
+/* ============================================================
+   The engine's page structure — one composition for every section.
+
+   Stacking contract (e2e/preview.spec.ts "stacking" enforces it):
+     0   section backgrounds, seams and scan lines   (z-index: auto)
+     1   the engine stage and docks
+     2   content: every word, link, card and form   (.page-col)
+     40  grain · 55 ruler · 60 nav
+   Sections and .landing create no stacking context and never overlap.
+
+   RUN blocks: copy scrolls in 100svh blocks (columns 1–5) past the engine in
+   the sticky stage's rail (columns 7–12). FRAME sections: the copy is sticky
+   during the hold. Lengths are SCROLL_PLAN in lib/landing/engine/beats.ts.
+   Everything here that pins lives under `@variant pin`: JS never changes
+   layout, and without it (no JS, reduced motion, phones, short screens) each
+   block shows its own poster in the flow instead.
+   ============================================================ */
+@reference "../../../app/globals.css";
+
+.landing {
+  --gap: 24px;
+  /* Nav + capsule above, breathing room below. */
+  --safe-top: 96px;
+  --safe-bottom: 40px;
+  /* The rail slot: column 7 to 24px short of the ruler. `%` resolves where
+     these are used — always a full-width box (the stage, a section). */
+  --col: calc((min(100%, var(--col-max)) - 2 * var(--gutter) - 11 * var(--gap)) / 12);
+  --rail-l: calc(var(--col-inset) + 6 * (var(--col) + var(--gap)));
+  --rail-r: calc(max(12px, (100% - var(--col-max)) / 4 + 12px) + 32px + var(--gap));
+}
+
+/* Content is layer 2: above the stage, whatever the section. */
+.landing .page-col {
+  position: relative;
+  z-index: 2;
+}
+
+/* Anchor jumps land on a hold (components/landing/engine/plan.ts landStyle). */
+[style*="--land"] {
+  @variant pin {
+    scroll-margin-top: var(--land);
+  }
+}
+
+/* ---------------- Composition grid ----------------
+   12 columns, 24px gaps, inside the site's one content column. Copy takes
+   columns 1–5 (1–6 in the hero); column 6 stays empty; the engine owns 7–12. */
+.ms-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  row-gap: 40px;
+
+  @media (width >= 62.5rem) {
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    column-gap: var(--gap);
+    align-items: center;
+  }
+}
+.ms-copy {
+  min-width: 0;
+
+  @media (width >= 62.5rem) {
+    grid-column: 1 / span 5;
+    grid-row: 1;
+  }
+}
+.ms-copy--wide {
+  @media (width >= 62.5rem) {
+    grid-column: 1 / span 6;
+  }
+}
+
+/* RUN block: one heading per screen, the copy centred on it. */
+.ms-block {
+  position: relative;
+  padding-block: var(--section-y);
+
+  @variant pin {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    min-height: var(--block, 100svh);
+    padding-block: var(--safe-top) var(--safe-bottom);
+  }
+}
+
+/* FRAME section: the copy holds still (sticky) while its beats play. */
+.ms-frame {
+  position: relative;
+
+  @variant pin {
+    min-height: var(--block);
+  }
+}
+.ms-frame-sticky {
+  padding-block: var(--section-y);
+
+  /* Sticky always makes a stacking context: it must sit at the content
+     layer, or the stage (layer 1) would paint over the copy inside it. */
+  @variant pin {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    height: 100svh;
+    padding-block: var(--safe-top) var(--safe-bottom);
+  }
+}
+
+/* Beat markers inside FRAME sections: in-flow boxes (never sticky), placed
+   where SCROLL_PLAN puts them. Only the pinned layout reads them. */
+.ms-marker {
+  display: none;
+  position: absolute;
+  left: 0;
+  width: 1px;
+  top: calc(var(--at) - var(--size, 1svh) / 2);
+  height: var(--size, 1svh);
+  pointer-events: none;
+  visibility: hidden;
+
+  @variant pin {
+    display: block;
+  }
+}
+
+/* ---------------- The stage ----------------
+   Sticky for the whole run (hero → studio), in the same grid cell as the
+   flow; it scrolls away natively at the end of the studio. Decoration only:
+   aria-hidden, inert, never a hit target. */
+.engine-run {
+  position: relative;
+  display: grid;
+}
+.engine-run > .engine-stage,
+.engine-run > .engine-flow {
+  grid-area: 1 / 1;
+  min-width: 0;
+}
+.engine-stage {
+  display: none;
+
+  @variant pin {
+    display: block;
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    align-self: start;
+    height: 100svh;
+    overflow: hidden;
+    pointer-events: none;
+  }
+
+  /* The readout plate under the capabilities ring. */
+  --plate-h: 186px;
+
+  @media (height < 47.5rem) {
+    --plate-h: 112px;
+  }
+}
+.engine-box {
+  position: absolute;
+  top: var(--safe-top);
+  bottom: var(--safe-bottom);
+  left: var(--rail-l);
+  right: var(--rail-r);
+  container-type: size;
+}
+/* Face-on ring, centred in the rail: ⌀ = min(0.92 × width, 0.8 × height). */
+.engine-ring {
+  position: absolute;
+  inset: 0;
+  width: min(92cqw, 80cqh);
+  aspect-ratio: 1;
+  margin: auto;
+}
+/* Capabilities: the ring at the top of the rail, the readout plate under it. */
+.engine-ringtop {
+  --ring-top: min(90cqw, calc(100cqh - var(--plate-h) - 16px));
+  position: absolute;
+  top: 0;
+  left: 50%;
+  width: var(--ring-top);
+  aspect-ratio: 1;
+  translate: -50% 0;
+}
+.engine-plate {
+  --ring-top: min(90cqw, calc(100cqh - var(--plate-h) - 16px));
+  position: absolute;
+  top: calc(var(--ring-top) + 16px);
+  left: 50%;
+  width: min(100%, 440px);
+  height: var(--plate-h);
+  translate: -50% 0;
+}
+.engine-plate .spec-panel {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  opacity: 0;
+  transition: opacity var(--dur-base) var(--ease-brand);
+}
+
+/* Posters: one per beat, cross-faded on beat changes (never tied to scroll). */
+.ep {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  opacity: 0;
+  transition: opacity 280ms var(--ease-brand);
+}
+.ep[data-on] {
+  opacity: 1;
+}
+/* Before the director has placed a beat, the stage shows the hero's ring. */
+.engine-stage:not([data-beat]) .engine-face[data-poster="face-ring"] {
+  opacity: 1;
+}
+
+/* Two tones of every drawing, clipped at the paper's edge: light lines above
+   dark surfaces, ink lines on paper — the scan line splits the engine exactly
+   where it splits the page. The director writes the four insets (px). */
+.engine-tone {
+  position: absolute;
+  inset: 0;
+}
+.engine-tone--dark {
+  clip-path: inset(var(--dt, 0px) 0 var(--db, 0px) 0);
+  color: var(--color-t3);
+  --ep-body: #1c1d21;
+  --ep-h0: var(--color-lime);
+  --ep-h1: var(--color-spec-ai);
+  --ep-h2: var(--color-spec-product);
+  --ep-h3: var(--color-spec-design);
+  --ep-h4: var(--color-spec-arch);
+  --ep-sketch: var(--color-lime);
+}
+.engine-tone--paper {
+  clip-path: inset(var(--pt, 100%) 0 var(--pb, 0px) 0);
+  color: var(--color-ink);
+  --ep-body: var(--color-paper-2);
+  --ep-h0: var(--color-lime-deep);
+  --ep-h1: var(--color-spec-ai-deep);
+  --ep-h2: var(--color-spec-product-deep);
+  --ep-h3: var(--color-spec-design-deep);
+  --ep-h4: var(--color-spec-arch-deep);
+  --ep-sketch: var(--color-lime-deep);
+}
+.ep[data-sketch] {
+  color: var(--ep-sketch);
+}
+
+/* ---------------- Docks (after the stage has scrolled away) ---------------- */
+.engine-dock {
+  position: relative;
+  flex: none;
+  aspect-ratio: 1;
+  pointer-events: none;
+}
+
+/* ---------------- Slots (the static layout's in-flow posters) ---------------- */
+.engine-slot {
+  position: relative;
+  min-width: 0;
+
+  /* Row 1 beside the copy, whichever comes first in the source. */
+  @media (width >= 62.5rem) {
+    grid-column: 7 / -1;
+    grid-row: 1;
+  }
+  @variant pin {
+    display: none;
+  }
+}
+.engine-slot .ep {
+  position: relative;
+  opacity: 1;
+}
+.engine-slot--draw {
+  height: 44svh;
+  max-height: 520px;
+  color: var(--color-t3);
+  --ep-body: #1c1d21;
+  --ep-h0: var(--color-lime);
+  --ep-h1: var(--color-spec-ai);
+  --ep-h2: var(--color-spec-product);
+  --ep-h3: var(--color-spec-design);
+  --ep-h4: var(--color-spec-arch);
+  --ep-sketch: var(--color-lime);
+
+  @media (width >= 62.5rem) {
+    height: min(72svh, 620px);
+    max-height: none;
+  }
+}
+[data-surface="paper"] .engine-slot--draw {
+  color: var(--color-ink);
+  --ep-body: var(--color-paper-2);
+  --ep-h0: var(--color-lime-deep);
+  --ep-h1: var(--color-spec-ai-deep);
+  --ep-h2: var(--color-spec-product-deep);
+  --ep-h3: var(--color-spec-design-deep);
+  --ep-h4: var(--color-spec-arch-deep);
+  --ep-sketch: var(--color-lime-deep);
+}
+/* Phones: a station's band sits above its heading. */
+.engine-slot--band {
+  @media (width < 62.5rem) {
+    order: -1;
+    height: 30svh;
+  }
+}
+
+/* ---------------- Surfaces: seams and scan lines (layer 0) ----------------
+   Every surface change is an element in the page's flow — no timers, no
+   colour transitions. Dark ↔ dark hand-offs feather over 18svh; paper edges
+   are a crisp scan line: 1px lime, a glow on the dark side only, an ink
+   hairline on the paper side, and a scanner head that runs along it with the
+   scroll where scroll-driven animations exist. */
+[data-surface="ink"] {
+  background-color: var(--color-ink);
+}
+[data-surface="graphite"] {
+  background-color: var(--color-graphite);
+}
+[data-surface="paper"] {
+  position: relative;
+  background-color: var(--color-paper);
+}
+.seam-from-graphite {
+  background-image: linear-gradient(var(--color-graphite), var(--color-ink) 18svh);
+}
+.seam-from-ink {
+  background-image: linear-gradient(var(--color-ink), var(--color-graphite) 18svh);
+}
+.scan-top::before,
+.scan-bottom::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 30px;
+  pointer-events: none;
+}
+/* Top edge: glow above (the dark side), the lime line, an ink hairline below. */
+.scan-top::before {
+  top: -29px;
+  background:
+    linear-gradient(var(--color-lime), var(--color-lime)) 0 28px / 100% 1px no-repeat,
+    linear-gradient(rgb(10 10 11 / 0.16), rgb(10 10 11 / 0.16)) 0 29px / 100% 1px no-repeat,
+    linear-gradient(to top, color-mix(in oklch, var(--color-lime) 22%, transparent), transparent) 0 0 / 100% 28px no-repeat;
+}
+/* Bottom edge: the mirror image. */
+.scan-bottom::after {
+  bottom: -29px;
+  background:
+    linear-gradient(rgb(10 10 11 / 0.16), rgb(10 10 11 / 0.16)) 0 0 / 100% 1px no-repeat,
+    linear-gradient(var(--color-lime), var(--color-lime)) 0 1px / 100% 1px no-repeat,
+    linear-gradient(to bottom, color-mix(in oklch, var(--color-lime) 22%, transparent), transparent) 0 2px / 100% 28px no-repeat;
+}
+/* The scanner head: a bright 40px segment riding the line. */
+.scan-head {
+  position: absolute;
+  left: 0;
+  width: 40px;
+  height: 3px;
+  pointer-events: none;
+  background: var(--color-lime);
+  box-shadow:
+    0 0 12px var(--color-lime),
+    0 0 28px color-mix(in oklch, var(--color-lime) 60%, transparent);
+  translate: calc(var(--col-inset) - 20px) 0;
+}
+.scan-head--top {
+  top: -1px;
+}
+.scan-head--bottom {
+  bottom: -2px;
+}
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .scan-head {
+      animation: scan-run linear both;
+      animation-timeline: view();
+    }
+  }
+}
+@keyframes scan-run {
+  from {
+    translate: -40px 0;
+  }
+  to {
+    translate: 100vw 0;
+  }
+}
+
+/* ---------------- Print and forced colours ---------------- */
+@media print {
+  .engine-stage {
+    display: none !important;
+  }
+  .engine-slot {
+    display: block !important;
+    break-inside: avoid;
+  }
+}
+@media (forced-colors: active) {
+  .engine-tone,
+  .engine-slot--draw {
+    --ep-body: Canvas;
+    color: CanvasText;
+  }
+  .scan-head,
+  .scan-top::before,
+  .scan-bottom::after {
+    display: none;
+  }
+}

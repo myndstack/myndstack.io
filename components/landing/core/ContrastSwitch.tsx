@@ -2,6 +2,8 @@
 
 import { useState } from "react";
 
+import { engineSignals } from "@/lib/landing/engine/store";
+
 import CoreRingMini from "./CoreRingMini";
 
 type Props = {
@@ -14,6 +16,8 @@ type Props = {
  * Both columns are always in the DOM and readable (no JS: a plain comparison);
  * the switch only moves the emphasis — and the ring beside it, which breaks
  * into gapped, desaturated arcs (the hand-offs) or closes into the spectrum.
+ * It also tells the engine (the stage shows the same engine, built the way an
+ * agency would ship it).
  */
 export default function ContrastSwitch({ without, with: withUs }: Props) {
   const [ours, setOurs] = useState(true);
@@ -34,7 +38,11 @@ export default function ContrastSwitch({ without, with: withUs }: Props) {
             role="switch"
             aria-checked={ours}
             aria-label="Show how Myndstack does it"
-            onClick={() => setOurs((v) => !v)}
+            onClick={() => {
+              const next = !ours;
+              setOurs(next);
+              engineSignals.set("studio.mode", next ? "ours" : "agency");
+            }}
             className="contrast-switch"
           >
             <span className="contrast-knob" />

@@ -49,7 +49,7 @@ test("soft navigation away and back leaks no listeners or running animation", as
     .toBe(0);
 });
 
-test("scrolling the pinned runs on a 4× throttled CPU has no very long frames", async ({ page, browserName }) => {
+test("scrolling the pinned run on a 4× throttled CPU has no very long frames", async ({ page, browserName }) => {
   test.skip(browserName !== "chromium", "CDP throttling is Chromium-only");
   await page.setViewportSize({ width: 1280, height: 900 });
   await page.goto(PREVIEW);
@@ -65,9 +65,9 @@ test("scrolling the pinned runs on a 4× throttled CPU has no very long frames",
     }).observe({ type: "long-animation-frame", buffered: false });
   });
 
-  // Wheel down through hero, dive, platform and the capabilities run.
+  // Wheel down through the hero, the dive, the stack and the capabilities.
   const end = await page.evaluate(() => {
-    const caps = document.querySelector('[data-chapter="core-caps"]') as HTMLElement;
+    const caps = document.getElementById("capabilities") as HTMLElement;
     return caps.getBoundingClientRect().bottom + window.scrollY;
   });
   for (let y = 0; y < end; y += 240) {

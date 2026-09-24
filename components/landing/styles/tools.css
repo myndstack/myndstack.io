@@ -1,62 +1,54 @@
-/* §06 — Tools: the spectrum rack, on paper. */
+/* §06 — Tools, on paper: a compact rack of four groups (a FRAME) beside the
+   engine's elevation, one port per group. */
 @reference "../../../app/globals.css";
 
-.tools {
-  position: relative;
-  z-index: 2;
-  background: var(--color-paper);
-  color: var(--color-ink);
-}
+/* Below 750px tall the rack can't hold still beside the engine: it scrolls
+   past it instead (RUN), while the engine holds. */
 .tools-run {
-  padding-block: var(--section-y);
-}
-.tools-head {
-  display: grid;
-  gap: 24px;
-  margin-bottom: 72px;
-
-  @media (width >= 62.5rem) {
-    grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
-    align-items: end;
+  @variant pin {
+    @media (height < 46.875rem) {
+      position: relative;
+      height: auto;
+      padding-block: var(--safe-top) var(--safe-bottom);
+    }
   }
 }
 .tools-title {
+  max-width: 14ch;
   font-size: var(--text-title);
   line-height: 1.02;
+
+  @variant pin {
+    font-size: clamp(30px, min(3.6vw, 6svh), 52px);
+  }
 }
 .tools-lede {
-  margin: 0;
-}
-.rack {
-  position: relative;
-}
-.rack-ruler {
-  display: block;
-  height: 14px;
-  margin-bottom: 28px;
-  transform-origin: left center;
-  background:
-    repeating-linear-gradient(90deg, var(--color-ink) 0 1px, transparent 1px 12px) bottom / 100% 6px no-repeat,
-    repeating-linear-gradient(90deg, var(--color-ink) 0 1px, transparent 1px 120px) bottom / 100% 14px no-repeat;
-  border-bottom: 1px solid var(--color-ink);
-  opacity: 0.55;
+  margin-top: 20px;
+
+  @variant pin {
+    margin-top: 14px;
+    font-size: var(--text-15);
+  }
 }
 .rack-groups {
   display: grid;
   grid-template-columns: minmax(0, 1fr);
-  gap: 48px 24px;
-  margin: 0;
+  gap: 28px;
+  margin: 40px 0 0;
   padding: 0;
   list-style: none;
 
-  @media (width >= 35rem) {
+  @media (width >= 35rem) and (width < 62.5rem) {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
-  @media (width >= 62.5rem) {
-    grid-template-columns: repeat(4, minmax(0, 1fr));
+  @variant pin {
+    gap: clamp(8px, 1.8svh, 18px);
+    margin-top: clamp(16px, 3svh, 28px);
   }
 }
 .rack-group {
+  position: relative;
+  padding-left: 16px;
   transition: opacity var(--dur-base) var(--ease-brand);
 }
 @media (hover: hover) {
@@ -64,11 +56,17 @@
     opacity: 0.4;
   }
 }
+.rack-groups:focus-within .rack-group:not(:focus-within) {
+  opacity: 0.4;
+}
+/* The group's hue bar: the leader to its port starts here. */
 .rack-bar {
-  display: block;
-  height: 3px;
-  margin-bottom: 18px;
-  transform-origin: left center;
+  position: absolute;
+  left: 0;
+  top: 4px;
+  bottom: 4px;
+  width: 3px;
+  transform-origin: center top;
   background: var(--hue);
 }
 .rack-title {
@@ -79,35 +77,50 @@
   font-family: var(--font-display);
   font-size: var(--text-22);
   font-weight: 600;
+
+  @variant pin {
+    font-size: var(--text-17);
+  }
 }
 .rack-n {
   font-family: var(--font-mono);
   font-size: var(--text-11);
-  color: var(--hue);
+  color: var(--hue-c, var(--hue));
 }
 .rack-blurb {
-  margin: 8px 0 22px;
+  margin: 4px 0 12px;
   font-size: var(--text-15);
   color: var(--color-paper-t2);
+
+  @variant pin {
+    margin: 2px 0 8px;
+    font-size: var(--text-13);
+  }
 }
 .rack-items {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 18px 10px;
+  grid-template-columns: repeat(auto-fill, minmax(64px, 1fr));
+  gap: 10px 6px;
   margin: 0;
   padding: 0;
   list-style: none;
+
+  /* Beside the engine: one row per group (up to six marks). */
+  @media (width >= 62.5rem) {
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+  }
 }
 .rack-item {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  gap: 8px;
+  gap: 6px;
+  min-width: 0;
 }
 .rack-item svg,
 .rack-chip {
-  width: 26px;
-  height: 26px;
+  width: 22px;
+  height: 22px;
   color: var(--color-ink);
 }
 .rack-chip {
@@ -115,12 +128,26 @@
   place-items: center;
   border: 1.5px solid var(--color-ink);
   font-family: var(--font-mono);
-  font-size: 10px;
+  font-size: 9px;
   font-weight: 700;
 }
+/* Names wrap only between words ("Google / Cloud"); a narrow column gets a
+   tighter face so the longest single words ("Cloudflare") still fit. */
 .rack-name {
+  max-width: 100%;
   font-family: var(--font-mono);
-  font-size: var(--text-11);
-  letter-spacing: 0.04em;
+  font-size: 10px;
+  line-height: 1.25;
+  letter-spacing: 0.02em;
   color: var(--color-paper-t2);
+
+  @media (width >= 62.5rem) and (width < 75rem) {
+    font-size: 9px;
+    letter-spacing: 0;
+  }
+}
+.rack-items {
+  @media (width >= 62.5rem) and (width < 75rem) {
+    gap: 10px 4px;
+  }
 }

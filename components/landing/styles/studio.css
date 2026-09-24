@@ -2,29 +2,31 @@
 @reference "../../../app/globals.css";
 
 /* ================= §07 Studio ================= */
-.founder {
-  position: relative;
-  z-index: 2;
-  padding-block: var(--section-y);
-  background: var(--color-ink);
-}
 .founder-head {
   max-width: 760px;
-  margin-bottom: 64px;
+  margin-bottom: 48px;
 }
+/* In the copy column: small enough that "Founder-led." never breaks at its hyphen. */
 .founder-title {
-  font-size: var(--text-title);
+  font-size: clamp(30px, 3.3vw, 48px);
   line-height: 1.02;
 }
+/* The static layout's engine beside the studio, in the switch's state
+   (pinned, the stage shows it). Phones keep just the switch's own ring. */
+.engine-slot--studio {
+  @media (width < 62.5rem) {
+    display: none;
+  }
+}
+.founder:has(.contrast[data-state="agency"]) .engine-slot--studio [data-poster="studio"],
+.founder:not(:has(.contrast[data-state="agency"])) .engine-slot--studio [data-poster="studio-agency"] {
+  display: none;
+}
+/* The ID panel, then the switch — one column beside the engine. */
 .founder-grid {
   display: grid;
   grid-template-columns: minmax(0, 1fr);
-  gap: 48px;
-
-  @media (width >= 62.5rem) {
-    grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
-    align-items: start;
-  }
+  gap: 32px;
 }
 .founder-people {
   display: flex;
@@ -42,10 +44,6 @@
   /* Narrow: the badge sits above the ID instead of squeezing it. */
   @media (width < 35rem) {
     grid-template-columns: minmax(0, 1fr);
-  }
-  @media (width >= 75rem) {
-    grid-template-columns: 132px minmax(0, 1fr);
-    gap: 24px;
   }
   align-items: start;
   padding: 24px;
@@ -237,22 +235,24 @@
 /* ================= §08 Pricing ================= */
 .pricing-ch {
   position: relative;
-  z-index: 2;
   padding-block: var(--section-y);
-  background: var(--color-graphite);
 }
+/* The heading, and the engine's first dock beside it. */
 .pricing-head {
   display: grid;
   gap: 24px;
   margin-bottom: 56px;
 
   @media (width >= 62.5rem) {
-    grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
-    align-items: end;
+    grid-template-columns: minmax(0, 1fr) 260px;
+    align-items: center;
+    gap: 48px;
   }
 }
-.pricing-head .chapter-lede {
-  margin: 0;
+.pricing-head .engine-dock {
+  @media (width < 62.5rem) {
+    display: none;
+  }
 }
 .pricing-title {
   font-size: var(--text-title);

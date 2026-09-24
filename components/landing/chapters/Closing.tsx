@@ -1,6 +1,6 @@
 import { CLOSING } from "@/lib/landing/chapters";
 
-import CoreRingMini from "../core/CoreRingMini";
+import { FacePoster } from "../engine/Posters";
 import MagneticSpring from "../motion/MagneticSpring";
 import MotionChapter from "../motion/MotionChapter";
 
@@ -9,18 +9,23 @@ type Props = {
 };
 
 /**
- * The closing band: the Core returns as a horizon, every arc lit, under the
- * restated promise. Its slow pulse is a CSS loop that only runs on screen.
+ * The closing band: the engine's last dock, centred at the top of the screen,
+ * powered on as the band arrives (live; its poster is the finished ring), over
+ * the restated promise. Its slow pulse is a CSS loop that only runs on screen.
  */
 export default function Closing({ cta }: Props) {
   return (
-    <section id="cta" className="closing" aria-labelledby="cta-title">
-      <MotionChapter id="cta" kind="once" className="closing-run">
-        <div className="closing-horizon" aria-hidden="true">
-          <CoreRingMini className="closing-ring" />
-          <span className="closing-glow" />
+    <section id="cta" className="closing" data-surface="ink" aria-labelledby="cta-title">
+      <MotionChapter id="cta" kind="once" className="page-col closing-run">
+        <div
+          className="engine-dock engine-dock--closing"
+          data-host="dock-closing"
+          data-beat-marker="closing"
+          aria-hidden="true"
+        >
+          <FacePoster id="dock-closing" prefix="dock-closing" />
         </div>
-        <div className="page-col closing-inner">
+        <div className="closing-inner">
           <p className="chapter-kicker">{CLOSING.kicker}</p>
           <h2 id="cta-title" className="closing-title">
             {CLOSING.title}

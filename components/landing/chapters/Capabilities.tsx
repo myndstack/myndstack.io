@@ -3,11 +3,9 @@ import type { CSSProperties } from "react";
 import { CAPABILITY_HUES, CAPABILITY_SPECS, FINALE } from "@/lib/landing/chapters";
 import type { Capability } from "@/lib/sanity/queries";
 
-import CapDemos from "../core/CapDemos";
 import CoreRingMini from "../core/CoreRingMini";
-import CoreStage from "../core/CoreStage";
 import SpecPanel from "../core/SpecPanel";
-import MotionChapter from "../motion/MotionChapter";
+import { blockStyle, landStyle } from "../engine/plan";
 
 const HUE_VAR = {
   ai: "var(--color-spec-ai)",
@@ -24,126 +22,96 @@ type Props = {
 };
 
 /**
- * §03 — Run B: the Core rises back out from behind the paper and, chapter by
- * chapter, lights one discipline's arc while a demo plays inside the ring and
- * a spec panel shows how that kind of build is shaped. The finale lights the
- * whole spectrum ("end to end"), then unrolls the ring into a bar that hands
- * off to the work.
+ * §03 — the engine rises back to face-on and becomes a porthole: one
+ * capability per screen lights its arc, turns the playhead to it, builds its
+ * demo inside the ring and shows its spec on the readout plate under it (all
+ * on the stage). The finale lights the whole spectrum.
  *
- * Only the first four capabilities get a hue/demo (the design has four); the
- * words always come from the CMS. Static layout (phones, reduced motion,
- * no JS): no stage — each article shows its own small ring and spec panel.
+ * Only the first four capabilities get a hue and a demo (the design has four);
+ * the words always come from the CMS. The static layout gives each article its
+ * own small ring and spec instead.
  */
 export default function Capabilities({ capabilities, cta }: Props) {
   const caps = capabilities.slice(0, CAPABILITY_HUES.length);
   const total = caps.length;
 
-  const underlay = CAPABILITY_HUES.map((hue, i) => (
-    <div key={hue} className="caps-wash" data-wash={i} style={{ "--wash": HUE_VAR[hue] } as CSSProperties} />
-  ));
-  const overlay = (
-    <>
-      {/* The finale's hand-off: the ring turns edge-on and becomes this bar. */}
-      <div className="caps-bar" data-caps-bar>
-        {(["lime", "ai", "product", "design", "arch"] as const).map((key) => (
-          <i key={key} data-hue={key} />
-        ))}
-      </div>
-      <div className="spec-panels">
-      {caps.map((_, i) => (
-        <SpecPanel
-          key={i}
-          panel
-          file={CAPABILITY_SPECS[i].file}
-          lines={CAPABILITY_SPECS[i].lines}
-          index={i}
-          total={total}
-          hue={HUE_VAR[CAPABILITY_HUES[i]]}
-        />
-      ))}
-      </div>
-    </>
-  );
-
   return (
-    <section id="capabilities" className="caps" aria-labelledby="caps-title">
+    <section
+      id="capabilities"
+      className="caps"
+      data-surface="graphite"
+      aria-labelledby="caps-title"
+      style={landStyle(["caps-entry", "cap-0"], "cap-0")}
+    >
       <h2 id="caps-title" className="sr-only">
         Capabilities
       </h2>
-      <MotionChapter id="core-caps" kind="scrub" className="core-run core-run--caps">
-        <CoreStage
-          prefix="caps"
-          placement="caps"
-          inner={<CapDemos />}
-          underlay={underlay}
-          overlay={overlay}
-        />
+      {/* The rise from the paper to face-on: the engine's alone on screen. */}
+      <div className="caps-entry" aria-hidden="true" style={blockStyle("caps-entry")} />
 
-        <div className="core-flow">
-          {caps.map((cap, i) => {
-            const hue = CAPABILITY_HUES[i];
-            return (
-              <article
-                key={cap.n}
-                data-segment
-                data-cap={i}
-                className="cap"
-                style={{ "--hue": HUE_VAR[hue] } as CSSProperties}
-                aria-labelledby={`cap-${i}`}
-              >
-                <div className="page-col cap-inner">
-                  <div className="cap-copy">
-                    <p className="chapter-kicker cap-kicker">
-                      <span className="stamp">§03</span>
-                      <span>
-                        Capabilities · {String(i + 1).padStart(2, "0")} / {String(total).padStart(2, "0")}
-                      </span>
-                    </p>
-                    <h3 id={`cap-${i}`} className="cap-title">
-                      {cap.title}
-                    </h3>
-                    <ul className="cap-points">
-                      {cap.points.map((point) => (
-                        <li key={point}>{point}</li>
-                      ))}
-                    </ul>
-                    <p className="cap-metric">
-                      <span className="cap-metric-v">{cap.metric}</span>
-                      <span className="cap-metric-l">{cap.metricLabel}</span>
-                    </p>
-                  </div>
+      {caps.map((cap, i) => {
+        const hue = CAPABILITY_HUES[i];
+        return (
+          <article
+            key={cap.n}
+            data-cap={i}
+            className="cap ms-block"
+            style={{ ...blockStyle(`cap-${i}`), "--hue": HUE_VAR[hue] } as CSSProperties}
+            aria-labelledby={`cap-${i}`}
+          >
+            <div className="page-col ms-grid">
+              <div className="ms-copy cap-copy" data-beat-marker={`cap-${i}`}>
+                <p className="chapter-kicker cap-kicker">
+                  <span className="stamp">§03</span>
+                  <span>
+                    Capabilities · {String(i + 1).padStart(2, "0")} / {String(total).padStart(2, "0")}
+                  </span>
+                </p>
+                <h3 id={`cap-${i}`} className="cap-title">
+                  {cap.title}
+                </h3>
+                <ul className="cap-points">
+                  {cap.points.map((point) => (
+                    <li key={point}>{point}</li>
+                  ))}
+                </ul>
+                <p className="cap-metric">
+                  <span className="cap-metric-v">{cap.metric}</span>
+                  <span className="cap-metric-l">{cap.metricLabel}</span>
+                </p>
+              </div>
 
-                  <div className="cap-inline" aria-hidden="true">
-                    <div className="cap-mini" data-hue={hue}>
-                      <CoreRingMini />
-                    </div>
-                    <SpecPanel
-                      file={CAPABILITY_SPECS[i].file}
-                      lines={CAPABILITY_SPECS[i].lines}
-                      index={i}
-                      total={total}
-                      hue={HUE_VAR[hue]}
-                    />
-                  </div>
+              <div className="engine-slot engine-slot--cap" aria-hidden="true">
+                <div className="cap-mini" data-hue={hue}>
+                  <CoreRingMini />
                 </div>
-              </article>
-            );
-          })}
-
-          <div data-segment className="cap-finale">
-            <div className="page-col">
-              <p className="chapter-kicker">
-                <span className="stamp">§03</span>
-                <span>{FINALE.kicker}</span>
-              </p>
-              <p className="cap-finale-line">{FINALE.line}</p>
-              <a href="#contact" className="btn btn-lime cap-finale-cta">
-                {cta}
-              </a>
+                <SpecPanel
+                  file={CAPABILITY_SPECS[i].file}
+                  lines={CAPABILITY_SPECS[i].lines}
+                  index={i}
+                  total={total}
+                  hue={HUE_VAR[hue]}
+                />
+              </div>
             </div>
+          </article>
+        );
+      })}
+
+      <div className="cap-finale ms-block" style={blockStyle("finale")}>
+        <div className="page-col ms-grid">
+          <div className="ms-copy" data-beat-marker="finale">
+            <p className="chapter-kicker">
+              <span className="stamp">§03</span>
+              <span>{FINALE.kicker}</span>
+            </p>
+            <p className="cap-finale-line">{FINALE.line}</p>
+            <a href="#contact" className="btn btn-lime cap-finale-cta">
+              {cta}
+            </a>
           </div>
         </div>
-      </MotionChapter>
+      </div>
     </section>
   );
 }

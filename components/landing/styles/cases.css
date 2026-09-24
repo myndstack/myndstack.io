@@ -1,52 +1,6 @@
 /* §04 — Work: the case, its metrics and the controlled-document stack. */
 @reference "../../../app/globals.css";
 
-.cases {
-  position: relative;
-  z-index: 2;
-  background: var(--color-ink);
-}
-.cases-run {
-  padding-block: 0 var(--section-y);
-}
-/* The ring, unrolled: continues the capabilities finale's bar. */
-.cases-bar {
-  display: flex;
-  gap: 2.4%;
-  height: 4px;
-  margin-bottom: var(--section-y);
-}
-.cases-bar i {
-  flex: 1;
-  transform-origin: left center;
-  background: var(--bar);
-  box-shadow: 0 0 18px color-mix(in oklch, var(--bar) 55%, transparent);
-}
-.cases-bar [data-hue="lime"] {
-  --bar: var(--color-lime);
-}
-.cases-bar [data-hue="ai"] {
-  --bar: var(--color-spec-ai);
-}
-.cases-bar [data-hue="product"] {
-  --bar: var(--color-spec-product);
-}
-.cases-bar [data-hue="design"] {
-  --bar: var(--color-spec-design);
-}
-.cases-bar [data-hue="arch"] {
-  --bar: var(--color-spec-arch);
-}
-.cases-grid {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr);
-  gap: 56px;
-
-  @media (width >= 62.5rem) {
-    grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
-    align-items: center;
-  }
-}
 .cases-title {
   max-width: 14ch;
   font-size: var(--text-title);
@@ -142,7 +96,8 @@
   margin-top: 32px;
 }
 
-/* The controlled-document stack. */
+/* The controlled-document stack: beside the copy in the static layout, inside
+   the engine's ring on the stage (stage.css sizes it there). */
 .cases-figure {
   position: relative;
 }
@@ -250,13 +205,10 @@
   margin: 8px 0 0;
 }
 
-/* Draft (before the chapter plays): sheets and stamps wait to arrive. */
+/* Draft (before the chapter plays): the static figure's sheets and stamps
+   wait to arrive. (The stage's fan is played by the stage overlay.) */
 @media screen and (prefers-reduced-motion: no-preference) {
-  html[data-anim="on"] .landing [data-chapter="cases"]:is([data-motion="idle"], [data-motion="ready"]) :is(.doc, .doc-stamp) {
+  html[data-anim="on"] .landing [data-chapter="cases"]:is([data-motion="idle"], [data-motion="ready"]) .cases-figure :is(.doc, .doc-stamp) {
     opacity: 0;
   }
-  html[data-anim="on"] .landing [data-chapter="cases"]:is([data-motion="idle"], [data-motion="ready"]) .cases-bar i {
-    transform: scaleX(0);
-  }
 }
-

@@ -453,79 +453,101 @@ zeroing only the duration leaves a staggered transition still waiting before it 
 which is exactly what the nav morph's cross-fade lag would do. Reveal animations are
 also forced open under `<noscript>`.
 
-### Landing redesign — motion (`/preview`)
+### Landing redesign — the engine (`/preview`)
 
-The "Full Spectrum" redesign is built at `/preview` (noindex: meta + an
-`X-Robots-Tag` header, not in the sitemap) until it is swapped in as `/`. The
-concept: a ring instrument, the **Core**, whose arcs are the disciplines (AI,
-product, design, architecture, plus the lime brand arc); scrolling lights them
-one by one until the ring closes into the full spectrum — "end to end".
-Code: `components/landing/` (chapters, core, motion, styles),
-`lib/landing/` (structure + tested geometry), `lib/motion/` (pure motion maths).
+The redesign is built at `/preview` (noindex: meta + an `X-Robots-Tag` header,
+not in the sitemap) until it is swapped in as `/`. One object tells the story:
+the **engine** — the Core ring (the disciplines' arcs, closing into the full
+spectrum, "end to end") as the front face of a machine whose modules are the
+stack: interface, models, compute, data. It's face-on in the hero, taken apart
+on the stack's paper, lit discipline by discipline in the capabilities, and
+built again in the process. Code: `components/landing/` (chapters, engine,
+core, motion, styles), `lib/landing/engine/` (pure and unit-tested: the beat
+table, choreography, posters and drawings, fit, hosts, surfaces, tiers,
+signals), `lib/motion/` (pure motion maths).
 
-- **Content scrolls in normal flow; only decoration is pinned.** Each Core run
-  (`core-hero`, `core-caps`) is a grid cell holding a sticky `[data-stage]`
-  (`aria-hidden`, `inert`, nothing focusable — an e2e test enforces it) under a
-  `.core-flow` layer that carries every word and link. Text is never covered,
-  hidden or moved by motion, so find-in-page, focus and screen readers work,
-  and a failed animation freezes decoration without changing layout.
+- **The page lays out; the engine follows.** Hero → studio is one run: the
+  flow (every word and link, in blocks of about a screen, columns 1–5 of a
+  12-column grid) and a sticky stage (`[data-engine-stage]`: `aria-hidden`,
+  `inert`, nothing focusable) share one grid cell. The engine lives in the
+  stage's rail slot (column 7 to 24px short of the ruler), so it can't cover
+  text at any width — `e2e/preview-audits.spec.ts` checks every hold at five
+  sizes. After the run it docks in pricing, the FAQ and the closing band.
+- **Holds, not a scrub.** A beat holds where its in-flow marker
+  (`[data-beat-marker]`, never inside anything sticky) meets the reading line
+  (46svh); between holds the engine travels. `lib/landing/engine/beats.ts` is
+  the beat table and `SCROLL_PLAN`, the block lengths the page implements —
+  `components/landing/engine/plan.ts` writes them as custom properties, so the
+  CSS can't drift from the plan, and anchor jumps land on holds
+  (`scroll-margin-top`). FRAME sections (the stack's overview, process, tools)
+  keep their copy sticky through the hold.
+- **The director** (`components/landing/engine/Engine.tsx`: first-load, no
+  three.js) measures markers, the run and the surface bands outside any frame
+  and resolves the timeline once per layout. A scroll frame is arithmetic: which
+  beat holds the stage (written as data attributes, only on change — CSS does
+  the rest) and where the paper's edge crosses it (two clip insets). Today it
+  runs the page on posters (`html[data-engine="poster"]`); the live renderer
+  reads the same timeline.
+- **Posters everywhere.** Face poses show the CoreRing in its bezel behind
+  smoked glass; every other pose is a technical drawing generated from the
+  pose itself (`lib/landing/engine/drawing.ts`, bodies painted back to front so
+  nearer modules hide farther ones, hidden edges dashed). Drawings ship once as
+  `<symbol>`s and are placed with `<use>`; the stage shows each in two tones,
+  clipped exactly at the paper's edge — light lines over dark, ink on paper.
+  The static layout (phones, tablets, short screens, reduced motion, no JS,
+  print) gives each block its own in-flow poster instead of the stage.
+- **Stacking contract.** Layer 0: section backgrounds, seams and scan lines;
+  1: the stage and docks; 2: content (`.page-col`, and FRAME sticky frames —
+  sticky always makes a stacking context); 40 grain, 55 ruler, 60 nav.
+  Sections make no stacking context and never overlap (an audit checks both).
+  The `pin:` variant adds `html[data-anim]` to every selector inside it, so
+  per-state overrides of a pinned default belong inside it too.
+- **Surfaces are CSS, in the flow.** Dark-to-dark hand-offs feather over 18svh
+  inside the lower section's own background; paper edges are scan lines (1px
+  lime, the glow on the dark side only, an ink hairline on the paper side, a
+  scanner head riding the line with the scroll where scroll-driven animations
+  exist). Nothing colours the page on a timer.
 - **Pinning is CSS, decided before paint.** The `pin:` custom variant in
   `globals.css` applies only with `html[data-anim="on"]` (the pre-paint flag,
   off for reduced motion and `?motion=off`) and `PIN_QUERY` (width *and*
   height; `lib/motion/pin.ts`, kept identical by a unit test). JS state may
-  change paint, never layout. Phones, tablets, short screens, reduced motion,
-  no JS and print get the static, fully built layout. The floor is 1000×600:
-  narrower, the pinned two-column frames stack and overflow; shorter than
-  800px, the pinned Platform and Process frames scale their spacing with
-  `svh` so the whole frame still fits one screen under the nav.
+  change paint, never layout (a test holds `scrollHeight` across beats). The
+  floor is 1000×600; short screens tighten FRAME copy with `svh`, and below
+  750px tall the tools rack scrolls past the engine instead of holding.
 - **One column, from tokens.** Every landing section lines up with the nav and
   footer: `.landing` defines `--gutter` (20px / 56px from 760px), `--col-max`
-  (1200px incl. gutters) and `--col-inset` (the column's edge in a full-bleed
-  box, for strips like the process track). Use `.page-col` or those tokens —
-  not a new `max-width`.
+  (1200px incl. gutters), `--col-inset` (the column's edge in a full-bleed box)
+  and the rail's `--rail-l` / `--rail-r`. Use `.page-col`, `.ms-grid` or those
+  tokens — not a new `max-width`.
 - **anime.js 4.5.0, one entry point.** Only `lib/motion/anime/*` imports
   `animejs` (ESLint-enforced), never `animejs/events` (`onScroll` would add a
   scroll listener and read layout per frame; the site has one scroll loop,
   `lib/scroll.ts`, and an e2e test counts listeners). `createDrawable`,
   `createMotionPath` and `splitText` are not exported — they measure the DOM.
   The engine loads lazily with the first chapter builder (`lib/motion/runtime.ts`),
-  so it isn't first-load JS (`node scripts/bundle-budget.mjs` after a build).
-- **Smoothed scrub on the one loop.** A run maps scroll → timeline time by its
-  `[data-segment]` children (`lib/motion/segments.ts`; offsets cached outside the
-  frame). The frame computes a quantised target and returns early if unchanged —
-  which is why a settled page writes nothing (an e2e MutationObserver test) —
-  then an anime timer glides the displayed time toward it (`lib/motion/smooth.ts`:
-  exponential, frame-rate independent, lag-clamped, snapping on jumps, builds,
-  re-measures and bfcache restores) and pauses itself once settled, leaving
-  anime's engine idle.
-- **No two animations share a property on an element.** anime's default
-  `replace` composition cancels overlapping tweens, so the hero's intro (dash
-  offsets, decode overlay; `composition: 'none'`), the scrubbed camera
-  (`[data-core-3d]`) and the pointer lean (`[data-core-lean]`) touch disjoint
-  targets. Timelines are `pause()`d after build — in 4.5 the first `seek()` on a
-  never-started timeline resumes it.
-- **Everything a builder creates is owned.** Builders run inside
-  `createScope().add()` (timelines, timers, animatables are reverted with the
-  scope) and return `dispose()` for the rest (listeners, observers, canvas,
-  data attributes). `finish()` (test hook, print, a failed chunk) lands a
-  play-once chapter on its end state and snaps a run to the *current* scroll
-  position with the glide and ambient motion off. Only play-once chapters
-  have the 3s build watchdog.
-- **Rendering.** Ring geometry is computed on the server (`core-geometry.ts`);
-  lines draw via `pathLength="1"` + dash offset, the tick sweep through a
-  single-contour mask (Skia restarts dashes per subpath). Glow is static
-  blurred layers whose opacity alone animates (never an animated SVG filter).
-  The particle field is a canvas on an anime timer (`field-canvas.ts`) with
-  device budgets, a pixel cap, adaptive quality, and no canvas at all under
-  automation, save-data or reduced motion.
+  so it isn't first-load JS (`npm run budget` after a build).
+- **Timed motion plays once; scroll only picks beats.** The hero's intro (the
+  ring draws, the headline decodes, the copy rises) plays once; each
+  capability's demo and the work's document fan play when their beat arrives
+  (`StageOverlay`); count-ups and the tools rack play on entry. Builders run in
+  `createScope().add()` and return `dispose()`; `finish()` (test hook, print,
+  a failed chunk) lands a chapter on its end state. Glow is static blurred
+  layers whose opacity alone changes (never an animated SVG filter).
+- **Signals.** The studio switch, the open FAQ question and the tier in focus
+  reach the engine through one store (`lib/landing/engine/store.ts`), with no
+  re-render; pricing is listened to by delegation, so the shared
+  `PricingCards` stays untouched.
 - **Truthful content.** The HUD shows only real values (coordinates, IST clock,
   build); the case shows its CMS metrics (counted up on an `aria-hidden` layer,
   settling on the exact CMS string); the founder panel shows only CMS data.
   Copy marked DRAFT in `lib/landing/chapters.ts` awaits the owner's approval.
-- **Test hooks:** `motion:finish-all` on `document` (or `beforeprint`) finishes
-  every chapter; runs expose `data-built`, `data-glide`, `data-intro`,
-  `data-cap-active`; `window.__MS_FIELD_TEST = true` opts a test into the
-  canvas. Helpers in `e2e/helpers.ts`.
+- **Tests.** `e2e/preview.spec.ts` (the pinned page, beat by beat),
+  `e2e/preview-static.spec.ts` (static layout, no motion, axe) and
+  `e2e/preview-audits.spec.ts` (stacking, overlap at every hold, dead zones —
+  each audit first proves it has something to check). Hooks: `motion:finish-all`
+  on `document`; the stage's `data-beat`, `data-cap-active`, `data-hue`,
+  `data-complete`, `data-labels`, `data-studio`; `#process[data-step]`.
+  Helpers in `e2e/helpers.ts`.
 
 ### Accessibility guard
 

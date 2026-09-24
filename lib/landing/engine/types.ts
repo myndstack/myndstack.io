@@ -89,6 +89,7 @@ export type ChannelGroup = "orbit" | "assembly" | "look" | "arcs" | "playhead";
 export type Bezier = readonly [number, number, number, number];
 
 export type HostId = "stage" | "dock-pricing" | "dock-faq" | "dock-closing";
+export type EngineBox = "rail" | "ring" | "ringTop" | "dock";
 export type FitKind = "sphere" | "circle";
 
 /** Which reference point of the marker sits on the anchor line at the hold's centre. */
@@ -105,8 +106,12 @@ export type Beat = {
   readonly hold: number;
   readonly host: HostId;
   readonly fit: FitKind;
-  /** Box within the host the engine fits into. */
-  readonly box: "rail" | "ring" | "dock";
+  /**
+   * Box within the host the engine fits into: the rail slot (columns 7–12),
+   * the ring centred in it, the ring at its top over the readout plate
+   * (capabilities), or a dock's own box.
+   */
+  readonly box: EngineBox;
   readonly pose: PoseSpec;
   /** Per-group ease of the travel INTO this beat (default: the group's ease). */
   readonly ease?: Partial<Record<ChannelGroup, Bezier>>;

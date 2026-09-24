@@ -49,7 +49,7 @@ export default function ContactChapter({ email, phone, phoneHref, location, turn
   };
 
   return (
-    <section id="contact" className="contact-ch" aria-labelledby={`${id}-title`}>
+    <section id="contact" className="contact-ch" data-surface="graphite" aria-labelledby={`${id}-title`}>
       <div className="page-col contact-grid">
         <div className="contact-copy">
           <p className="chapter-kicker">

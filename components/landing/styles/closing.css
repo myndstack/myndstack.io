@@ -4,9 +4,7 @@
 /* ================= §09 FAQ ================= */
 .faq-ch {
   position: relative;
-  z-index: 2;
   padding-block: var(--section-y);
-  background: var(--color-ink);
 }
 .faq-grid {
   display: grid;
@@ -28,6 +26,11 @@
 .faq-title {
   font-size: var(--text-title);
   line-height: 1.02;
+}
+.faq-head .engine-dock {
+  @media (width < 62.5rem) {
+    display: none;
+  }
 }
 .faq-list {
   margin: 0;
@@ -102,43 +105,26 @@
   color: var(--color-t4);
 }
 
-/* ================= Closing band ================= */
+/* ================= Closing band =================
+   The engine's last dock, centred at the top of a screen-tall band (pinned:
+   the ring in the top half, the copy under it — never overlapping). */
 .closing {
   position: relative;
-  z-index: 2;
   overflow: hidden;
-  background: var(--color-ink);
 }
 .closing-run {
-  position: relative;
-  padding-block: 160px 42vmin;
-}
-.closing-horizon {
-  position: absolute;
-  left: 50%;
-  bottom: 0;
-  width: min(1100px, 130vw);
-  aspect-ratio: 1;
-  translate: -50% 62%;
-  pointer-events: none;
-}
-.closing-ring .core-mini-arc {
-  stroke-width: 10;
-}
-.closing-glow {
-  position: absolute;
-  inset: 10%;
-  border-radius: 50%;
-  background: radial-gradient(
-    closest-side,
-    color-mix(in oklch, var(--color-spec-ai) 22%, transparent),
-    color-mix(in oklch, var(--color-lime) 8%, transparent) 55%,
-    transparent
-  );
-  opacity: 0.7;
-}
-.closing-run.is-ambient .closing-glow {
-  animation: horizon 6s ease-in-out infinite;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 40px;
+  padding-block: 120px 140px;
+
+  @variant pin {
+    justify-content: center;
+    gap: 4svh;
+    min-height: 100svh;
+    padding-block: 8svh 8svh;
+  }
 }
 @keyframes horizon {
   50% {
@@ -181,10 +167,8 @@
 /* ================= §10 Contact ================= */
 .contact-ch {
   position: relative;
-  z-index: 2;
   padding-block: var(--section-y);
   border-top: 1px solid var(--color-line);
-  background: var(--color-graphite);
 }
 .contact-grid {
   display: grid;

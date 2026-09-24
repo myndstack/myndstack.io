@@ -1,0 +1,327 @@
+/* The engine's posters and what rides on them: the Core in its bezel behind
+   smoked glass, per-beat emphasis (arcs, playhead, demos, the readout plate),
+   the hue wash, and the three docks. All state arrives as data attributes the
+   director writes on change; nothing here is tied to scroll. */
+@reference "../../../app/globals.css";
+
+.engine-sprite {
+  position: absolute;
+  width: 0;
+  height: 0;
+  overflow: hidden;
+}
+
+/* ---------------- The face: glass, bezel, ring ---------------- */
+.engine-face {
+  container-type: inline-size;
+}
+.engine-face > .core-ring,
+.engine-face > .core-glows {
+  position: absolute;
+  inset: 0;
+}
+/* Smoked glass over the dial (the bezel's inner edge is r 471 of 500). */
+.engine-glass {
+  position: absolute;
+  inset: 2.9%;
+  border-radius: 50%;
+  background:
+    radial-gradient(60% 46% at 38% 26%, rgb(255 255 255 / 0.05), transparent 70%),
+    radial-gradient(closest-side, rgb(10 10 11 / 0.2), rgb(10 10 11 / 0.55));
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.06),
+    inset 0 0 40px rgb(0 0 0 / 0.45);
+}
+.engine-bezel {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  fill: none;
+}
+/* The knurled band: fine radial ticks from a dashed, wide stroke. */
+.engine-bezel-knurl {
+  stroke: var(--color-t8);
+  stroke-width: 30;
+  stroke-dasharray: 1.4 5.2;
+}
+.engine-bezel-edge {
+  stroke: var(--color-t6);
+  stroke-width: 1.5;
+}
+.engine-bezel-dial {
+  stroke: var(--color-t7);
+  stroke-width: 2;
+}
+/* A small dial: CoreRingMini's arcs sit at CORE's radius like the full ring's. */
+.engine-face--mini .core-mini {
+  position: absolute;
+  inset: 0;
+}
+
+/* ---------------- The stage's face posters ---------------- */
+/* Hero and work share the centred ring; work turns it a little and lights the
+   document fan inside it. */
+.engine-ring .engine-face {
+  transition:
+    opacity 280ms var(--ease-brand),
+    transform 600ms var(--ease-camera);
+}
+.engine-stage[data-beat="hero"] .engine-ring .engine-face {
+  transform: perspective(1800px) rotateY(7deg) rotateX(-3deg);
+}
+.engine-stage[data-beat="work"] .engine-ring .engine-face {
+  transform: perspective(1800px) rotateY(-14deg) rotateX(-5deg);
+}
+.engine-stage[data-beat="work"] .engine-ring .core-arc {
+  opacity: 0.7;
+}
+/* The documents take the dial's centre: the waveform steps aside. */
+.engine-ring .core-wave-static {
+  transition: opacity var(--dur-base) var(--ease-brand);
+}
+.engine-stage[data-beat="work"] .engine-ring .core-wave-static {
+  opacity: 0;
+}
+/* Inside the ring's inner circle (r 330 of 500). Scoped to the face so it
+   outranks the static figure's `.docs` box from cases.css. */
+.engine-face > .engine-docs {
+  position: absolute;
+  inset: 17%;
+  height: auto;
+  perspective: 1400px;
+  opacity: 0;
+  transition: opacity var(--dur-base) var(--ease-brand);
+}
+.engine-stage[data-beat="work"] .engine-docs {
+  opacity: 1;
+}
+.engine-docs .docs-plane {
+  top: 50%;
+  width: 44%;
+}
+.engine-docs {
+  container-type: size;
+}
+.engine-docs .doc {
+  transform: translateZ(calc(var(--i) * 22px));
+}
+.engine-docs .doc-scan {
+  transform: translateZ(96px);
+}
+/* The scan line passes once every 6s — the engine's playhead turns with it (live). */
+.engine-stage[data-beat="work"] .engine-docs .doc-scan {
+  animation: doc-scan-ring 6s var(--ease-camera) infinite;
+}
+@keyframes doc-scan-ring {
+  0% {
+    transform: translateZ(96px) translateY(0);
+    opacity: 0;
+  }
+  12%,
+  78% {
+    opacity: 1;
+  }
+  90%,
+  100% {
+    transform: translateZ(96px) translateY(calc(44cqw * 44 / 34));
+    opacity: 0;
+  }
+}
+
+/* The capabilities porthole: active arc full, past 55%, upcoming 20%; the
+   playhead points at the active arc; the finale lights everything and swings
+   the playhead home to 12. */
+.engine-ringtop .core-arc,
+.engine-ringtop .core-glow {
+  opacity: 0.2;
+  transition: opacity var(--dur-slow) var(--ease-brand);
+}
+.engine-ringtop :is(.core-arc[data-arc="lime"], .core-glow[data-glow="lime"]) {
+  opacity: 0.55;
+}
+.engine-stage[data-cap-active="0"] .engine-ringtop :is([data-arc="ai"], [data-glow="ai"]),
+.engine-stage[data-cap-active="1"] .engine-ringtop :is([data-arc="product"], [data-glow="product"]),
+.engine-stage[data-cap-active="2"] .engine-ringtop :is([data-arc="design"], [data-glow="design"]),
+.engine-stage[data-cap-active="3"] .engine-ringtop :is([data-arc="arch"], [data-glow="arch"]),
+.engine-stage[data-complete] .engine-ringtop :is(.core-arc, .core-glow) {
+  opacity: 1;
+}
+.engine-stage:is([data-cap-active="1"], [data-cap-active="2"], [data-cap-active="3"]) .engine-ringtop :is([data-arc="ai"], [data-glow="ai"]),
+.engine-stage:is([data-cap-active="2"], [data-cap-active="3"]) .engine-ringtop :is([data-arc="product"], [data-glow="product"]),
+.engine-stage[data-cap-active="3"] .engine-ringtop :is([data-arc="design"], [data-glow="design"]) {
+  opacity: 0.55;
+}
+.engine-ringtop [data-core-playhead] {
+  rotate: var(--playhead, 0deg);
+  transition: rotate 700ms var(--ease-camera);
+}
+.engine-stage[data-cap-active="0"] {
+  --playhead: 72deg;
+}
+.engine-stage[data-cap-active="1"] {
+  --playhead: 144deg;
+}
+.engine-stage[data-cap-active="2"] {
+  --playhead: 216deg;
+}
+.engine-stage[data-cap-active="3"] {
+  --playhead: 288deg;
+}
+.engine-stage[data-complete] {
+  --playhead: 360deg;
+}
+/* Only the active chapter's demo; the finale's ring is the spectrum alone. */
+.engine-ringtop [data-demo] {
+  opacity: 0;
+  transition: opacity var(--dur-base) var(--ease-brand);
+}
+.engine-stage[data-cap-active="0"] .engine-ringtop [data-demo="0"],
+.engine-stage[data-cap-active="1"] .engine-ringtop [data-demo="1"],
+.engine-stage[data-cap-active="2"] .engine-ringtop [data-demo="2"],
+.engine-stage[data-cap-active="3"] .engine-ringtop [data-demo="3"] {
+  opacity: 1;
+}
+.engine-ringtop .core-wave-static {
+  opacity: 0;
+  transition: opacity var(--dur-slow) var(--ease-brand);
+}
+.engine-stage[data-complete] .engine-ringtop .core-wave-static {
+  opacity: 1;
+}
+.engine-stage[data-cap-active="0"] .engine-plate [data-panel="0"],
+.engine-stage[data-cap-active="1"] .engine-plate [data-panel="1"],
+.engine-stage[data-cap-active="2"] .engine-plate [data-panel="2"],
+.engine-stage[data-cap-active="3"] .engine-plate [data-panel="3"] {
+  opacity: 1;
+}
+
+/* The hue wash behind the porthole: one layer per hue, cross-faded. */
+.engine-washes {
+  position: absolute;
+  inset: 0;
+}
+.engine-wash {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  background: radial-gradient(34% 44% at 72% 38%, color-mix(in oklch, var(--wash) 16%, transparent), transparent 72%);
+  transition: opacity var(--dur-slow) var(--ease-brand);
+}
+.engine-stage[data-hue="ai"] [data-wash="ai"],
+.engine-stage[data-hue="product"] [data-wash="product"],
+.engine-stage[data-hue="design"] [data-wash="design"],
+.engine-stage[data-hue="arch"] [data-wash="arch"] {
+  opacity: 1;
+}
+
+/* ---------------- Docks ---------------- */
+.engine-dock .ep {
+  opacity: 1;
+}
+/* Pricing: the focused tier's arc lit and turned to 12 (Discovery lime,
+   Build product, Studio ai, Enterprise arch); the rest at 25%. */
+.engine-dock--pricing {
+  width: 260px;
+  justify-self: end;
+  align-self: center;
+}
+.engine-dock--pricing .core-mini {
+  rotate: var(--spin, 0deg);
+  transition: rotate 600ms var(--ease-out-expo);
+}
+.engine-dock--pricing .core-mini-arc {
+  opacity: 0.25;
+}
+.engine-dock--pricing:is(:not([data-focus]), [data-focus="0"]) .core-mini-arc[data-arc="lime"],
+.engine-dock--pricing[data-focus="1"] .core-mini-arc[data-arc="product"],
+.engine-dock--pricing[data-focus="2"] .core-mini-arc[data-arc="ai"],
+.engine-dock--pricing[data-focus="3"] .core-mini-arc[data-arc="arch"] {
+  opacity: 1;
+}
+.engine-dock--pricing[data-focus="1"] {
+  --spin: -144deg;
+}
+.engine-dock--pricing[data-focus="2"] {
+  --spin: -72deg;
+}
+.engine-dock--pricing[data-focus="3"] {
+  --spin: 72deg;
+}
+/* FAQ: the playhead points at the open question (i × 60°). */
+.engine-dock--faq {
+  width: 160px;
+  margin-top: 40px;
+}
+.engine-dock--faq .core-mini-arc {
+  opacity: 0.4;
+}
+.faq-playhead {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  fill: var(--color-t1);
+  rotate: calc(var(--open, 0) * 60deg);
+  transition: rotate 500ms var(--ease-out-expo);
+}
+/* Closing: centred at the top of the band. */
+.engine-dock--closing {
+  width: min(72vw, 420px);
+  margin: 0 auto;
+
+  @variant pin {
+    width: min(42svh, 520px);
+  }
+}
+.closing-run.is-ambient .engine-dock--closing .core-glows {
+  animation: horizon 6s ease-in-out infinite;
+}
+
+/* ---------------- The hero's own slot (static layout) ----------------
+   Positioned against the header (outside the content layer, so the copy and
+   the dive both paint over it). */
+.engine-slot--hero {
+  position: absolute;
+  aspect-ratio: 1;
+  pointer-events: none;
+
+  /* Phones and tablets: a horizon, 42% of a 118vw ring above the hero's foot. */
+  @media (width < 62.5rem) {
+    left: 50%;
+    bottom: 0;
+    width: 118vw;
+    translate: -50% 58%;
+  }
+  /* Wide static screens: the ring in the rail's place, beside the copy. */
+  @media (width >= 62.5rem) {
+    top: 50%;
+    left: var(--rail-l);
+    right: var(--rail-r);
+    width: auto;
+    max-height: 72svh;
+    margin-inline: auto;
+    translate: 0 -50%;
+  }
+}
+.engine-slot--hero .ep {
+  position: absolute;
+}
+
+@media print {
+  .engine-glass,
+  .engine-bezel-knurl {
+    display: none;
+  }
+}
+@media (forced-colors: active) {
+  .engine-glass,
+  .engine-wash {
+    display: none;
+  }
+  .engine-bezel circle {
+    stroke: CanvasText;
+  }
+}

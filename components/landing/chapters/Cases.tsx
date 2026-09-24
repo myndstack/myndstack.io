@@ -1,20 +1,11 @@
 import Link from "next/link";
-import type { CSSProperties } from "react";
 
 import { CASES_COPY } from "@/lib/landing/chapters";
 import type { CaseStudy } from "@/lib/cases";
 
+import DocsFan from "../core/DocsFan";
+import { blockStyle, landStyle } from "../engine/plan";
 import MotionChapter from "../motion/MotionChapter";
-
-const SHEETS = 5;
-/** Redaction bar widths (%) per sheet row — the anonymised proof, literally. */
-const REDACTIONS = [
-  [62, 38, 80],
-  [44, 70, 30],
-  [76, 52, 40],
-  [34, 64, 58],
-  [70, 46, 66],
-] as const;
 
 type Props = {
   readonly study: CaseStudy;
@@ -25,21 +16,22 @@ type Props = {
 /**
  * §04 — the work. The one real case (anonymised where the client requires it),
  * with its real metrics (counted up on an aria-hidden layer; the settled text
- * is always exactly the CMS value). The figure is a stack of controlled
- * documents — redacted, as the proof is — fanning out, gated and stamped.
+ * is always exactly the CMS value). Its figure — controlled documents, fanned
+ * out and stamped — sits inside the engine's ring on the stage, or beside the
+ * copy in the static layout.
  */
 export default function Cases({ study, total }: Props) {
   return (
-    <section id="work-cases" className="cases" aria-labelledby="cases-title">
+    <section
+      id="work-cases"
+      className="cases ms-block seam-from-graphite"
+      data-surface="ink"
+      aria-labelledby="cases-title"
+      style={{ ...blockStyle("work"), ...landStyle(["work"], "work") }}
+    >
       <MotionChapter id="cases" kind="once" className="cases-run">
-        <div className="cases-bar" aria-hidden="true">
-          {(["lime", "ai", "product", "design", "arch"] as const).map((key) => (
-            <i key={key} data-hue={key} />
-          ))}
-        </div>
-
-        <div className="page-col cases-grid">
-          <div className="cases-copy">
+        <div className="page-col ms-grid">
+          <div className="ms-copy cases-copy" data-beat-marker="work">
             <p className="chapter-kicker">
               <span className="stamp">§04</span>
               <span>{CASES_COPY.kicker}</span>
@@ -93,31 +85,8 @@ export default function Cases({ study, total }: Props) {
             </div>
           </div>
 
-          <div className="cases-figure" aria-hidden="true">
-            <div className="docs">
-              <div className="docs-plane">
-                {Array.from({ length: SHEETS }, (_, k) => (
-                  <div key={k} className="doc" data-doc={k} style={{ "--i": k } as CSSProperties}>
-                    <div className="doc-head">
-                      <span>DOC-{String(k + 1).padStart(3, "0")}</span>
-                      <span>CONTROLLED · REV {k + 1}</span>
-                    </div>
-                    <div className="doc-rows">
-                      {REDACTIONS[k].map((w, r) => (
-                        <span key={r} className="doc-redact" style={{ width: `${w}%` }} />
-                      ))}
-                    </div>
-                    <div className="doc-table">
-                      {Array.from({ length: 12 }, (_, c) => (
-                        <i key={c} />
-                      ))}
-                    </div>
-                    <span className="doc-stamp">PASS</span>
-                  </div>
-                ))}
-                <span className="doc-scan" />
-              </div>
-            </div>
+          <div className="engine-slot cases-figure" aria-hidden="true">
+            <DocsFan />
             <p className="docs-caption hud">
               <span className="hud-k">Every run</span>
               <span>Drafted · gated · human-verified</span>

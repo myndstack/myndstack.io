@@ -1,73 +1,15 @@
-/* §03 — Capabilities: run B on graphite, its demos and spec panels. */
+/* §03 — Capabilities, on graphite: the demos inside the ring, the readout
+   plate's spec panels, and the articles in the flow. */
 @reference "../../../app/globals.css";
 
-.caps {
-  position: relative;
-  z-index: 2;
-  background: var(--color-graphite);
-}
-.core-run--caps {
-  background: var(--color-graphite);
-}
-/* The stage exists only on the pinned layout; static layouts get inline rings. */
-.core-run--caps > [data-stage] {
+/* The rise to face-on: the engine alone on graphite (pinned only). */
+.caps-entry {
   display: none;
 
   @variant pin {
     display: block;
+    height: var(--block, 70svh);
   }
-}
-.core-run--caps .core-wash {
-  background: radial-gradient(50% 60% at 64% 50%, rgb(255 255 255 / 0.03), transparent 70%);
-}
-.caps-wash {
-  position: absolute;
-  inset: 0;
-  opacity: 0;
-  background: radial-gradient(42% 56% at 64% 50%, color-mix(in oklch, var(--wash) 20%, transparent), transparent 72%);
-}
-/* Right of centre, so the ring's visible edge clears the copy column. */
-.core-scene--caps {
-  width: min(84svh, 50vw);
-  left: 50%;
-  top: 50%;
-  translate: calc(-50% + 16vw) -50%;
-}
-.core-run--caps .core-wave-static {
-  display: none;
-}
-
-/* The finale's spectral bar (the ring, turned edge-on, becomes this). */
-.caps-bar {
-  position: absolute;
-  left: 0;
-  right: 0;
-  top: 50%;
-  display: flex;
-  gap: 2.4%;
-  height: 4px;
-  translate: 0 -50%;
-  opacity: 0;
-}
-.caps-bar i {
-  flex: 1;
-  background: var(--bar);
-  box-shadow: 0 0 18px color-mix(in oklch, var(--bar) 60%, transparent);
-}
-.caps-bar [data-hue="lime"] {
-  --bar: var(--color-lime);
-}
-.caps-bar [data-hue="ai"] {
-  --bar: var(--color-spec-ai);
-}
-.caps-bar [data-hue="product"] {
-  --bar: var(--color-spec-product);
-}
-.caps-bar [data-hue="design"] {
-  --bar: var(--color-spec-design);
-}
-.caps-bar [data-hue="arch"] {
-  --bar: var(--color-spec-arch);
 }
 
 /* ---------------- Demos inside the ring ---------------- */
@@ -157,18 +99,6 @@
 }
 
 /* ---------------- Spec panels ---------------- */
-.spec-panels {
-  position: absolute;
-  right: var(--col-inset);
-  bottom: 7svh;
-  width: min(400px, 30vw);
-  height: 220px;
-}
-.spec-panels .spec-panel {
-  position: absolute;
-  inset: auto 0 0 0;
-  opacity: 0;
-}
 .spec-panel {
   border: 1px solid var(--color-graphite-line);
   border-top: 2px solid var(--hue);
@@ -234,34 +164,14 @@
 
 /* ---------------- Articles (the flow) ---------------- */
 .cap {
-  position: relative;
-  padding-block: var(--section-y);
   border-top: 1px solid var(--color-graphite-line);
 
   @variant pin {
-    display: flex;
-    align-items: center;
-    min-height: 110svh;
-    padding-block: 0;
     border-top: 0;
-  }
-}
-.cap-inner {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr);
-  gap: 40px;
-
-  @media (width >= 62.5rem) {
-    grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
-    align-items: center;
   }
 }
 .cap-copy {
   min-width: 0;
-
-  @variant pin {
-    max-width: min(32vw, 440px);
-  }
 }
 .cap-kicker {
   color: var(--hue);
@@ -321,13 +231,13 @@
 }
 
 /* Static layout: a small ring with this chapter's arc lit, and its spec. */
-.cap-inline {
+.engine-slot--cap {
   display: grid;
   gap: 24px;
   align-items: center;
   min-width: 0;
 
-  @media (width >= 35rem) {
+  @media (width >= 35rem) and (width < 62.5rem) {
     grid-template-columns: minmax(0, 220px) minmax(0, 1fr);
   }
   @variant pin {
@@ -338,6 +248,11 @@
   position: relative;
   width: min(220px, 60vw);
   aspect-ratio: 1;
+
+  @media (width >= 62.5rem) {
+    width: min(320px, 100%);
+    justify-self: center;
+  }
 }
 .cap-mini .core-mini-arc {
   opacity: 0.2;
@@ -352,13 +267,9 @@
 
 /* Finale. */
 .cap-finale {
-  position: relative;
-  padding-block: var(--section-y);
   border-top: 1px solid var(--color-graphite-line);
 
   @variant pin {
-    min-height: 200svh;
-    padding-block: 26svh 0;
     border-top: 0;
   }
 }

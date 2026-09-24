@@ -1,19 +1,19 @@
 /* ============================================================
-   LANDING — "Full Spectrum" (the redesign at /preview)
+   LANDING — the engine (the redesign at /preview)
 
-   Separate stylesheets (this folder), loaded only by the landing. Tokens come from the
-   `@theme static` block in app/globals.css; `@reference` gives this file the
-   `pin:` custom variant (as nested `@variant pin`) without emitting any
-   Tailwind output of its own.
+   Separate stylesheets (this folder), loaded only by the landing. Tokens come
+   from the `@theme static` block in app/globals.css; `@reference` gives each
+   file the `pin:` custom variant (as nested `@variant pin`) without emitting
+   any Tailwind output of its own.
 
-   Rules of the layer model (see components/landing/core/CoreStage.tsx):
-   - `.core-flow` carries every word and link and sits above the stage.
-   - `[data-stage]` is decoration only; pinned (sticky) under `pin`, else an
-     absolutely positioned hero backdrop. Pinning is decided here, before
-     paint — JS state never changes layout.
-   - Server HTML is the BUILT state. Draft states (undrawn arcs, copy about to
-     rise) apply only with html[data-anim="on"], motion allowed, and until the
-     chapter's intro is done — so no JS, reduced motion, print and a failed
+   - engine.css: the page's structure (the composition grid, RUN blocks, FRAME
+     sections, the sticky stage, docks, slots, seams and scan lines) and the
+     stacking contract. stage.css: the posters and their per-beat states.
+   - Pinning is decided here, before paint (`pin:`) — JS state never changes
+     layout. The director only writes data attributes that change paint.
+   - Server HTML is the BUILT state. Draft states (an undrawn ring, copy about
+     to rise) apply only with html[data-anim="on"], motion allowed, and until
+     the chapter's intro is done — so no JS, reduced motion, print and a failed
      chunk all show the finished page.
    ============================================================ */
 @reference "../../../app/globals.css";
@@ -198,33 +198,11 @@ main:has(> .landing) + footer {
   color: var(--color-paper-t4);
 }
 
-/* ---------------- Paper curtain ----------------
-   Platform rises over the diving Core: its own opaque paper, above the
-   stage, pulled up one screen over the end of the dive when pinned. */
-.curtain {
-  position: relative;
-  z-index: 2;
-  background: var(--color-paper);
-  color: var(--color-ink);
-  box-shadow: 0 -48px 96px -24px rgb(0 0 0 / 0.65);
-
-  @variant pin {
-    margin-top: -100svh;
-  }
-}
-.curtain :focus-visible {
-  outline-color: var(--color-ink);
-}
-
 /* ---------------- Print and forced colours ---------------- */
 @media print {
   .landing-grain,
-  .core-canvas,
   .core-glows {
     display: none !important;
-  }
-  .core-stage {
-    position: absolute !important;
   }
   .landing .core-arc,
   .landing .core-sweep {
@@ -237,8 +215,7 @@ main:has(> .landing) + footer {
 }
 @media (forced-colors: active) {
   .landing-grain,
-  .core-glows,
-  .core-canvas {
+  .core-glows {
     display: none;
   }
   .core-ring path,

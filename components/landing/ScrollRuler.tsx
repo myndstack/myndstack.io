@@ -6,8 +6,10 @@ import { useCssSupports, useScrollFrame } from "@/lib/hooks";
 import { RULER_CHAPTERS } from "@/lib/landing/chapters";
 import { activeSection, documentTop, type SectionOffset } from "@/lib/scroll-spy";
 
-/** Where a ruler tick scrolls to — the stack lands mid-build, like the nav. */
+/** Where a ruler tick scrolls to — the stack lands on its overview, like the nav. */
 const TARGET: Partial<Record<string, string>> = { platform: "platform-anchor" };
+/** Chapters on paper: the ruler takes the paper skin over them. */
+const PAPER = new Set(["platform", "integrations"]);
 
 /**
  * The fixed HUD bottom-right (wide screens): the chapter you're in, a tick per
@@ -56,6 +58,7 @@ export default function ScrollRuler() {
     if (active !== activeRef.current) {
       activeRef.current = active;
       root.dataset.active = active;
+      root.dataset.skin = PAPER.has(active) ? "paper" : "ink";
       const chapter = RULER_CHAPTERS.find((c) => c.id === active);
       const label = root.querySelector<HTMLElement>("[data-ruler-label]");
       if (chapter && label) label.textContent = `§${chapter.n} · ${chapter.label}`;
@@ -89,6 +92,7 @@ export default function ScrollRuler() {
       className="ruler"
       aria-label="Chapters"
       data-active={RULER_CHAPTERS[0].id}
+      data-skin="ink"
       data-native={nativeTimeline ? "true" : "false"}
       suppressHydrationWarning
     >

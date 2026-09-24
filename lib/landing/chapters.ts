@@ -52,8 +52,12 @@ export const CONTACT_COPY = {
   lede: "Send the shape of the problem. We’ll reply within one business day with the fastest path to production.",
 } as const;
 
-/** The paper-safe hue each integration group lights in (in INTEGRATIONS order). */
-export const TOOL_HUES: readonly Hue[] = ["ai", "arch", "product", "design"];
+/**
+ * The hue each integration group lights in (INTEGRATIONS order), matching the
+ * engine module it plugs into: models (ai), cloud → compute (arch), data
+ * (lime), and delivery — the shaft through every layer — the whole spectrum.
+ */
+export const TOOL_HUES: readonly (Hue | "spectrum")[] = ["ai", "arch", "lime", "spectrum"];
 
 /** DRAFT — the closing CTA band (the sub-line is the live homepage's). */
 export const CLOSING = {
@@ -84,10 +88,10 @@ export const CAPABILITY_HUES: readonly Exclude<Hue, "lime">[] = ["ai", "product"
  * the live `/` still says "3 regions", an unverified claim this page drops.
  */
 export const PLATFORM_LAYERS = [
-  { n: "01", title: "Interface", meta: "Web · mobile · agents" },
-  { n: "02", title: "Models", meta: "Serving · routing · evals" },
-  { n: "03", title: "Compute", meta: "APIs · autoscale · infra" },
-  { n: "04", title: "Data", meta: "Ingest · vector · governance" },
+  { n: "01", title: "Interface", meta: "Web\u00a0· mobile\u00a0· agents" },
+  { n: "02", title: "Models", meta: "Serving\u00a0· routing\u00a0· evals" },
+  { n: "03", title: "Compute", meta: "APIs\u00a0· autoscale\u00a0· infra" },
+  { n: "04", title: "Data", meta: "Ingest\u00a0· vector\u00a0· governance" },
 ] as const;
 
 /** DRAFT — the Platform chapter's copy. */

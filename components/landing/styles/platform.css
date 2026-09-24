@@ -1,99 +1,47 @@
-/* §02 — Platform: the paper curtain with the isometric stack. */
+/* §02 — the stack, on paper: the overview (a FRAME), four stations, the lock. */
 @reference "../../../app/globals.css";
 
-.platform-run {
-  position: relative;
-
-  @variant pin {
-    height: 250svh;
-  }
-}
-/* The nav's "Stack" link lands here. Pinned, that's 110svh into the run —
-   mid-build — instead of the run's top (a still-exploded stack). */
+/* The nav's "Stack" link lands on the overview's hold when pinned: the
+   marker's centre (SCROLL_PLAN: 62svh) on the reading line (46svh). */
 .platform-anchor {
   display: block;
   height: 0;
 
   @variant pin {
-    scroll-margin-top: -110svh;
+    scroll-margin-top: -16svh;
   }
 }
-.platform-frame {
-  padding-block: var(--section-y);
 
-  @variant pin {
-    position: sticky;
-    top: 0;
-    display: flex;
-    align-items: center;
-    height: 100svh;
-    padding-block: 72px 24px;
-
-    /* Short laptop windows: the copy column must still fit under the nav. */
-    @media (height < 50rem) {
-      padding-block: 64px 16px;
-    }
-  }
-}
-.platform-grid {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr);
-  gap: 48px;
-
-  @media (width >= 62.5rem) {
-    grid-template-columns: minmax(0, 4fr) minmax(0, 8fr);
-    align-items: center;
-    gap: 32px;
-  }
-  @media (width >= 75rem) {
-    grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
-  }
-}
 /* Two lines ("Four layers. / One team.") in the copy column at every width. */
 .platform-copy .chapter-title {
   font-size: clamp(40px, 4.4vw, 64px);
 
   @variant pin {
-    font-size: clamp(40px, min(4.4vw, 7svh), 64px);
+    font-size: clamp(36px, min(4.4vw, 7svh), 64px);
   }
 }
-/* Pinned on a short screen, the copy column tightens its rhythm. */
+/* Pinned on a short screen, the overview tightens its rhythm to fit. */
 .platform-copy {
   @variant pin {
     @media (height < 50rem) {
+      .chapter-kicker {
+        margin-bottom: 16px;
+      }
       .chapter-lede {
-        margin-top: 18px;
+        margin-top: 16px;
+        font-size: var(--text-17);
       }
       .platform-layers {
-        margin-top: 22px;
+        margin-top: 20px;
       }
       .platform-layer {
         padding-block: 6px;
-      }
-      .platform-count {
-        margin-top: 10px;
-      }
-    }
-    /* …and tighter still where the column is also narrow (1000–1199px). */
-    @media (width < 75rem) and (height < 40rem) {
-      .chapter-lede {
-        margin-top: 14px;
-        line-height: 1.38;
-      }
-      .platform-layers {
-        margin-top: 16px;
-      }
-      .platform-layer {
-        padding-block: 4px;
-      }
-      .platform-count {
-        margin-top: 8px;
       }
     }
   }
 }
 
-/* Layer legend — real text, lights with its plate. */
+/* Layer legend — real text, an LED per layer in its hue. */
 .platform-layers {
   container-type: inline-size;
   margin: 36px 0 0;
@@ -113,7 +61,6 @@
   font-family: var(--font-mono);
   font-size: var(--text-11);
   color: var(--color-paper-t4);
-  transition: color var(--dur-base) var(--ease-brand);
 }
 .platform-layer-t {
   font-family: var(--font-display);
@@ -138,8 +85,7 @@
   opacity: 1;
   box-shadow: 0 0 0 3px color-mix(in oklch, var(--plate-hue) 20%, transparent);
 }
-/* A narrow copy column (the 4fr track at 1000–1199px, small phones): the
-   meta drops under the title instead of wrapping into a ragged cell. */
+/* A narrow copy column: the meta drops under the title instead of wrapping. */
 @container (width < 340px) {
   .platform-layer {
     grid-template-columns: 28px minmax(0, 1fr) 10px;
@@ -155,164 +101,79 @@
     grid-row: 1 / span 2;
   }
 }
-.platform-count {
-  margin: 18px 0 0;
-  justify-content: space-between;
-}
 
-/* The figure: an SVG stack with HTML labels laid over it (same geometry). */
-.platform-figure {
-  position: relative;
+/* ---------------- Stations ---------------- */
+.station-kicker {
+  color: var(--plate-hue);
 }
-/* Below 1000px the labels become chips and the leaders are hidden, so the
-   figure crops the 1000×760 view to the built stack (x 250–750, y ≈ 90–670)
-   instead of leaving it a small drawing in a mostly empty box. The SVG stays
-   overflow:visible so the exploded plates of the phone settle aren't clipped
-   vertically; the figure clips only the sideways overhang. Capped at 880px
-   (a 440px-wide crop) so a tablet doesn't get a stack taller than the fold;
-   the chip list below keeps the full column. */
-.platform-figure {
-  @media (width < 62.5rem) {
-    overflow-x: clip;
-  }
+.station-kicker .stamp {
+  border-color: color-mix(in oklch, var(--plate-hue) 45%, transparent);
+  color: var(--plate-hue);
 }
-.platform-figure svg {
-  display: block;
-  width: 100%;
-  height: auto;
-  overflow: visible;
-
-  @media (width < 62.5rem) {
-    --svg-w: min(200%, 880px);
-    width: var(--svg-w);
-    margin: calc(var(--svg-w) * -0.09) 0 calc(var(--svg-w) * -0.08) calc((100% - var(--svg-w)) / 2);
-  }
-  @variant pin {
-    max-height: calc(100svh - 120px);
-  }
+.station-title {
+  max-width: 13ch;
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: var(--text-title);
+  font-weight: 500;
+  line-height: 1.02;
+  letter-spacing: -0.03em;
+  color: var(--color-ink);
+  text-wrap: balance;
 }
-.plate-top,
-.plate-left,
-.plate-right {
-  stroke: var(--color-ink);
-  stroke-width: 1.5;
-  stroke-linejoin: round;
-}
-.plate-top {
-  fill: var(--color-paper-2);
-  transition: fill var(--dur-slow) var(--ease-brand);
-}
-.plate-left {
-  fill: #b7b4ab;
-}
-.plate-right {
-  fill: #c5c2b9;
-}
-.plate-inset {
-  fill: none;
-  stroke: var(--color-paper-line);
-  stroke-width: 1.4;
-  stroke-dasharray: 3 6;
-  transition: stroke var(--dur-slow) var(--ease-brand);
-}
-.plate.is-locked .plate-top {
-  fill: color-mix(in oklch, var(--plate-hue) 14%, var(--color-paper-2));
-}
-.plate.is-locked .plate-inset {
-  stroke: var(--plate-hue);
-  stroke-dasharray: none;
-}
-.leader,
-.platform-bus {
-  fill: none;
-  stroke-width: 1.5;
-  stroke-dasharray: 1;
-  stroke-dashoffset: 0;
-}
-.platform-bus {
-  stroke: var(--color-ink);
-}
-
-/* Discipline labels. Phones: a chip list under the stack (lines hidden). */
-.platform-disciplines {
+.station-disciplines {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
-  margin: 24px 0 0;
+  margin: 28px 0 0;
   padding: 0;
   list-style: none;
 }
-.discipline {
+.station-disciplines li {
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 6px 10px;
+  padding: 7px 11px;
   border: 1px solid var(--color-paper-line);
   font-family: var(--font-mono);
   font-size: var(--text-11);
   letter-spacing: 0.1em;
   text-transform: uppercase;
   white-space: nowrap;
-  color: var(--color-paper-t4);
-  transition: color var(--dur-base) var(--ease-brand);
+  color: var(--color-ink);
 }
-.discipline::before {
+.station-disciplines li::before {
   content: "";
   width: 6px;
   height: 6px;
   background: var(--plate-hue);
-  opacity: 0.3;
-  transition: opacity var(--dur-base) var(--ease-brand);
 }
-.discipline.is-lit {
-  color: var(--color-ink);
+/* Static layout: stations are one chapter's paragraphs, not screens. */
+.station {
+  @media (width < 62.5rem) {
+    padding-block: 40px;
+  }
 }
-.discipline.is-lit::before {
-  opacity: 1;
+.station + .station {
+  border-top: 1px solid var(--color-paper-line);
+
+  @variant pin {
+    border-top: 0;
+  }
 }
-.leader {
+
+/* ---------------- Locked ---------------- */
+.locked {
   display: none;
-}
 
-@media (width >= 62.5rem) {
-  .leader {
-    display: inline;
-  }
-  .platform-disciplines {
-    position: absolute;
-    inset: 0;
-    margin: 0;
-  }
-  .discipline {
-    position: absolute;
-    top: var(--y);
-    translate: 0 -50%;
-    padding: 0;
-    border: 0;
-    font-size: 10px;
-    letter-spacing: 0.06em;
-  }
-  .discipline[data-side="left"] {
-    right: calc(100% - var(--x));
-    flex-direction: row-reverse;
-    padding-right: 10px;
-  }
-  .discipline[data-side="right"] {
-    left: var(--x);
-    padding-left: 10px;
+  @variant pin {
+    display: flex;
   }
 }
-
-@media (width >= 75rem) {
-  .discipline {
-    font-size: var(--text-11);
-    letter-spacing: 0.1em;
-  }
-}
-
-@media (forced-colors: active) {
-  .leader,
-  .platform-bus {
-    stroke: CanvasText !important;
-  }
+.locked-readout {
+  justify-content: space-between;
+  max-width: 440px;
+  margin: 0;
+  padding: 14px 0;
+  border-block: 1px solid var(--color-paper-line);
 }

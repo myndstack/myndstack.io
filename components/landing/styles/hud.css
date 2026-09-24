@@ -33,6 +33,29 @@
     display: flex;
   }
 }
+/* Over paper chapters the ruler takes the paper's skin (written by the
+   ruler when the chapter changes, never per frame). */
+.ruler[data-skin="paper"] {
+  border-color: rgb(10 10 11 / 0.12);
+  background: color-mix(in oklch, var(--color-paper) 72%, transparent);
+
+  @supports not (backdrop-filter: blur(1px)) {
+    background: var(--color-paper);
+  }
+  .ruler-label {
+    color: var(--color-paper-t4);
+  }
+  .ruler-tick::before {
+    background: var(--color-paper-t4);
+  }
+  .ruler-tick[aria-current="true"]::before {
+    background: var(--color-lime-deep);
+    box-shadow: none;
+  }
+  .ruler-track::before {
+    background: rgb(10 10 11 / 0.14);
+  }
+}
 .ruler-label {
   margin: 0;
   writing-mode: vertical-rl;

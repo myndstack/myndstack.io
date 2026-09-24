@@ -1,4 +1,4 @@
-/* §01 — hero, copy chip and the dive (run A's flow layer). */
+/* §01 — the hero, its copy chip and the dive: the run's first two blocks. */
 @reference "../../../app/globals.css";
 
 /* ---------------- Hero ---------------- */
@@ -9,6 +9,16 @@
   justify-content: center;
   min-height: 100svh;
   padding-block: 112px 120px;
+
+  /* Phones: room at the foot for the horizon ring (42% of 118vw shows) and
+     its bezel (another ~5%), clear of the copy. */
+  @media (width < 62.5rem) {
+    padding-bottom: calc(118vw * 0.47 + 32px);
+  }
+  @variant pin {
+    min-height: var(--block, 100svh);
+    padding-block: var(--safe-top) calc(var(--safe-bottom) + 48px);
+  }
 }
 .hero-grid {
   position: absolute;
@@ -19,18 +29,10 @@
   -webkit-mask-image: radial-gradient(70% 60% at 30% 45%, #000 20%, transparent 75%);
   mask-image: radial-gradient(70% 60% at 30% 45%, #000 20%, transparent 75%);
 }
-.hero-inner {
+/* Phones: the horizon ring may spill past the hero's foot; the dive covers it. */
+.hero-run {
   position: relative;
-}
-/* A soft ink scrim under the copy, so the particle trails never cost the
-   headline or lede any contrast. */
-.hero-inner::before {
-  content: "";
-  position: absolute;
-  inset: -12% -18% -12% -30%;
-  z-index: -1;
-  pointer-events: none;
-  background: radial-gradient(closest-side, rgb(10 10 11 / 0.82), rgb(10 10 11 / 0.5) 60%, transparent);
+  overflow-x: clip;
 }
 .hero-eyebrow {
   display: flex;
@@ -49,6 +51,17 @@
   max-width: 11.5ch;
   font-family: var(--font-display);
   font-size: var(--text-hero);
+
+  /* Wide screens give the headline columns 1–6 (≈ half the content column):
+     sized so "Architected" and "end to end." each fit a line. Pinned, three
+     lines must also fit the screen with the rest of the copy. */
+  @media (width >= 62.5rem) {
+    max-width: none;
+    font-size: min(calc(9.4vw - 13px), 100px);
+  }
+  @variant pin {
+    font-size: min(calc(9.4vw - 13px), 100px, 11.5svh);
+  }
   font-weight: 500;
   line-height: 0.92;
   letter-spacing: var(--tracking-hero);
@@ -69,10 +82,10 @@
   visibility: hidden;
   pointer-events: none;
 }
-[data-intro="playing"] .hero-decode {
+[data-chapter="core-hero"][data-motion="playing"] .hero-decode {
   visibility: visible;
 }
-[data-intro="playing"] .hero-real {
+[data-chapter="core-hero"][data-motion="playing"] .hero-real {
   color: transparent;
 }
 .hero-lede {
@@ -90,13 +103,14 @@
 }
 .hud--hero {
   position: absolute;
+  z-index: 2;
   left: var(--col-inset);
   right: var(--col-inset);
   bottom: 32px;
 
-  /* Phones: the horizon Core fills the foot of the hero — the HUD would sit
-     on the waveform. It's decorative, so it simply steps aside. */
-  @media (width < 35rem) {
+  /* Below the wide layout the horizon Core fills the foot of the hero — the
+     HUD would sit on it. It's decorative, so it simply steps aside. */
+  @media (width < 62.5rem) {
     display: none;
   }
 }
@@ -158,27 +172,19 @@
   opacity: 1;
 }
 
-/* ---------------- Dive ---------------- */
+/* ---------------- Dive ----------------
+   Pinned: its own 90svh block, the statement on the reading line while the
+   engine tilts back and the paper rises. Static: one short line under the
+   hero (on phones the dive merges into it). */
 .dive {
   position: relative;
-  width: 100%;
-  max-width: var(--col-max);
-  margin-inline: auto;
-  padding: 64px var(--gutter) 120px;
 
-  @variant pin {
-    height: 200svh;
-    padding-top: 0;
+  @media (width < 62.5rem) {
+    padding-block: 48px 72px;
   }
 }
 .dive-statement {
   margin: 0;
-
-  /* Holds mid-screen through the dive until the curtain slides over it. */
-  @variant pin {
-    position: sticky;
-    top: 34svh;
-  }
   max-width: 17ch;
   font-family: var(--font-display);
   font-size: var(--text-title);
