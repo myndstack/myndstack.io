@@ -26,6 +26,7 @@ import Platform from "./chapters/Platform";
 import PricingChapter from "./chapters/PricingChapter";
 import Process from "./chapters/Process";
 import Tools from "./chapters/Tools";
+import EngineSpike from "./engine/EngineSpike";
 import MobileCtaBar from "./MobileCtaBar";
 import ScrollRuler from "./ScrollRuler";
 
@@ -71,6 +72,7 @@ export default function LandingPage({ home, faqs, cases, team, tiers, site, turn
       <div className="landing-grain" aria-hidden="true" />
       <ScrollRuler />
       <MobileCtaBar label={home.hero.ctaPrimary} note={home.hero.eyebrow} />
+      <EngineSpike />
 
       <Hero
         eyebrow={home.hero.eyebrow}
