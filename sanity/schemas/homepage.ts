@@ -1,5 +1,5 @@
 import { defineArrayMember, defineField, defineType } from "sanity";
-import { ANIMATABLE_METRIC_MESSAGE, NUMERIC } from "./shared";
+import { ANIMATABLE_METRIC_MESSAGE, NUMERIC, fits } from "./shared";
 
 /**
  * Singleton for the homepage's ordered content lists and long-form copy.
@@ -68,20 +68,24 @@ export default defineType({
           name: "capability",
           fields: [
             defineField({ name: "n", title: "Number", type: "string", validation: (r) => r.required() }),
-            defineField({ name: "title", type: "string", validation: (r) => r.required() }),
+            defineField({
+              name: "title",
+              type: "string",
+              validation: (r) => [r.required(), r.max(28).warning(fits("Capability titles", 28))],
+            }),
             defineField({
               name: "points",
               type: "array",
-              of: [{ type: "string" }],
+              of: [{ type: "string", validation: (r) => r.max(34).warning(fits("Points", 34)) }],
               validation: (rule) => rule.required().min(1),
             }),
             defineField({
               name: "metric",
               type: "string",
               description: "Counts up on the card.",
-              validation: (rule) => rule.required().regex(NUMERIC, { name: ANIMATABLE_METRIC_MESSAGE }),
+              validation: (rule) => [rule.required().regex(NUMERIC, { name: ANIMATABLE_METRIC_MESSAGE }), rule.max(12).warning(fits("Metrics", 12))],
             }),
-            defineField({ name: "metricLabel", type: "string", validation: (r) => r.required() }),
+            defineField({ name: "metricLabel", type: "string", validation: (r) => [r.required(), r.max(18).warning(fits("Metric labels", 18))] }),
           ],
           preview: { select: { title: "title", subtitle: "metric" } },
         }),

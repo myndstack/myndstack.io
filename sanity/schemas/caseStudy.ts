@@ -1,5 +1,5 @@
 import { defineArrayMember, defineField, defineType } from "sanity";
-import { ANIMATABLE_METRIC_MESSAGE, NUMERIC, orderField } from "./shared";
+import { ANIMATABLE_METRIC_MESSAGE, NUMERIC, fits, orderField } from "./shared";
 
 /** Mirrors `CaseStudy` / `CaseMetric` in lib/cases.ts. */
 export default defineType({
@@ -34,7 +34,7 @@ export default defineType({
       type: "text",
       rows: 2,
       description: "One line, used as the page lede.",
-      validation: (rule) => rule.required(),
+      validation: (rule) => [rule.required(), rule.max(120).warning(fits("Case ledes", 120))],
     }),
     defineField({
       name: "summary",

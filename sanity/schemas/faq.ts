@@ -1,5 +1,5 @@
 import { defineField, defineType } from "sanity";
-import { orderField } from "./shared";
+import { fits, orderField } from "./shared";
 
 /** Mirrors an entry in FAQS (lib/content.ts). */
 export default defineType({
@@ -11,7 +11,7 @@ export default defineType({
       name: "q",
       title: "Question",
       type: "string",
-      validation: (rule) => rule.required(),
+      validation: (rule) => [rule.required(), rule.max(64).warning(fits("Questions", 64))],
     }),
     orderField,
     defineField({
