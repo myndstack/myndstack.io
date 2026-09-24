@@ -61,5 +61,11 @@ A few rules that are easy to violate by accident:
 - **`npm run build` writes to `.next-build`, not `.next`**, so it can run while
   the dev server is up.
 
+- **The landing (`/preview`) has its own section in the README** — read it
+  before touching `components/landing/` or `lib/landing/engine/`. The stage is
+  decoration; words live in scenes; CSS does the motion off data attributes
+  the director writes on change. `Posters.tsx`/`posters.ts` are server-only
+  (a client import ships the drawing generator: `npm run budget` catches it).
+
 Unit tests cover pure logic in `lib/` (`npm test`). Anything needing a real
 viewport goes in `e2e/` (`npm run test:e2e`, against a production build).
