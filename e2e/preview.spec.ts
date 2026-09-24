@@ -1,10 +1,12 @@
 import { expect, test, type Page } from "@playwright/test";
 
-import { CAPABILITY_HUES, PLATFORM_LAYERS } from "@/lib/landing/chapters";
+import { INTEGRATIONS } from "@/lib/content";
+import { CAPABILITY_HUES, CAPABILITY_ROUTES, PLATFORM_LAYERS } from "@/lib/landing/chapters";
 import { BEATS } from "@/lib/landing/engine/beats";
 import { DRAW_POSTERS } from "@/lib/landing/engine/posters";
+import { SPRITE_URL } from "@/lib/landing/engine/sprite";
 
-import { READING, seriousViolations, toHold } from "./helpers";
+import { READING, STAGE, introDone, seriousViolations, toHold } from "./helpers";
 
 /**
  * The landing redesign at /preview, in poster mode: under automation the live
@@ -15,9 +17,8 @@ import { READING, seriousViolations, toHold } from "./helpers";
 const PREVIEW = "/preview";
 const DESKTOP = { width: 1440, height: 900 };
 const PHONE = { width: 390, height: 844 };
-const STAGE = "[data-engine-stage]";
-const HERO = "core-hero";
-const STAGE_BEATS = BEATS.filter((b) => b.host === "stage");
+// Every beat with a hold takes the page-wide stage (waypoints pass through).
+const STAGE_BEATS = BEATS.filter((b) => b.hold > 0);
 const STATIONS = PLATFORM_LAYERS.map((l) => `st-${l.title.toLowerCase()}`);
 
 async function openPinned(page: Page) {
@@ -117,23 +118,29 @@ test.describe("one scroll loop", () => {
 });
 
 test.describe("hero", () => {
-  test("the headline is real text from the first paint, and the intro plays once", async ({ page }) => {
+  test("the headline is real text from the first paint; the ring draws once and its bore ships the stack", async ({ page }) => {
     await page.setViewportSize(DESKTOP);
     await page.goto(PREVIEW, { waitUntil: "domcontentloaded" });
     await expect(page.locator("h1")).toContainText("Architected and built");
     await expect(page.locator("h1")).toContainText("end to end.");
-    const hero = page.locator(`[data-chapter="${HERO}"]`);
-    await expect(hero).toHaveAttribute("data-motion", "done", { timeout: 8000 });
-    // The stage's ring drew itself: every arc on.
+    await introDone(page);
+    await expect(page.locator(".beat--hero")).toHaveAttribute("data-in", "");
+    // The ring drew itself: every arc on.
     const offsets = await page
-      .locator(`${STAGE} [data-poster="face-ring"] .core-arc`)
+      .locator(`${STAGE} [data-sheet="a"] [data-poster="face"] .core-arc`)
       .evaluateAll((els) => els.map((el) => parseFloat(getComputedStyle(el).strokeDashoffset)));
     expect(offsets).toHaveLength(5);
     for (const o of offsets) expect(o).toBeCloseTo(0, 2);
-    // Away and back: it stays played.
+    // The bore is open onto the chamber, and the terminal has printed every layer.
+    await expect.poll(() => opacity(page, `${STAGE} .ship-console`)).toBe(1);
+    await expect
+      .poll(() => page.locator(`${STAGE} .ship-console .sc-line`).evaluateAll((els) => els.filter((el) => getComputedStyle(el).clipPath.includes("100%")).length))
+      .toBe(0);
+    await expect(page.locator(`${STAGE} .ship-console .sc-key`)).toHaveText(PLATFORM_LAYERS.map((l) => l.title.toLowerCase()));
+    // Away and back: the intro doesn't replay.
     await toHold(page, "stack");
     await toHold(page, "hero");
-    await expect(hero).toHaveAttribute("data-motion", "done");
+    expect(await page.locator(STAGE).getAttribute("data-intro")).toBeNull();
   });
 
   test("the stage is decoration: aria-hidden, inert, nothing focusable, no words", async ({ page }) => {
@@ -146,9 +153,10 @@ test.describe("hero", () => {
   });
 
   test("the copy chip copies the studio email", async ({ browser }) => {
-    const context = await browser.newContext({ permissions: ["clipboard-read", "clipboard-write"] });
+    const context = await browser.newContext({ permissions: ["clipboard-read", "clipboard-write"], viewport: DESKTOP });
     const page = await context.newPage();
     await page.goto(PREVIEW);
+    await introDone(page);
     const chip = page.locator(".copy-chip");
     const email = (await chip.locator("a").textContent())?.trim() ?? "";
     expect(email).toMatch(/@/);
@@ -177,50 +185,57 @@ test.describe("the stage (pinned)", () => {
     expect(clipped).toBeNull();
   });
 
-  test("every stage beat holds its own poster", async ({ page }) => {
+  test("every stage beat holds its own poster, on its own skin", async ({ page }) => {
     test.slow();
     await openPinned(page);
     expect(STAGE_BEATS.length).toBeGreaterThanOrEqual(20);
     for (const beat of STAGE_BEATS) {
-      await toHold(page, beat.marker, beat.id);
-      const shown = await page
-        .locator(`${STAGE} [data-poster][data-on]`)
-        .evaluateAll((els) => [...new Set(els.map((el) => (el as HTMLElement).dataset.poster))]);
-      const expected = beat.fit === "circle" ? (beat.box === "ringTop" ? "face-top" : "face-ring") : beat.id;
-      expect(shown, beat.id).toEqual([expected]);
+      await toHold(page, beat.id, beat.id);
+      // (Polled: the studio's switch flips itself once as its words come in.)
+      await expect
+        .poll(() =>
+          page.locator(`${STAGE} [data-sheet="a"] [data-poster][data-on]`).evaluateAll((els) => els.map((el) => (el as HTMLElement).dataset.poster)),
+        )
+        .toEqual([beat.fit === "circle" ? "face" : beat.id]);
+      await expect(page.locator(`${STAGE} [data-sheet="a"]`), beat.id).toHaveAttribute("data-skin", beat.skin);
     }
   });
 
-  test("at the paper's edge the drawing splits exactly where the page does", async ({ page }) => {
-    await openPinned(page);
-    // Halfway between the dive and the stack, the paper's top edge is on screen.
-    await toHold(page, "dive");
+  test("mid-scan, the paper starts exactly at the front's line", async ({ page }) => {
+    await page.setViewportSize(DESKTOP);
+    // ?debug exposes the director's timeline: scroll to the first scan's middle.
+    await page.goto(`${PREVIEW}?debug`);
+    await expect(page.locator("html")).toHaveAttribute("data-engine", "poster");
     const y = await page.evaluate(() => {
-      const platform = document.getElementById("platform")!;
-      return platform.getBoundingClientRect().top + window.scrollY - window.innerHeight * 0.55;
+      const d = (window as unknown as { __msDirector?: { layout: { fronts: { kind: string; y: number }[] } | null } }).__msDirector;
+      return d?.layout?.fronts.find((f) => f.kind === "scan")?.y ?? null;
     });
-    await page.evaluate((top) => window.scrollTo({ top, behavior: "instant" }), y);
-    await expect
-      .poll(() =>
-        page.evaluate((sel) => {
-          const edge = document.getElementById("platform")!.getBoundingClientRect().top;
-          const pt = parseFloat(getComputedStyle(document.querySelector(sel)!).getPropertyValue("--pt"));
-          return Math.abs(pt - edge);
-        }, STAGE),
-      )
-      .toBeLessThanOrEqual(1);
+    expect(y).not.toBeNull();
+    await page.evaluate((top) => window.scrollTo({ top, behavior: "instant" }), y as number);
+    await expect(page.locator(STAGE)).toHaveAttribute("data-front", "scan");
+    const { line, clip } = await page.evaluate((sel) => {
+      const stage = document.querySelector<HTMLElement>(sel)!;
+      const b = stage.querySelector<HTMLElement>('[data-sheet="b"]')!;
+      return {
+        line: parseFloat(getComputedStyle(stage).getPropertyValue("--line")),
+        clip: parseFloat(/inset\(([\d.]+)px/.exec(b.style.clipPath)?.[1] ?? "NaN"),
+      };
+    }, STAGE);
+    expect(line).toBeGreaterThan(0);
+    expect(line).toBeLessThan(DESKTOP.height);
+    expect(Math.abs(line - clip)).toBeLessThanOrEqual(0.5);
+    await expect(page.locator(`${STAGE} [data-sheet="b"]`)).toHaveAttribute("data-skin", "drafting");
   });
 
   test("settled inside a hold, scrolling writes nothing to the page", async ({ page }) => {
     await openPinned(page);
-    // The intro (time-based, once) must be over: it writes by design.
-    await expect(page.locator(`[data-chapter="${HERO}"]`)).toHaveAttribute("data-motion", "done", { timeout: 8000 });
+    await introDone(page);
     await toHold(page, STATIONS[1]);
     await page.waitForTimeout(400);
     const mutations = await page.evaluate(async () => {
-      let count = 0;
+      const seen: string[] = [];
       const mo = new MutationObserver((records) => {
-        count += records.filter((r) => !(r.target as Element).closest?.("[data-live]")).length;
+        for (const r of records) seen.push(`${(r.target as Element).className || r.target.nodeName} ${r.attributeName ?? r.type}`);
       });
       mo.observe(document.querySelector(".landing")!, { attributes: true, childList: true, subtree: true, characterData: true });
       for (let i = 0; i < 8; i++) {
@@ -228,15 +243,15 @@ test.describe("the stage (pinned)", () => {
         await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)));
       }
       mo.disconnect();
-      return count;
+      return seen;
     });
-    expect(mutations).toBe(0);
+    expect(mutations).toEqual([]);
   });
 
   test("beats change paint, never layout", async ({ page }) => {
     await openPinned(page);
     const heights = new Set<number>();
-    for (const id of ["hero", "stack", STATIONS[3], "cap-1", "work", "build-2", "studio"]) {
+    for (const id of ["hero", "stack", STATIONS[3], "cap-1", "work", "build-2", "studio-contrast"]) {
       await toHold(page, id);
       heights.add(await page.evaluate(() => document.documentElement.scrollHeight));
     }
@@ -274,14 +289,23 @@ test.describe("the stack (paper)", () => {
     await expect(page.locator(STAGE)).toHaveAttribute("data-labels", "stack");
   });
 
-  test("each station pulls out its own layer, annotated", async ({ page }) => {
+  test("each station pulls out its own layer, its software beside it, its manifest line lit", async ({ page }) => {
     await openPinned(page);
-    for (const id of STATIONS) {
+    for (const [i, id] of STATIONS.entries()) {
       await toHold(page, id);
       await expect(page.locator(STAGE)).toHaveAttribute("data-labels", "annot");
-      await expect(page.locator(`${STAGE} .engine-tone--paper [data-poster="${id}"]`)).toHaveAttribute("data-on", "");
+      await expect(page.locator(`${STAGE} [data-sheet="a"] [data-poster="${id}"]`)).toHaveAttribute("data-on", "");
+      const card = page.locator(`.beat--${id} .layer-card`);
+      await expect(card).toHaveAttribute("data-layer", String(i));
+      await expect.poll(() => card.evaluate((el) => parseFloat(getComputedStyle(el).opacity))).toBe(1);
+      const lit = await page
+        .locator(`.furniture--stack [data-part="${id}"]`)
+        .first()
+        .evaluate((el) => getComputedStyle(el).backgroundImage);
+      expect(lit, id).not.toBe("none");
     }
     await toHold(page, "locked");
+    await expect.poll(() => opacity(page, ".furniture--stack .part-state")).toBe(1);
   });
 
   test("paper passes axe at a station", async ({ page }) => {
@@ -293,21 +317,20 @@ test.describe("the stack (paper)", () => {
 });
 
 test.describe("capabilities", () => {
-  test("each chapter lights its own hue, and the finale completes the spectrum", async ({ page }) => {
+  test("each capability turns to 12, takes its hue and builds its demo; the finale completes the set", async ({ page }) => {
     await openPinned(page);
-    const caps = page.locator("#capabilities");
+    const stage = page.locator(STAGE);
     for (let i = 0; i < CAPABILITY_HUES.length; i++) {
-      const hue = CAPABILITY_HUES[i];
       await toHold(page, `cap-${i}`);
-      await expect(caps).toHaveAttribute("data-cap-active", String(i));
-      await expect(caps).toHaveAttribute("data-hue", hue);
-      await expect.poll(() => opacity(page, `${STAGE} .engine-ringtop .core-arc[data-arc="${hue}"]`)).toBeGreaterThan(0.9);
-      await expect.poll(() => opacity(page, `${STAGE} [data-panel="${i}"]`)).toBeGreaterThan(0.9);
+      await expect(stage).toHaveAttribute("data-cap", String(i));
+      await expect(stage).toHaveAttribute("data-accent", CAPABILITY_HUES[i]);
       await expect.poll(() => opacity(page, `${STAGE} [data-demo="${i}"]`)).toBeGreaterThan(0.9);
+      await expect(page.locator(`.beat--cap-${i} .cap-detent`)).toContainText(CAPABILITY_ROUTES[i]);
+      await expect(page.locator(`.beat--cap-${i} .spec-panel`)).toBeVisible();
     }
     await toHold(page, "finale");
-    await expect(caps).toHaveAttribute("data-complete", "true");
-    await expect(caps).toHaveAttribute("data-hue", "spectrum");
+    await expect(stage).toHaveAttribute("data-complete", "");
+    await expect.poll(() => opacity(page, `${STAGE} [data-demo="wave"]`)).toBeGreaterThan(0.9);
   });
 
   test("every capability is in the flow", async ({ page }) => {
@@ -315,7 +338,7 @@ test.describe("capabilities", () => {
     await expect(page.locator("#capabilities h3")).toHaveCount(CAPABILITY_HUES.length);
   });
 
-  test("axe passes mid-chapter on graphite", async ({ page }) => {
+  test("axe passes mid-chapter", async ({ page }) => {
     await openPinned(page);
     await toHold(page, "cap-1");
     const found = await seriousViolations(page, "#capabilities");
@@ -324,63 +347,55 @@ test.describe("capabilities", () => {
 });
 
 test.describe("work, process, tools", () => {
-  test("the case metrics settle on exactly the CMS values, and the case links", async ({ page }) => {
-    await page.setViewportSize(DESKTOP);
-    await page.goto(PREVIEW);
-    await page.locator("#work-cases").scrollIntoViewIfNeeded();
-    await expect(page.locator('[data-chapter="cases"]')).toHaveAttribute("data-motion", "done", { timeout: 10_000 });
-    const shown = await page
-      .locator("#work-cases [data-countup]")
-      .evaluateAll((els) => els.map((el) => [el.getAttribute("data-countup"), el.textContent]));
-    expect(shown.length).toBeGreaterThan(0);
-    for (const [target, text] of shown) expect(text).toBe(target);
+  test("the case shows its CMS metrics and stack, and links to itself", async ({ page }) => {
+    await openPinned(page);
+    await toHold(page, "work");
+    const metrics = await page.locator("#work-cases .metrics dd").allTextContents();
+    expect(metrics.length).toBeGreaterThan(0);
+    for (const m of metrics) expect(m.trim()).not.toBe("");
+    await expect(page.locator("#work-cases .case-stack li").first()).toBeVisible();
     await expect(page.locator('#work-cases a[href^="/work/"]')).toBeVisible();
   });
 
-  test("process: each step lights as the engine is built", async ({ page }) => {
+  test("process: each step opens onto its artifact as the engine is built", async ({ page }) => {
     await openPinned(page);
-    const process = page.locator("#process");
-    let fill = -1;
+    const steps = page.locator(".furniture--process:not(.furniture--twin) .step");
     for (let n = 1; n <= 4; n++) {
       await toHold(page, `build-${n}`);
-      await expect(process).toHaveAttribute("data-step", String(n));
-      await expect
-        .poll(() => page.locator(`#process .step[data-n="${n}"] .step-n`).evaluate((el) => getComputedStyle(el).color))
-        .toBe("rgb(201, 242, 77)");
-      await page.waitForTimeout(650);
-      const next = await page
-        .locator("#process .steps")
-        .evaluate((el) => new DOMMatrixReadOnly(getComputedStyle(el, "::after").transform).d);
-      expect(next).toBeGreaterThan(fill);
-      fill = next;
+      for (let k = 1; k <= 4; k++) {
+        const open = steps.nth(k - 1).locator(".step-more");
+        await expect.poll(() => open.evaluate((el) => parseFloat(getComputedStyle(el).opacity)), `build-${n}, step ${k}`).toBe(k === n ? 1 : 0);
+      }
+      await expect(steps.nth(n - 1).locator(".delivery")).toHaveAttribute("data-page", String(n - 1));
     }
-    await toHold(page, "tools");
-    await expect(process).toHaveAttribute("data-step", "4");
   });
 
-  test("tools: every vendor is named in text, on paper, beside the elevation", async ({ page }) => {
+  test("tools: every vendor is named in text beside the elevation", async ({ page }) => {
     await openPinned(page);
-    await expect(page.locator("#integrations .rack-group")).toHaveCount(4);
-    await expect(page.locator("#integrations .rack-name")).toHaveCount(21);
-    await expect(page.locator("#integrations")).toHaveAttribute("data-surface", "paper");
+    await expect(page.locator("#integrations .rack-row")).toHaveCount(INTEGRATIONS.length);
+    const named = await page.locator("#integrations .rack-item").allTextContents();
+    expect(named.map((t) => t.trim())).toEqual(INTEGRATIONS.flatMap((g) => g.items));
     await toHold(page, "tools");
     await expect(page.locator(STAGE)).toHaveAttribute("data-labels", "ports");
   });
 });
 
 test.describe("studio, pricing, faq, contact", () => {
-  test("the founder panel shows only real people; the switch moves the emphasis and the engine", async ({ page }) => {
+  test("the founder panel shows only real people; the diff's switch moves the emphasis and the engine", async ({ page }) => {
     await openPinned(page);
     await expect(page.locator("#team")).not.toContainText("Adding soon");
-    await expect(page.locator("#team .founder-name").first()).toBeVisible();
-    await toHold(page, "studio");
+    await toHold(page, "studio-founder");
+    await expect(page.locator("#team .id-card h3").first()).toBeVisible();
+    await toHold(page, "studio-contrast");
     const sw = page.getByRole("switch", { name: "Show how Myndstack does it" });
+    // The first read flips it once, agency → Myndstack, on its own: let that finish.
+    await page.waitForTimeout(1600);
     await expect(sw).toHaveAttribute("aria-checked", "true");
     await sw.click();
     await expect(sw).toHaveAttribute("aria-checked", "false");
     await expect(page.locator(".contrast")).toHaveAttribute("data-state", "agency");
     await expect(page.locator(STAGE)).toHaveAttribute("data-studio", "agency");
-    await expect(page.locator(`${STAGE} .engine-tone--dark [data-poster="studio-agency"]`)).toHaveAttribute("data-on", "");
+    await expect(page.locator(`${STAGE} [data-sheet="a"] [data-poster="studio-agency"]`)).toHaveAttribute("data-on", "");
     // Both answers stay readable either way.
     await expect(page.locator(".contrast-table td")).toHaveCount(10);
   });
@@ -390,11 +405,9 @@ test.describe("studio, pricing, faq, contact", () => {
     await expect(page.locator('#pricing a[href^="/pricing/"]').first()).toBeVisible();
     await expect(page.locator('#pricing a[href="#contact"]').first()).toBeAttached();
     await expect(page.locator("#pricing select")).toHaveCount(1);
-    const dock = page.locator('[data-host="dock-pricing"]');
-    await expect(dock).toHaveAttribute("data-focus", "0");
+    await page.locator("#pricing .pricing-card").nth(1).scrollIntoViewIfNeeded();
     await page.locator("#pricing .pricing-card").nth(1).hover();
-    await expect(dock).toHaveAttribute("data-focus", "1");
-    await expect.poll(() => opacity(page, '[data-host="dock-pricing"] .core-mini-arc[data-arc="product"]')).toBe(1);
+    await expect(page.locator(".pricing-dial")).toHaveAttribute("data-coverage", "1");
   });
 
   test("faq is a working accordion, and its dial points at the open question", async ({ page }) => {
@@ -404,7 +417,7 @@ test.describe("studio, pricing, faq, contact", () => {
     await buttons.nth(1).click();
     await expect(buttons.nth(1)).toHaveAttribute("aria-expanded", "true");
     await expect(buttons.first()).toHaveAttribute("aria-expanded", "false");
-    await expect(page.locator('[data-host="dock-faq"]')).toHaveAttribute("data-open", "1");
+    await expect(page.locator(".faq-dial")).toHaveAttribute("data-open", "1");
   });
 
   test("contact: the form is server-rendered; no tabs without a Cal link", async ({ page }) => {
@@ -413,7 +426,7 @@ test.describe("studio, pricing, faq, contact", () => {
     await expect(page.locator('#contact [role="tablist"]')).toHaveCount(0);
   });
 
-  test("no element id is duplicated, and every drawing is defined once", async ({ page }) => {
+  test("no element id is duplicated, and every drawing is defined once, in the cached sprite", async ({ page, request }) => {
     await page.goto(PREVIEW);
     const dupes = await page.evaluate(() => {
       const seen = new Map<string, number>();
@@ -421,26 +434,48 @@ test.describe("studio, pricing, faq, contact", () => {
       return [...seen].filter(([, n]) => n > 1).map(([id]) => id);
     });
     expect(dupes).toEqual([]);
-    await expect(page.locator(".engine-sprite symbol")).toHaveCount(DRAW_POSTERS.length);
-    const dangling = await page.locator("use").evaluateAll((uses) =>
-      uses.map((u) => u.getAttribute("href") ?? "").filter((href) => !document.querySelector(href)),
+    // The drawings aren't in the page: they're one static file, cached for good.
+    await expect(page.locator(".landing symbol[id^='ep-']")).toHaveCount(0);
+    const uses = await page.locator("use").evaluateAll((els) =>
+      els.map((u) => {
+        const href = u.getAttribute("href") ?? "";
+        return { href, local: href.startsWith("#"), found: href.startsWith("#") && !!document.querySelector(href) };
+      }),
     );
-    expect(dangling).toEqual([]);
+    expect(uses.filter((u) => u.local && !u.found).map((u) => u.href)).toEqual([]);
+    const external = uses.filter((u) => !u.local).map((u) => u.href);
+    expect([...new Set(external.map((h) => h.split("#")[0]))]).toEqual([SPRITE_URL]);
+    const file = await request.get(SPRITE_URL);
+    expect(file.headers()["content-type"]).toContain("image/svg+xml");
+    expect(file.headers()["cache-control"]).toContain("immutable");
+    const ids = new Set([...(await file.text()).matchAll(/<symbol id="([^"]+)"/g)].map((m) => m[1]));
+    expect(ids.size).toBe(DRAW_POSTERS.length);
+    expect(external.filter((h) => !ids.has(h.split("#")[1]))).toEqual([]);
   });
 });
 
-test.describe("chrome: ruler and mobile bar", () => {
-  test("the ruler follows the page, takes the paper's skin, and its ticks navigate + move focus", async ({ page }) => {
+test.describe("chrome: ruler, title block, mobile bar", () => {
+  test("the ruler follows the page, takes the skin under it, and its zones navigate + move focus", async ({ page }) => {
     await openPinned(page);
     const ruler = page.getByRole("navigation", { name: "Chapters" });
     await expect(ruler).toBeVisible();
     await toHold(page, "stack");
-    await expect(ruler).toHaveAttribute("data-skin", "paper");
+    await expect(ruler).toHaveAttribute("data-skin", "drafting");
     await ruler.getByRole("button", { name: "Chapter 08: Pricing" }).click();
     await expect(page.locator("#pricing")).toBeFocused();
     await expect.poll(() => page.evaluate(() => document.getElementById("pricing")!.getBoundingClientRect().top)).toBeLessThan(120);
-    await expect(ruler.locator('[aria-current="true"]')).toHaveAttribute("data-id", "pricing");
-    await expect(ruler).toHaveAttribute("data-skin", "ink");
+    await expect(ruler.locator(".zr-zone[data-current]")).toHaveAttribute("data-id", "pricing");
+  });
+
+  test("the title block names the section and the stage's state, and steps aside for the sheets", async ({ page }) => {
+    await openPinned(page);
+    const title = page.locator(".title-block");
+    await toHold(page, STATIONS[1]);
+    await expect(title.locator("[data-tb-sheet]")).toHaveText("02/10");
+    await expect(title.locator("[data-tb-name]")).toHaveText("Stack");
+    await expect(title.locator("[data-tb-read]")).toHaveText(/Layer 02\/04/i);
+    await page.evaluate(() => document.getElementById("pricing")!.scrollIntoView({ behavior: "instant", block: "center" }));
+    await expect(title).toHaveAttribute("data-covered", "");
   });
 
   test("phones: the CTA bar appears after the hero and steps aside over pricing", async ({ page }) => {
@@ -452,6 +487,6 @@ test.describe("chrome: ruler and mobile bar", () => {
     await expect(bar).toHaveClass(/is-shown/);
     await page.evaluate(() => document.getElementById("pricing")!.scrollIntoView({ behavior: "instant", block: "center" }));
     await expect(bar).not.toHaveClass(/is-shown/);
-    await expect(page.locator(".ruler")).toBeHidden();
+    await expect(page.locator(".zone-ruler")).toBeHidden();
   });
 });

@@ -1,0 +1,341 @@
+/* ============================================================
+   The flowing sheets — pricing and the FAQ on paper, contact on metal — and
+   the shared components they reuse (PricingCards, the Enterprise band, the
+   comparison, the currency picker, the contact form). Those components are
+   untouched: they colour themselves through the site's --color-* tokens, so
+   a paper sheet remaps the tokens in its own scope, plus a few targeted
+   fixes. Nothing here can reach "/".
+   ============================================================ */
+@reference "../../../app/globals.css";
+
+/* The site's dark-theme tokens, remapped onto paper inside a drafting sheet. */
+.sheet[data-skin="drafting"] {
+  --color-t1: #0a0a0b;
+  --color-t2: #2a2a2f;
+  --color-t3: #3d3d42;
+  --color-t4: #4a4b52;
+  --color-t5: #55565d;
+  --color-t6: #6b6b73;
+  --color-t7: rgb(10 10 11 / 0.3);
+  --color-t8: rgb(10 10 11 / 0.2);
+  --color-surface: #e4e2dc;
+  --color-surface-3: #eceae5;
+  --color-line: rgb(10 10 11 / 0.14);
+  --color-line-3: rgb(10 10 11 / 0.32);
+  --edge-lip: inset 0 1px 0 rgb(255 255 255 / 0.5);
+  --shadow-lift: 0 10px 24px rgb(10 10 11 / 0.1);
+  --shadow-float: 0 14px 34px rgb(10 10 11 / 0.12);
+  --shadow-panel: 0 16px 38px rgb(10 10 11 / 0.14);
+}
+.sheet[data-skin="drafting"] .text-lime {
+  color: var(--color-lime-deep);
+}
+.sheet[data-skin="drafting"] .btn-outline {
+  background: transparent;
+  color: var(--skin-text1);
+  border: 1px solid var(--skin-rule);
+}
+.sheet[data-skin="drafting"] .btn-outline:hover {
+  background: var(--skin-raised);
+  color: var(--skin-text1);
+  border-color: var(--skin-text1);
+}
+/* The shared reveal is the landing's own business here: always shown. */
+.landing .reveal {
+  opacity: 1 !important;
+  transform: none !important;
+}
+
+/* ---------------- §08 Pricing: a quotation sheet ---------------- */
+.pricing-head {
+  align-items: end;
+  margin-bottom: 56px;
+}
+.pricing-copy {
+  @media (width >= 62.5rem) {
+    grid-column: 1 / span 7;
+  }
+}
+.pricing-copy .t-lede {
+  margin-top: 24px;
+}
+.pricing-dial {
+  display: none;
+
+  @media (width >= 62.5rem) {
+    display: grid;
+    justify-items: center;
+    gap: 12px;
+    grid-column: 10 / span 3;
+  }
+}
+.pricing-dial .engine-face {
+  position: relative;
+  width: 220px;
+  height: 220px;
+}
+.pricing-dial-label {
+  margin: 0;
+  color: var(--skin-mute);
+}
+/* Coverage: Discovery lights the lime arc; Build adds all four at 60%;
+   Studio lights everything; Enterprise also lights the bezel. */
+.pricing-dial .core-mini-arc {
+  opacity: 0.18;
+  transition: opacity 600ms var(--ease-out-expo);
+}
+.pricing-dial .core-mini-arc[data-arc="lime"],
+.pricing-dial[data-coverage="2"] .core-mini-arc,
+.pricing-dial[data-coverage="3"] .core-mini-arc {
+  opacity: 1;
+}
+.pricing-dial[data-coverage="1"] .core-mini-arc:not([data-arc="lime"]) {
+  opacity: 0.6;
+}
+.pricing-dial[data-coverage="3"] .engine-bezel-edge {
+  stroke: var(--color-lime-deep);
+  stroke-width: 3;
+}
+.pricing-body {
+  grid-column: 1 / -1;
+}
+.pricing-note {
+  margin-top: 32px;
+}
+/* The cards: surface, hairline, square corners; prices at 500; squares, not ▸. */
+.sheet--pricing .pricing-card {
+  border-radius: 0;
+  background: var(--skin-card);
+  border: 1px solid var(--skin-line);
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.5);
+}
+.sheet--pricing .pricing-card--featured {
+  background: var(--skin-raised);
+  border-color: var(--skin-text1);
+  box-shadow: 0 16px 38px rgb(10 10 11 / 0.14);
+}
+.sheet--pricing .pricing-card .font-bold {
+  font-weight: 500;
+}
+.sheet--pricing .pricing-card li > span[aria-hidden="true"] {
+  flex: none;
+  width: 6px;
+  height: 6px;
+  margin-top: 0.6em;
+  font-size: 0;
+  background: var(--color-lime-deep);
+}
+.sheet--pricing .pricing-card .bg-lime {
+  background: var(--color-ink);
+  color: var(--color-lime);
+}
+.sheet--pricing .pricing-cta {
+  border-radius: 0;
+  background: transparent;
+  color: var(--skin-text1);
+  border: 1px solid var(--skin-rule);
+}
+.sheet--pricing .pricing-card--featured .pricing-cta,
+.sheet--pricing .pricing-card:hover .pricing-cta,
+.sheet--pricing .pricing-card:focus-within .pricing-cta {
+  background: var(--color-ink);
+  color: var(--color-lime);
+  border-color: var(--color-ink);
+}
+
+/* ---------------- §09 FAQ: notes ---------------- */
+.faq-grid {
+  align-items: start;
+}
+.faq-head {
+  @media (width >= 62.5rem) {
+    grid-column: 1 / span 4;
+    position: sticky;
+    top: 120px;
+  }
+}
+.faq-dial {
+  display: none;
+  position: relative;
+  width: 160px;
+  height: 160px;
+  margin-top: 40px;
+
+  @media (width >= 62.5rem) {
+    display: block;
+  }
+}
+.faq-dial .engine-face {
+  position: absolute;
+  inset: 0;
+}
+.faq-dial .core-mini-arc {
+  opacity: 0.4;
+}
+.faq-playhead {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  fill: var(--skin-text1);
+  rotate: 0deg;
+  transition: rotate 500ms var(--ease-out-expo);
+}
+.faq-dial[data-open="1"] .faq-playhead {
+  rotate: 60deg;
+}
+.faq-dial[data-open="2"] .faq-playhead {
+  rotate: 120deg;
+}
+.faq-dial[data-open="3"] .faq-playhead {
+  rotate: 180deg;
+}
+.faq-dial[data-open="4"] .faq-playhead {
+  rotate: 240deg;
+}
+.faq-dial[data-open="5"] .faq-playhead {
+  rotate: 300deg;
+}
+.faq-list {
+  margin: 40px 0 0;
+  padding: 0;
+  list-style: none;
+  border-top: 1px solid var(--skin-rule);
+
+  @media (width >= 62.5rem) {
+    grid-column: 6 / span 7;
+    margin-top: 0;
+  }
+}
+.faq-item {
+  border-bottom: 1px solid var(--skin-line);
+}
+.faq-q {
+  margin: 0;
+}
+.faq-q button {
+  display: grid;
+  grid-template-columns: 32px minmax(0, 1fr) 20px;
+  align-items: center;
+  gap: 16px;
+  width: 100%;
+  min-height: 64px;
+  padding: 16px 0;
+  border: 0;
+  background: none;
+  text-align: left;
+  color: var(--skin-text1);
+}
+.faq-n {
+  color: var(--skin-mute);
+}
+.faq-item[data-open="true"] .faq-n {
+  color: var(--accent);
+}
+/* Square plus / minus. */
+.faq-icon {
+  position: relative;
+  width: 14px;
+  height: 14px;
+}
+.faq-icon::before,
+.faq-icon::after {
+  content: "";
+  position: absolute;
+  inset: 6px 0;
+  height: 2px;
+  background: currentColor;
+  transition: rotate var(--dur-base) var(--ease-brand);
+}
+.faq-icon::after {
+  rotate: 90deg;
+}
+.faq-item[data-open="true"] .faq-icon::after {
+  rotate: 0deg;
+}
+.faq-a {
+  max-width: 62ch;
+  padding: 0 36px 24px 48px;
+}
+
+/* ---------------- §10 Contact ---------------- */
+.contact-grid {
+  align-items: start;
+}
+.contact-copy {
+  @media (width >= 62.5rem) {
+    grid-column: 1 / span 5;
+  }
+}
+.contact-copy .t-lede {
+  margin-top: 24px;
+}
+.contact-facts {
+  display: grid;
+  gap: 16px;
+  margin: 40px 0 0;
+  padding-top: 24px;
+  border-top: 1px solid var(--skin-rule);
+}
+.contact-facts dd {
+  margin: 6px 0 0;
+  font-size: 15px;
+}
+.contact-panel {
+  margin-top: 48px;
+
+  @media (width >= 62.5rem) {
+    grid-column: 7 / span 6;
+    margin-top: 0;
+  }
+}
+.contact-tabs {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 24px;
+  border-bottom: 1px solid var(--skin-line);
+}
+.contact-tab {
+  min-height: 44px;
+  padding: 0 16px;
+  border: 0;
+  border-bottom: 2px solid transparent;
+  background: none;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--skin-mute);
+}
+.contact-tab[aria-selected="true"] {
+  color: var(--skin-text1);
+  border-bottom-color: var(--accent);
+}
+.contact-cal-note {
+  font-size: 13px;
+  color: var(--skin-text2);
+}
+
+/* The small dials on paper: ink ticks, the deep hues. */
+.sheet[data-skin="drafting"] .core-mini-tick {
+  stroke: rgb(10 10 11 / 0.3);
+}
+.sheet[data-skin="drafting"] .core-mini-tick.is-major {
+  stroke: rgb(10 10 11 / 0.6);
+}
+.sheet[data-skin="drafting"] .core-mini-arc[data-arc="lime"] {
+  stroke: var(--color-lime-deep) !important;
+}
+.sheet[data-skin="drafting"] .core-mini-arc[data-arc="ai"] {
+  stroke: var(--color-spec-ai-deep) !important;
+}
+.sheet[data-skin="drafting"] .core-mini-arc[data-arc="product"] {
+  stroke: var(--color-spec-product-deep) !important;
+}
+.sheet[data-skin="drafting"] .core-mini-arc[data-arc="design"] {
+  stroke: var(--color-spec-design-deep) !important;
+}
+.sheet[data-skin="drafting"] .core-mini-arc[data-arc="arch"] {
+  stroke: var(--color-spec-arch-deep) !important;
+}

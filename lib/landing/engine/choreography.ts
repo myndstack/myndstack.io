@@ -12,31 +12,38 @@
  * - Only the page scroll is smoothed (by the director); poses are sampled from
  *   it, so the object always stays on its authored path.
  *
- * The beat table and SCROLL_PLAN (the designed page) live in beats.ts; the
- * tests check the table against the plan — speed limits, continuity, holds.
+ * The beat table lives in beats.ts, the page it implies in scenes.ts; the
+ * tests check the table — speed limits, continuity, holds.
  */
-import { BASE, BEATS } from "./beats";
+import { BEATS } from "./beats";
 import { bezier, linear, monotoneHermite } from "./ease";
-import {
-  CH,
-  POSE_LEN,
-  type Beat,
-  type Bezier,
-  type ChannelGroup,
-  type HostId,
-  type Pose,
-  type PoseSpec,
-} from "./types";
+import { type Grid } from "./layout";
+import { basePose, buildPoses, lastStartAtOrBefore, place, type Markers, type Placed } from "./timeline";
+import { CH, POSE_LEN, type Beat, type Bezier, type ChannelGroup, type Pose } from "./types";
 
-export { ARC_MID, BEATS, LOCK, SCROLL_PLAN, type PlanBlock } from "./beats";
+export { ARC_MID, BEATS, LOCK } from "./beats";
+export { READING, beatAt, buildPoses, place, type MarkerBox, type Markers, type Placed } from "./timeline";
 
-/** Where held copy sits: a viewport fraction from the top. */
-export const READING = 0.46;
 /** The travel ease: flat at both ends (zero velocity at holds). */
 export const TRAVEL: Bezier = [0.55, 0, 0.25, 1];
+
 // ---- Channel groups -------------------------------------------------------
 
-const ORBIT: readonly number[] = [CH.yaw, CH.pitch, CH.tilt, CH.fov, CH.fill, CH.offX, CH.offY, CH.aim, CH.focus];
+const ORBIT: readonly number[] = [
+  CH.yaw,
+  CH.pitch,
+  CH.tilt,
+  CH.fov,
+  CH.fill,
+  CH.offX,
+  CH.offY,
+  CH.aim,
+  CH.focus,
+  CH.circle,
+  CH.cx,
+  CH.cy,
+  CH.cr,
+];
 const ASSEMBLY: readonly number[] = [
   CH.explode,
   CH.lift,
@@ -52,7 +59,8 @@ const GROUP_OF: readonly ChannelGroup[] = Array.from({ length: POSE_LEN }, (_, c
   if (ORBIT.includes(c)) return "orbit";
   if (ASSEMBLY.includes(c)) return "assembly";
   if (c >= CH.arc && c < CH.arc + 5) return "arcs";
-  if (c === CH.playhead) return "playhead";
+  if (c === CH.playhead || c === CH.dial) return "playhead";
+  if (c === CH.portal) return "iris";
   return "look";
 });
 
@@ -62,8 +70,10 @@ const DEFAULT_STAGGER: Record<ChannelGroup, readonly [number, number]> = {
   assembly: [0.15, 0.1],
   look: [0, 0],
   arcs: [0, 0],
-  // The playhead swings in the middle 40% (the demo leaves before, the next builds after).
+  // The playhead and the dial's detents swing in the middle 40% (the demo leaves before, the next builds after).
   playhead: [0.3, 0.3],
+  // The iris opens once the ring has turned to face the camera.
+  iris: [0.55, 0],
 };
 const DEFAULT_EASE: Record<ChannelGroup, Bezier> = {
   orbit: TRAVEL,
@@ -71,58 +81,16 @@ const DEFAULT_EASE: Record<ChannelGroup, Bezier> = {
   look: TRAVEL,
   arcs: [0, 0, 1, 1],
   playhead: TRAVEL,
+  iris: TRAVEL,
 };
 /** Arcs ramp linearly over 18% of a travel (≈12svh of 68), 4.5% (≈3svh) apart, clockwise. */
 const ARC_START = 0.3;
 const ARC_STEP = 0.045;
 const ARC_RAMP = 0.18;
 
-// ---- Building poses ---------------------------------------------------------
-
-function write(spec: PoseSpec, out: Pose, offset: number): void {
-  for (const [name, c] of Object.entries(CH) as [keyof typeof CH, number][]) {
-    if (name === "lift") {
-      spec.lift?.forEach((v, k) => (out[offset + c + k] = v));
-    } else if (name === "arc") {
-      spec.arcs?.forEach((v, k) => (out[offset + c + k] = v));
-    } else {
-      const v = (spec as Record<string, number | undefined>)[name];
-      if (v !== undefined) out[offset + c] = v;
-    }
-  }
-}
-
-/**
- * Every beat's full pose (n × POSE_LEN), each carrying over whatever its spec
- * doesn't list from the beat above — computed over the whole table, so a
- * beat dropped later (a missing section) never changes the poses after it.
- */
-export function buildPoses(beats: readonly Beat[]): Float32Array {
-  const poses = new Float32Array(beats.length * POSE_LEN);
-  const current = new Float32Array(POSE_LEN);
-  write(BASE, current, 0);
-  beats.forEach((beat, i) => {
-    write(beat.pose, current, 0);
-    poses.set(current, i * POSE_LEN);
-  });
-  return poses;
-}
-
 // ---- Resolving against the page ---------------------------------------------
 
-export type MarkerBox = { readonly top: number; readonly height: number };
-export type Markers = ReadonlyMap<string, MarkerBox>;
-
-export type Resolved = {
-  /** Viewport height the timeline was resolved at (px). */
-  readonly vh: number;
-  readonly beats: readonly Beat[];
-  /** Hold [start, end] per beat, in scroll px (start === end for a waypoint). */
-  readonly starts: Float64Array;
-  readonly ends: Float64Array;
-  readonly poses: Float32Array;
-  /** Waypoints (hold 0) between holds: the curve passes through them without stopping. */
-  readonly via: Uint8Array;
+export type Resolved = Placed & {
   /** Ease per beat per group, for the travel into that beat. */
   readonly eases: readonly Record<ChannelGroup, (t: number) => number>[];
 };
@@ -138,72 +106,19 @@ function easeFor(b: Bezier): (t: number) => number {
   return fn;
 }
 
-/**
- * Place one host's beats on the page. Each host (the stage, each dock) has its
- * own timeline — two docks can be on screen at once, and only the one holding
- * the canvas is sampled — but poses carry over across the whole table.
- *
- * `markers` are document-px boxes measured outside the frame; beats whose
- * marker is missing (a section that didn't render) are dropped. Holds are
- * clamped to [0, maxScroll] and never overlap (on a short page, neighbours
- * shrink to meet).
- */
-export function resolve(
-  beats: readonly Beat[],
-  markers: Markers,
-  vh: number,
-  maxScroll: number,
-  host: HostId = "stage",
-): Resolved {
-  const allPoses = buildPoses(beats);
-  const kept: Beat[] = [];
-  const keptPoses: number[] = [];
-  const starts: number[] = [];
-  const ends: number[] = [];
-  beats.forEach((beat, i) => {
-    if (beat.host !== host) return;
-    const m = markers.get(beat.marker);
-    if (!m) return;
-    const ref = beat.ref ?? "center";
-    const point = ref === "top" ? m.top : ref === "bottom" ? m.top + m.height : m.top + m.height / 2;
-    const centre = point - (beat.anchor ?? READING) * vh;
-    const half = (beat.hold * vh) / 200;
-    let start = Math.max(0, centre - half);
-    let end = Math.max(start, centre + half);
-    start = Math.min(start, maxScroll);
-    end = Math.min(end, maxScroll);
-    kept.push(beat);
-    keptPoses.push(i);
-    starts.push(start);
-    ends.push(end);
-  });
-  // Never overlap: a hold that runs into the next one shrinks with it to meet in the middle.
-  for (let i = 1; i < kept.length; i++) {
-    if (starts[i] < ends[i - 1]) {
-      const meet = Math.max(starts[i - 1], Math.min(ends[i], (ends[i - 1] + starts[i]) / 2));
-      ends[i - 1] = meet;
-      starts[i] = Math.max(starts[i], meet);
-      if (ends[i] < starts[i]) ends[i] = starts[i];
-    }
-  }
-  const poses = new Float32Array(kept.length * POSE_LEN);
-  keptPoses.forEach((src, i) => poses.set(allPoses.subarray(src * POSE_LEN, (src + 1) * POSE_LEN), i * POSE_LEN));
-  const via = new Uint8Array(kept.length);
-  kept.forEach((b, i) => (via[i] = b.hold === 0 && i > 0 && i < kept.length - 1 ? 1 : 0));
-  const eases = kept.map((b) => {
+/** The eases for a placed timeline's travels (the live half samples with them). */
+export function withEases(placed: Placed): Resolved {
+  const eases = placed.beats.map((b) => {
     const e = {} as Record<ChannelGroup, (t: number) => number>;
     for (const g of Object.keys(DEFAULT_EASE) as ChannelGroup[]) e[g] = easeFor(b.ease?.[g] ?? DEFAULT_EASE[g]);
     return e;
   });
-  return {
-    vh,
-    beats: kept,
-    starts: Float64Array.from(starts),
-    ends: Float64Array.from(ends),
-    poses,
-    via,
-    eases,
-  };
+  return { ...placed, eases };
+}
+
+/** Place the beats on the page (timeline.ts) with the eases to travel between them. */
+export function resolve(beats: readonly Beat[], markers: Markers, vh: number, maxScroll: number, g?: Grid): Resolved {
+  return withEases(place(beats, markers, vh, maxScroll, g));
 }
 
 // ---- Sampling ---------------------------------------------------------------
@@ -214,21 +129,6 @@ function window01(t: number, delay: number, lead: number): number {
   const span = 1 - delay - lead;
   if (span <= 0) return t >= delay ? 1 : 0;
   return clamp01((t - delay) / span);
-}
-
-/** Index of the last beat whose hold starts at or before y (or -1). */
-function lastStartAtOrBefore(res: Resolved, y: number): number {
-  let lo = 0;
-  let hi = res.beats.length - 1;
-  let found = -1;
-  while (lo <= hi) {
-    const mid = (lo + hi) >> 1;
-    if (res.starts[mid] <= y) {
-      found = mid;
-      lo = mid + 1;
-    } else hi = mid - 1;
-  }
-  return found;
 }
 
 const xsScratch: number[] = [];
@@ -244,8 +144,7 @@ const viaScratch: number[] = [];
 export function samplePose(res: Resolved, y: number, out: Pose): void {
   const n = res.beats.length;
   if (n === 0) {
-    out.fill(0);
-    write(BASE, out, 0);
+    basePose(out);
     return;
   }
   const i = lastStartAtOrBefore(res, y);
@@ -324,27 +223,6 @@ export function samplePose(res: Resolved, y: number, out: Pose): void {
 /** Annotation fade-out / fade-in lengths, svh. */
 const ANNOT_OUT = 6;
 const ANNOT_IN = 10;
-
-/**
- * The beat whose DOM state applies at `y`: the hold that contains it, or —
- * mid-travel — the nearer side, switching at the middle with ±5% hysteresis
- * so a wobble never flips attributes back and forth. Waypoints never count.
- */
-export function beatAt(res: Resolved, y: number, prev: number | null): number {
-  const n = res.beats.length;
-  if (n === 0) return -1;
-  let i = lastStartAtOrBefore(res, y);
-  if (i < 0) return 0;
-  while (i > 0 && res.via[i]) i--;
-  if (y <= res.ends[i] || i === n - 1) return i;
-  let j = i + 1;
-  while (j < n - 1 && res.via[j]) j++;
-  const span = res.starts[j] - res.ends[i];
-  const t = span > 0 ? (y - res.ends[i]) / span : 1;
-  if (prev === i && t < 0.55) return i;
-  if (prev === j && t > 0.45) return j;
-  return t < 0.5 ? i : j;
-}
 
 /** Linear blend (phones tween between poses; `u` is already eased). */
 export function blendPose(a: Pose, b: Pose, u: number, out: Pose): void {

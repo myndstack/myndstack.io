@@ -1,81 +1,52 @@
-import type { CSSProperties } from "react";
-
-import { CAPABILITY_HUES, CAPABILITY_SPECS } from "@/lib/landing/chapters";
 import { DRAW_POSTERS } from "@/lib/landing/engine/posters";
 
 import CapDemos from "../core/CapDemos";
 import DocsFan from "../core/DocsFan";
-import SpecPanel from "../core/SpecPanel";
+import ShipConsole from "../core/ShipConsole";
 import { DrawingPoster, FacePoster } from "./Posters";
 
-const HUE_VAR = {
-  ai: "var(--color-spec-ai)",
-  product: "var(--color-spec-product)",
-  design: "var(--color-spec-design)",
-  arch: "var(--color-spec-arch)",
-} as const;
-
-type Props = {
-  /** How many capabilities the CMS gave us (the readout plate's n / total). */
-  readonly caps: number;
-};
-
-/**
- * The sticky stage behind the run from the hero to the studio (pinned layout
- * only). Decoration: aria-hidden and inert, nothing focusable; every word is
- * in the flow beside it.
- *
- * Its rail slot (columns 7–12) holds the engine: today the posters — each
- * drawing in two tones, clipped at the paper's edge by the director — and the
- * Core for face poses, in the ring box (hero, work) or at the top of the rail
- * over the readout plate (capabilities). The live canvas (P3) lands in the
- * same boxes and cross-fades over its poster.
- */
-export default function EngineStage({ caps }: Props) {
-  const tone = (t: "dark" | "paper") => (
-    <div className={`engine-tone engine-tone--${t}`}>
-      <div className="engine-box">
+/** One skin's sheet: its base and atmosphere, and every poster in that skin's tone. */
+function Sheet({ sheet, skin }: { readonly sheet: "a" | "b"; readonly skin: string }) {
+  return (
+    <div className="stage-sheet" data-sheet={sheet} data-skin={skin}>
+      <div className="stage-atmos" />
+      <div className="stage-halo" />
+      <div className="stage-posters">
+        <FacePoster id="face" prefix={`stage-${sheet}`} />
         {DRAW_POSTERS.map((p) => (
           <DrawingPoster key={p.id} id={p.id} />
         ))}
       </div>
     </div>
   );
-  const count = Math.min(caps, CAPABILITY_HUES.length);
+}
 
+/**
+ * The stage: sticky and page-wide, behind every scene (layer 1). It owns the
+ * background — two skin sheets, the second clipped at the current front by
+ * the director — and the engine: posters in each sheet's tone until the live
+ * canvas has drawn, the SIGNAL chamber in the bore (the hero's terminal, the
+ * capabilities' demos), the document fan and the front itself. Decoration only: aria-hidden and inert; every word is in the
+ * scenes beside it.
+ */
+export default function EngineStage() {
   return (
-    <div className="engine-stage" data-engine-stage aria-hidden="true" inert>
-      <div className="engine-washes">
-        {CAPABILITY_HUES.map((hue) => (
-          <span key={hue} className="engine-wash" data-wash={hue} style={{ "--wash": HUE_VAR[hue] } as CSSProperties} />
-        ))}
+    <div className="stage" data-engine-stage aria-hidden="true" inert data-accent="lime">
+      <Sheet sheet="a" skin="machined" />
+      <Sheet sheet="b" skin="drafting" />
+      <div className="stage-chamber" data-skin="signal">
+        <div className="chamber-grid" />
+        <CapDemos />
+        <ShipConsole />
       </div>
-      {tone("dark")}
-      {tone("paper")}
-      <div className="engine-box">
-        <div className="engine-ring">
-          <FacePoster id="face-ring" prefix="stage-ring">
-            <DocsFan className="engine-docs" />
-          </FacePoster>
-        </div>
-        <div className="engine-ringtop">
-          <FacePoster id="face-top" prefix="stage-top">
-            <CapDemos />
-          </FacePoster>
-        </div>
-        <div className="engine-plate">
-          {CAPABILITY_HUES.slice(0, count).map((hue, i) => (
-            <SpecPanel
-              key={hue}
-              panel
-              file={CAPABILITY_SPECS[i].file}
-              lines={CAPABILITY_SPECS[i].lines}
-              index={i}
-              total={count}
-              hue={HUE_VAR[hue]}
-            />
-          ))}
-        </div>
+      <canvas className="stage-canvas" />
+      <div className="stage-overlays">
+        <DocsFan className="stage-docs" />
+      </div>
+      <div className="stage-front">
+        <i className="front-line" />
+        <i className="front-head" />
+        <i className="front-ring" />
       </div>
     </div>
   );

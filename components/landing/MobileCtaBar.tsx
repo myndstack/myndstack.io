@@ -58,7 +58,7 @@ export default function MobileCtaBar({ label, note }: { readonly label: string; 
   });
 
   return (
-    <div ref={ref} className="mobile-cta" inert suppressHydrationWarning>
+    <div ref={ref} className="mobile-cta" data-skin="machined" inert suppressHydrationWarning>
       <span className="mobile-cta-line" aria-hidden="true" />
       <p className="mobile-cta-text">{note}</p>
       <a href="#contact" className="btn btn-lime mobile-cta-btn">

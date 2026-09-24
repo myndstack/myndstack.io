@@ -4,13 +4,11 @@ import { BEATS } from "./beats";
 import { DRAW_POSTERS, STUDIO_AGENCY, drawingOf, posterFor } from "./posters";
 
 describe("the poster table", () => {
-  it("gives every stage beat exactly one poster, and docks their own", () => {
+  it("gives every beat exactly one poster: the Core face for face poses, its own drawing otherwise", () => {
     for (const beat of BEATS) {
       const poster = posterFor(beat.id);
-      expect(poster, beat.id).not.toBeNull();
-      if (beat.host !== "stage") expect(poster?.kind).toBe("dock");
-      else if (beat.fit === "circle") expect(poster).toEqual({ kind: "face", box: beat.box === "ringTop" ? "ringTop" : "ring" });
-      else expect(poster).toEqual({ kind: "draw", id: beat.id });
+      if (beat.fit === "circle") expect(poster, beat.id).toEqual({ kind: "face" });
+      else expect(poster, beat.id).toEqual({ kind: "draw", id: beat.id });
     }
     expect(posterFor("nope")).toBeNull();
   });
@@ -18,7 +16,7 @@ describe("the poster table", () => {
   it("draws each sphere-fit beat from its own pose, plus the studio's agency state", () => {
     const ids = DRAW_POSTERS.map((p) => p.id);
     expect(new Set(ids).size).toBe(ids.length);
-    const drawn = BEATS.filter((b) => b.host === "stage" && b.fit === "sphere").map((b) => b.id);
+    const drawn = BEATS.filter((b) => b.fit === "sphere").map((b) => b.id);
     expect(ids).toEqual([...drawn, STUDIO_AGENCY]);
   });
 

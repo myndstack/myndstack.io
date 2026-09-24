@@ -113,24 +113,46 @@
     stroke-dasharray var(--dur-slow) var(--ease-brand);
 }
 
-/* ---------------- Draft states (the intro) ----------------
-   Until the hero's intro has played, its Core waits undrawn: the stage's ring
-   (pinned) or the hero's own slot (static). The stage sits outside the hero's
-   chapter root, hence :has(). The copy waits to rise only when pinned. */
+/* ---------------- The intro ----------------
+   Once, on arrival (the director stamps data-intro on the stage): the tick
+   sweep and the five arcs draw on, then the glow comes up. The server's
+   markup is the drawn ring, so without the director nothing waits. */
 @media screen and (prefers-reduced-motion: no-preference) {
-  html[data-anim="on"] .landing:has([data-chapter="core-hero"]:not([data-motion="done"]))
-    :is([data-engine-stage] [data-poster="face-ring"], .engine-slot--hero)
-    :is(.core-arc, .core-sweep) {
+  .stage[data-intro] .engine-face .core-sweep {
+    animation: core-draw 620ms cubic-bezier(0.65, 0, 0.35, 1) 120ms both;
+  }
+  .stage[data-intro] .engine-face .core-arc {
+    animation: core-draw 720ms var(--ease-out-expo) calc(300ms + var(--arc-i, 0) * 90ms) both;
+  }
+  .stage[data-intro] .engine-face .core-glow-inner {
+    animation: core-glow 900ms ease-out 380ms both;
+  }
+}
+@keyframes core-draw {
+  from {
     stroke-dashoffset: 1;
   }
-  html[data-anim="on"] .landing:has([data-chapter="core-hero"]:not([data-motion="done"]))
-    :is([data-engine-stage] [data-poster="face-ring"], .engine-slot--hero)
-    .core-glow-inner {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+@keyframes core-glow {
+  from {
     opacity: 0;
   }
 }
-.landing [data-chapter="core-hero"]:not([data-motion="done"]) [data-rise] {
-  @variant pin {
-    opacity: 0;
-  }
+.core-arc[data-arc="lime"] {
+  --arc-i: 0;
+}
+.core-arc[data-arc="ai"] {
+  --arc-i: 1;
+}
+.core-arc[data-arc="product"] {
+  --arc-i: 2;
+}
+.core-arc[data-arc="design"] {
+  --arc-i: 3;
+}
+.core-arc[data-arc="arch"] {
+  --arc-i: 4;
 }

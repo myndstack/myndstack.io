@@ -1,0 +1,444 @@
+/* ============================================================
+   The landing's chrome: the nav (restyled here, on /preview only — every
+   rule is scoped to html:has(.landing), so "/" is untouched), the sheet's
+   frame (rails and marks), the zone ruler, the title block and the phones'
+   CTA bar. Each takes the skin under it (the director writes it, on change)
+   and switches in 240ms as a front passes.
+   ============================================================ */
+@reference "../../../app/globals.css";
+
+/* ---------------- The nav: a full-width skinned bar ---------------- */
+html:has(.landing) .nav {
+  --inset: calc(max(0px, (100% - 1600px) / 2) + clamp(24px, min(100%, 1600px) / 30, 48px) + 24px);
+  --bar: #0a0a0b;
+  --bar-line: rgb(255 255 255 / 0.08);
+  --bar-text: #c7c7ce;
+  --bar-strong: #f4f4f6;
+  --bar-accent: var(--color-lime);
+  padding: 14px 0;
+
+  @media (width < 62.5rem) {
+    --inset: 24px;
+  }
+  @media (width < 47.5rem) {
+    --inset: 20px;
+  }
+}
+html:has(.landing) .nav[data-landing-skin="drafting"] {
+  --bar: #d9d7d1;
+  --bar-line: rgb(10 10 11 / 0.14);
+  --bar-text: #3d3d42;
+  --bar-strong: #0a0a0b;
+  --bar-accent: var(--color-ink);
+}
+html:has(.landing) .nav .nav-inner,
+html:has(.landing) .nav.is-cap .nav-inner {
+  max-width: none;
+  padding: 0 var(--inset);
+}
+html:has(.landing) .nav .nav-pill,
+html:has(.landing) .nav::after {
+  display: none;
+}
+html:has(.landing) .nav .nav-scrim {
+  opacity: 0;
+  background: color-mix(in oklch, var(--bar) 72%, transparent);
+  -webkit-backdrop-filter: blur(14px) saturate(1.3);
+  backdrop-filter: blur(14px) saturate(1.3);
+  border-bottom: 1px solid var(--bar-line);
+  transition:
+    opacity 240ms var(--ease-brand),
+    background-color 240ms var(--ease-brand),
+    border-color 240ms var(--ease-brand);
+}
+html:has(.landing) .nav.is-cap .nav-scrim {
+  opacity: 1;
+  transition-delay: 0ms;
+}
+html:has(.landing) .nav.is-cap {
+  transform: none;
+}
+html:has(.landing) .nav.is-cap.is-tucked {
+  transform: translate3d(0, -110%, 0);
+}
+/* The wordmark follows the skin, not the morph. */
+html:has(.landing) .nav .wm-white,
+html:has(.landing) .nav.is-cap .wm-white {
+  opacity: 1;
+}
+html:has(.landing) .nav .wm-black,
+html:has(.landing) .nav.is-cap .wm-black {
+  opacity: 0;
+}
+html:has(.landing) .nav[data-landing-skin="drafting"] .wm-white {
+  opacity: 0;
+}
+html:has(.landing) .nav[data-landing-skin="drafting"] .wm-black {
+  opacity: 1;
+}
+html:has(.landing) .nav .navlink,
+html:has(.landing) .nav.is-cap .navlink {
+  padding: 8px 12px;
+  color: var(--bar-text);
+  background: none;
+  transition: color 240ms var(--ease-brand);
+}
+html:has(.landing) .nav .navlink:hover,
+html:has(.landing) .nav.is-cap .navlink:hover {
+  color: var(--bar-strong);
+  background: none;
+}
+html:has(.landing) .nav .navlink.is-active,
+html:has(.landing) .nav.is-cap .navlink.is-active {
+  color: var(--bar-strong);
+  background: none;
+  text-decoration: underline;
+  text-decoration-color: var(--bar-accent);
+  text-decoration-thickness: 2px;
+  text-underline-offset: 9px;
+}
+html:has(.landing) .nav .nav-cta,
+html:has(.landing) .nav.is-cap .nav-cta {
+  background: var(--color-lime);
+  color: var(--color-lime-ink);
+  transition:
+    background 240ms var(--ease-brand),
+    color 240ms var(--ease-brand);
+}
+html:has(.landing) .nav[data-landing-skin="drafting"] .nav-cta {
+  background: var(--color-ink);
+  color: var(--color-lime);
+}
+
+/* ---------------- The frame: rails and marks ---------------- */
+.frame {
+  display: none;
+
+  @variant pin {
+    display: block;
+    position: fixed;
+    inset: 0;
+    z-index: 4;
+    pointer-events: none;
+    --frame-l: max(0px, (100% - 1600px) / 2);
+    --rail: clamp(24px, min(100%, 1600px) / 30, 48px);
+  }
+}
+.frame-rail {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  background: rgb(128 128 128 / 0.2);
+}
+.frame-rail--l {
+  left: calc(var(--frame-l) + var(--rail));
+}
+.frame-rail--r {
+  right: calc(var(--frame-l) + var(--rail));
+}
+/* "+" marks at the safe area's corners. */
+.frame-mark {
+  position: absolute;
+  width: 11px;
+  height: 11px;
+  translate: -5px -5px;
+  background:
+    linear-gradient(rgb(128 128 128 / 0.55), rgb(128 128 128 / 0.55)) 50% 0 / 1px 100% no-repeat,
+    linear-gradient(rgb(128 128 128 / 0.55), rgb(128 128 128 / 0.55)) 0 50% / 100% 1px no-repeat;
+}
+.frame-mark--tl,
+.frame-mark--bl {
+  left: calc(var(--frame-l) + var(--rail));
+}
+.frame-mark--tr,
+.frame-mark--br {
+  left: calc(100% - var(--frame-l) - var(--rail) + 1px);
+}
+.frame-mark--tl,
+.frame-mark--tr {
+  top: 96px;
+}
+.frame-mark--bl,
+.frame-mark--br {
+  top: calc(100% - 72px);
+}
+
+/* ---------------- The zone ruler ---------------- */
+.zone-ruler {
+  display: none;
+
+  @variant pin {
+    display: flex;
+    position: fixed;
+    top: 116px;
+    bottom: 92px;
+    right: calc(max(0px, (100% - 1600px) / 2) + clamp(24px, min(100%, 1600px) / 30, 48px) - 12px);
+    z-index: 55;
+    width: 24px;
+    flex-direction: column;
+    color: var(--skin-mute);
+    transition: color 240ms var(--ease-brand);
+  }
+}
+.zr-zones {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 4px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.zr-zone {
+  position: relative;
+  flex: 1 1 0;
+  min-height: 6px;
+}
+.zr-zone button {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  padding: 0;
+  border: 0;
+  background: none;
+}
+.zr-zone button::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 11px;
+  width: 1px;
+  background: currentColor;
+  opacity: 0.45;
+  transition:
+    width var(--dur-fast) var(--ease-brand),
+    opacity var(--dur-fast) var(--ease-brand);
+}
+.zr-zone[data-current] button::before {
+  left: 10.5px;
+  width: 2px;
+  opacity: 1;
+  background: var(--skin-accent);
+}
+.zr-zone button:hover::before,
+.zr-zone button:focus-visible::before {
+  opacity: 1;
+}
+.zr-tip {
+  position: absolute;
+  top: 50%;
+  right: calc(100% + 6px);
+  translate: 4px -50%;
+  padding: 4px 8px;
+  white-space: nowrap;
+  border: 1px solid var(--skin-rule);
+  background: var(--skin-base);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--skin-text1);
+  opacity: 0;
+  pointer-events: none;
+  transition:
+    opacity var(--dur-fast) var(--ease-brand),
+    translate var(--dur-fast) var(--ease-brand);
+}
+.zr-zone button:hover .zr-tip,
+.zr-zone button:focus-visible .zr-tip {
+  opacity: 1;
+  translate: 0 -50%;
+}
+/* The carriage is the ruler's full height, its bar drawn at its top edge, so
+   moving it is a translate of 0–100% of its own height: compositor-only. The
+   page's scroll drives it directly where CSS can (no script, no writes);
+   elsewhere the ruler writes --p. */
+.zr-carriage {
+  position: absolute;
+  inset: 0 auto 0 4px;
+  width: 15px;
+  pointer-events: none;
+  translate: 0 calc(var(--p, 0) * 100%);
+}
+.zr-carriage::before {
+  content: "";
+  position: absolute;
+  top: -1px;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  background: var(--color-lime);
+  box-shadow: 0 0 10px var(--color-lime);
+}
+@supports (animation-timeline: scroll()) {
+  .zr-carriage {
+    animation: zr-carriage linear both;
+    animation-timeline: scroll(root block);
+  }
+}
+@keyframes zr-carriage {
+  from {
+    translate: 0 0;
+  }
+  to {
+    translate: 0 100%;
+  }
+}
+.zone-ruler[data-skin="drafting"] .zr-carriage::before {
+  background: var(--color-lime-deep);
+  box-shadow: none;
+}
+
+/* ---------------- The title block ---------------- */
+.title-block {
+  display: none;
+
+  @variant pin {
+    display: grid;
+    gap: 3px;
+    position: fixed;
+    left: var(--inset);
+    bottom: 18px;
+    z-index: 55;
+    font-family: var(--font-mono);
+    font-size: 10px;
+    line-height: 1.4;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--skin-text2);
+    transition:
+      color 240ms var(--ease-brand),
+      opacity 240ms var(--ease-brand);
+  }
+}
+.title-block p {
+  margin: 0;
+}
+/* Over a sheet it steps aside (it belongs to the pinned scenes). */
+.title-block[data-covered] {
+  opacity: 0;
+  pointer-events: none;
+}
+.tb-sheet b {
+  font-weight: 400;
+  color: var(--skin-text1);
+}
+.tb-k,
+.tb-dash {
+  color: var(--skin-mute);
+}
+.title-block:not([data-beat="hero"]) [data-tb-hero],
+.title-block[data-beat="hero"] [data-tb-read] {
+  display: none;
+}
+.tb-actions {
+  display: flex;
+  gap: 16px;
+  margin-top: 2px;
+}
+.tb-link {
+  padding: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  letter-spacing: inherit;
+  text-transform: inherit;
+  color: var(--skin-mute);
+  text-decoration: underline;
+  text-decoration-color: transparent;
+  text-underline-offset: 3px;
+  transition:
+    color var(--dur-fast) var(--ease-brand),
+    text-decoration-color var(--dur-fast) var(--ease-brand);
+}
+.tb-link:hover,
+.tb-link:focus-visible {
+  color: var(--skin-text1);
+  text-decoration-color: currentColor;
+}
+
+/* The loops stop when paused (the engine's idle motion stops in live.ts). */
+html[data-paused] .landing * {
+  animation-play-state: paused !important;
+}
+
+/* ---------------- Phones: the CTA bar ---------------- */
+.mobile-cta {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 55;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 20px calc(10px + env(safe-area-inset-bottom));
+  border-top: 1px solid var(--skin-line);
+  background: color-mix(in oklch, var(--skin-base) 90%, transparent);
+  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
+  translate: 0 110%;
+  transition: translate var(--dur-base) var(--ease-out-expo);
+
+  @media (width >= 62.5rem) {
+    display: none;
+  }
+}
+.mobile-cta.is-shown {
+  translate: 0 0;
+}
+.mobile-cta-line {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: -1px;
+  height: 2px;
+  transform-origin: left center;
+  background: var(--color-lime);
+}
+@supports (animation-timeline: scroll(root)) {
+  .mobile-cta-line {
+    animation: cta-progress linear both;
+    animation-timeline: scroll(root);
+  }
+}
+@keyframes cta-progress {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+.mobile-cta-text {
+  flex: 1;
+  min-width: 0;
+  margin: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--skin-text2);
+}
+.mobile-cta-btn {
+  flex: none;
+  min-height: 44px;
+  padding-inline: 16px;
+  white-space: nowrap;
+  font-size: 13px;
+}
+
+@media print {
+  .frame,
+  .zone-ruler,
+  .title-block,
+  .mobile-cta {
+    display: none !important;
+  }
+}

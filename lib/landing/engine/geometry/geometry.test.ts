@@ -3,7 +3,9 @@ import { describe, expect, it } from "vitest";
 import { CORE } from "@/lib/motion/core-geometry";
 
 import {
+  FINS,
   GLYPH,
+  MAT,
   MODULE_Z,
   S,
   buildEngine,
@@ -71,6 +73,40 @@ describe("the face is the Core", () => {
       expect(minDraw).toBe(0);
       expect(maxDraw).toBe(1);
     }
+  });
+});
+
+describe("the modules read as a computer, not an engine", () => {
+  const materialAt = (m: Mesh, v: number) => m.extras[v * 4];
+  const hueAt = (m: Mesh, v: number) => m.extras[v * 4 + 1];
+  const radiusAt = (m: Mesh, v: number) => Math.hypot(m.positions[v * 3], m.positions[v * 3 + 1]);
+
+  it("builds compute as a heat sink: five fins out to its rim, the hub between them", () => {
+    const m = hi.modules[3].surface;
+    const levels = new Set<number>();
+    for (let v = 0; v < m.positions.length / 3; v++) {
+      if (Math.abs(radiusAt(m, v) - FINS.r) < 1e-6) levels.add(Math.round(m.positions[v * 3 + 2] * 1000));
+    }
+    expect(levels.size).toBe(FINS.count * 2);
+  });
+
+  it("fits models with lit blades and data with status lights — no pistons, no bolts", () => {
+    for (const engine of engines) {
+      for (const mod of engine.modules) {
+        expect(kinds(mod.surface).includes(MAT.fastener)).toBe(false);
+      }
+    }
+    const lit = (k: number, hue: number, r0: number) => {
+      const m = hi.modules[k].surface;
+      let n = 0;
+      for (let v = 0; v < m.positions.length / 3; v++) {
+        if (materialAt(m, v) === MAT.inlay && hueAt(m, v) === hue && radiusAt(m, v) > r0) n++;
+      }
+      return n;
+    };
+    // Models' blades carry a violet light on their outer edge; data's bays an amber one.
+    expect(lit(2, 1, 1.9)).toBeGreaterThan(0);
+    expect(lit(4, 4, 1.95)).toBeGreaterThan(0);
   });
 });
 

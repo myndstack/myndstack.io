@@ -1,0 +1,279 @@
+/* ============================================================
+   Scenes and sheets.
+
+   Stacking contract (e2e audits check these exact values):
+     0  the landing's base
+     1  the stage (sticky, page-wide): skins, engine, chamber, overlays
+     2  scene panels (sticky, transparent): the words
+     3  flowing sheets (opaque, they paint their own skin)
+     4  rails and marks · 40 grain · 55 ruler and title block · 60 nav
+
+   Pinned (`pin:`): a scene is an in-flow spacer (--len) holding one sticky
+   100svh panel; every spacer after the first overlaps the item above by a
+   panel, so panels swap unseen at a travel's middle. A beat's words sit in
+   fixed cells and never scroll: the director writes `data-in` on the group
+   whose words are in, and CSS runs the exit and the entry, which always
+   finish. Lengths come from lib/landing/engine/scenes.ts (planScenes).
+
+   Static (no JS, reduced motion, phones, short screens, print): scenes are
+   plain sections; every beat group is in the flow, each on its own skin
+   with its own poster slot.
+   ============================================================ */
+@reference "../../../app/globals.css";
+
+.run {
+  position: relative;
+  display: grid;
+}
+.run > .stage,
+.run > .flow {
+  grid-area: 1 / 1;
+  min-width: 0;
+}
+
+/* ---------------- Scenes ---------------- */
+.scene {
+  position: relative;
+
+  @variant pin {
+    height: var(--len);
+  }
+}
+.scene[data-overlap] {
+  @variant pin {
+    margin-top: -100svh;
+  }
+}
+/* Anchor jumps land on the scene's first hold. */
+.scene[style*="--land"] {
+  @variant pin {
+    scroll-margin-top: calc(-1 * var(--land));
+  }
+}
+/* The nav's own anchor for a scene (the live site's name for it): at the
+   first hold, like the scene's anchor. */
+.scene-alias {
+  position: absolute;
+  top: 0;
+  width: 1px;
+  height: 1px;
+  pointer-events: none;
+
+  @variant pin {
+    top: var(--land);
+  }
+}
+.beat-marker {
+  display: none;
+  position: absolute;
+  left: 0;
+  width: 1px;
+  top: calc(var(--at) - 0.5svh);
+  height: 1svh;
+  pointer-events: none;
+  visibility: hidden;
+
+  @variant pin {
+    display: block;
+  }
+}
+
+.panel {
+  position: relative;
+
+  /* Sticky always makes a stacking context: it sits at layer 2, over the stage. */
+  @variant pin {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    height: 100svh;
+    overflow: clip;
+    pointer-events: none;
+  }
+}
+
+/* A beat's words: a full-panel grid of cells (12 columns × the safe area). */
+.beat {
+  position: relative;
+  padding-block: var(--sheet-y);
+  background: var(--skin-base);
+  color: var(--skin-text1);
+
+  @variant pin {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    grid-template-rows: var(--safe-top) minmax(0, 1fr) var(--safe-bottom);
+    column-gap: var(--gap);
+    padding: 0 var(--inset);
+    background: none;
+    pointer-events: none;
+  }
+}
+.beat > * {
+  @variant pin {
+    grid-row: 2;
+    min-width: 0;
+  }
+}
+.beat[data-in] > * {
+  @variant pin {
+    pointer-events: auto;
+  }
+}
+/* Static: below 1000px the cells stack in the content box; wider, they sit
+   on the 12 columns side by side (copy left, the poster slot right). */
+.beat {
+  padding-inline: var(--inset);
+
+  @media (width >= 62.5rem) {
+    display: grid;
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    column-gap: var(--gap);
+    align-items: center;
+  }
+}
+.beat > * + * {
+  margin-top: 40px;
+
+  @media (width >= 62.5rem) {
+    margin-top: 0;
+  }
+}
+
+/* Scene furniture: lists that stay through a whole scene (the parts list,
+   the step list). The director writes data-in for the scene's span. */
+.furniture {
+  @variant pin {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    grid-template-rows: var(--safe-top) minmax(0, 1fr) var(--safe-bottom);
+    column-gap: var(--gap);
+    padding: 0 var(--inset);
+    pointer-events: none;
+  }
+}
+.furniture > * {
+  @variant pin {
+    grid-row: 2;
+  }
+}
+.furniture[data-in] > * {
+  @variant pin {
+    pointer-events: auto;
+  }
+}
+
+/* ---------------- Triggered words ----------------
+   Exit 320ms; entry: titles rise out of a mask (800ms, 30ms a word), the
+   rest 600ms with a 12px rise, staggered 50ms. Pinned only — the static page
+   is always fully built. */
+.w {
+  display: inline-block;
+  overflow: clip;
+  vertical-align: top;
+  /* Room for descenders inside the mask, given back below. */
+  padding-bottom: 0.12em;
+  margin-bottom: -0.12em;
+}
+.wi {
+  display: inline-block;
+}
+/* (Written out rather than `@variant pin`: at the top level the variant's
+   `&` has no parent selector, and its rules would match nothing.) */
+@media screen and (min-width: 62.5rem) and (min-height: 37.5rem) and (prefers-reduced-motion: no-preference) {
+  html[data-anim="on"] :is(.beat, .furniture) .wi {
+    transform: translateY(125%);
+    transition: transform 320ms var(--ease-exit);
+  }
+  html[data-anim="on"] :is(.beat, .furniture)[data-in] .wi {
+    transform: none;
+    transition: transform 800ms var(--ease-out-expo) calc(120ms + var(--wi, 0) * 30ms);
+  }
+  html[data-anim="on"] :is(.beat, .furniture) [data-rise] {
+    opacity: 0;
+    translate: 0 12px;
+    transition:
+      opacity 320ms var(--ease-exit),
+      translate 320ms var(--ease-exit);
+  }
+  html[data-anim="on"] :is(.beat, .furniture)[data-in] [data-rise] {
+    opacity: 1;
+    translate: 0 0;
+    transition:
+      opacity 600ms var(--ease-out-expo) calc(260ms + var(--ri, 0) * 50ms),
+      translate 600ms var(--ease-out-expo) calc(260ms + var(--ri, 0) * 50ms);
+  }
+  html[data-anim="on"] :is(.beat, .furniture) .kicker {
+    opacity: 0;
+    transition: opacity 240ms var(--ease-exit);
+  }
+  html[data-anim="on"] :is(.beat, .furniture)[data-in] .kicker {
+    opacity: 1;
+    transition: opacity 420ms steps(6, end) 60ms;
+  }
+}
+/* The finish-all event (tests, print) and reduced motion land everything. */
+html[data-motion-finished] :is(.beat, .furniture) :is(.wi, [data-rise], .kicker) {
+  transition: none !important;
+}
+
+/* ---------------- Sheets ----------------
+   Flowing sections: opaque, their own skin, sliding over the stage. A sheet
+   after a scene overlaps its last screen, so it slides over a still panel. */
+.sheet {
+  position: relative;
+  padding-block: var(--sheet-y);
+  background: var(--skin-base);
+  color: var(--skin-text1);
+
+  @variant pin {
+    z-index: 3;
+  }
+}
+.sheet[data-overlap] {
+  @variant pin {
+    margin-top: -100svh;
+  }
+}
+/* Its top edge is a front when the skin changes: a lime line, glow on the dark side. */
+.sheet[data-edge="front"]::before {
+  content: "";
+  position: absolute;
+  inset: -32px 0 auto;
+  height: 33px;
+  pointer-events: none;
+  background:
+    linear-gradient(var(--color-lime), var(--color-lime)) 0 31px / 100% 1.5px no-repeat,
+    linear-gradient(to top, color-mix(in oklch, var(--color-lime) 22%, transparent), transparent) 0 0 / 100% 31px no-repeat;
+}
+/* Same-skin hand-offs feather instead. */
+.sheet[data-edge="feather"]::before {
+  content: "";
+  position: absolute;
+  inset: -24svh 0 auto;
+  height: 24svh;
+  pointer-events: none;
+  background: linear-gradient(transparent, var(--skin-base));
+}
+
+@media print {
+  .scene,
+  .panel,
+  .beat,
+  .furniture {
+    position: static !important;
+    height: auto !important;
+    margin: 0 !important;
+  }
+  .wi,
+  [data-rise],
+  .kicker {
+    transform: none !important;
+    translate: none !important;
+    opacity: 1 !important;
+  }
+}

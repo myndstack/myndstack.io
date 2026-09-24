@@ -6,6 +6,8 @@ import CalInline, { CAL_LINK } from "@/components/CalInline";
 import ContactFormPanel from "@/components/ContactFormPanel";
 import { CONTACT_COPY } from "@/lib/landing/chapters";
 
+import { Kicker, Lede, Title } from "../type/Type";
+
 type Props = {
   readonly email: string;
   readonly phone: string;
@@ -49,43 +51,46 @@ export default function ContactChapter({ email, phone, phoneHref, location, turn
   };
 
   return (
-    <section id="contact" className="contact-ch" data-surface="graphite" aria-labelledby={`${id}-title`}>
-      <div className="page-col contact-grid">
+    <section
+      id="contact"
+      className="sheet sheet--contact"
+      data-skin="machined"
+      data-accent="lime"
+      data-overlap=""
+      data-edge="feather"
+      aria-labelledby={`${id}-title`}
+    >
+      <div className="ms-grid contact-grid">
         <div className="contact-copy">
-          <p className="chapter-kicker">
-            <span className="stamp">§10</span>
-            <span>{CONTACT_COPY.kicker}</span>
-          </p>
-          <h2 id={`${id}-title`} className="chapter-title contact-title">
-            {CONTACT_COPY.title}
-          </h2>
-          <p className="chapter-lede">{CONTACT_COPY.lede}</p>
+          <Kicker n="§10">{CONTACT_COPY.kicker}</Kicker>
+          <Title id={`${id}-title`} lines={[CONTACT_COPY.title]} />
+          <Lede>{CONTACT_COPY.lede}</Lede>
 
           <dl className="contact-facts">
             <div>
-              <dt className="hud-k">Email</dt>
+              <dt className="t-mono-10">Email</dt>
               <dd>
-                <a href={`mailto:${email}`} className="ulink">
+                <a href={`mailto:${email}`} className="ms-link">
                   {email}
                 </a>
               </dd>
             </div>
             <div>
-              <dt className="hud-k">Phone</dt>
+              <dt className="t-mono-10">Phone</dt>
               <dd>
-                <a href={phoneHref} className="ulink">
+                <a href={phoneHref} className="ms-link">
                   {phone}
                 </a>
               </dd>
             </div>
             <div>
-              <dt className="hud-k">Studio</dt>
+              <dt className="t-mono-10">Studio</dt>
               <dd>{location}</dd>
             </div>
           </dl>
         </div>
 
-        <div className="contact-panel">
+        <div className="contact-panel ms-card">
           {hasCal ? (
             <div role="tablist" aria-label="How to reach us" className="contact-tabs">
               {TABS.map((t, i) => (

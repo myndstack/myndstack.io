@@ -2,6 +2,8 @@
  * Shared types of the landing engine. Everything under lib/landing/engine/ is
  * pure (no DOM, no three.js) so it runs in vitest; only gl/* touches WebGL.
  */
+import type { BoxSpec } from "./layout";
+import type { Skin } from "./skins";
 
 /** The engine's five modules, front to back along its axis. */
 export const MODULES = ["face", "interface", "models", "compute", "data"] as const;
@@ -72,9 +74,24 @@ export const CH = {
   focus: 36,
   /** Playhead auto-rotation, turns per second (work: synced to the documents' scan line). */
   spin: 37,
+  /** The iris: 0 closed, 1 the bore open onto the SIGNAL chamber (capabilities). */
+  portal: 38,
+  /** Dial rotation, degrees clockwise: a capability's detent turns its arc to 12 o'clock. */
+  dial: 39,
+  /** Fit blend: 0 frames the posed bounding sphere, 1 the face's CORE circle (from the beat's `fit`). */
+  circle: 40,
+  /** Target circle on the canvas, px — baked by resolve() from the beat's box, fill and offsets. */
+  cx: 41,
+  cy: 42,
+  cr: 43,
+  /** Rim light (= the halo's colour), ground grid, dust, and visibility (0 = parked off stage). */
+  rim: 44,
+  grid: 45,
+  dust: 46,
+  vis: 47,
 } as const;
 
-export const POSE_LEN = 38;
+export const POSE_LEN = 48;
 export type ChannelName = keyof typeof CH;
 export type Pose = Float32Array;
 
@@ -85,33 +102,37 @@ export type PoseSpec = Partial<Record<Exclude<ChannelName, "lift" | "arc">, numb
 };
 
 /** Channel groups share an ease and a delay/lead inside a travel. */
-export type ChannelGroup = "orbit" | "assembly" | "look" | "arcs" | "playhead";
+export type ChannelGroup = "orbit" | "assembly" | "look" | "arcs" | "playhead" | "iris";
 export type Bezier = readonly [number, number, number, number];
 
-export type HostId = "stage" | "dock-pricing" | "dock-faq" | "dock-closing";
-export type EngineBox = "rail" | "ring" | "ringTop" | "dock";
 export type FitKind = "sphere" | "circle";
 
-/** Which reference point of the marker sits on the anchor line at the hold's centre. */
-export type MarkerRef = "top" | "center" | "bottom";
+/** The pinned run's scenes, in page order: one sticky panel each. */
+export const SCENES = ["intro", "stack", "caps", "work", "process", "tools", "studio", "closing"] as const;
+export type SceneId = (typeof SCENES)[number];
 
 export type Beat = {
   readonly id: string;
-  /** `[data-beat-marker="…"]` — an in-flow (never sticky) element. */
-  readonly marker: string;
-  readonly ref?: MarkerRef;
-  /** Viewport fraction the marker's reference point sits at, mid-hold (default: the reading line). */
-  readonly anchor?: number;
+  readonly scene: SceneId;
+  /**
+   * svh of the travel INTO this beat from the hold above. A scene's first
+   * beat after a flowing section travels behind the sheets instead (0 here).
+   */
+  readonly travel: number;
   /** Hold length in svh; 0 = a pass-through waypoint. */
   readonly hold: number;
-  readonly host: HostId;
   readonly fit: FitKind;
+  /** The grid box the engine fits into (lib/landing/engine/layout.ts). */
+  readonly box: BoxSpec;
+  /** The stage's skin while this beat holds (it only ever changes at a front: scenes.ts). */
+  readonly skin: Skin;
+  /** The accent this beat remaps `--accent` to. */
+  readonly accent: ArcKey;
   /**
-   * Box within the host the engine fits into: the rail slot (columns 7–12),
-   * the ring centred in it, the ring at its top over the readout plate
-   * (capabilities), or a dock's own box.
+   * When this beat's words come in, as a phase of its travel and hold
+   * (-1 → 0 the travel, 0 → 1 the hold). Default -0.3: at 70% of the travel.
    */
-  readonly box: EngineBox;
+  readonly enter?: number;
   readonly pose: PoseSpec;
   /** Per-group ease of the travel INTO this beat (default: the group's ease). */
   readonly ease?: Partial<Record<ChannelGroup, Bezier>>;
@@ -123,15 +144,6 @@ export type Beat = {
     readonly cap?: number;
     readonly complete?: boolean;
   };
-};
-
-export type SurfaceKind = "ink" | "graphite" | "paper";
-
-/** A surface band in document coordinates (px). */
-export type SurfaceBand = {
-  readonly top: number;
-  readonly bottom: number;
-  readonly kind: SurfaceKind;
 };
 
 /** `html[data-engine]`. Absent ("static") without JS or when motion is off. */

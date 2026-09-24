@@ -1,294 +1,218 @@
-/* §07 Studio (founder + contrast) and §08 Pricing. */
+/* §07 — the studio: the founder's ID card, then the agency ↔ Myndstack switch. */
 @reference "../../../app/globals.css";
 
-/* ================= §07 Studio ================= */
-.founder-head {
-  max-width: 760px;
-  margin-bottom: 48px;
-}
-/* In the copy column: small enough that "Founder-led." never breaks at its hyphen. */
-.founder-title {
-  font-size: clamp(30px, 3.3vw, 48px);
-  line-height: 1.02;
-}
-/* The static layout's engine beside the studio, in the switch's state
-   (pinned, the stage shows it). Phones keep just the switch's own ring. */
-.engine-slot--studio {
-  @media (width < 62.5rem) {
-    display: none;
+.founder-copy {
+  @media (width >= 62.5rem) {
+    grid-column: 7 / span 5;
+  }
+  @variant pin {
+    align-self: center;
   }
 }
-.founder:has(.contrast[data-state="agency"]) .engine-slot--studio [data-poster="studio"],
-.founder:not(:has(.contrast[data-state="agency"])) .engine-slot--studio [data-poster="studio-agency"] {
-  display: none;
+.founder-copy .t-lede {
+  margin-top: 20px;
 }
-/* The ID panel, then the switch — one column beside the engine. */
-.founder-grid {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr);
-  gap: 32px;
+.id-card {
+  margin-top: 36px;
 }
-.founder-people {
+.id-cmd {
+  margin: -8px 0 18px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--skin-line);
+  color: var(--skin-text3);
+  text-transform: none;
+}
+.id-cmd span {
+  color: var(--accent);
+}
+.id-row {
   display: flex;
-  flex-direction: column;
-  gap: 24px;
+  align-items: center;
+  gap: 18px;
+}
+.id-row h3 {
+  margin: 0 0 4px;
+}
+.id-row p {
   margin: 0;
-  padding: 0;
-  list-style: none;
 }
-.founder-card {
-  display: grid;
-  grid-template-columns: 96px minmax(0, 1fr);
-  gap: 20px;
-
-  /* Narrow: the badge sits above the ID instead of squeezing it. */
-  @media (width < 35rem) {
-    grid-template-columns: minmax(0, 1fr);
-  }
-  align-items: start;
-  padding: 24px;
-  border: 1px solid var(--color-line);
-  border-top: 2px solid var(--color-lime);
-  background: var(--color-surface);
-}
-.founder-badge {
-  position: relative;
-  aspect-ratio: 1;
-
-  @media (width < 35rem) {
-    width: 96px;
-  }
-}
-.founder-initials {
-  position: absolute;
-  inset: 0;
+.id-mark {
   display: grid;
   place-items: center;
-  font-family: var(--font-display);
-  font-size: var(--text-30);
-  font-weight: 600;
-  letter-spacing: -0.02em;
-  color: var(--color-t1);
-}
-.founder-name {
-  margin: 0;
-  font-family: var(--font-display);
-  font-size: var(--text-30);
-  font-weight: 600;
-  letter-spacing: -0.02em;
-}
-.founder-role {
-  margin: 4px 0 0;
-  font-family: var(--font-mono);
-  font-size: var(--text-12);
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: var(--color-lime);
-}
-.founder-facts {
-  display: grid;
-  gap: 6px;
-  margin: 20px 0 0;
-}
-.founder-facts div {
-  display: flex;
-  gap: 12px;
-}
-.founder-facts dt {
+  flex: none;
   width: 56px;
+  height: 56px;
+  border: 1px solid var(--skin-rule);
+  color: var(--accent);
 }
-.founder-facts dd {
-  margin: 0;
+.id-facts {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+  margin: 24px 0 0;
+  padding-top: 18px;
+  border-top: 1px solid var(--skin-line);
 }
-.founder-links {
+.id-facts dd {
+  margin: 6px 0 0;
+  font-size: 15px;
+  color: var(--skin-text1);
+}
+.id-links {
   display: flex;
   flex-wrap: wrap;
   gap: 8px 20px;
-  margin: 20px 0 0;
-  padding: 16px 0 0;
-  border-top: 1px solid var(--color-line);
+  margin: 22px 0 0;
+  padding: 0;
   list-style: none;
-  font-size: var(--text-15);
+  font-size: 15px;
 }
-
-/* Agency ↔ Myndstack. */
-.contrast {
-  min-width: 0;
-  padding: clamp(20px, 4vw, 28px);
-  border: 1px solid var(--color-line);
-  background: var(--color-surface);
-}
-.contrast-head {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 16px 24px;
-  margin-bottom: 24px;
-}
-.contrast-ring {
-  flex: none;
-  width: 72px;
-  height: 72px;
-
-  @media (width >= 35rem) {
-    width: 88px;
-    height: 88px;
+.founder .slot {
+  @media (width >= 62.5rem) {
+    grid-column: 1 / span 6;
+    grid-row: 1;
   }
 }
-/* Agency: the arcs go grey and break apart — the hand-offs. */
-.contrast[data-state="agency"] .core-mini-arc {
-  stroke: var(--color-t6) !important;
-  stroke-dasharray: 60 34;
-  opacity: 0.8;
+
+.contrast-cell {
+  @media (width >= 62.5rem) {
+    grid-column: 1 / span 6;
+  }
+  @variant pin {
+    align-self: center;
+  }
 }
-.contrast-toggle {
+/* The switch on the skin: its card, its rules, its type. */
+.landing .contrast {
+  padding: 32px;
+  border: 1px solid var(--skin-line);
+  background: var(--skin-card);
+  box-shadow: inset 0 1px 0 color-mix(in oklch, var(--skin-text1) 6%, transparent);
+}
+.landing .contrast-label {
+  color: var(--skin-mute);
+}
+.landing .contrast[data-state="agency"] .contrast-label[data-side="agency"],
+.landing .contrast[data-state="ours"] .contrast-label[data-side="ours"] {
+  color: var(--skin-text1);
+}
+.landing .contrast-switch {
+  border-color: var(--skin-rule);
+  background: var(--skin-inset);
+}
+.landing .contrast-table th {
+  color: var(--skin-mute);
+}
+.landing .contrast-table td {
+  border-top-color: var(--skin-line);
+}
+.landing .contrast-table td[data-side="agency"] {
+  color: var(--skin-text3);
+}
+.landing .contrast-table td[data-side="ours"] {
+  color: var(--skin-text1);
+}
+.landing .contrast[data-state="agency"] td[data-side="agency"] {
+  color: var(--skin-text1);
+}
+.landing .contrast[data-state="agency"] td[data-side="ours"] {
+  color: var(--skin-mute);
+}
+
+/* The contrast as a split diff: the agency's lines out, ours in. */
+.landing .diff-file {
   display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 10px 14px;
+  justify-content: space-between;
+  margin: 0;
+  padding: 8px 12px;
+  border: 1px solid var(--skin-line);
+  border-bottom: 0;
+  background: var(--skin-inset);
+  color: var(--skin-text3);
   font-family: var(--font-mono);
-  font-size: var(--text-12);
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
+  font-size: 11px;
+  letter-spacing: 0.06em;
 }
-.contrast-label {
-  white-space: nowrap;
-  color: var(--color-t5);
-  transition: color var(--dur-base) var(--ease-brand);
-}
-.contrast[data-state="agency"] .contrast-label[data-side="agency"],
-.contrast[data-state="ours"] .contrast-label[data-side="ours"] {
-  color: var(--color-t1);
-}
-.contrast-switch {
-  position: relative;
-  flex: none;
-  width: 56px;
-  height: 30px;
-  padding: 0;
-  border: 1px solid var(--color-line-3);
-  background: var(--color-ink);
-}
-.contrast-knob {
-  position: absolute;
-  top: 4px;
-  left: 4px;
-  width: 20px;
-  height: 20px;
-  background: var(--color-t5);
-  transition:
-    translate var(--dur-base) var(--ease-out-expo),
-    background var(--dur-base) var(--ease-brand);
-}
-.contrast-switch[aria-checked="true"] .contrast-knob {
-  translate: 26px 0;
-  background: var(--color-lime);
-  box-shadow: var(--shadow-glow);
-}
-.contrast-table {
-  width: 100%;
-  border-collapse: collapse;
-  table-layout: fixed;
-  font-size: var(--text-15);
-}
-.contrast-table th {
-  padding: 0 12px 12px 0;
-  text-align: left;
-  font-family: var(--font-mono);
-  font-size: var(--text-11);
+.landing .diff-file b {
   font-weight: 400;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: var(--color-t5);
 }
-.contrast-table td {
-  padding: 14px 16px 14px 0;
-  border-top: 1px solid var(--color-line);
-  vertical-align: top;
-  line-height: 1.45;
-  transition:
-    color var(--dur-base) var(--ease-brand),
-    opacity var(--dur-base) var(--ease-brand);
+.landing .diff-del {
+  color: var(--color-spec-design);
 }
-.contrast-table td[data-side="agency"] {
-  color: var(--color-t4);
-}
-.contrast-table td[data-side="ours"] {
-  color: var(--color-t1);
-}
-.contrast-table td[data-side="ours"]::before {
-  content: "→ ";
-  font-family: var(--font-mono);
+.landing .diff-add {
   color: var(--color-lime);
 }
-.contrast[data-state="agency"] td[data-side="agency"] {
-  color: var(--color-t1);
+.landing .contrast-table {
+  border: 1px solid var(--skin-line);
 }
-.contrast[data-state="agency"] td[data-side="ours"] {
-  color: var(--color-t5);
+.landing .contrast-table th {
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--skin-line);
+  background: var(--skin-inset);
 }
-.contrast[data-state="ours"] td[data-side="agency"] {
-  text-decoration: line-through;
-  text-decoration-color: var(--color-t6);
+.landing .contrast-table th[data-side="agency"]::before {
+  content: "− ";
+  color: var(--color-spec-design);
 }
-
-/* ================= §08 Pricing ================= */
-.pricing-ch {
+.landing .contrast-table th[data-side="ours"]::before {
+  content: "+ ";
+  color: var(--color-lime);
+}
+.landing .contrast-table td {
   position: relative;
-  padding-block: var(--section-y);
+  padding: 11px 14px 11px 46px;
+  font-size: 15px;
 }
-/* The heading, and the engine's first dock beside it. */
-.pricing-head {
-  display: grid;
-  gap: 24px;
-  margin-bottom: 56px;
-
-  @media (width >= 62.5rem) {
-    grid-template-columns: minmax(0, 1fr) 260px;
-    align-items: center;
-    gap: 48px;
-  }
+.landing .contrast-table td + td {
+  border-left: 1px solid var(--skin-line);
 }
-.pricing-head .engine-dock {
-  @media (width < 62.5rem) {
+.landing .contrast-table td::before {
+  position: absolute;
+  top: 11px;
+  left: 28px;
+  font-family: var(--font-mono);
+}
+.landing .contrast-table td[data-side="agency"]::before {
+  content: "−";
+  color: var(--color-spec-design);
+}
+.landing .contrast-table td[data-side="ours"]::before {
+  content: "+";
+  color: var(--color-lime);
+}
+.landing .diff-ln {
+  position: absolute;
+  top: 13px;
+  left: 8px;
+  color: var(--skin-mute);
+  font-family: var(--font-mono);
+  font-size: 10px;
+}
+.landing .contrast-table td[data-side="agency"] {
+  background: color-mix(in oklch, var(--color-spec-design) 5%, transparent);
+}
+.landing .contrast-table td[data-side="ours"] {
+  background: color-mix(in oklch, var(--color-lime) 5%, transparent);
+}
+.landing .contrast[data-state="agency"] td[data-side="agency"] {
+  background: color-mix(in oklch, var(--color-spec-design) 11%, transparent);
+}
+.landing .contrast[data-state="ours"] td[data-side="ours"] {
+  background: color-mix(in oklch, var(--color-lime) 10%, transparent);
+}
+/* Narrow: a unified diff — each concern as its removed line, then its added one. */
+@media (width < 40rem) {
+  .landing .contrast-table thead {
     display: none;
   }
-}
-.pricing-title {
-  font-size: var(--text-title);
-  line-height: 1.02;
-}
-.pricing-note {
-  margin: 32px 0 0;
-  font-size: var(--text-13);
-}
-
-/* The featured tier wears the spectrum as a travelling beam. */
-@property --beam {
-  syntax: "<angle>";
-  inherits: false;
-  initial-value: 0deg;
-}
-.pricing-ch .pricing-card--featured {
-  border-color: transparent;
-  background:
-    linear-gradient(var(--color-surface-3), var(--color-surface-3)) padding-box,
-    conic-gradient(
-        from var(--beam),
-        var(--color-lime),
-        var(--color-spec-ai),
-        var(--color-spec-product),
-        var(--color-spec-design),
-        var(--color-spec-arch),
-        var(--color-lime)
-      )
-      border-box;
-}
-.pricing-run.is-ambient .pricing-card--featured {
-  animation: beam 6s linear infinite;
-}
-@keyframes beam {
-  to {
-    --beam: 360deg;
+  .landing .contrast-table tr,
+  .landing .contrast-table td {
+    display: block;
+  }
+  .landing .contrast-table td + td {
+    border-left: 0;
+  }
+  .landing .contrast-table td[data-side="ours"] {
+    border-top: 0;
   }
 }

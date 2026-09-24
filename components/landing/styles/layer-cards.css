@@ -1,0 +1,385 @@
+/* The layer cards at the stack's stations: what each layer is, as software —
+   an app (interface), an agent's trace (models), an API under autoscaling
+   (compute), a vector search (data). Wireframes in the sheet's ink. */
+@reference "../../../app/globals.css";
+
+/* ---------------- Layer cards (the stack's stations) ----------------
+   A wireframe of each layer's software, in the sheet's ink: paper card,
+   the layer's hue for what's live. */
+.layer-card {
+  position: relative;
+  container-type: inline-size;
+  margin: 0;
+  border: 1px solid var(--skin-rule);
+  background: var(--skin-card);
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.45),
+    0 22px 44px -28px rgb(40 36 28 / 0.4);
+  font-family: var(--font-mono);
+  color: var(--skin-text2);
+}
+.layer-card::before {
+  content: "";
+  position: absolute;
+  inset: -1px -1px auto;
+  height: 2px;
+  background: var(--hue);
+}
+.lc-bar {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 9px 12px;
+  border-bottom: 1px solid var(--skin-line);
+  color: var(--skin-text3);
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.lc-status {
+  color: var(--hue);
+}
+.lc-body {
+  padding: 14px 12px;
+  font-size: 11px;
+  line-height: 1.5;
+}
+
+/* 01 Interface: a browser and a phone, the same product. */
+.ui {
+  position: relative;
+  aspect-ratio: 16 / 9;
+}
+.ui b {
+  display: block;
+  height: 5px;
+  background: var(--skin-rule);
+}
+.ui-browser {
+  position: absolute;
+  inset: 0 22% 0 0;
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--skin-rule);
+  background: var(--skin-raised);
+}
+.ui-url {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 5px 7px;
+  border-bottom: 1px solid var(--skin-line);
+  color: var(--skin-text3);
+  font-size: 9px;
+  white-space: nowrap;
+}
+.ui-url i {
+  flex: none;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--skin-rule);
+}
+.ui-url span {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  margin-left: 6px;
+  padding: 0 6px;
+  border: 1px solid var(--skin-line);
+  text-overflow: ellipsis;
+}
+.ui-page {
+  display: grid;
+  flex: 1;
+  grid-template-columns: 22% minmax(0, 1fr);
+  min-height: 0;
+}
+.ui-side {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 8px 7px;
+  border-right: 1px solid var(--skin-line);
+}
+.ui-side .is-on {
+  background: var(--hue);
+}
+.ui-main {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+  padding: 8px;
+}
+.ui-main .ui-h {
+  width: 45%;
+  height: 7px;
+  background: var(--skin-text3);
+}
+.ui-tiles {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+}
+.ui-tile {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  gap: 4px;
+  height: 34px;
+  padding: 5px;
+  border: 1px solid var(--skin-line);
+}
+.ui-tile svg {
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+.ui-tile path {
+  fill: none;
+  stroke: var(--hue);
+  stroke-width: 1.4;
+  vector-effect: non-scaling-stroke;
+}
+.ui .is-short {
+  width: 60%;
+}
+.ui-phone {
+  position: absolute;
+  right: 0;
+  bottom: -10px;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  width: 27%;
+  aspect-ratio: 9 / 17;
+  padding: 13px 6px 6px;
+  border: 1.5px solid var(--skin-text2);
+  border-radius: 10px;
+  background: var(--skin-card);
+  box-shadow: -10px 12px 24px -16px rgb(40 36 28 / 0.5);
+}
+.ui-phone .ui-notch {
+  position: absolute;
+  top: 5px;
+  left: 50%;
+  width: 30%;
+  height: 3px;
+  border-radius: 2px;
+  translate: -50% 0;
+}
+.ui-phone .ui-h {
+  width: 70%;
+  height: 6px;
+  background: var(--skin-text3);
+}
+.ui-phone .ui-block {
+  height: 30%;
+  border: 1px solid var(--skin-line);
+  background: color-mix(in oklch, var(--hue) 12%, transparent);
+}
+.ui-phone .ui-cta {
+  height: 9px;
+  margin-top: auto;
+  border-radius: 2px;
+  background: var(--hue);
+}
+
+/* 02 Models: an agent's spans, then its evals. */
+.trace {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.trace li {
+  display: grid;
+  grid-template-columns: 10ch minmax(0, 1fr);
+  align-items: center;
+  gap: 10px;
+  font-size: 10px;
+  white-space: nowrap;
+}
+.trace i {
+  position: relative;
+  height: 9px;
+  background: linear-gradient(var(--skin-line), var(--skin-line)) 0 50% / 100% 1px no-repeat;
+}
+.trace i::after {
+  content: "";
+  position: absolute;
+  inset: 0 auto;
+  left: var(--x);
+  width: var(--w);
+  background: var(--hue);
+  transform-origin: 0 50%;
+}
+.evals {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 14px 0 0;
+}
+.evals span {
+  padding: 1px 6px;
+  border: 1px solid color-mix(in oklch, var(--hue) 45%, transparent);
+  color: var(--hue);
+  font-size: 9.5px;
+}
+
+/* 03 Compute: requests over the instances autoscaling under them. */
+.load {
+  display: block;
+  width: 100%;
+  height: 76px;
+  overflow: visible;
+}
+.load-grid {
+  stroke: var(--skin-line);
+  stroke-width: 1;
+  vector-effect: non-scaling-stroke;
+}
+.load-area {
+  fill: color-mix(in oklch, var(--hue) 16%, transparent);
+  stroke: color-mix(in oklch, var(--hue) 60%, transparent);
+  stroke-width: 1;
+  vector-effect: non-scaling-stroke;
+}
+.load-line {
+  fill: none;
+  stroke: var(--skin-text1);
+  stroke-width: 1.6;
+  stroke-dasharray: 1;
+  vector-effect: non-scaling-stroke;
+}
+.log {
+  display: grid;
+  gap: 3px;
+  margin: 10px 0 0;
+  padding: 8px 0 0;
+  border-top: 1px solid var(--skin-line);
+  list-style: none;
+  font-size: 10px;
+  white-space: nowrap;
+}
+.log b {
+  display: inline-block;
+  min-width: 6ch;
+  color: var(--hue);
+  font-weight: 400;
+}
+.log em {
+  float: right;
+  color: var(--skin-text3);
+  font-style: normal;
+}
+
+/* 04 Data: a search by meaning over the index the pipelines keep. */
+.query {
+  margin: 0 0 10px;
+  color: var(--skin-text1);
+  white-space: nowrap;
+}
+.query q {
+  color: var(--hue);
+}
+.matches {
+  display: grid;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.matches li {
+  display: grid;
+  grid-template-columns: 8ch minmax(0, 1fr) 4ch;
+  align-items: center;
+  gap: 10px;
+  font-size: 10px;
+}
+.matches i {
+  height: 6px;
+  background: var(--skin-line);
+}
+.matches i::before {
+  content: "";
+  display: block;
+  width: calc((var(--s) - 0.75) * 400%);
+  height: 100%;
+  background: var(--hue);
+  transform-origin: 0 50%;
+}
+.matches em {
+  color: var(--skin-text3);
+  font-style: normal;
+  text-align: right;
+}
+.flowline {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 12px 0 0;
+  padding-top: 10px;
+  border-top: 1px solid var(--skin-line);
+  color: var(--skin-text3);
+  font-size: 10px;
+}
+.flowline span {
+  padding: 1px 6px;
+  border: 1px solid var(--skin-rule);
+  color: var(--skin-text2);
+}
+@container (width < 250px) {
+  .lc-status,
+  .flowline,
+  .log li:nth-child(3) {
+    display: none;
+  }
+}
+
+/* The card assembles as its station takes the stage (pinned, with motion). */
+@media screen and (min-width: 62.5rem) and (min-height: 37.5rem) and (prefers-reduced-motion: no-preference) {
+  html[data-anim="on"] .layer-card .trace i::after,
+  html[data-anim="on"] .layer-card .matches i::before {
+    transform: scaleX(0);
+    transition: transform 240ms var(--ease-exit);
+  }
+  html[data-anim="on"] .beat[data-in] .layer-card .trace i::after,
+  html[data-anim="on"] .beat[data-in] .layer-card .matches i::before {
+    transform: none;
+    transition: transform 700ms var(--ease-out-expo) calc(520ms + var(--k, 0) * 110ms);
+  }
+  html[data-anim="on"] .layer-card :is(.evals span, .log li) {
+    opacity: 0;
+    transition: opacity 200ms var(--ease-exit);
+  }
+  html[data-anim="on"] .beat[data-in] .layer-card :is(.evals span, .log li) {
+    opacity: 1;
+    transition: opacity 360ms var(--ease-brand) calc(900ms + var(--k, 0) * 120ms);
+  }
+  html[data-anim="on"] .layer-card :is(.load-line, .ui-tile path) {
+    stroke-dasharray: 1;
+    stroke-dashoffset: 1;
+    transition: stroke-dashoffset 240ms var(--ease-exit);
+  }
+  html[data-anim="on"] .beat[data-in] .layer-card :is(.load-line, .ui-tile path) {
+    stroke-dashoffset: 0;
+    transition: stroke-dashoffset 1100ms var(--ease-out-expo) 480ms;
+  }
+  html[data-anim="on"] .layer-card :is(.load-area, .ui-phone) {
+    opacity: 0;
+    translate: 0 8px;
+    transition:
+      opacity 200ms var(--ease-exit),
+      translate 200ms var(--ease-exit);
+  }
+  html[data-anim="on"] .beat[data-in] .layer-card :is(.load-area, .ui-phone) {
+    opacity: 1;
+    translate: 0 0;
+    transition:
+      opacity 600ms var(--ease-out-expo) 420ms,
+      translate 600ms var(--ease-out-expo) 420ms;
+  }
+}

@@ -1,0 +1,52 @@
+/* ============================================================
+   The three skins — MACHINED (the studio), DRAFTING (the sheet), SIGNAL
+   (inside the bore). One token set: lib/landing/engine/skins.ts holds the
+   same values (skins.test.ts keeps them equal), and the renderer clears to
+   `--skin-base`, so the canvas and the page are the same colour by
+   construction. Only custom properties here; surfaces.css paints with them.
+   ============================================================ */
+
+[data-skin="machined"] {
+  --skin-base: #0a0a0b;
+  --skin-card: #111214;
+  --skin-raised: #17181b;
+  --skin-inset: #0d0e10;
+  --skin-line: rgb(255 255 255 / 0.07);
+  --skin-rule: rgb(255 255 255 / 0.14);
+  --skin-text1: #f4f4f6;
+  --skin-text2: #c7c7ce;
+  --skin-text3: #9a9aa2;
+  --skin-mute: #83838c;
+  --skin-accent: #c9f24d;
+  --skin-focus: #c9f24d;
+}
+
+[data-skin="drafting"] {
+  --skin-base: #d9d7d1;
+  --skin-card: #e4e2dc;
+  --skin-raised: #eceae5;
+  --skin-inset: #d2d0c9;
+  --skin-line: rgb(10 10 11 / 0.14);
+  --skin-rule: rgb(10 10 11 / 0.32);
+  --skin-text1: #0a0a0b;
+  --skin-text2: #3d3d42;
+  --skin-text3: #4a4b52;
+  --skin-mute: #55565d;
+  --skin-accent: #445c00;
+  --skin-focus: #0a0a0b;
+}
+
+[data-skin="signal"] {
+  --skin-base: #060708;
+  --skin-card: #0c0d0f;
+  --skin-raised: #121316;
+  --skin-inset: #08090a;
+  --skin-line: rgb(255 255 255 / 0.06);
+  --skin-rule: rgb(255 255 255 / 0.12);
+  --skin-text1: #f4f4f6;
+  --skin-text2: #c7c7ce;
+  --skin-text3: #9a9aa2;
+  --skin-mute: #86868f;
+  --skin-accent: #c9f24d;
+  --skin-focus: #c9f24d;
+}

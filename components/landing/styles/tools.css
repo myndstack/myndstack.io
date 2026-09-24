@@ -1,153 +1,90 @@
-/* §06 — Tools, on paper: a compact rack of four groups (a FRAME) beside the
-   engine's elevation, one port per group. */
+/* §06 — the tools: one group row per port, beside the side elevation. */
 @reference "../../../app/globals.css";
 
-/* Below 750px tall the rack can't hold still beside the engine: it scrolls
-   past it instead (RUN), while the engine holds. */
-.tools-run {
+.tools-head {
+  @media (width >= 62.5rem) {
+    grid-column: 1 / span 5;
+  }
   @variant pin {
-    @media (height < 46.875rem) {
-      position: relative;
-      height: auto;
-      padding-block: var(--safe-top) var(--safe-bottom);
-    }
+    align-self: start;
+    margin-top: 8px;
   }
 }
-.tools-title {
-  max-width: 14ch;
-  font-size: var(--text-title);
-  line-height: 1.02;
-
-  @variant pin {
-    font-size: clamp(30px, min(3.6vw, 6svh), 52px);
-  }
-}
-.tools-lede {
+.tools-head .t-lede {
   margin-top: 20px;
-
-  @variant pin {
-    margin-top: 14px;
-    font-size: var(--text-15);
-  }
 }
-.rack-groups {
+.rack {
   display: grid;
-  grid-template-columns: minmax(0, 1fr);
-  gap: 28px;
   margin: 40px 0 0;
   padding: 0;
   list-style: none;
+  border-top: 1px solid var(--skin-rule);
 
-  @media (width >= 35rem) and (width < 62.5rem) {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+  @media (width >= 62.5rem) {
+    grid-column: 1 / span 5;
   }
   @variant pin {
-    gap: clamp(8px, 1.8svh, 18px);
-    margin-top: clamp(16px, 3svh, 28px);
+    align-self: end;
+    margin: 0 0 8px;
   }
 }
-.rack-group {
+.rack-row {
   position: relative;
-  padding-left: 16px;
-  transition: opacity var(--dur-base) var(--ease-brand);
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 10px;
+  padding: 14px 0 14px 20px;
+  border-bottom: 1px solid var(--skin-line);
 }
-@media (hover: hover) {
-  .rack-groups:hover .rack-group:not(:hover) {
-    opacity: 0.4;
-  }
-}
-.rack-groups:focus-within .rack-group:not(:focus-within) {
-  opacity: 0.4;
-}
-/* The group's hue bar: the leader to its port starts here. */
+/* The group's hue bar (the port it plugs into lights the same). */
 .rack-bar {
   position: absolute;
   left: 0;
-  top: 4px;
-  bottom: 4px;
+  top: 16px;
+  bottom: 16px;
   width: 3px;
-  transform-origin: center top;
-  background: var(--hue);
+  background: var(--hue, var(--skin-rule));
+}
+.rack-row[data-spectrum] .rack-bar {
+  background: linear-gradient(180deg, var(--color-spec-ai), var(--color-spec-product), var(--color-spec-design), var(--color-spec-arch));
 }
 .rack-title {
   display: flex;
   align-items: baseline;
-  gap: 10px;
-  margin: 0;
-  font-family: var(--font-display);
-  font-size: var(--text-22);
-  font-weight: 600;
-
-  @variant pin {
-    font-size: var(--text-17);
-  }
+  gap: 12px;
 }
 .rack-n {
-  font-family: var(--font-mono);
-  font-size: var(--text-11);
-  color: var(--hue-c, var(--hue));
-}
-.rack-blurb {
-  margin: 4px 0 12px;
-  font-size: var(--text-15);
-  color: var(--color-paper-t2);
-
-  @variant pin {
-    margin: 2px 0 8px;
-    font-size: var(--text-13);
-  }
+  color: var(--skin-mute);
 }
 .rack-items {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(64px, 1fr));
-  gap: 10px 6px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 16px;
   margin: 0;
   padding: 0;
   list-style: none;
-
-  /* Beside the engine: one row per group (up to six marks). */
-  @media (width >= 62.5rem) {
-    grid-template-columns: repeat(6, minmax(0, 1fr));
-  }
+  color: var(--skin-text2);
 }
 .rack-item {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
+  display: inline-flex;
+  align-items: center;
   gap: 6px;
-  min-width: 0;
+  white-space: nowrap;
 }
-.rack-item svg,
-.rack-chip {
-  width: 22px;
-  height: 22px;
-  color: var(--color-ink);
+.rack-item svg {
+  width: 14px;
+  height: 14px;
+  flex: none;
 }
-.rack-chip {
-  display: grid;
-  place-items: center;
-  border: 1.5px solid var(--color-ink);
-  font-family: var(--font-mono);
-  font-size: 9px;
-  font-weight: 700;
+.rack-item .t-mono-10 {
+  color: var(--skin-text2);
 }
-/* Names wrap only between words ("Google / Cloud"); a narrow column gets a
-   tighter face so the longest single words ("Cloudflare") still fit. */
-.rack-name {
-  max-width: 100%;
-  font-family: var(--font-mono);
-  font-size: 10px;
-  line-height: 1.25;
-  letter-spacing: 0.02em;
-  color: var(--color-paper-t2);
-
-  @media (width >= 62.5rem) and (width < 75rem) {
-    font-size: 9px;
-    letter-spacing: 0;
+/* Short screens: the lede goes, the rows tighten. */
+@media screen and (min-width: 62.5rem) and (min-height: 37.5rem) and (prefers-reduced-motion: no-preference) and (height < 50rem) {
+  html[data-anim="on"] .tools-head .t-lede {
+    display: none;
   }
-}
-.rack-items {
-  @media (width >= 62.5rem) and (width < 75rem) {
-    gap: 10px 4px;
+  html[data-anim="on"] .rack-row {
+    padding-block: 10px;
   }
 }

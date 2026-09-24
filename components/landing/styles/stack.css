@@ -1,0 +1,167 @@
+/* §02 — the stack, on paper: the overview, four stations, the lock. The
+   stack's manifest (stack.ts) holds bottom-left through all of it. */
+@reference "../../../app/globals.css";
+
+.stack-head {
+  @media (width >= 62.5rem) {
+    grid-column: 1 / span 5;
+  }
+  @variant pin {
+    align-self: start;
+    margin-top: 8px;
+  }
+}
+/* A station's words keep columns 1–4: its layer card takes 5–7, the module 8–12. */
+.station-head {
+  @variant pin {
+    grid-column: 1 / span 4;
+  }
+}
+.stack-head .t-lede {
+  margin-top: 24px;
+}
+.station-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 32px 0 0;
+  padding: 0;
+  list-style: none;
+}
+.locked-readout {
+  margin: 0;
+  color: var(--accent);
+}
+
+/* The layer card sits between the words and the module it describes, a
+   leader running from its edge to the module's rim. */
+.layer-card {
+  max-width: 26rem;
+
+  @media (width >= 62.5rem) {
+    grid-column: 1 / span 5;
+  }
+  @variant pin {
+    grid-column: 5 / span 3;
+    align-self: center;
+    max-width: none;
+    margin-top: 4svh;
+  }
+}
+.layer-card::after {
+  @variant pin {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 100%;
+    width: calc(var(--gap) + 36px);
+    height: 5px;
+    translate: 0 -50%;
+    background:
+      linear-gradient(var(--skin-rule), var(--skin-rule)) 0 50% / calc(100% - 5px) 1px no-repeat,
+      linear-gradient(var(--hue), var(--hue)) 100% 50% / 5px 5px no-repeat;
+  }
+}
+
+/* The manifest: the stack as code. Its line follows the station (an
+   editor's current line); at the lock every line reads live. */
+.manifest {
+  container-type: inline-size;
+
+  @media (width >= 62.5rem) {
+    grid-column: 1 / span 5;
+  }
+  @variant pin {
+    grid-column: 1 / span 5;
+    align-self: end;
+    margin-bottom: 8px;
+  }
+}
+.furniture--stack {
+  @media (width < 62.5rem) {
+    padding: 0 var(--inset) 48px;
+    background: var(--skin-base);
+  }
+}
+html:not([data-anim="on"]) .furniture--stack {
+  padding: 0 var(--inset) 48px;
+  background: var(--skin-base);
+}
+.manifest-file {
+  display: flex;
+  justify-content: space-between;
+  margin: 0;
+  padding: 0 0 10px;
+  color: var(--skin-text3);
+}
+.parts {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  border-top: 1px solid var(--skin-rule);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  line-height: 1.5;
+}
+.part {
+  display: grid;
+  grid-template-columns: 24px 9ch minmax(0, 1fr) auto 8px;
+  align-items: center;
+  gap: 12px;
+  padding: 11px 8px 11px 0;
+  border-bottom: 1px solid var(--skin-line);
+  transition: background var(--dur-base) var(--ease-brand);
+}
+.part-n {
+  color: var(--skin-text3);
+  text-align: right;
+}
+.part-t {
+  color: var(--skin-text1);
+}
+.part-t::after {
+  content: ":";
+  color: var(--skin-text3);
+}
+.part-meta {
+  overflow: hidden;
+  color: var(--skin-text3);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.part-str {
+  color: var(--hue);
+}
+.part-str > span {
+  color: var(--skin-text3);
+}
+.part-state {
+  color: var(--hue);
+  opacity: 0;
+  transition: opacity var(--dur-base) var(--ease-brand);
+}
+.part .led {
+  color: var(--hue);
+}
+.panel[data-beat="st-interface"] [data-part="st-interface"],
+.panel[data-beat="st-models"] [data-part="st-models"],
+.panel[data-beat="st-compute"] [data-part="st-compute"],
+.panel[data-beat="st-data"] [data-part="st-data"] {
+  background: linear-gradient(90deg, var(--hue) 0 2px, color-mix(in oklch, var(--hue) 9%, transparent) 2px);
+}
+.panel[data-beat="st-interface"] [data-part="st-interface"] .led,
+.panel[data-beat="st-models"] [data-part="st-models"] .led,
+.panel[data-beat="st-compute"] [data-part="st-compute"] .led,
+.panel[data-beat="st-data"] [data-part="st-data"] .led,
+.panel[data-beat="locked"] .part .led {
+  opacity: 1;
+  box-shadow: 0 0 0 3px color-mix(in oklch, var(--hue) 22%, transparent);
+}
+.panel[data-beat="locked"] .part-state {
+  opacity: 1;
+}
+@container (width < 360px) {
+  .part-meta {
+    display: none;
+  }
+}

@@ -1,0 +1,409 @@
+/* ============================================================
+   The sheet: one frame, one grid, one type scale for the whole landing.
+   lib/landing/engine/layout.ts holds the same numbers for the engine, so the
+   object lands on the same columns as the words beside it.
+
+   - Frame at most 1600px, centred. Rails inset clamp(24px, 1/30 of the
+     width, 48px); the content box is the rails inset 24px (72 → 1368 at
+     1440). 12 columns, 24px gutters; 8 on tablets; 4 on phones.
+   - Pinned safe zones: 96px under the nav, 72px over the title block.
+   - Percentages here always resolve against a full-width box (the landing,
+     a panel, a sheet), never the viewport — no scrollbar drift.
+   ============================================================ */
+@reference "../../../app/globals.css";
+
+.landing {
+  --frame-l: max(0px, (100% - 1600px) / 2);
+  --rail: clamp(24px, min(100%, 1600px) / 30, 48px);
+  /* The content box's left/right inset from the landing's edge. */
+  --inset: calc(var(--frame-l) + var(--rail) + 24px);
+  --gap: 24px;
+  --safe-top: 96px;
+  --safe-bottom: 72px;
+  --sheet-y: clamp(96px, 10vw, 144px);
+
+  position: relative;
+  background: var(--skin-base);
+  color: var(--skin-text1);
+
+  @media (width < 62.5rem) {
+    --inset: 24px;
+    --gap: 20px;
+  }
+  @media (width < 47.5rem) {
+    --inset: 20px;
+    --gap: 16px;
+  }
+}
+/* Every skinned block sets its own ink (its tokens alone would still inherit
+   the parent's computed colour). */
+.landing [data-skin] {
+  color: var(--skin-text1);
+}
+
+/* The content box as a 12 / 8 / 4 column grid. */
+.ms-grid {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  column-gap: var(--gap);
+  padding-inline: var(--inset);
+
+  @media (width < 62.5rem) {
+    grid-template-columns: repeat(8, minmax(0, 1fr));
+  }
+  @media (width < 47.5rem) {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+/* Below 1000px every cell spans the whole content box. */
+.ms-grid > * {
+  @media (width < 62.5rem) {
+    grid-column: 1 / -1 !important;
+  }
+}
+
+/* ---------------- Type: the only sizes on /preview ---------------- */
+.t-display-xl {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: clamp(48px, 6.9vw, 120px);
+  font-weight: 500;
+  line-height: 0.92;
+  letter-spacing: -0.045em;
+  text-wrap: balance;
+
+  @variant pin {
+    font-size: min(clamp(48px, 6.9vw, 120px), 11.5svh);
+  }
+}
+.t-display-l {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: clamp(36px, 4.2vw, 72px);
+  font-weight: 500;
+  line-height: 0.96;
+  letter-spacing: -0.035em;
+  text-wrap: balance;
+
+  @variant pin {
+    font-size: min(clamp(36px, 4.2vw, 72px), 7.2svh);
+  }
+}
+.t-title-m {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: clamp(24px, 2vw, 30px);
+  font-weight: 500;
+  line-height: 1.12;
+  letter-spacing: -0.02em;
+}
+.t-title-s {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 20px;
+  font-weight: 500;
+  line-height: 1.25;
+  letter-spacing: -0.01em;
+
+  @media (width < 47.5rem) {
+    font-size: 18px;
+  }
+}
+.t-readout {
+  font-family: var(--font-display);
+  font-size: clamp(40px, 3.4vw, 56px);
+  font-weight: 500;
+  line-height: 1;
+  letter-spacing: -0.03em;
+  font-variant-numeric: tabular-nums;
+}
+.t-lede {
+  max-width: 42ch;
+  margin: 0;
+  font-size: clamp(17px, 1.3vw, 20px);
+  line-height: 1.45;
+  color: var(--skin-text2);
+}
+.t-lede b {
+  font-weight: 600;
+  color: var(--skin-text1);
+}
+.t-body {
+  margin: 0;
+  font-size: 15px;
+  line-height: 1.6;
+  color: var(--skin-text2);
+}
+/* The mono voice: uppercase, open, regular. 13 readouts · 11 labels · 10 callouts. */
+.t-mono,
+.t-mono-13,
+.t-mono-10 {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 400;
+  line-height: 1.4;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--skin-mute);
+}
+.t-mono-13 {
+  font-size: 13px;
+}
+.t-mono-10 {
+  font-size: 10px;
+}
+
+/* Cells that hold display type are containers: a title's size is also capped
+   by its own cell, so its longest word always fits (at 1920 a 120px
+   "Architected" would outgrow five columns). */
+:is(.hero-copy, .stack-head, .cap-title, .finale-copy, .work-copy, .process-copy, .tools-head, .founder-copy, .closing-copy, .pricing-copy, .faq-head, .contact-copy) {
+  container-type: inline-size;
+}
+@container (width > 0px) {
+  .t-display-xl {
+    font-size: min(clamp(48px, 6.9vw, 120px), 16.5cqi);
+  }
+  .t-display-l {
+    font-size: min(clamp(36px, 4.2vw, 72px), 14cqi);
+  }
+}
+@media screen and (min-width: 62.5rem) and (min-height: 37.5rem) and (prefers-reduced-motion: no-preference) {
+  @container (width > 0px) {
+    html[data-anim="on"] .t-display-xl {
+      font-size: min(clamp(48px, 6.9vw, 120px), 11.5svh, 16.5cqi);
+    }
+    html[data-anim="on"] .t-display-l {
+      font-size: min(clamp(36px, 4.2vw, 72px), 7.2svh, 14cqi);
+    }
+  }
+}
+
+/* Two-tone titles: the setup quiet, the payoff bright. */
+.tone-setup {
+  color: var(--skin-text3);
+}
+
+/* Eyebrow: a [§nn] stamp and a label in the accent. */
+.kicker {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 0 0 24px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+.stamp {
+  display: inline-block;
+  padding: 3px 6px 2px;
+  border: 1px solid var(--skin-rule);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  line-height: 1;
+  color: var(--skin-mute);
+}
+.kicker + .t-display-l,
+.kicker + .t-display-xl {
+  margin-top: 0;
+}
+.t-display-l + .t-lede,
+.t-display-xl + .t-lede {
+  margin-top: 24px;
+}
+
+/* ---------------- Accents ----------------
+   Each beat remaps --accent with one attribute; raw hues on dark skins, the
+   deep variants on paper (raw lime is 1.1:1 there). */
+[data-accent] {
+  --accent-raw: var(--color-lime);
+  --accent-deep: var(--color-lime-deep);
+}
+[data-accent="ai"] {
+  --accent-raw: var(--color-spec-ai);
+  --accent-deep: var(--color-spec-ai-deep);
+}
+[data-accent="product"] {
+  --accent-raw: var(--color-spec-product);
+  --accent-deep: var(--color-spec-product-deep);
+}
+[data-accent="design"] {
+  --accent-raw: var(--color-spec-design);
+  --accent-deep: var(--color-spec-design-deep);
+}
+[data-accent="arch"] {
+  --accent-raw: var(--color-spec-arch);
+  --accent-deep: var(--color-spec-arch-deep);
+}
+.landing,
+[data-skin] {
+  --accent: var(--accent-raw, var(--color-lime));
+}
+[data-skin="drafting"] {
+  --accent: var(--accent-deep, var(--color-lime-deep));
+}
+
+/* ---------------- Components ---------------- */
+/* Three buttons only: primary, secondary, text link. 52px tall. */
+.landing .btn {
+  min-height: 52px;
+  padding: 0 24px;
+  font-weight: 600;
+  font-size: 15px;
+  border-radius: 0;
+}
+.landing .btn:active {
+  transform: scale(0.97);
+  transition-duration: var(--dur-press);
+}
+.landing .btn-lime {
+  background: var(--color-lime);
+  color: var(--color-lime-ink);
+}
+.landing .btn-outline {
+  background: transparent;
+  color: var(--skin-text1);
+  border: 1px solid var(--skin-rule);
+}
+.landing .btn-outline:hover {
+  background: color-mix(in oklch, var(--skin-text1) 6%, transparent);
+  border-color: var(--skin-text1);
+  color: var(--skin-text1);
+}
+/* On paper the primary is ink with a lime label. */
+[data-skin="drafting"] .btn-lime {
+  background: var(--color-ink);
+  color: var(--color-lime);
+}
+[data-skin="drafting"] .btn-lime:hover {
+  background: #1c1d21;
+  color: var(--color-lime);
+}
+.ms-link {
+  color: var(--skin-text1);
+  background-image: linear-gradient(currentColor, currentColor);
+  background-repeat: no-repeat;
+  background-position: 100% 100%;
+  background-size: 0% 1px;
+  padding-bottom: 2px;
+  transition:
+    background-size 300ms var(--ease-out-expo),
+    color var(--dur-fast) var(--ease-brand);
+}
+.ms-link:hover,
+.ms-link:focus-visible {
+  color: var(--accent);
+  background-position: 0% 100%;
+  background-size: 100% 1px;
+}
+.landing :focus-visible {
+  outline: 2px solid var(--skin-focus);
+  outline-offset: 2px;
+}
+
+/* Card: surface, hairline, a lit top edge, square corners. */
+.ms-card {
+  position: relative;
+  padding: 32px;
+  background: var(--skin-card);
+  border: 1px solid var(--skin-line);
+  box-shadow: inset 0 1px 0 color-mix(in oklch, var(--skin-text1) 6%, transparent);
+
+  @media (width < 47.5rem) {
+    padding: 24px;
+  }
+}
+.card--spec {
+  border-top: 2px solid var(--accent);
+}
+/* Chip: 10px mono with an optional hue square. */
+.ms-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 10px;
+  border: 1px solid var(--skin-line);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  color: var(--skin-text2);
+}
+.ms-chip[data-hue]::before {
+  content: "";
+  width: 6px;
+  height: 6px;
+  background: var(--hue, var(--accent));
+}
+/* A status LED: a square that lights in its hue. */
+.led {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  background: var(--hue, currentColor);
+  opacity: 0.25;
+  transition:
+    opacity var(--dur-base) var(--ease-brand),
+    box-shadow var(--dur-base) var(--ease-brand);
+}
+.led.is-on {
+  opacity: 1;
+  box-shadow: 0 0 0 3px color-mix(in oklch, var(--hue, currentColor) 22%, transparent);
+}
+
+/* Hue map (one colour map for the whole page). */
+[data-hue="lime"] {
+  --hue: var(--color-lime);
+}
+[data-hue="ai"] {
+  --hue: var(--color-spec-ai);
+}
+[data-hue="product"] {
+  --hue: var(--color-spec-product);
+}
+[data-hue="design"] {
+  --hue: var(--color-spec-design);
+}
+[data-hue="arch"] {
+  --hue: var(--color-spec-arch);
+}
+[data-skin="drafting"] [data-hue="lime"] {
+  --hue: var(--color-lime-deep);
+}
+[data-skin="drafting"] [data-hue="ai"] {
+  --hue: var(--color-spec-ai-deep);
+}
+[data-skin="drafting"] [data-hue="product"] {
+  --hue: var(--color-spec-product-deep);
+}
+[data-skin="drafting"] [data-hue="design"] {
+  --hue: var(--color-spec-design-deep);
+}
+[data-skin="drafting"] [data-hue="arch"] {
+  --hue: var(--color-spec-arch-deep);
+}
+
+/* Static film grain over everything but the chrome. */
+.landing-grain {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  pointer-events: none;
+  opacity: 0.035;
+  background-size: 128px 128px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='128' height='128'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .5 0 0 0 0 .5 0 0 0 0 .5 0 0 0 1.6 -.45'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+@media print {
+  .landing-grain {
+    display: none !important;
+  }
+}
+@media (forced-colors: active) {
+  .landing-grain {
+    display: none;
+  }
+}

@@ -1,238 +1,51 @@
-/* §09 FAQ, the closing band and §10 Contact. */
+/* The closing: the ring on its floor, the words centred beneath it. */
 @reference "../../../app/globals.css";
 
-/* ================= §09 FAQ ================= */
-.faq-ch {
-  position: relative;
-  padding-block: var(--section-y);
-}
-.faq-grid {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr);
-  gap: 40px;
-
-  @media (width >= 62.5rem) {
-    grid-template-columns: minmax(0, 4fr) minmax(0, 7fr);
-    gap: 8%;
-  }
-}
-.faq-head {
-  @media (width >= 62.5rem) {
-    position: sticky;
-    top: 120px;
-    align-self: start;
-  }
-}
-.faq-title {
-  font-size: var(--text-title);
-  line-height: 1.02;
-}
-.faq-head .engine-dock {
-  @media (width < 62.5rem) {
-    display: none;
-  }
-}
-.faq-list {
-  margin: 0;
-  padding: 0;
-  list-style: none;
-  border-top: 1px solid var(--color-line);
-}
-.faq-item {
-  border-bottom: 1px solid var(--color-line);
-}
-.faq-q {
-  margin: 0;
-}
-.faq-q button {
-  display: grid;
-  grid-template-columns: 40px minmax(0, 1fr) 20px;
-  align-items: center;
-  gap: 12px;
-  width: 100%;
-  padding: 24px 0;
-  border: 0;
-  background: transparent;
-  color: var(--color-t1);
-  text-align: left;
-}
-.faq-n {
-  font-family: var(--font-mono);
-  font-size: var(--text-12);
-  color: var(--color-t5);
-  transition: color var(--dur-fast) var(--ease-brand);
-}
-.faq-item[data-open="true"] .faq-n,
-.faq-q button:hover .faq-n {
-  color: var(--color-lime);
-}
-.faq-text {
-  font-family: var(--font-display);
-  font-size: var(--text-22);
-  font-weight: 500;
-  letter-spacing: -0.01em;
-}
-/* Plus → minus: the vertical bar folds away. */
-.faq-icon {
-  position: relative;
-  width: 16px;
-  height: 16px;
-}
-.faq-icon::before,
-.faq-icon::after {
-  content: "";
-  position: absolute;
-  left: 0;
-  right: 0;
-  top: 50%;
-  height: 2px;
-  margin-top: -1px;
-  background: var(--color-lime);
-  transition: rotate var(--dur-base) var(--ease-out-expo);
-}
-.faq-icon::after {
-  rotate: 90deg;
-}
-.faq-item[data-open="true"] .faq-icon::after {
-  rotate: 0deg;
-}
-.faq-a {
-  max-width: 62ch;
-  margin: 0;
-  padding: 0 0 26px 52px;
-  font-size: var(--text-15);
-  line-height: 1.6;
-  color: var(--color-t4);
-}
-
-/* ================= Closing band =================
-   The engine's last dock, centred at the top of a screen-tall band (pinned:
-   the ring in the top half, the copy under it — never overlapping). */
-.closing {
-  position: relative;
-  overflow: hidden;
-}
-.closing-run {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 40px;
-  padding-block: 120px 140px;
-
-  @variant pin {
-    justify-content: center;
-    gap: 4svh;
-    min-height: 100svh;
-    padding-block: 8svh 8svh;
-  }
-}
-@keyframes horizon {
-  50% {
-    opacity: 1;
-    scale: 1.04;
-  }
-}
-.closing-inner {
-  position: relative;
+.closing-copy {
   text-align: center;
+
+  @media (width >= 62.5rem) {
+    grid-column: 2 / span 10;
+  }
+  @variant pin {
+    align-self: end;
+    margin-bottom: 4px;
+  }
 }
-.closing-inner .chapter-kicker {
+.closing-copy .kicker {
   justify-content: center;
 }
-.closing-title {
-  max-width: 14ch;
-  margin: 0 auto;
-  font-family: var(--font-display);
-  font-size: var(--text-chapter);
-  font-weight: 500;
-  line-height: 0.95;
-  letter-spacing: var(--tracking-chapter);
-  text-wrap: balance;
+.closing-copy .t-display-xl {
+  @variant pin {
+    font-size: min(clamp(48px, 6vw, 96px), 9svh, 16.5cqi);
+  }
 }
-.closing-line {
-  max-width: 44ch;
-  margin: 24px auto 0;
-  font-size: var(--text-lede);
-  line-height: 1.45;
-  color: var(--color-t3);
+.closing-copy .t-lede {
+  margin: 20px auto 0;
+}
+/* Short screens: the line steps out, so the words clear the ring above them. */
+@media (height < 42rem) {
+  .closing-copy .t-lede {
+    @variant pin {
+      display: none;
+    }
+  }
 }
 .closing-ctas {
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
   gap: 12px;
-  margin-top: 36px;
+  margin-top: 32px;
 }
-
-/* ================= §10 Contact ================= */
-.contact-ch {
-  position: relative;
-  padding-block: var(--section-y);
-  border-top: 1px solid var(--color-line);
-}
-.contact-grid {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr);
-  gap: 48px;
-
-  @media (width >= 62.5rem) {
-    grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
-  }
-}
-.contact-title {
-  font-size: var(--text-title);
-  line-height: 1.02;
-}
-.contact-facts {
-  display: grid;
-  gap: 14px;
-  margin: 36px 0 0;
-}
-.contact-facts div {
-  display: grid;
-  grid-template-columns: 72px minmax(0, 1fr);
-  gap: 12px;
-  align-items: baseline;
-}
-.contact-facts dt {
-  font-family: var(--font-mono);
-  font-size: var(--text-11);
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-}
-.contact-facts dd {
-  margin: 0;
-  font-family: var(--font-display);
-  font-size: var(--text-17);
-}
-.contact-panel {
-  padding: 28px;
-  border: 1px solid var(--color-graphite-line);
-  background: var(--color-ink);
-}
-.contact-tabs {
-  display: flex;
-  gap: 4px;
-  margin-bottom: 24px;
-  border-bottom: 1px solid var(--color-line);
-}
-.contact-tab {
-  padding: 12px 16px;
-  border: 0;
-  border-bottom: 2px solid transparent;
-  background: transparent;
-  font-family: var(--font-mono);
-  font-size: var(--text-12);
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: var(--color-t4);
-}
-.contact-tab[aria-selected="true"] {
-  border-bottom-color: var(--color-lime);
-  color: var(--color-t1);
-}
-.contact-cal-note {
-  margin: 0 0 16px;
-  font-size: var(--text-13);
-  color: var(--color-t4);
+/* A contact shadow under the ring (the floor). */
+.stage[data-scene="closing"] .stage-atmos::after {
+  content: "";
+  position: absolute;
+  left: calc(var(--ex) - var(--er) * 0.9);
+  top: calc(var(--ey) + var(--er) * 1.08);
+  width: calc(var(--er) * 1.8);
+  height: calc(var(--er) * 0.16);
+  border-radius: 50%;
+  background: radial-gradient(closest-side, rgb(0 0 0 / 0.35), transparent);
 }

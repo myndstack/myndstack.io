@@ -4,21 +4,19 @@
  * engine's first frame). Derived from the beat table, so a poster can never
  * drift from the pose it stands for:
  *
- * - face poses (circle fit) use the CoreRing SVG, in the ring box or the ring
- *   box at the top of the rail (capabilities);
- * - every other stage pose is a technical drawing from its own pose
- *   (drawing.ts), one SVG <symbol> each;
- * - docks keep their own small ring.
+ * - face poses (circle fit) use the CoreRing SVG, placed on the beat's
+ *   target circle by the director;
+ * - every other pose is a technical drawing from its own pose (drawing.ts),
+ *   one SVG <symbol> each.
  */
 import { BEATS } from "./beats";
 import { axisInCamera, posesById } from "./choreography";
 import { drawEngine, type DrawView, type Drawing } from "./drawing";
+import { STUDIO, STUDIO_AGENCY } from "./poster-ids";
+import { AGENCY } from "./rig";
 import { CH } from "./types";
 
-export type Poster =
-  | { readonly kind: "face"; readonly box: "ring" | "ringTop" }
-  | { readonly kind: "draw"; readonly id: string }
-  | { readonly kind: "dock" };
+export { STUDIO, STUDIO_AGENCY, posterFor, type Poster } from "./poster-ids";
 
 export type DrawPoster = {
   /** The symbol's id suffix: the beat id (or STUDIO_AGENCY). */
@@ -32,16 +30,6 @@ export type DrawPoster = {
   readonly powered: boolean;
 };
 
-/** The studio's second drawing: the same engine, as an agency would ship it. */
-export const STUDIO_AGENCY = "studio-agency";
-
-/** Offsets, extra gaps and rolls per module (face first) for the agency state: nothing lines up. */
-const AGENCY = {
-  shift: [0, 0.26, -0.22, 0.3, -0.16],
-  gap: [0, 0.14, 0.34, 0.12, 0.4],
-  roll: [0, 5, -4, 3, -5],
-} as const;
-
 const EXTRAS: Readonly<Record<string, Partial<DrawView>>> = {
   "build-2": { dims: true },
   tools: { ports: true },
@@ -51,14 +39,13 @@ function build(): DrawPoster[] {
   const poses = posesById(BEATS);
   const out: DrawPoster[] = [];
   for (const beat of BEATS) {
-    if (beat.host !== "stage" || beat.fit !== "sphere") continue;
+    if (beat.fit !== "sphere") continue;
     const pose = poses.get(beat.id);
     if (!pose) continue;
     const view: DrawView = {
       axis: axisInCamera(pose),
       explode: pose[CH.explode],
       fill: pose[CH.fill],
-      teeth: true,
       arcs: true,
       ...EXTRAS[beat.id],
     };
@@ -70,7 +57,7 @@ function build(): DrawPoster[] {
       ...(pose[CH.focus] > 0.5 ? { focus: Math.round(pose[CH.aim]) } : {}),
     };
     out.push(poster);
-    if (beat.id === "studio") out.push({ ...poster, id: STUDIO_AGENCY, view: { ...view, ...AGENCY } });
+    if (beat.id === STUDIO) out.push({ ...poster, id: STUDIO_AGENCY, view: { ...view, ...AGENCY } });
   }
   return out;
 }
@@ -79,12 +66,4 @@ export const DRAW_POSTERS: readonly DrawPoster[] = build();
 
 export function drawingOf(poster: DrawPoster): Drawing {
   return drawEngine(poster.view);
-}
-
-export function posterFor(beatId: string): Poster | null {
-  const beat = BEATS.find((b) => b.id === beatId);
-  if (!beat) return null;
-  if (beat.host !== "stage") return { kind: "dock" };
-  if (beat.fit === "circle") return { kind: "face", box: beat.box === "ringTop" ? "ringTop" : "ring" };
-  return { kind: "draw", id: beat.id };
 }

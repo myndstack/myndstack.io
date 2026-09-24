@@ -6,15 +6,13 @@ import { FAQ_COPY } from "@/lib/landing/chapters";
 import { engineSignals } from "@/lib/landing/engine/store";
 import type { Faq as FaqItem } from "@/lib/sanity/queries";
 
-import { markerStyle } from "../engine/plan";
-import { DialPoster } from "../engine/Posters";
+import { DialPoster } from "../engine/Dial";
+import { Kicker, Title } from "../type/Type";
 
 /**
- * §09 — deliberately quiet: a sticky title beside a WAI accordion (buttons
- * with aria-expanded controlling labelled regions; one open at a time). The
- * shared `.disclosure` animates height via grid rows and takes closed answers
- * out of the accessibility tree. Under the title, the engine's smallest dock:
- * its playhead points at the open question.
+ * §09 — notes: paper, quiet. A sticky title and a small dial beside a WAI
+ * accordion (buttons with aria-expanded controlling labelled regions; one
+ * open at a time). The dial's playhead points at the open question.
  */
 export default function LandingFaq({ faqs }: { readonly faqs: readonly FaqItem[] }) {
   const baseId = useId();
@@ -22,19 +20,13 @@ export default function LandingFaq({ faqs }: { readonly faqs: readonly FaqItem[]
   if (faqs.length === 0) return null;
 
   return (
-    <section id="faq" className="faq-ch seam-from-graphite" data-surface="ink" aria-labelledby={`${baseId}-title`}>
-      <span className="ms-marker" data-beat-marker="faq" style={markerStyle("faq", "faq")} />
-      <div className="page-col faq-grid">
+    <section id="faq" className="sheet sheet--faq" data-skin="drafting" data-accent="lime" aria-labelledby={`${baseId}-title`}>
+      <div className="ms-grid faq-grid">
         <div className="faq-head">
-          <p className="chapter-kicker">
-            <span className="stamp">§09</span>
-            <span>{FAQ_COPY.kicker}</span>
-          </p>
-          <h2 id={`${baseId}-title`} className="chapter-title faq-title">
-            {FAQ_COPY.title}
-          </h2>
-          <div className="engine-dock engine-dock--faq" data-host="dock-faq" aria-hidden="true">
-            <DialPoster id="dock-faq">
+          <Kicker n="§09">{FAQ_COPY.kicker}</Kicker>
+          <Title id={`${baseId}-title`} lines={[FAQ_COPY.title]} />
+          <div className="faq-dial" data-open={open ?? -1} aria-hidden="true">
+            <DialPoster id="faq-dial">
               <svg className="faq-playhead" viewBox="0 0 1000 1000" focusable="false">
                 <path d="M500 18L516 -8H484Z" />
               </svg>
@@ -61,22 +53,16 @@ export default function LandingFaq({ faqs }: { readonly faqs: readonly FaqItem[]
                       engineSignals.set("faq.open", next ?? -1);
                     }}
                   >
-                    <span className="faq-n" aria-hidden="true">
+                    <span className="faq-n t-mono-10" aria-hidden="true">
                       {String(i + 1).padStart(2, "0")}
                     </span>
-                    <span className="faq-text">{faq.q}</span>
+                    <span className="faq-text t-title-s">{faq.q}</span>
                     <span className="faq-icon" aria-hidden="true" />
                   </button>
                 </h3>
-                <div
-                  id={panelId}
-                  role="region"
-                  aria-labelledby={buttonId}
-                  className="disclosure"
-                  data-open={isOpen ? "true" : "false"}
-                >
+                <div id={panelId} role="region" aria-labelledby={buttonId} className="disclosure" data-open={isOpen ? "true" : "false"}>
                   <div className="disclosure__inner">
-                    <p className="faq-a">{faq.a}</p>
+                    <p className="t-body faq-a">{faq.a}</p>
                   </div>
                 </div>
               </li>

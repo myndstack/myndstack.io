@@ -1,5 +1,8 @@
 import { CORE } from "@/lib/motion/core-geometry";
+import { SPECTRUM } from "@/lib/motion/tokens";
 import { DESIGN_DEMO, NEURAL, PIPELINE_DEMO, PRODUCT_DEMO } from "@/lib/landing/demo-geometry";
+
+import { WAVE } from "./CoreRing";
 
 /**
  * The four demos inside the Core during the capabilities run — one per
@@ -47,6 +50,20 @@ export default function CapDemos() {
         <text x="500" y="690" className="demo-label demo-label--after" data-after>
           MODERN · V2
         </text>
+      </g>
+
+      {/* The finale: the whole spectrum's signal, in the chamber. */}
+      <g data-demo="wave" className="demo demo-wave">
+        <defs>
+          <linearGradient id="chamber-wave" gradientUnits="userSpaceOnUse" x1="270" y1="0" x2="730" y2="0">
+            <stop offset="0" stopColor={SPECTRUM.ai} />
+            <stop offset="0.35" stopColor={SPECTRUM.product} />
+            <stop offset="0.5" stopColor={SPECTRUM.lime} />
+            <stop offset="0.68" stopColor={SPECTRUM.design} />
+            <stop offset="1" stopColor={SPECTRUM.arch} />
+          </linearGradient>
+        </defs>
+        <path d={WAVE} stroke="url(#chamber-wave)" className="demo-wave-bars" />
       </g>
 
       <g data-demo="3" className="demo" style={{ color: "var(--color-spec-arch)" }}>

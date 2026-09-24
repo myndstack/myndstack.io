@@ -7,20 +7,20 @@
  * space (x right, y up, z toward the viewer — axisInCamera(pose)). Each module
  * is drawn as its rims (ellipses), the silhouette walls joining them, its bore
  * and hue inlay; back rims' far halves and rims covered by a seated, wider
- * neighbour are dashed; a dash-dot centreline runs through it all. On request:
- * the gear's teeth, the face's five arcs, a dimension line and the tools'
- * ports. Pure: path data in poster units (world × 100, y down) and a viewBox
+ * neighbour are dashed; a dash-dot centreline runs through it all. Compute is
+ * drawn fin by fin (a heat sink, the hub showing between the fins). On
+ * request: the face's five arcs, a dimension line and the tools' ports. Pure: path data in poster units (world × 100, y down) and a viewBox
  * that frames the drawing at `fill`, for the server component to render.
  */
 import { CORE } from "@/lib/motion/core-geometry";
 
-import { BEZEL, FLANGE, GEAR, HOUSING, INTERFACE, moduleZ } from "./geometry/index";
+import { BEZEL, FINS, FLANGE, HOUSING, INTERFACE, finZ, moduleZ } from "./geometry/index";
 
 /** Poster units per world unit. */
 export const POSTER_UNIT = 100;
 
 /** `body` is a band's filled silhouette (painted back to front, it hides what's behind it). */
-export type PathKind = "body" | "outline" | "hidden" | "centre" | "bore" | "inlay" | "arc" | "tooth" | "shaft" | "dim" | "port";
+export type PathKind = "body" | "outline" | "hidden" | "centre" | "bore" | "inlay" | "arc" | "shaft" | "dim" | "port";
 
 export type PosterPath = {
   readonly d: string;
@@ -44,7 +44,6 @@ export type DrawView = {
   readonly gap?: readonly number[];
   /** Per-module roll in the picture plane, degrees about the module's centre. */
   readonly roll?: readonly number[];
-  readonly teeth?: boolean;
   readonly arcs?: boolean;
   readonly dims?: boolean;
   readonly ports?: boolean;
@@ -63,8 +62,16 @@ export type Drawing = {
   readonly ports: readonly Anchor[];
 };
 
-type Band = { readonly r: number; readonly top: number; readonly bottom: number };
-type Part = { readonly bands: readonly Band[]; readonly bore: number; readonly inlay: number; readonly hue: number };
+/** A lathed slab. `quiet` bands (compute's inner fins and the hub between them) draw no hidden lines. */
+type Band = { readonly r: number; readonly top: number; readonly bottom: number; readonly quiet?: boolean };
+type Part = {
+  readonly bands: readonly Band[];
+  readonly bore: number;
+  readonly inlay: number;
+  readonly hue: number;
+  /** Where labels anchor, if not the first band (compute: the whole heat sink). */
+  readonly anchor?: Band;
+};
 
 const maxR = (profile: readonly { readonly r: number }[]) => Math.max(...profile.map((p) => p.r));
 
@@ -76,11 +83,21 @@ const SEATED = 0.06;
 
 /** Outline, bore, inlay and hue per module (face first), from the 3D profiles. */
 const PARTS: readonly Part[] = [
-  { bands: [{ r: maxR(BEZEL), top: 0.22, bottom: -0.3 }], bore: 1.98, inlay: 0, hue: 3 },
+  { bands: [{ r: maxR(BEZEL), top: 0.22, bottom: -0.3 }], bore: 1.98, inlay: 0, hue: 0 },
   { bands: [{ r: maxR(INTERFACE), top: 0.3, bottom: -0.3 }], bore: 1.62, inlay: 1.78, hue: 2 },
   { bands: [{ r: maxR(HOUSING), top: 0.5, bottom: -0.5 }], bore: 0.95, inlay: 1.42, hue: 1 },
-  // The gear's teeth over its hub's thickness (the hub is what seats).
-  { bands: [{ r: GEAR.tip, top: 0.3, bottom: -0.3 }], bore: 1.12, inlay: 1.2, hue: 4 },
+  // The heat sink: fin, hub, fin … — only the last fin's back rim is dashed.
+  {
+    bands: Array.from({ length: FINS.count * 2 - 1 }, (_, j): Band => {
+      const [top, bottom] = finZ(j >> 1);
+      if (j % 2 === 0) return { r: FINS.r, top, bottom, ...(j < FINS.count * 2 - 2 ? { quiet: true } : {}) };
+      return { r: FINS.hub, top: bottom, bottom: finZ((j >> 1) + 1)[0], quiet: true };
+    }),
+    bore: 1.12,
+    inlay: 1.2,
+    hue: 3,
+    anchor: { r: FINS.r, top: finZ(0)[0], bottom: finZ(FINS.count - 1)[1] },
+  },
   {
     bands: [
       { r: maxR(FLANGE), top: 0.25, bottom: -0.25 },
@@ -88,9 +105,12 @@ const PARTS: readonly Part[] = [
     ],
     bore: 0,
     inlay: 1.82,
-    hue: 0,
+    hue: 4,
   },
 ];
+
+/** A part's whole axial extent, over all its bands. */
+const extent = (part: Part) => ({ top: Math.max(...part.bands.map((b) => b.top)), bottom: Math.min(...part.bands.map((b) => b.bottom)) });
 
 type V = { x: number; y: number };
 const add = (a: V, b: V): V => ({ x: a.x + b.x, y: a.y + b.y });
@@ -175,7 +195,8 @@ export function drawEngine(view: DrawView): Drawing {
     near: ellipse(k, facing > 0 ? band.top : band.bottom, band.r),
     far: ellipse(k, facing > 0 ? band.bottom : band.top, band.r),
   }));
-  bands.forEach(({ k }, i) => {
+  bands.forEach(({ k, band }, i) => {
+    if (band.quiet) return;
     items.push({ kind: "hidden", module: k, e: rims[i].far, part: "far" });
     if (covered[i]) items.push({ kind: "hidden", module: k, e: rims[i].near, part: "full" });
   });
@@ -185,8 +206,8 @@ export function drawEngine(view: DrawView): Drawing {
   if (fore > 1e-3) {
     const shaft: (readonly [V, V])[] = [];
     for (let k = 0; k < 4; k++) {
-      const from = zOf(k) + PARTS[k].bands[0].bottom;
-      const to = zOf(k + 1) + PARTS[k + 1].bands[0].top;
+      const from = zOf(k) + extent(PARTS[k]).bottom;
+      const to = zOf(k + 1) + extent(PARTS[k + 1]).top;
       if (from - to > SEATED) {
         for (const s of [-SHAFT_R, SHAFT_R]) shaft.push([axisAt(from, s), axisAt(to, s)]);
       }
@@ -213,15 +234,6 @@ export function drawEngine(view: DrawView): Drawing {
     const tNear = facing > 0 ? band.top : band.bottom;
     if (part.bore > 0) items.push({ kind: "bore", module: k, e: ellipse(k, tNear, part.bore), part: "full" });
     if (part.inlay > 0) items.push({ kind: "inlay", module: k, hue: part.hue, e: ellipse(k, tNear, part.inlay), part: "full" });
-    if (k === 3 && view.teeth) {
-      const lines: (readonly [V, V])[] = [];
-      for (let n = 0; n < GEAR.teeth; n++) {
-        const th = (2 * Math.PI * n) / GEAR.teeth;
-        const u = add(mul(near.a, Math.cos(th) / band.r), mul(near.b, Math.sin(th) / band.r));
-        lines.push([add(near.c, mul(u, GEAR.root)), add(near.c, mul(u, GEAR.tip))]);
-      }
-      items.push({ kind: "tooth", module: 3, lines });
-    }
     if (k === 0 && view.arcs && facing > 0) {
       CORE.arcs.forEach((arc, hue) => {
         items.push({ kind: "arc", module: 0, hue, e: ellipse(0, tNear, R_ARC), arc: [arc.a0, arc.a1] });
@@ -238,7 +250,7 @@ export function drawEngine(view: DrawView): Drawing {
 
   // Anchors: each module's right-hand silhouette at mid-height.
   const anchorsMath = PARTS.map((part, k) => {
-    const band = part.bands[0];
+    const band = part.anchor ?? part.bands[0];
     const e = ellipse(k, (band.top + band.bottom) / 2, band.r);
     const [l, r] = [sub(e.c, e.a), add(e.c, e.a)];
     return { module: k, left: l.x < r.x ? l : r, right: l.x < r.x ? r : l };
@@ -248,9 +260,12 @@ export function drawEngine(view: DrawView): Drawing {
     const side = p0.x >= 0 ? 1 : -1;
     const s = side * (rMax + 0.45);
     const ticks: (readonly [V, V])[] = [[axisAt(tMax, s), axisAt(tMin, s)]];
-    for (const b of bands) {
-      for (const t of [top(b), bottom(b)]) ticks.push([axisAt(t, s - side * 0.12), axisAt(t, s + side * 0.12)]);
-    }
+    const at = new Set<number>();
+    PARTS.forEach((part, k) => {
+      const { top: t0, bottom: t1 } = extent(part);
+      for (const t of [zOf(k) + t0, zOf(k) + t1]) at.add(Math.round(t * 1000) / 1000);
+    });
+    for (const t of at) ticks.push([axisAt(t, s - side * 0.12), axisAt(t, s + side * 0.12)]);
     items.push({ kind: "dim", module: -1, lines: ticks });
   }
 

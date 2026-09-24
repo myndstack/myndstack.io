@@ -7,58 +7,48 @@ import type { PricingTier } from "@/lib/content";
 import { PRICING_COPY } from "@/lib/landing/chapters";
 import { DEFAULT_REGION, resolveTiersForRegion } from "@/lib/region";
 
-import { DialPoster } from "../engine/Posters";
-import MotionChapter from "../motion/MotionChapter";
+import { DialPoster } from "../engine/Dial";
+import { Kicker, Lede, Title } from "../type/Type";
 
 /**
- * §08 — pricing. Every piece of the live pricing logic is reused as-is:
- * PricingCards (region-aware prices, currency picker, /api/pricing refetch,
- * `isPurchasable` → /pricing/[slug] checkout), the Enterprise band and the
- * comparison table. The landing only reframes it: a dial beside the heading
- * (the engine's first dock) lights the arc of whichever tier is under the
- * pointer or focus — the director listens here, delegated, so PricingCards
- * stays untouched — and the featured tier wears the spectrum as a beam.
+ * §08 — pricing, as a quotation sheet: paper, sliding up over the studio
+ * with a lime edge. Every piece of the live pricing logic is reused as-is
+ * (region-aware prices, the currency picker, checkout links, the Enterprise
+ * band, the comparison) — the landing only restyles it, scoped to itself.
+ * Beside the heading, a coverage dial: the tier under the pointer or focus
+ * shows how much of the engine it lights (the director listens, delegated).
  */
 export default function PricingChapter({ tiers }: { readonly tiers: PricingTier[] }) {
   if (tiers.length === 0) return null;
   const initialTiers = resolveTiersForRegion(tiers, DEFAULT_REGION);
 
   return (
-    <section id="pricing" className="pricing-ch seam-from-ink" data-surface="graphite" aria-labelledby="pricing-title">
-      <MotionChapter id="pricing" kind="once" className="page-col pricing-run">
-        <div className="pricing-head">
-          <div className="pricing-head-copy">
-            <p className="chapter-kicker">
-              <span className="stamp">§08</span>
-              <span>{PRICING_COPY.kicker}</span>
-            </p>
-            <h2 id="pricing-title" className="chapter-title pricing-title">
-              {PRICING_COPY.title}
-            </h2>
-            <p className="chapter-lede">{PRICING_COPY.lede}</p>
-          </div>
-          <div
-            className="engine-dock engine-dock--pricing"
-            data-host="dock-pricing"
-            data-beat-marker="pricing"
-            aria-hidden="true"
-          >
-            <DialPoster id="dock-pricing" />
-          </div>
+    <section id="pricing" className="sheet sheet--pricing" data-skin="drafting" data-accent="lime" data-overlap="" data-edge="front" aria-labelledby="pricing-title">
+      <div className="ms-grid pricing-head">
+        <div className="pricing-copy" data-reveal-group>
+          <Kicker n="§08">{PRICING_COPY.kicker}</Kicker>
+          <Title id="pricing-title" lines={[PRICING_COPY.title]} />
+          <Lede>{PRICING_COPY.lede}</Lede>
         </div>
-
-        <PricingCards initialTiers={initialTiers} />
-        <div data-tier-band>
-          <EnterpriseBand />
+        <div className="pricing-dial" data-coverage="0" aria-hidden="true">
+          <DialPoster id="pricing-dial" />
+          <p className="pricing-dial-label t-mono-10">Coverage</p>
         </div>
-        <PricingCompare tierNames={[...tiers.map((t) => t.name), ENTERPRISE.name]} />
-
-        <p className="pricing-note">
-          <Link href="#contact" className="ulink">
-            Not sure which fits? Start a project — we’ll scope it with you.
-          </Link>
-        </p>
-      </MotionChapter>
+      </div>
+      <div className="ms-grid">
+        <div className="pricing-body" data-reveal-group>
+          <PricingCards initialTiers={initialTiers} />
+          <div data-tier-band>
+            <EnterpriseBand />
+          </div>
+          <PricingCompare tierNames={[...tiers.map((t) => t.name), ENTERPRISE.name]} />
+          <p className="pricing-note t-body">
+            <Link href="#contact" className="ms-link">
+              Not sure which fits? Start a project — we’ll scope it with you.
+            </Link>
+          </p>
+        </div>
+      </div>
     </section>
   );
 }

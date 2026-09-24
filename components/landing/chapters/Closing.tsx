@@ -1,37 +1,24 @@
 import { CLOSING } from "@/lib/landing/chapters";
 
-import { FacePoster } from "../engine/Posters";
 import MagneticSpring from "../motion/MagneticSpring";
-import MotionChapter from "../motion/MotionChapter";
-
-type Props = {
-  readonly cta: string;
-};
+import { Beat, Scene, Slot } from "../scene/Scene";
+import { Kicker, Lede, Rise, Title } from "../type/Type";
 
 /**
- * The closing band: the engine's last dock, centred at the top of the screen,
- * powered on as the band arrives (live; its poster is the finished ring), over
- * the restated promise. Its slow pulse is a CSS loop that only runs on screen.
+ * The closing: the FAQ sheet scrolls away and uncovers the ring on paper,
+ * powered off on its floor; the scroll powers it on — ticks, arcs, core,
+ * waveform — and at ignition the page develops to metal from the core. The
+ * words wait for it, centred beneath the ring. Contact slides over.
  */
-export default function Closing({ cta }: Props) {
+export default function Closing({ cta }: { readonly cta: string }) {
   return (
-    <section id="cta" className="closing" data-surface="ink" aria-labelledby="cta-title">
-      <MotionChapter id="cta" kind="once" className="page-col closing-run">
-        <div
-          className="engine-dock engine-dock--closing"
-          data-host="dock-closing"
-          data-beat-marker="closing"
-          aria-hidden="true"
-        >
-          <FacePoster id="dock-closing" prefix="dock-closing" />
-        </div>
-        <div className="closing-inner">
-          <p className="chapter-kicker">{CLOSING.kicker}</p>
-          <h2 id="cta-title" className="closing-title">
-            {CLOSING.title}
-          </h2>
-          <p className="closing-line">{CLOSING.line}</p>
-          <div className="closing-ctas">
+    <Scene id="closing" anchor="cta" labelledBy="cta-title">
+      <Beat id="closing" className="closing">
+        <div className="closing-copy">
+          <Kicker>{CLOSING.kicker}</Kicker>
+          <Title id="cta-title" size="xl" lines={[CLOSING.title]} />
+          <Lede>{CLOSING.line}</Lede>
+          <Rise i={1} className="closing-ctas">
             <MagneticSpring>
               <a href="#contact" className="btn btn-lime">
                 {cta}
@@ -40,9 +27,10 @@ export default function Closing({ cta }: Props) {
             <a href="#pricing" className="btn btn-outline">
               See pricing
             </a>
-          </div>
+          </Rise>
         </div>
-      </MotionChapter>
-    </section>
+        <Slot beat="closing" />
+      </Beat>
+    </Scene>
   );
 }

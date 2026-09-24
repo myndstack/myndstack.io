@@ -1,0 +1,171 @@
+/* §01 — the intro: the hero, then the dive. */
+@reference "../../../app/globals.css";
+
+.hero-copy {
+  @media (width >= 62.5rem) {
+    grid-column: 1 / span 5;
+  }
+  @variant pin {
+    align-self: center;
+    margin-top: 12px;
+  }
+}
+.hero-copy .t-lede {
+  margin-top: 28px;
+}
+.hero-ctas {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 40px;
+}
+.hero-email {
+  margin-top: 28px;
+}
+
+/* The dive: one statement, bottom-left, converted by the scan. On phones it
+   merges into the hero: the statement stays, its poster goes (the hero's
+   horizon ring is just above it). */
+.beat--dive .slot {
+  @media (width < 62.5rem) {
+    display: none;
+  }
+}
+.dive-statement {
+  @media (width >= 62.5rem) {
+    grid-column: 1 / span 5;
+  }
+  @variant pin {
+    align-self: end;
+    margin-bottom: 8px;
+  }
+}
+
+/* ---------------- Twins ----------------
+   A designated statement converts with the scan: the original shows above
+   the line, its aria-hidden twin (on the next skin) below it. The director
+   writes --line on the panel: unset before the scan, the line during, 0
+   after. */
+.beat--twin,
+.furniture--twin {
+  display: none;
+
+  @variant pin {
+    display: grid;
+    clip-path: inset(var(--line, 100svh) 0 0 0);
+  }
+}
+.has-twin {
+  @variant pin {
+    clip-path: inset(0 0 calc(100% - var(--line, 100svh)) 0);
+  }
+}
+
+/* ---------------- Slots: the static layout's own posters ---------------- */
+.slot {
+  position: relative;
+  min-width: 0;
+  height: min(44svh, 520px);
+
+  @media (width >= 62.5rem) {
+    grid-column: 7 / -1;
+    height: min(72svh, 640px);
+  }
+  @variant pin {
+    display: none;
+  }
+}
+.slot .ep {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 1;
+}
+.slot .engine-face {
+  inset: 0;
+  width: auto;
+  height: auto;
+  max-width: 100%;
+  max-height: 100%;
+  aspect-ratio: 1;
+  margin: auto;
+}
+/* Phones: the hero's ring is a horizon at the foot of the screen. */
+.slot--hero {
+  @media (width < 62.5rem) {
+    height: 60vw;
+    margin-inline: calc(-1 * var(--inset));
+    overflow: hidden;
+  }
+}
+.slot--hero .engine-face {
+  @media (width < 62.5rem) {
+    width: 118vw;
+    max-width: none;
+    max-height: none;
+    margin: 0 auto;
+    left: 50%;
+    translate: -50% 0;
+  }
+}
+
+/* ---------------- The copy-email chip ----------------
+   A real mailto link and a copy button with a drawn check. */
+.copy-chip {
+  display: inline-flex;
+  align-items: stretch;
+  border: 1px solid var(--skin-rule);
+  background: color-mix(in oklch, var(--skin-base) 72%, transparent);
+  font-family: var(--font-mono);
+  font-size: 13px;
+}
+.copy-chip-mail {
+  padding: 11px 14px;
+  color: var(--skin-text2);
+  transition: color var(--dur-fast) var(--ease-brand);
+}
+.copy-chip-mail:hover {
+  color: var(--skin-text1);
+}
+.copy-chip-btn {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  border: 0;
+  border-left: 1px solid var(--skin-rule);
+  background: transparent;
+  color: var(--skin-text3);
+  transition: color var(--dur-fast) var(--ease-brand);
+}
+.copy-chip-btn:hover,
+.copy-chip-btn:focus-visible {
+  color: var(--color-lime);
+}
+.copy-chip-icon {
+  width: 16px;
+  height: 16px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.4;
+}
+.copy-chip-glyph {
+  transition: opacity var(--dur-fast) var(--ease-brand);
+}
+.copy-chip-check {
+  stroke: var(--color-lime);
+  stroke-width: 1.8;
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  opacity: 0;
+  transition:
+    stroke-dashoffset 240ms var(--ease-out-expo),
+    opacity var(--dur-fast) var(--ease-brand);
+}
+.copy-chip[data-state="copied"] .copy-chip-glyph {
+  opacity: 0;
+}
+.copy-chip[data-state="copied"] .copy-chip-check {
+  stroke-dashoffset: 0;
+  opacity: 1;
+}

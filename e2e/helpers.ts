@@ -6,8 +6,21 @@ import { expect, type Page } from "@playwright/test";
  * copies until the swap, when it moves onto these.)
  */
 
-/** Where held copy sits: lib/landing/engine/choreography.ts READING. */
+/** Where held copy sits: lib/landing/engine/timeline.ts READING. */
 export const READING = 0.46;
+
+/** The pinned stage. */
+export const STAGE = "[data-engine-stage]";
+
+/**
+ * The first load's intro (the ring drawing itself) is over: the director has
+ * booted (it stamps `data-engine` and `data-intro` together) and cleared
+ * `data-intro` again.
+ */
+export async function introDone(page: Page) {
+  await expect(page.locator("html")).toHaveAttribute("data-engine", /./, { timeout: 8000 });
+  await expect.poll(() => page.locator(STAGE).getAttribute("data-intro"), { timeout: 8000 }).toBeNull();
+}
 
 /**
  * Finish every landing chapter — the redesign's equivalent of revealAll():
@@ -102,14 +115,18 @@ export async function toHold(page: Page, marker: string, beat: string | null = m
 export type Rect = { readonly x: number; readonly y: number; readonly w: number; readonly h: number };
 
 /**
- * Every visible line of text on the page, in viewport px: the flow's words
- * (decorative ones included — they're on screen too), not the engine's own
- * overlays, nor the page chrome that floats above it (nav, ruler, CTA bar).
+ * Every visible line of text on the page, in viewport px: the words of the
+ * beats that are in (and every flowing section's), not the engine's own
+ * overlays, nor the page chrome that floats above it (nav, ruler, title
+ * block, CTA bar). A beat that isn't in has its words masked out of sight.
+ * `decor` marks the aria-hidden cards (specs, layer cards, the delivery
+ * card): they may sit on the bezel, never in the bore.
  */
-export async function textRects(page: Page): Promise<(Rect & { readonly text: string })[]> {
+export async function textRects(page: Page): Promise<(Rect & { readonly text: string; readonly decor: boolean })[]> {
   return page.evaluate(() => {
-    const out: { x: number; y: number; w: number; h: number; text: string }[] = [];
-    const skip = "[data-engine-stage], .engine-dock, .engine-slot, .ruler, .mobile-cta, script, style, .sr-only";
+    const out: { x: number; y: number; w: number; h: number; text: string; decor: boolean }[] = [];
+    const skip =
+      "[data-engine-stage], .slot, .zone-ruler, .title-block, .mobile-cta, script, style, .sr-only, .beat:not([data-in]), .furniture:not([data-in]), .beat--twin, .furniture--twin";
     const root = document.querySelector(".landing");
     if (!root) return out;
     const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
@@ -119,33 +136,48 @@ export async function textRects(page: Page): Promise<(Rect & { readonly text: st
       const parent = node.parentElement;
       if (!text || !parent || parent.closest(skip)) continue;
       if (!parent.checkVisibility({ opacityProperty: true, visibilityProperty: true })) continue;
+      const decor = !!parent.closest('[aria-hidden="true"]');
       range.selectNodeContents(node);
       for (const r of Array.from(range.getClientRects())) {
         if (r.width < 2 || r.height < 2) continue;
         if (r.bottom < 0 || r.top > window.innerHeight || r.right < 0 || r.left > window.innerWidth) continue;
-        out.push({ x: r.left, y: r.top, w: r.width, h: r.height, text: text.slice(0, 40) });
+        out.push({ x: r.left, y: r.top, w: r.width, h: r.height, text: text.slice(0, 40), decor });
       }
     }
     return out;
   });
 }
 
+export type Hull = ({ readonly kind: "circle"; readonly cx: number; readonly cy: number; readonly r: number } | ({ readonly kind: "rect" } & Rect));
+
 /**
- * The engine's hull on screen in poster mode: the drawing the stage shows
- * (its <use> reports the drawn bounds), or the ring out to its bezel.
+ * The engine's outline on screen in poster mode: the ring out to its bezel
+ * (a circle), or the drawing the stage shows (its <use> reports the drawn
+ * bounds).
  */
-export async function engineHull(page: Page): Promise<Rect | null> {
+export async function engineHull(page: Page): Promise<Hull | null> {
   return page.evaluate(() => {
     const stage = document.querySelector<HTMLElement>("[data-engine-stage]");
     if (!stage || getComputedStyle(stage).display === "none") return null;
-    const on = stage.querySelector<HTMLElement | SVGElement>(".engine-tone--dark [data-poster][data-on], .engine-face[data-on]");
+    const on = stage.querySelector<HTMLElement | SVGElement>('[data-sheet="a"] [data-poster][data-on]');
     if (!on) return null;
-    const target = on.matches(".engine-face") ? on.querySelector(".engine-bezel circle:nth-child(2)") : on.querySelector("use");
-    const r = (target ?? on).getBoundingClientRect();
-    return { x: r.left, y: r.top, w: r.width, h: r.height };
+    if (on.matches(".engine-face")) {
+      const r = (on.querySelector(".engine-bezel circle:nth-child(2)") ?? on).getBoundingClientRect();
+      return { kind: "circle" as const, cx: r.left + r.width / 2, cy: r.top + r.height / 2, r: r.width / 2 };
+    }
+    const r = (on.querySelector("use") ?? on).getBoundingClientRect();
+    return { kind: "rect" as const, x: r.left, y: r.top, w: r.width, h: r.height };
   });
 }
 
-export function intersects(a: Rect, b: Rect, pad = 0): boolean {
-  return a.x < b.x + b.w + pad && a.x + a.w + pad > b.x && a.y < b.y + b.h + pad && a.y + a.h + pad > b.y;
+/** How far a text rect stays outside the hull, px (negative: inside it). */
+export function clearance(t: Rect, hull: Hull): number {
+  if (hull.kind === "circle") {
+    const dx = Math.max(t.x - hull.cx, 0, hull.cx - (t.x + t.w));
+    const dy = Math.max(t.y - hull.cy, 0, hull.cy - (t.y + t.h));
+    return Math.hypot(dx, dy) - hull.r;
+  }
+  const dx = Math.max(hull.x - (t.x + t.w), 0, t.x - (hull.x + hull.w));
+  const dy = Math.max(hull.y - (t.y + t.h), 0, t.y - (hull.y + hull.h));
+  return dx > 0 || dy > 0 ? Math.hypot(dx, dy) : -1;
 }

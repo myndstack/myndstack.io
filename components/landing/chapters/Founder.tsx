@@ -1,12 +1,10 @@
 import { FOUNDER_COPY, STUDIO_COORDS } from "@/lib/landing/chapters";
-import { STUDIO_AGENCY } from "@/lib/landing/engine/posters";
 import type { SiteSettings, TeamMember } from "@/lib/sanity/queries";
 
 import ContrastSwitch from "../core/ContrastSwitch";
-import CoreRingMini from "../core/CoreRingMini";
 import IstClock from "../core/IstClock";
-import { blockStyle, landStyle } from "../engine/plan";
-import { DrawingPoster } from "../engine/Posters";
+import { Beat, Scene, Slot } from "../scene/Scene";
+import { Kicker, Lede, Rise, Title } from "../type/Type";
 
 type Props = {
   /** From Sanity, "Adding soon" placeholder rows already removed. */
@@ -17,89 +15,79 @@ type Props = {
 };
 
 /**
- * §07 — the studio, the last block of the run: the founder as an ID panel
- * (only what the CMS says: name, role, where, how to reach them — no invented
- * bio or portrait) and the agency ↔ Myndstack switch, which the engine acts
- * out beside it. The stage scrolls away at the end of this block.
+ * §07 — the studio, in two beats. The founder: an ID card in columns 7–12
+ * (only what the CMS says: name, role, where, how to reach them) while the
+ * engine carries off to the left. Then the contrast: the agency ↔ Myndstack
+ * switch and its table in columns 1–6, the engine acting it out beside them —
+ * modules knocked out of line, then snapping home. The pricing sheet slides
+ * over it.
  */
 export default function Founder({ people, site, contrastWith, contrastWithout }: Props) {
   const channels = site.socials.filter((s): s is { label: string; href: string } => Boolean(s.href));
-
+  const [founder] = people;
   return (
-    <section
-      id="team"
-      className="founder ms-block"
-      data-surface="ink"
-      aria-labelledby="team-title"
-      style={{ ...blockStyle("studio"), ...landStyle(["studio"], "studio") }}
-    >
-      <div className="page-col ms-grid">
-        <div className="ms-copy founder-copy" data-beat-marker="studio">
-          <div className="founder-head">
-            <p className="chapter-kicker">
-              <span className="stamp">§07</span>
-              <span>{FOUNDER_COPY.kicker}</span>
-            </p>
-            <h2 id="team-title" className="chapter-title founder-title">
-              {FOUNDER_COPY.title}
-            </h2>
-            <p className="chapter-lede">{FOUNDER_COPY.lede}</p>
-          </div>
-
-          <div className="founder-grid">
-            <ul className="founder-people">
-              {people.map((member) => (
-                <li key={member.n} className="founder-card">
-                  <div className="founder-badge" aria-hidden="true">
-                    <CoreRingMini />
-                    <span className="founder-initials">{member.i}</span>
-                  </div>
-                  <div className="founder-id">
-                    <h3 className="founder-name">{member.n}</h3>
-                    <p className="founder-role">{member.r}</p>
-                    <dl className="founder-facts hud">
-                      <div>
-                        <dt className="hud-k">Base</dt>
-                        <dd>{site.location}</dd>
-                      </div>
-                      <div>
-                        <dt className="hud-k">Coords</dt>
-                        <dd>{STUDIO_COORDS}</dd>
-                      </div>
-                      <div aria-hidden="true">
-                        <dt className="hud-k">Local</dt>
-                        <dd>
-                          IST <IstClock />
-                        </dd>
-                      </div>
-                    </dl>
-                    <ul className="founder-links">
-                      <li>
-                        <a href={`mailto:${site.email}`} className="ulink">
-                          {site.email}
-                        </a>
-                      </li>
-                      {channels.map((c) => (
-                        <li key={c.label}>
-                          <a href={c.href} className="ulink" rel="me noopener" target="_blank">
-                            {c.label} ↗
-                          </a>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
+    <Scene id="studio" anchor="team" labelledBy="team-title">
+      <Beat id="studio-founder" className="founder">
+        <div className="founder-copy">
+          <Kicker n="§07">{FOUNDER_COPY.kicker}</Kicker>
+          <Title id="team-title" lines={[{ text: "Founder-led.", tone: "setup" }, "Hands on the code."]} />
+          <Lede>{FOUNDER_COPY.lede}</Lede>
+          {founder ? (
+            <Rise i={1} className="ms-card id-card">
+              <p className="id-cmd t-mono-10" aria-hidden="true">
+                <span>$</span> whoami
+              </p>
+              <div className="id-row">
+                <span className="id-mark t-mono-13" aria-hidden="true">
+                  {founder.i}
+                </span>
+                <div>
+                  <h3 className="t-title-m">{founder.n}</h3>
+                  <p className="t-mono">{founder.r}</p>
+                </div>
+              </div>
+              <dl className="id-facts">
+                <div>
+                  <dt className="t-mono-10">Base</dt>
+                  <dd>{site.location}</dd>
+                </div>
+                <div>
+                  <dt className="t-mono-10">Coords</dt>
+                  <dd>{STUDIO_COORDS}</dd>
+                </div>
+                <div aria-hidden="true">
+                  <dt className="t-mono-10">Local</dt>
+                  <dd>
+                    IST <IstClock />
+                  </dd>
+                </div>
+              </dl>
+              <ul className="id-links">
+                <li>
+                  <a href={`mailto:${site.email}`} className="ms-link">
+                    {site.email}
+                  </a>
                 </li>
-              ))}
-            </ul>
+                {channels.map((c) => (
+                  <li key={c.label}>
+                    <a href={c.href} className="ms-link" rel="me noopener" target="_blank">
+                      {c.label} ↗
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </Rise>
+          ) : null}
+        </div>
+        <Slot beat="studio-founder" />
+      </Beat>
 
-            <ContrastSwitch without={contrastWithout} with={contrastWith} />
-          </div>
-        </div>
-        <div className="engine-slot engine-slot--draw engine-slot--studio" aria-hidden="true">
-          <DrawingPoster id="studio" />
-          <DrawingPoster id={STUDIO_AGENCY} />
-        </div>
-      </div>
-    </section>
+      <Beat id="studio-contrast" className="contrast-beat">
+        <Rise i={0} className="contrast-cell">
+          <ContrastSwitch without={contrastWithout} with={contrastWith} />
+        </Rise>
+        <Slot beat="studio-contrast" />
+      </Beat>
+    </Scene>
   );
 }

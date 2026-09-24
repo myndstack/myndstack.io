@@ -2,7 +2,7 @@ import { expect, test } from "@playwright/test";
 
 import { CAPABILITY_HUES, PLATFORM_LAYERS } from "@/lib/landing/chapters";
 
-import { finishAllMotion, seriousViolations, toHold } from "./helpers";
+import { STAGE, finishAllMotion, seriousViolations, toHold } from "./helpers";
 
 /**
  * The landing without the pinned layout — phones and tablets, reduced motion,
@@ -13,47 +13,47 @@ import { finishAllMotion, seriousViolations, toHold } from "./helpers";
 const PREVIEW = "/preview";
 const DESKTOP = { width: 1440, height: 900 };
 const PHONE = { width: 390, height: 844 };
-const STAGE = "[data-engine-stage]";
-const HERO = "core-hero";
 const STATIONS = PLATFORM_LAYERS.map((l) => `st-${l.title.toLowerCase()}`);
 
 test.describe("phones: the static layout", () => {
-  test("no stage; the blocks carry their own posters; the hero intro plays once", async ({ page }) => {
+  test("no stage; every block carries its own poster, and each layer its software", async ({ page }) => {
     await page.setViewportSize(PHONE);
     await page.goto(PREVIEW);
     await expect(page.locator(STAGE)).toBeHidden();
-    await expect(page.locator(`[data-chapter="${HERO}"]`)).toHaveAttribute("data-motion", "done", { timeout: 8000 });
-    await expect(page.locator(".engine-slot--hero .ep")).toBeVisible();
-    const slots = await page.locator(".engine-slot").evaluateAll((els) => els.filter((el) => el.getClientRects().length).length);
+    await expect(page.locator(".slot--hero .ep")).toBeVisible();
+    const slots = await page.locator(".slot").evaluateAll((els) => els.filter((el) => el.getClientRects().length).length);
     expect(slots).toBeGreaterThanOrEqual(STATIONS.length + CAPABILITY_HUES.length + 2);
-    const dive = await page.locator(".dive").evaluate((el) => (el as HTMLElement).offsetHeight / window.innerHeight);
+    const dive = await page.locator(".beat--dive:not(.beat--twin)").evaluate((el) => (el as HTMLElement).offsetHeight / window.innerHeight);
     expect(dive).toBeLessThan(0.8);
-    await expect(page.locator(".cap-mini")).toHaveCount(CAPABILITY_HUES.length);
-    await expect(page.locator(".cap-mini").first()).toBeVisible();
+    // Each station's layer card sits in the flow, fully built.
+    await expect(page.locator(".layer-card")).toHaveCount(STATIONS.length);
+    for (const card of await page.locator(".layer-card").all()) {
+      await card.scrollIntoViewIfNeeded();
+      await expect(card).toBeVisible();
+    }
   });
 });
 
 test.describe("posters, and without motion", () => {
-  test("under automation the page runs on posters: no canvas, no engine chunk", async ({ page }) => {
+  test("under automation the page runs on posters: the canvas never starts, no engine chunk", async ({ page }) => {
     await page.setViewportSize(DESKTOP);
     await page.goto(PREVIEW);
     await expect(page.locator("html")).toHaveAttribute("data-engine", "poster");
     await toHold(page, "stack");
-    await expect(page.locator("canvas")).toHaveCount(0);
+    expect(await page.locator(STAGE).getAttribute("data-live")).toBeNull();
     const loaded = await page.evaluate(() => performance.getEntriesByName("engine:module-eval").length);
     expect(loaded).toBe(0);
   });
 
-  test("reduced motion: static layout, every chapter built on load", async ({ browser }) => {
+  test("reduced motion: the static layout, fully built on load", async ({ browser }) => {
     const context = await browser.newContext({ reducedMotion: "reduce", viewport: DESKTOP });
     const page = await context.newPage();
     await page.goto(PREVIEW);
     expect(await page.locator("html").getAttribute("data-anim")).toBeNull();
     expect(await page.locator("html").getAttribute("data-engine")).toBeNull();
-    await expect(page.locator('[data-chapter]:not([data-motion="done"])')).toHaveCount(0);
     await expect(page.locator(STAGE)).toBeHidden();
-    await expect(page.locator(".engine-slot--hero .ep")).toBeVisible();
-    await expect(page.locator("canvas")).toHaveCount(0);
+    await expect(page.locator(".slot--hero .ep")).toBeVisible();
+    await expect(page.locator(".hero-copy .t-lede")).toBeVisible();
     await context.close();
   });
 
@@ -61,8 +61,8 @@ test.describe("posters, and without motion", () => {
     await page.setViewportSize(DESKTOP);
     await page.goto(`${PREVIEW}?motion=off`);
     expect(await page.locator("html").getAttribute("data-anim")).toBeNull();
-    await expect(page.locator('[data-chapter]:not([data-motion="done"])')).toHaveCount(0);
     await expect(page.locator(STAGE)).toBeHidden();
+    await expect(page.locator(".slot--hero .ep")).toBeVisible();
   });
 
   test("JavaScript disabled: no draft state, the ring drawn, unpinned, text present", async ({ browser }) => {
@@ -70,17 +70,15 @@ test.describe("posters, and without motion", () => {
     const page = await context.newPage();
     await page.goto(PREVIEW);
     expect(await page.locator("html").getAttribute("data-anim")).toBeNull();
-    const offset = await page
-      .locator(".engine-slot--hero .core-arc")
-      .first()
-      .evaluate((el) => getComputedStyle(el).strokeDashoffset);
-    expect(parseFloat(offset)).toBe(0);
+    // The hero's slot shows the still ring, whole.
+    await expect(page.locator('.slot--hero use[href="#core-ring-still"]')).toHaveCount(1);
+    await expect(page.locator("symbol#core-ring-still")).toHaveCount(1);
     await expect(page.locator(STAGE)).toBeHidden();
-    const opacity = await page.locator(".hero-lede").evaluate((el) => getComputedStyle(el).opacity);
+    const opacity = await page.locator(".hero-copy .t-lede").evaluate((el) => getComputedStyle(el).opacity);
     expect(opacity).toBe("1");
     await expect(page.locator("h1")).toContainText("Architected and built");
     await expect(page.locator("h1")).toBeVisible();
-    await expect(page.locator(".hero-lede")).toBeVisible();
+    await expect(page.locator(".hero-copy .t-lede")).toBeVisible();
     await context.close();
   });
 });

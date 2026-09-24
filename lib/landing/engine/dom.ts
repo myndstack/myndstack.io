@@ -1,18 +1,23 @@
 /**
  * What the page shows for a beat, beyond the engine itself: which poster the
- * stage holds, which capability is lit, which process step, which labels.
- * The director writes these as data attributes — only when they change — and
- * CSS does the rest. Pure, so the mapping is unit-tested.
+ * stage holds, its skin and accent, which capability is lit, which process
+ * step, which labels. The director writes these as data attributes — only
+ * when they change — and CSS does the rest. Pure, so the mapping is
+ * unit-tested.
  */
 import { CAPABILITY_HUES } from "@/lib/landing/chapters";
 
-import { STUDIO_AGENCY, posterFor } from "./posters";
-import type { Beat } from "./types";
+import { STUDIO, STUDIO_AGENCY, posterFor } from "./poster-ids";
+import type { Skin } from "./skins";
+import type { ArcKey, Beat, SceneId } from "./types";
 
 export type BeatDom = {
   readonly beat: string | null;
-  /** `data-poster` of the stage poster to show (null: the canvas is in a dock). */
+  readonly scene: SceneId | null;
+  /** `data-poster` of the stage poster to show: "face", or a drawing's id. */
   readonly poster: string | null;
+  readonly skin: Skin | null;
+  readonly accent: ArcKey | null;
   /** Capability index while one holds the stage; their count at the finale. */
   readonly cap: number | null;
   /** The lit capability's hue, or "spectrum" at the finale. */
@@ -23,7 +28,18 @@ export type BeatDom = {
   readonly step: number | null;
 };
 
-const EMPTY: BeatDom = { beat: null, poster: null, cap: null, hue: null, complete: false, labels: null, step: null };
+const EMPTY: BeatDom = {
+  beat: null,
+  scene: null,
+  poster: null,
+  skin: null,
+  accent: null,
+  cap: null,
+  hue: null,
+  complete: false,
+  labels: null,
+  step: null,
+};
 
 export function beatDom(beats: readonly Beat[], index: number, studio: "ours" | "agency"): BeatDom {
   const beat = beats[index];
@@ -31,8 +47,8 @@ export function beatDom(beats: readonly Beat[], index: number, studio: "ours" | 
 
   const poster = posterFor(beat.id);
   let key: string | null = null;
-  if (poster?.kind === "face") key = poster.box === "ringTop" ? "face-top" : "face-ring";
-  else if (poster?.kind === "draw") key = poster.id === "studio" && studio === "agency" ? STUDIO_AGENCY : poster.id;
+  if (poster?.kind === "face") key = "face";
+  else if (poster?.kind === "draw") key = poster.id === STUDIO && studio === "agency" ? STUDIO_AGENCY : poster.id;
 
   const complete = beat.dom?.complete === true;
   const cap = beat.dom?.cap ?? (complete ? CAPABILITY_HUES.length : null);
@@ -43,5 +59,16 @@ export function beatDom(beats: readonly Beat[], index: number, studio: "ours" | 
   let step: number | null = null;
   if (firstBuild >= 0 && index >= firstBuild) step = index > lastBuild ? lastBuild - firstBuild + 1 : index - firstBuild + 1;
 
-  return { beat: beat.id, poster: key, cap, hue, complete, labels: beat.dom?.labels ?? null, step };
+  return {
+    beat: beat.id,
+    scene: beat.scene,
+    poster: key,
+    skin: beat.skin,
+    accent: beat.accent,
+    cap,
+    hue,
+    complete,
+    labels: beat.dom?.labels ?? null,
+    step,
+  };
 }

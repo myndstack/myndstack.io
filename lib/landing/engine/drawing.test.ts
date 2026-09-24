@@ -45,7 +45,7 @@ describe("drawEngine", () => {
       tower,
       { axis: upright(2), explode: 0.6, ports: true, dims: true },
       { axis: [0.35, 0.5, 0.79], explode: 0.12, arcs: true },
-      { axis: [-0.6, 0.4, -0.69], explode: 1, teeth: true },
+      { axis: [-0.6, 0.4, -0.69], explode: 1 },
       { axis: [0, 0, 1], explode: 0 },
     ];
     for (const view of views) {
@@ -126,10 +126,19 @@ describe("drawEngine", () => {
     expect(drawEngine(tower).ports).toEqual([]);
   });
 
-  it("draws the gear's 44 teeth and the face's five arcs on request", () => {
-    const d = drawEngine({ ...tower, teeth: true, arcs: true });
-    const teeth = d.paths.find((p) => p.kind === "tooth");
-    expect(teeth && commands(teeth.d).match(/M/g)?.length).toBe(44);
+  it("draws compute as a heat sink: five fins, the hub showing between them", () => {
+    const bodies = (d: Drawing) => d.paths.filter((p) => p.module === 3 && p.kind === "body");
+    expect(bodies(exploded)).toHaveLength(9);
+    expect(bodies(assembled)).toHaveLength(9);
+    // The fins run out to r 1.9, the hub between them only to r 1.3: its walls sit inside the fins'.
+    const xs = (p: { d: string }) => endpoints(p.d).map((q) => q.x);
+    const span = (p: { d: string }) => Math.max(...xs(p)) - Math.min(...xs(p));
+    const widths = bodies(exploded).map(span);
+    expect(Math.min(...widths) / Math.max(...widths)).toBeCloseTo(1.3 / 1.9, 1);
+  });
+
+  it("draws the face's five arcs on request", () => {
+    const d = drawEngine({ ...tower, arcs: true });
     expect(d.paths.filter((p) => p.kind === "arc").map((p) => p.hue)).toEqual([0, 1, 2, 3, 4]);
     // Seen from behind, the face (and its arcs) is out of sight.
     const behind = drawEngine({ axis: [0, 0.5, -0.87], explode: 1, arcs: true });

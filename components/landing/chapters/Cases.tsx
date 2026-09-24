@@ -4,8 +4,8 @@ import { CASES_COPY } from "@/lib/landing/chapters";
 import type { CaseStudy } from "@/lib/cases";
 
 import DocsFan from "../core/DocsFan";
-import { blockStyle, landStyle } from "../engine/plan";
-import MotionChapter from "../motion/MotionChapter";
+import { Beat, Scene, Slot } from "../scene/Scene";
+import { Kicker, Lede, Rise, Title } from "../type/Type";
 
 type Props = {
   readonly study: CaseStudy;
@@ -14,86 +14,58 @@ type Props = {
 };
 
 /**
- * §04 — the work. The one real case (anonymised where the client requires it),
- * with its real metrics (counted up on an aria-hidden layer; the settled text
- * is always exactly the CMS value). Its figure — controlled documents, fanned
- * out and stamped — sits inside the engine's ring on the stage, or beside the
- * copy in the static layout.
+ * §04 — the work. The ring carries left and turns a little; inside it, the
+ * case's controlled documents fan out and are stamped (the stage's overlay).
+ * The copy holds columns 7–12: the real case, anonymised where the client
+ * requires it, what it was built with, and its real metrics in one row.
  */
 export default function Cases({ study, total }: Props) {
   return (
-    <section
-      id="work-cases"
-      className="cases ms-block seam-from-graphite"
-      data-surface="ink"
-      aria-labelledby="cases-title"
-      style={{ ...blockStyle("work"), ...landStyle(["work"], "work") }}
-    >
-      <MotionChapter id="cases" kind="once" className="cases-run">
-        <div className="page-col ms-grid">
-          <div className="ms-copy cases-copy" data-beat-marker="work">
-            <p className="chapter-kicker">
-              <span className="stamp">§04</span>
-              <span>{CASES_COPY.kicker}</span>
+    <Scene id="work" anchor="work-cases" labelledBy="cases-title">
+      <Beat id="work" className="work">
+        <div className="work-copy">
+          <Kicker n="§04">{CASES_COPY.kicker}</Kicker>
+          <Title id="cases-title" lines={[CASES_COPY.title]} />
+          <Rise i={0} className="case-id">
+            <h3 className="t-title-m">{study.client}</h3>
+            <p className="t-mono">
+              {study.industry} · {study.duration} · {study.regions}
             </p>
-            <h2 id="cases-title" className="chapter-title cases-title">
-              {CASES_COPY.title}
-            </h2>
-
-            <div className="case-id">
-              <h3 className="case-client">{study.client}</h3>
-              <p className="case-meta">
-                {study.industry} · {study.duration} · {study.regions}
-              </p>
-            </div>
-            <p className="chapter-lede case-lede">{study.lede}</p>
-
-            <ul className="case-tags" aria-label="Scope">
-              {study.tags.map((tag) => (
-                <li key={tag}>{tag}</li>
+          </Rise>
+          <Lede i={1}>{study.lede}</Lede>
+          {study.stack.length ? (
+            <Rise as="ul" i={2} className="case-stack" aria-label="Built with">
+              {study.stack.map((item) => (
+                <li key={item} className="ms-chip">
+                  {item}
+                </li>
               ))}
-            </ul>
-
-            <dl className="case-metrics">
-              {study.metrics.map((m) => (
-                <div key={m.l} className={`case-metric${m.lime ? " is-lime" : ""}`}>
-                  <dt>{m.l}</dt>
-                  <dd>
-                    <span className="sr-only">{m.v}</span>
-                    <span aria-hidden="true" data-countup={m.v}>
-                      {m.v}
-                    </span>
-                  </dd>
-                </div>
-              ))}
-            </dl>
-
-            <p className="case-stack hud">
-              <span className="hud-k">Stack</span>
-              <span>{study.stack.join(" · ")}</span>
-            </p>
-
-            <div className="case-links">
-              <Link href={`/work/${study.slug}`} className="btn btn-lime">
-                Read the case study →
+            </Rise>
+          ) : null}
+          <Rise as="dl" i={3} className="metrics">
+            {study.metrics.map((m) => (
+              <div key={m.l} className={`metric${m.lime ? " is-accent" : ""}`}>
+                <dt className="t-mono">{m.l}</dt>
+                <dd className="t-readout">{m.v}</dd>
+              </div>
+            ))}
+          </Rise>
+          <Rise i={4} className="work-links">
+            <Link href={`/work/${study.slug}`} className="btn btn-lime">
+              Read the case study →
+            </Link>
+            {total > 1 ? (
+              <Link href="/work" className="btn btn-outline">
+                See all work
               </Link>
-              {total > 1 ? (
-                <Link href="/work" className="btn btn-outline">
-                  See all work
-                </Link>
-              ) : null}
-            </div>
-          </div>
-
-          <div className="engine-slot cases-figure" aria-hidden="true">
-            <DocsFan />
-            <p className="docs-caption hud">
-              <span className="hud-k">Every run</span>
-              <span>Drafted · gated · human-verified</span>
-            </p>
-          </div>
+            ) : null}
+          </Rise>
         </div>
-      </MotionChapter>
-    </section>
+        <div className="slot slot--work" aria-hidden="true">
+          <DocsFan />
+        </div>
+        <Slot beat="work" className="slot--work-ring" />
+      </Beat>
+    </Scene>
   );
 }

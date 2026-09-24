@@ -1,0 +1,74 @@
+/* §04 — the work: case copy in columns 7–12, the ring with its documents left. */
+@reference "../../../app/globals.css";
+
+.work-copy {
+  @media (width >= 62.5rem) {
+    grid-column: 7 / span 6;
+  }
+  @variant pin {
+    align-self: center;
+  }
+}
+.case-id {
+  margin-top: 28px;
+  padding-top: 20px;
+  border-top: 1px solid var(--skin-rule);
+}
+.case-id h3 {
+  margin: 0 0 6px;
+}
+.case-id p {
+  margin: 0;
+}
+.work-copy .t-lede {
+  margin-top: 16px;
+}
+.case-stack {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 20px 0 0;
+  padding: 0;
+  list-style: none;
+}
+.metrics {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(0, 1fr));
+  gap: 24px;
+  margin: 28px 0 0;
+}
+.metrics .metric {
+  margin: 0;
+  padding-top: 14px;
+}
+.metrics dt {
+  order: 2;
+}
+.metrics dd {
+  margin: 0;
+  font-size: clamp(30px, 2.6vw, 44px);
+}
+.metric.is-accent dd {
+  color: var(--accent);
+}
+.work-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 32px;
+}
+/* Static: the documents fanned beside the copy (or above it on phones). */
+.slot--work {
+  @media (width >= 62.5rem) {
+    grid-column: 1 / span 6;
+    grid-row: 1;
+  }
+}
+.slot--work .docs {
+  position: absolute;
+  inset: 8% 14%;
+  perspective: 1400px;
+}
+.slot--work-ring {
+  display: none;
+}

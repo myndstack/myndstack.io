@@ -17,6 +17,12 @@ export const LANDING_HEADLINE = { lead: "Architected and built,", accent: "end t
 /** Where the studio is. Shown in the hero HUD next to the live IST clock. */
 export const STUDIO_COORDS = "11.05°N 76.07°E";
 
+/**
+ * DRAFT — the terminal in the hero's bore: the stack shipping, one layer per
+ * line (each layer's own meta from PLATFORM_LAYERS). Illustrative, not a log.
+ */
+export const SHIP_CONSOLE = { path: "~/myndstack", command: "ship --whole-stack", done: "live in production" } as const;
+
 /** DRAFT — the line that scrolls past while the Core dives. */
 export const DIVE_STATEMENT = "One studio. Every layer. Nothing handed off.";
 
@@ -53,11 +59,11 @@ export const CONTACT_COPY = {
 } as const;
 
 /**
- * The hue each integration group lights in (INTEGRATIONS order), matching the
- * engine module it plugs into: models (ai), cloud → compute (arch), data
- * (lime), and delivery — the shaft through every layer — the whole spectrum.
+ * The hue each integration group lights in (INTEGRATIONS order) — one colour
+ * map for the page: models (violet), cloud → compute (coral), data (amber),
+ * and delivery — the shaft through every layer — the whole spectrum.
  */
-export const TOOL_HUES: readonly (Hue | "spectrum")[] = ["ai", "arch", "lime", "spectrum"];
+export const TOOL_HUES: readonly (Hue | "spectrum")[] = ["ai", "design", "arch", "spectrum"];
 
 /** DRAFT — the closing CTA band (the sub-line is the live homepage's). */
 export const CLOSING = {
@@ -82,6 +88,8 @@ export const RULER_CHAPTERS = [
 
 /** Hue per capability chapter, in the Sanity capabilities' order (01–04). */
 export const CAPABILITY_HUES: readonly Exclude<Hue, "lime">[] = ["ai", "product", "design", "arch"];
+/** DRAFT — each capability's route, shown in its status line (the same order). */
+export const CAPABILITY_ROUTES = ["/ai", "/product", "/design", "/architecture"] as const;
 
 /**
  * The four stack plates (titles from STACK_LAYERS), with landing-local meta:
@@ -101,8 +109,12 @@ export const PLATFORM_COPY = {
   lede: "We architect and build every layer your product runs on\u00a0— interface, models, compute and data\u00a0— so nothing is glue code someone else owns.",
 } as const;
 
-/** Which hue each plate lights in when it locks (paper: the -deep variants). */
-export const PLATFORM_HUES: readonly Hue[] = ["product", "ai", "arch", "lime"];
+/**
+ * Which hue each layer lights in — one colour map for the page: interface is
+ * product (teal), models AI (violet), compute design (coral), data
+ * architecture (amber). Paper uses the -deep variants.
+ */
+export const PLATFORM_HUES: readonly Hue[] = ["product", "ai", "design", "arch"];
 
 /** DRAFT — disciplines that feed each plate (leader lines draw into it). */
 export const DISCIPLINES: readonly { readonly label: string; readonly layer: 0 | 1 | 2 | 3 }[] = [

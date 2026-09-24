@@ -22,8 +22,8 @@ import {
 
 export { GLYPH, S, WAVE_BARS } from "./face";
 export { MAT, ROTOR, SPECTRUM_HUE, NO_HUE, pack, type Mesh, type Packed } from "./mesh";
-export { EXPLODE_GAP, LOD, MODULE_Z, moduleExplode, moduleZ, type Lod, type ModuleGeometry } from "./parts";
-export { BEZEL, FLANGE, GEAR, HOUSING, HUB, INTERFACE, REAR_HUB } from "./parts";
+export { EXPLODE_GAP, EXTENTS, LOD, MODULE_Z, moduleExplode, moduleZ, type Lod, type ModuleGeometry } from "./parts";
+export { BEZEL, FINS, FLANGE, HOUSING, HUB, INTERFACE, REAR_HUB, finZ } from "./parts";
 
 /** Glyph plane height in the face module's frame: just above the dial, under the glass. */
 export const GLYPH_Z = 0.012;

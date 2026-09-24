@@ -26,14 +26,14 @@ test("soft navigation away and back leaks no listeners or running animation", as
   });
   await page.setViewportSize({ width: 1280, height: 900 });
   await page.goto(PREVIEW);
-  await expect(page.locator('[data-chapter="core-hero"]')).toHaveAttribute("data-built", "true");
+  await expect(page.locator("html")).toHaveAttribute("data-engine", "poster");
 
   for (let i = 0; i < 3; i++) {
     await page.locator('footer a[href="/careers"]').first().click();
     await expect(page).toHaveURL(/\/careers$/);
     await page.goBack();
     await expect(page).toHaveURL(/\/preview$/);
-    await expect(page.locator('[data-chapter="core-hero"]')).toHaveAttribute("data-built", "true");
+    await expect(page.locator("html")).toHaveAttribute("data-engine", "poster");
   }
 
   const listeners = await page.evaluate(() => (window as unknown as Probe).__scroll);
@@ -53,7 +53,7 @@ test("scrolling the pinned run on a 4× throttled CPU has no very long frames", 
   test.skip(browserName !== "chromium", "CDP throttling is Chromium-only");
   await page.setViewportSize({ width: 1280, height: 900 });
   await page.goto(PREVIEW);
-  await expect(page.locator('[data-chapter="core-hero"]')).toHaveAttribute("data-built", "true");
+  await expect(page.locator("html")).toHaveAttribute("data-engine", "poster");
 
   const cdp = await page.context().newCDPSession(page);
   await cdp.send("Emulation.setCPUThrottlingRate", { rate: 4 });

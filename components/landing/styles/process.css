@@ -1,182 +1,147 @@
-/* §05 — Process: a FRAME of four steps beside the engine being built. */
+/* §05 — the process: the step list on a lime rail, the engine being built. */
 @reference "../../../app/globals.css";
 
-.process-title {
-  max-width: 16ch;
-  font-size: var(--text-title);
-  line-height: 1.02;
-
+.process-copy {
+  @media (width >= 62.5rem) {
+    grid-column: 1 / span 5;
+  }
   @variant pin {
-    font-size: clamp(30px, min(3.6vw, 6svh), 52px);
+    align-self: center;
   }
 }
-
-/* The steps: a vertical list on a rail that fills as the build advances. */
+html:not([data-anim="on"]) .furniture--process {
+  padding: var(--sheet-y) var(--inset);
+  background: var(--skin-base);
+}
+.furniture--process {
+  @media (width < 62.5rem) {
+    padding: var(--sheet-y) var(--inset);
+    background: var(--skin-base);
+  }
+}
 .steps {
-  --rail-x: 26px;
   position: relative;
   display: grid;
-  gap: 28px;
+  gap: 4px;
   margin: 40px 0 0;
-  padding: 0;
+  padding: 0 0 0 28px;
   list-style: none;
-
-  @variant pin {
-    gap: clamp(14px, 3.2svh, 32px);
-    margin-top: clamp(22px, 4.5svh, 44px);
-  }
 }
-.steps::before,
-.steps::after {
+/* The rail. */
+.steps::before {
   content: "";
   position: absolute;
-  top: 8px;
-  bottom: 8px;
-  left: var(--rail-x);
-  width: 2px;
-  translate: -50% 0;
+  left: 0;
+  top: 6px;
+  bottom: 6px;
+  width: 1px;
+  background: var(--skin-rule);
 }
-.steps::before {
-  background: var(--color-graphite-line);
-}
-.steps::after {
-  transform-origin: center top;
-  transform: scaleY(var(--fill, 1));
-  background: linear-gradient(
-    180deg,
-    var(--color-lime),
-    var(--color-spec-ai),
-    var(--color-spec-product),
-    var(--color-spec-design),
-    var(--color-spec-arch)
-  );
-  transition: transform 600ms var(--ease-camera);
-}
-/* Pinned, the director writes the step (`data-step`, 1–4) as each beat holds.
-   (Nested under pin so they outrank its empty default: the variant adds
-   html[data-anim] to every selector inside it.) */
-.process {
-  @variant pin {
-    --fill: 0;
-
-    &[data-step="1"] {
-      --fill: 0.1;
-    }
-    &[data-step="2"] {
-      --fill: 0.4;
-    }
-    &[data-step="3"] {
-      --fill: 0.7;
-    }
-    &[data-step="4"] {
-      --fill: 1;
-    }
-  }
-}
-
 .step {
   position: relative;
   display: grid;
-  grid-template-columns: 52px minmax(0, 1fr);
-  gap: 18px;
-  align-items: start;
-}
-/* Above the rail (the rail's fill is painted after the steps). */
-.step-glyph {
-  position: relative;
-  z-index: 1;
-  width: 52px;
-  height: 52px;
-  padding: 8px;
-  border: 1px solid var(--color-graphite-line);
-  background: var(--color-graphite-2);
-}
-/* The shortest pinned screens: smaller glyphs, one line of description. */
-.steps {
-  @variant pin {
-    @media (height < 43.75rem) {
-      --rail-x: 20px;
+  grid-template-columns: 34px minmax(0, 1fr);
+  gap: 12px;
+  padding: 14px 0;
+  transition: opacity var(--dur-base) var(--ease-brand);
 
-      .step {
-        grid-template-columns: 40px minmax(0, 1fr);
-        gap: 14px;
-      }
-      .step-glyph {
-        width: 40px;
-        height: 40px;
-        padding: 6px;
-      }
-      .step-t {
-        font-size: var(--text-17);
-      }
-      .step-d {
-        margin-top: 2px;
-        -webkit-line-clamp: 1;
-      }
-    }
+  /* Pinned, the steps ahead wait dimmed; static, every step reads at full contrast. */
+  @variant pin {
+    opacity: 0.55;
   }
 }
-.step-glyph path {
-  fill: none;
-  stroke: var(--color-lime);
-  stroke-width: 3;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-  transition: stroke var(--dur-base) var(--ease-brand);
-}
-.step-t {
-  display: flex;
-  align-items: baseline;
-  gap: 12px;
-  margin: 2px 0 0;
-  font-family: var(--font-display);
-  font-size: var(--text-22);
-  font-weight: 500;
-  letter-spacing: -0.01em;
+.step::before {
+  content: "";
+  position: absolute;
+  left: -32px;
+  top: 18px;
+  width: 9px;
+  height: 9px;
+  border: 1px solid var(--skin-rule);
+  background: var(--skin-base);
+  transition:
+    background var(--dur-base) var(--ease-brand),
+    border-color var(--dur-base) var(--ease-brand);
 }
 .step-n {
-  font-family: var(--font-mono);
-  font-size: var(--text-13);
-  font-weight: 400;
-  color: var(--color-lime);
-  transition: color var(--dur-base) var(--ease-brand);
+  padding-top: 3px;
+  color: var(--skin-mute);
 }
 .step-d {
+  margin-top: 4px;
   max-width: 44ch;
-  margin: 6px 0 0;
-  font-size: var(--text-15);
-  line-height: 1.5;
-  color: var(--color-t4);
+}
+/* The active step, and every step before it, lit. */
+.panel[data-beat="build-1"] .step[data-step="build-1"],
+.panel[data-beat="build-2"] .step:is([data-step="build-1"], [data-step="build-2"]),
+.panel[data-beat="build-3"] .step:not([data-step="build-4"]),
+.panel[data-beat="build-4"] .step {
+  opacity: 1;
+}
+.panel[data-beat="build-1"] .step[data-step="build-1"]::before,
+.panel[data-beat="build-2"] .step[data-step="build-2"]::before,
+.panel[data-beat="build-3"] .step[data-step="build-3"]::before,
+.panel[data-beat="build-4"] .step[data-step="build-4"]::before {
+  border-color: var(--accent);
+  background: var(--accent);
+  box-shadow: 0 0 0 4px color-mix(in oklch, var(--accent) 22%, transparent);
+}
+.panel[data-beat="build-1"] .step[data-step="build-1"] .step-n,
+.panel[data-beat="build-2"] .step[data-step="build-2"] .step-n,
+.panel[data-beat="build-3"] .step[data-step="build-3"] .step-n,
+.panel[data-beat="build-4"] .step[data-step="build-4"] .step-n {
+  color: var(--accent);
+}
+/* The build beats carry only their static posters. */
+.build {
+  @variant pin {
+    display: none;
+  }
+}
+
+/* Pinned, only the active step is open: its words, then its artifact
+   (the discovery doc, the architecture, the pull request, production). */
+.step-more {
+  display: grid;
+  grid-template-rows: 1fr;
 
   @variant pin {
-    @media (height < 50rem) {
-      display: -webkit-box;
-      -webkit-line-clamp: 2;
-      -webkit-box-orient: vertical;
-      overflow: hidden;
-    }
+    grid-template-rows: 0fr;
+    opacity: 0;
+    transition:
+      grid-template-rows 520ms var(--ease-camera),
+      opacity 240ms var(--ease-exit);
   }
 }
+.step-more > div {
+  min-height: 0;
+  overflow: clip;
+}
+:is(
+    .panel[data-beat="build-1"] .step[data-step="build-1"],
+    .panel[data-beat="build-2"] .step[data-step="build-2"],
+    .panel[data-beat="build-3"] .step[data-step="build-3"],
+    .panel[data-beat="build-4"] .step[data-step="build-4"]
+  )
+  .step-more {
+  @variant pin {
+    grid-template-rows: 1fr;
+    opacity: 1;
+    transition:
+      grid-template-rows 520ms var(--ease-camera),
+      opacity 480ms var(--ease-brand) 140ms;
+  }
+}
+/* Static, the steps read as a list: the artifacts are for the pinned run. */
+.step-more .delivery {
+  display: none;
 
-/* While a step holds, its numeral and glyph are lime; the others rest in the
-   neutral tone. Nothing is dimmed: every word keeps its contrast. */
-.process[data-step] .step-n {
-  color: var(--color-t4);
-}
-.process[data-step] .step .step-glyph path {
-  stroke: var(--color-t5);
-}
-.process[data-step="1"] .step[data-n="1"],
-.process[data-step="2"] .step[data-n="2"],
-.process[data-step="3"] .step[data-n="3"],
-.process[data-step="4"] .step[data-n="4"] {
-  .step-n {
-    color: var(--color-lime);
+  @variant pin {
+    display: block;
   }
-  .step-glyph {
-    border-color: color-mix(in oklch, var(--color-lime) 50%, transparent);
-  }
-  .step-glyph path {
-    stroke: var(--color-lime);
+}
+@media (height < 45rem) {
+  .step-more .delivery {
+    display: none !important;
   }
 }
